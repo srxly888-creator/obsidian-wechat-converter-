@@ -3647,6 +3647,7 @@ var require_wechat_html_cleaner = __commonJS({
           return;
         if (!["SPAN", "STRONG", "CODE"].includes(firstMeaningfulNode.tagName))
           return;
+        const firstText = (firstMeaningfulNode.textContent || "").trim();
         let nextMeaningfulNode = null;
         for (let i = firstMeaningfulIdx + 1; i < nodes.length; i += 1) {
           const node = nodes[i];
@@ -3659,6 +3660,8 @@ var require_wechat_html_cleaner = __commonJS({
           return;
         const text = nextMeaningfulNode.textContent || "";
         if (!text.trim())
+          return;
+        if (/[：:]$/.test(firstText) || /^\s*[：:]/.test(text))
           return;
         const span = document.createElement("span");
         span.setAttribute("style", "display:inline !important;");
@@ -3685,6 +3688,8 @@ var require_wechat_html_cleaner = __commonJS({
         if (!firstText || !secondText)
           return;
         if (/[：:]$/.test(firstText) || /^[：:]/.test(secondText))
+          return;
+        if (!/^(?:[（(]|的)/.test(secondText))
           return;
         if (secondText.length > 16)
           return;
@@ -3937,7 +3942,7 @@ var require_wechat_html_cleaner = __commonJS({
 });
 
 // input.js
-var { Plugin, MarkdownView, ItemView, Notice } = require("obsidian");
+var { Plugin, MarkdownView, ItemView, Notice, Platform } = require("obsidian");
 var { PluginSettingTab, Setting } = require("obsidian");
 var { createRenderPipelines } = require_render_pipeline();
 var { buildRenderRuntime } = require_dependency_loader();
@@ -3989,6 +3994,12 @@ var DEFAULT_SETTINGS = {
   wechatAppSecret: ""
 };
 var MAX_ACCOUNTS = 5;
+function isMobileClient(app) {
+  if (typeof (Platform == null ? void 0 : Platform.isMobile) === "boolean") {
+    return Platform.isMobile;
+  }
+  return !!(app == null ? void 0 : app.isMobile);
+}
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
@@ -4274,8 +4285,9 @@ var AppleStyleView = class extends ItemView {
     container.addClass("apple-converter-container");
     await this.loadDependencies();
     this.createSettingsPanel(container);
+    const usePhoneFrame = this.plugin.settings.usePhoneFrame && !isMobileClient(this.app);
     const previewWrapper = container.createEl("div", {
-      cls: `apple-preview-wrapper ${this.plugin.settings.usePhoneFrame ? "mode-phone" : "mode-classic"}`
+      cls: `apple-preview-wrapper ${usePhoneFrame ? "mode-phone" : "mode-classic"}`
     });
     previewWrapper.addEventListener("click", (e) => {
       if (this.settingsOverlay && this.settingsOverlay.classList.contains("visible")) {
@@ -4285,7 +4297,7 @@ var AppleStyleView = class extends ItemView {
           btn.classList.remove("active");
       }
     });
-    if (this.plugin.settings.usePhoneFrame) {
+    if (usePhoneFrame) {
       const phoneFrame = previewWrapper.createEl("div", { cls: "apple-phone-frame" });
       const header = phoneFrame.createEl("div", { cls: "apple-phone-header" });
       header.createEl("span", { cls: "title", text: "\u516C\u4F17\u53F7\u9884\u89C8" });
@@ -4487,10 +4499,7 @@ var AppleStyleView = class extends ItemView {
       settingsBtn.classList.toggle("active");
     });
     this.copyBtn = createIconBtn("copy", "\u590D\u5236\u5230\u516C\u4F17\u53F7", () => this.copyHTML());
-    const accounts = this.plugin.settings.wechatAccounts || [];
-    if (accounts.length > 0) {
-      createIconBtn("send", "\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1", () => this.showSyncModal());
-    }
+    createIconBtn("send", "\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1", () => this.showSyncModal());
     this.settingsOverlay = container.createEl("div", { cls: "apple-settings-overlay" });
     const settingsArea = this.settingsOverlay.createEl("div", { cls: "apple-settings-area" });
     this.createSection(settingsArea, "\u4E3B\u9898", (section) => {
@@ -4945,11 +4954,31 @@ var AppleStyleView = class extends ItemView {
     builder(content);
   }
   /**
+   * 提示用户先配置公众号账号，并尽量直接打开插件设置页
+   */
+  promptConfigureWechatAccount() {
+    var _a, _b, _c;
+    new Notice("\u274C \u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u6DFB\u52A0\u516C\u4F17\u53F7\u8D26\u53F7\uFF08AppID / AppSecret\uFF09");
+    const settingApi = (_a = this.app) == null ? void 0 : _a.setting;
+    if (!settingApi || typeof settingApi.open !== "function")
+      return;
+    settingApi.open();
+    const tabId = ((_c = (_b = this.plugin) == null ? void 0 : _b.manifest) == null ? void 0 : _c.id) || "wechat-converter";
+    if (typeof settingApi.openTabById === "function") {
+      settingApi.openTabById(tabId);
+    }
+  }
+  /**
    * 显示同步选项 Modal
    */
   showSyncModal() {
     if (!this.currentHtml) {
       new Notice(this.getMissingRenderNotice());
+      return;
+    }
+    const accounts = this.plugin.settings.wechatAccounts || [];
+    if (accounts.length === 0) {
+      this.promptConfigureWechatAccount();
       return;
     }
     const { Modal } = require("obsidian");
@@ -4963,7 +4992,6 @@ var AppleStyleView = class extends ItemView {
     if (currentPath && this.articleStates.has(currentPath)) {
       cachedState = this.articleStates.get(currentPath);
     }
-    const accounts = this.plugin.settings.wechatAccounts || [];
     const defaultId = this.plugin.settings.defaultAccountId;
     let selectedAccountId = defaultId;
     let coverBase64 = (cachedState == null ? void 0 : cachedState.coverBase64) || frontmatterMeta.coverSrc || this.getFirstImageFromArticle();
@@ -5083,7 +5111,7 @@ var AppleStyleView = class extends ItemView {
       defaultAccountId: this.plugin.settings.defaultAccountId
     });
     if (!account) {
-      new Notice("\u274C \u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u6DFB\u52A0\u5FAE\u4FE1\u516C\u4F17\u53F7\u8D26\u53F7");
+      this.promptConfigureWechatAccount();
       return;
     }
     if (!this.currentHtml) {
@@ -5466,6 +5494,63 @@ var AppleStyleView = class extends ItemView {
     this.previewContainer.empty();
     this.previewContainer.innerHTML = html;
   }
+  copyRichHTMLBySelection(htmlContent) {
+    var _a;
+    const selection = (_a = window.getSelection) == null ? void 0 : _a.call(window);
+    if (!selection || typeof document.execCommand !== "function")
+      return false;
+    const previousRanges = [];
+    for (let i = 0; i < selection.rangeCount; i += 1) {
+      previousRanges.push(selection.getRangeAt(i).cloneRange());
+    }
+    const activeElement = document.activeElement;
+    const tempContainer = document.createElement("div");
+    tempContainer.innerHTML = htmlContent;
+    tempContainer.style.position = "fixed";
+    tempContainer.style.left = "-9999px";
+    tempContainer.style.top = "0";
+    tempContainer.style.opacity = "0";
+    tempContainer.style.pointerEvents = "none";
+    tempContainer.style.background = "#fff";
+    document.body.appendChild(tempContainer);
+    let success = false;
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(tempContainer);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      success = document.execCommand("copy");
+    } catch (error) {
+      success = false;
+    } finally {
+      selection.removeAllRanges();
+      for (const prevRange of previousRanges) {
+        try {
+          selection.addRange(prevRange);
+        } catch (restoreError) {
+        }
+      }
+      if (activeElement && typeof activeElement.focus === "function") {
+        try {
+          activeElement.focus({ preventScroll: true });
+        } catch (focusError) {
+          activeElement.focus();
+        }
+      }
+      tempContainer.remove();
+    }
+    return success;
+  }
+  async copyRichHTMLByClipboard(htmlContent) {
+    if (!navigator.clipboard || typeof navigator.clipboard.write !== "function" || typeof ClipboardItem === "undefined") {
+      return false;
+    }
+    const item = new ClipboardItem({
+      "text/html": new Blob([htmlContent], { type: "text/html" })
+    });
+    await navigator.clipboard.write([item]);
+    return true;
+  }
   /**
    * 复制 HTML
    */
@@ -5490,42 +5575,34 @@ var AppleStyleView = class extends ItemView {
       }
       const processed = await this.processImagesToDataURL(tempDiv);
       const cleanedHtml = this.cleanHtmlForDraft(tempDiv.innerHTML);
-      const plainDiv = document.createElement("div");
-      plainDiv.innerHTML = cleanedHtml;
-      const text = plainDiv.textContent || "";
       const htmlContent = cleanedHtml;
       window.__OWC_LAST_CLIPBOARD_HTML = htmlContent;
-      window.__OWC_LAST_CLIPBOARD_TEXT = text;
-      if (navigator.clipboard && navigator.clipboard.write) {
-        try {
-          const htmlOnlyItem = new ClipboardItem({
-            "text/html": new Blob([htmlContent], { type: "text/html" })
-          });
-          await navigator.clipboard.write([htmlOnlyItem]);
-        } catch (htmlOnlyError) {
-          const clipboardItem = new ClipboardItem({
-            "text/html": new Blob([htmlContent], { type: "text/html" }),
-            "text/plain": new Blob([text], { type: "text/plain" })
-          });
-          await navigator.clipboard.write([clipboardItem]);
-        }
-        new Notice("\u2705 \u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F\uFF01");
-        if (this.copyBtn) {
-          const { setIcon } = require("obsidian");
-          setIcon(this.copyBtn, "check");
-          setTimeout(() => {
-            if (this.copyBtn) {
-              setIcon(this.copyBtn, "copy");
-              this.copyBtn.classList.remove("active");
-            }
-          }, 2e3);
-        }
-        return;
+      const plainDiv = document.createElement("div");
+      plainDiv.innerHTML = cleanedHtml;
+      window.__OWC_LAST_CLIPBOARD_TEXT = plainDiv.textContent || "";
+      let copied = this.copyRichHTMLBySelection(htmlContent);
+      const mobile = isMobileClient(this.app);
+      if (!copied && !mobile) {
+        copied = await this.copyRichHTMLByClipboard(htmlContent);
       }
-      throw new Error("Clipboard API unavailable");
+      if (!copied) {
+        throw new Error("rich copy unavailable");
+      }
+      new Notice("\u2705 \u5DF2\u590D\u5236\u516C\u4F17\u53F7\u683C\u5F0F\uFF0C\u8BF7\u76F4\u63A5\u7C98\u8D34\u5230\u516C\u4F17\u53F7\u7F16\u8F91\u5668");
+      if (this.copyBtn) {
+        const { setIcon } = require("obsidian");
+        setIcon(this.copyBtn, "check");
+        setTimeout(() => {
+          if (this.copyBtn) {
+            setIcon(this.copyBtn, "copy");
+            this.copyBtn.classList.remove("active");
+          }
+        }, 2e3);
+      }
+      return;
     } catch (error) {
       console.error("\u590D\u5236\u5931\u8D25:", error);
-      new Notice(`\u274C \u590D\u5236\u5931\u8D25: ${error.message}`);
+      new Notice("\u274C \u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u4F7F\u7528\u300C\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1\u300D\u53D1\u9001\u6587\u7AE0");
       if (this.copyBtn) {
         this.copyBtn.classList.remove("active");
       }
@@ -5951,14 +6028,17 @@ var AppleStylePlugin = class extends Plugin {
     console.log("\u2705 \u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668\u52A0\u8F7D\u5B8C\u6210");
   }
   async openConverter() {
+    var _a, _b, _c, _d;
     let leaf = this.app.workspace.getLeavesOfType(APPLE_STYLE_VIEW)[0];
     if (!leaf) {
-      const rightLeaf = this.app.workspace.getRightLeaf(false);
-      await rightLeaf.setViewState({
+      const targetLeaf = isMobileClient(this.app) ? ((_b = (_a = this.app.workspace).getLeaf) == null ? void 0 : _b.call(_a, "tab")) || ((_d = (_c = this.app.workspace).getLeaf) == null ? void 0 : _d.call(_c, false)) : this.app.workspace.getRightLeaf(false);
+      if (!targetLeaf)
+        return;
+      await targetLeaf.setViewState({
         type: APPLE_STYLE_VIEW,
         active: true
       });
-      leaf = rightLeaf;
+      leaf = targetLeaf;
     }
     this.app.workspace.revealLeaf(leaf);
   }

@@ -7,6 +7,7 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
   let view;
   let writeMock;
   let realBlob;
+  let realExecCommand;
   const blobToText = async (blob) => {
     if (blob && typeof blob.text === 'function') return blob.text();
     return new Response(blob).text();
@@ -46,43 +47,74 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
 
     window.__OWC_LAST_CLIPBOARD_HTML = undefined;
     window.__OWC_LAST_CLIPBOARD_TEXT = undefined;
+
+    realExecCommand = document.execCommand;
+    document.execCommand = vi.fn().mockReturnValue(true);
   });
 
   afterEach(() => {
     delete global.ClipboardItem;
     global.Blob = realBlob;
+    if (realExecCommand) {
+      document.execCommand = realExecCommand;
+    } else {
+      delete document.execCommand;
+    }
   });
 
-  it('should prefer html-only clipboard write and expose debug snapshots', async () => {
+  it('should prefer rich selection copy and expose debug snapshots', async () => {
+    await view.copyHTML();
+
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
+    expect(writeMock).not.toHaveBeenCalled();
+    const html = window.__OWC_LAST_CLIPBOARD_HTML;
+    expect(html).toBe('<ol><li>清理时机： 正文</li></ol>');
+    expect(window.__OWC_LAST_CLIPBOARD_TEXT).toBe('清理时机： 正文');
+  });
+
+  it('should fallback to clipboard html on desktop when selection copy fails', async () => {
+    document.execCommand = vi.fn().mockReturnValue(false);
+
     await view.copyHTML();
 
     expect(writeMock).toHaveBeenCalledTimes(1);
     const item = writeMock.mock.calls[0][0][0];
     expect(Object.keys(item.items)).toEqual(['text/html']);
-
     const html = await blobToText(item.items['text/html']);
     expect(html).toBe('<ol><li>清理时机： 正文</li></ol>');
-    expect(window.__OWC_LAST_CLIPBOARD_HTML).toBe(html);
-    expect(window.__OWC_LAST_CLIPBOARD_TEXT).toBe('清理时机： 正文');
   });
 
-  it('should fallback to html+plain when html-only write fails', async () => {
-    writeMock
-      .mockRejectedValueOnce(new Error('html-only blocked'))
-      .mockResolvedValueOnce(undefined);
+  it('should fail fast on mobile when rich selection copy fails', async () => {
+    view.app = { isMobile: true };
+    document.execCommand = vi.fn().mockReturnValue(false);
 
     await view.copyHTML();
 
-    expect(writeMock).toHaveBeenCalledTimes(2);
+    expect(writeMock).not.toHaveBeenCalled();
+  });
 
-    const firstItem = writeMock.mock.calls[0][0][0];
-    expect(Object.keys(firstItem.items)).toEqual(['text/html']);
+  it('should restore user selection after rich selection copy', async () => {
+    const textEl = document.createElement('div');
+    textEl.textContent = 'abcdef';
+    document.body.appendChild(textEl);
 
-    const secondItem = writeMock.mock.calls[1][0][0];
-    expect(Object.keys(secondItem.items).sort()).toEqual(['text/html', 'text/plain']);
+    const originalRange = document.createRange();
+    originalRange.setStart(textEl.firstChild, 1);
+    originalRange.setEnd(textEl.firstChild, 3);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(originalRange);
 
-    const plain = await blobToText(secondItem.items['text/plain']);
-    expect(plain).toBe('清理时机： 正文');
+    await view.copyHTML();
+
+    expect(selection.rangeCount).toBe(1);
+    const restored = selection.getRangeAt(0);
+    expect(restored.startContainer).toBe(textEl.firstChild);
+    expect(restored.startOffset).toBe(1);
+    expect(restored.endContainer).toBe(textEl.firstChild);
+    expect(restored.endOffset).toBe(3);
+
+    textEl.remove();
   });
 
   it('should block copy when latest render has failed', async () => {

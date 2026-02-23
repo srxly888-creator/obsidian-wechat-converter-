@@ -1,4 +1,4 @@
-const { Plugin, MarkdownView, ItemView, Notice } = require('obsidian');
+const { Plugin, MarkdownView, ItemView, Notice, Platform } = require('obsidian');
 const { PluginSettingTab, Setting } = require('obsidian');
 const { createRenderPipelines } = require('./services/render-pipeline');
 const { buildRenderRuntime } = require('./services/dependency-loader');
@@ -49,6 +49,13 @@ const DEFAULT_SETTINGS = {
 
 // 账号上限
 const MAX_ACCOUNTS = 5;
+
+function isMobileClient(app) {
+  if (typeof Platform?.isMobile === 'boolean') {
+    return Platform.isMobile;
+  }
+  return !!app?.isMobile;
+}
 
 // 生成唯一 ID
 function generateId() {
@@ -428,8 +435,9 @@ class AppleStyleView extends ItemView {
     this.createSettingsPanel(container);
 
     // 创建预览区 - 根据设置决定是否使用手机框
+    const usePhoneFrame = this.plugin.settings.usePhoneFrame && !isMobileClient(this.app);
     const previewWrapper = container.createEl('div', {
-      cls: `apple-preview-wrapper ${this.plugin.settings.usePhoneFrame ? 'mode-phone' : 'mode-classic'}`
+      cls: `apple-preview-wrapper ${usePhoneFrame ? 'mode-phone' : 'mode-classic'}`
     });
 
     // Light Dismiss: 点击预览区域(手机框外)收起设置面板
@@ -452,7 +460,7 @@ class AppleStyleView extends ItemView {
       }
     });
 
-    if (this.plugin.settings.usePhoneFrame) {
+    if (usePhoneFrame) {
       // === 手机仿真模式 ===
       const phoneFrame = previewWrapper.createEl('div', { cls: 'apple-phone-frame' });
 
@@ -730,11 +738,8 @@ class AppleStyleView extends ItemView {
     // [复制] 按钮
     this.copyBtn = createIconBtn('copy', '复制到公众号', () => this.copyHTML());
 
-    // [同步] 按钮 (仅当有账号时显示)
-    const accounts = this.plugin.settings.wechatAccounts || [];
-    if (accounts.length > 0) {
-      createIconBtn('send', '一键同步到草稿箱', () => this.showSyncModal());
-    }
+    // [同步] 按钮（始终显示；未配置账号时点击后引导去设置）
+    createIconBtn('send', '一键同步到草稿箱', () => this.showSyncModal());
 
     // 2. 创建悬浮设置层 (初始隐藏)
     this.settingsOverlay = container.createEl('div', { cls: 'apple-settings-overlay' });
@@ -1272,11 +1277,33 @@ class AppleStyleView extends ItemView {
   }
 
   /**
+   * 提示用户先配置公众号账号，并尽量直接打开插件设置页
+   */
+  promptConfigureWechatAccount() {
+    new Notice('❌ 请先在插件设置中添加公众号账号（AppID / AppSecret）');
+
+    const settingApi = this.app?.setting;
+    if (!settingApi || typeof settingApi.open !== 'function') return;
+
+    settingApi.open();
+    const tabId = this.plugin?.manifest?.id || 'wechat-converter';
+    if (typeof settingApi.openTabById === 'function') {
+      settingApi.openTabById(tabId);
+    }
+  }
+
+  /**
    * 显示同步选项 Modal
    */
   showSyncModal() {
     if (!this.currentHtml) {
       new Notice(this.getMissingRenderNotice());
+      return;
+    }
+
+    const accounts = this.plugin.settings.wechatAccounts || [];
+    if (accounts.length === 0) {
+      this.promptConfigureWechatAccount();
       return;
     }
 
@@ -1296,7 +1323,6 @@ class AppleStyleView extends ItemView {
       cachedState = this.articleStates.get(currentPath);
     }
 
-    const accounts = this.plugin.settings.wechatAccounts || [];
     const defaultId = this.plugin.settings.defaultAccountId;
     let selectedAccountId = defaultId;
 
@@ -1462,7 +1488,7 @@ class AppleStyleView extends ItemView {
     });
 
     if (!account) {
-      new Notice('❌ 请先在插件设置中添加微信公众号账号');
+      this.promptConfigureWechatAccount();
       return;
     }
 
@@ -1913,6 +1939,72 @@ class AppleStyleView extends ItemView {
     this.previewContainer.innerHTML = html;
   }
 
+  copyRichHTMLBySelection(htmlContent) {
+    const selection = window.getSelection?.();
+    if (!selection || typeof document.execCommand !== 'function') return false;
+    const previousRanges = [];
+    for (let i = 0; i < selection.rangeCount; i += 1) {
+      previousRanges.push(selection.getRangeAt(i).cloneRange());
+    }
+    const activeElement = document.activeElement;
+
+    const tempContainer = document.createElement('div');
+    tempContainer.innerHTML = htmlContent;
+    tempContainer.style.position = 'fixed';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '0';
+    tempContainer.style.opacity = '0';
+    tempContainer.style.pointerEvents = 'none';
+    tempContainer.style.background = '#fff';
+    document.body.appendChild(tempContainer);
+
+    let success = false;
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(tempContainer);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      success = document.execCommand('copy');
+    } catch (error) {
+      success = false;
+    } finally {
+      selection.removeAllRanges();
+      for (const prevRange of previousRanges) {
+        try {
+          selection.addRange(prevRange);
+        } catch (restoreError) {
+          // ignore invalid stale ranges
+        }
+      }
+      if (activeElement && typeof activeElement.focus === 'function') {
+        try {
+          activeElement.focus({ preventScroll: true });
+        } catch (focusError) {
+          activeElement.focus();
+        }
+      }
+      tempContainer.remove();
+    }
+
+    return success;
+  }
+
+  async copyRichHTMLByClipboard(htmlContent) {
+    if (
+      !navigator.clipboard ||
+      typeof navigator.clipboard.write !== 'function' ||
+      typeof ClipboardItem === 'undefined'
+    ) {
+      return false;
+    }
+
+    const item = new ClipboardItem({
+      'text/html': new Blob([htmlContent], { type: 'text/html' }),
+    });
+    await navigator.clipboard.write([item]);
+    return true;
+  }
+
 
   /**
    * 复制 HTML
@@ -1950,52 +2042,40 @@ class AppleStyleView extends ItemView {
       // 清理 HTML 以适配微信编辑器（处理嵌套列表等）
       const cleanedHtml = this.cleanHtmlForDraft(tempDiv.innerHTML);
 
-      // 注意：微信有时会优先读取 text/plain。必须使用清理后的 HTML 生成纯文本，
-      // 否则会出现“HTML 修复生效但粘贴结果仍异常”的情况。
-      const plainDiv = document.createElement('div');
-      plainDiv.innerHTML = cleanedHtml;
-      const text = plainDiv.textContent || '';
       const htmlContent = cleanedHtml;
       window.__OWC_LAST_CLIPBOARD_HTML = htmlContent;
-      window.__OWC_LAST_CLIPBOARD_TEXT = text;
+      const plainDiv = document.createElement('div');
+      plainDiv.innerHTML = cleanedHtml;
+      window.__OWC_LAST_CLIPBOARD_TEXT = plainDiv.textContent || '';
 
-      if (navigator.clipboard && navigator.clipboard.write) {
-        // 先尝试仅写入 HTML，避免某些编辑器优先读取 text/plain 导致样式/结构修复失效。
-        // 如果环境不支持，再降级为 HTML + plain text 双格式。
-        try {
-          const htmlOnlyItem = new ClipboardItem({
-            'text/html': new Blob([htmlContent], { type: 'text/html' }),
-          });
-          await navigator.clipboard.write([htmlOnlyItem]);
-        } catch (htmlOnlyError) {
-          const clipboardItem = new ClipboardItem({
-            'text/html': new Blob([htmlContent], { type: 'text/html' }),
-            'text/plain': new Blob([text], { type: 'text/plain' }),
-          });
-          await navigator.clipboard.write([clipboardItem]);
-        }
+      let copied = this.copyRichHTMLBySelection(htmlContent);
+      const mobile = isMobileClient(this.app);
 
-        // Success Feedback
-        new Notice('✅ 已复制到剪贴板！');
-        if (this.copyBtn) {
-           const { setIcon } = require('obsidian');
-           setIcon(this.copyBtn, 'check'); // 变成对勾图标
-           setTimeout(() => {
-             if (this.copyBtn) {
-               setIcon(this.copyBtn, 'copy'); // 恢复复制图标
-               this.copyBtn.classList.remove('active');
-             }
-           }, 2000);
-        }
-        return;
+      if (!copied && !mobile) {
+        copied = await this.copyRichHTMLByClipboard(htmlContent);
       }
 
-      // Fallback
-      throw new Error('Clipboard API unavailable');
+      if (!copied) {
+        throw new Error('rich copy unavailable');
+      }
+
+      // Success Feedback
+      new Notice('✅ 已复制公众号格式，请直接粘贴到公众号编辑器');
+      if (this.copyBtn) {
+         const { setIcon } = require('obsidian');
+         setIcon(this.copyBtn, 'check'); // 变成对勾图标
+         setTimeout(() => {
+           if (this.copyBtn) {
+             setIcon(this.copyBtn, 'copy'); // 恢复复制图标
+             this.copyBtn.classList.remove('active');
+           }
+         }, 2000);
+      }
+      return;
 
     } catch (error) {
       console.error('复制失败:', error);
-      new Notice(`❌ 复制失败: ${error.message}`);
+      new Notice('❌ 复制失败，请使用「一键同步到草稿箱」发送文章');
       if (this.copyBtn) {
         this.copyBtn.classList.remove('active');
       }
@@ -2600,12 +2680,17 @@ class AppleStylePlugin extends Plugin {
     let leaf = this.app.workspace.getLeavesOfType(APPLE_STYLE_VIEW)[0];
 
     if (!leaf) {
-      const rightLeaf = this.app.workspace.getRightLeaf(false);
-      await rightLeaf.setViewState({
+      const targetLeaf = isMobileClient(this.app)
+        ? (this.app.workspace.getLeaf?.('tab') || this.app.workspace.getLeaf?.(false))
+        : this.app.workspace.getRightLeaf(false);
+
+      if (!targetLeaf) return;
+
+      await targetLeaf.setViewState({
         type: APPLE_STYLE_VIEW,
         active: true,
       });
-      leaf = rightLeaf;
+      leaf = targetLeaf;
     }
 
     this.app.workspace.revealLeaf(leaf);
