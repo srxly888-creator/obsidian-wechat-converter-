@@ -30,6 +30,10 @@ function stripQuotePrefix(line) {
   return String(line || '').replace(/^\s{0,3}(?:>\s?)+/, '');
 }
 
+function isQuotePrefix(prefix) {
+  return /^\s{0,3}(?:>\s?)+$/.test(String(prefix || ''));
+}
+
 function startsNewBlock(trimmedLine) {
   if (!trimmedLine) return true;
   if (/^#{1,6}\s/.test(trimmedLine)) return true;
@@ -381,11 +385,26 @@ function preRenderMathFormulas(markdown, converter) {
   // First, handle block math ($$...$$) - must be processed before inline
   // Match $$...$$ where content can span multiple lines
   const blockMathPattern = /\$\$([\s\S]+?)\$\$/g;
-  output = output.replace(blockMathPattern, (match, formula) => {
+  output = output.replace(blockMathPattern, (match, formula, offset, fullText) => {
     const placeholder = generateMathPlaceholder('BLOCK');
     try {
+      let normalizedFormula = formula;
+      const safeOffset = Number(offset) || 0;
+      const source = String(fullText || '');
+      const lineStart = source.lastIndexOf('\n', Math.max(0, safeOffset - 1)) + 1;
+      const openingPrefix = source.slice(lineStart, safeOffset);
+
+      // In quoted blocks/callouts, captured formula lines include leading ">" markers.
+      // Strip them before MathJax rendering to avoid rendering stray ">" symbols.
+      if (isQuotePrefix(openingPrefix)) {
+        normalizedFormula = String(formula || '')
+          .split('\n')
+          .map((line) => stripQuotePrefix(line))
+          .join('\n');
+      }
+
       // Render using full markdown-it (handles block math)
-      const rendered = converter.md.render(`$$${formula}$$`);
+      const rendered = converter.md.render(`$$${normalizedFormula}$$`);
       // Extract just the rendered math (strip wrapper <p> if any)
       const cleaned = rendered.replace(/^<p>|<\/p>$/g, '').trim();
       formulas.push({ placeholder, rendered: cleaned, isBlock: true });

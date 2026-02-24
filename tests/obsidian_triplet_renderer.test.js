@@ -454,6 +454,55 @@ describe('Obsidian Triplet Renderer', () => {
     expect(html).toMatch(/mjx-container|<svg/);
   });
 
+  it('should render blockquote block math without quote marker artifacts', async () => {
+    const converter = await createLegacyConverter();
+
+    const renderMarkdown = vi.fn(async (markdown, el) => {
+      const parsed = converter.md.render(markdown);
+      el.innerHTML = parsed;
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter,
+      markdown: [
+        '> $$',
+        '> \\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}',
+        '> $$',
+      ].join('\n'),
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+    });
+
+    expect(html).toMatch(/mjx-container|<svg/);
+    expect(html).not.toContain('&gt;');
+  });
+
+  it('should render callout block math without quote marker artifacts', async () => {
+    const converter = await createLegacyConverter();
+
+    const renderMarkdown = vi.fn(async (markdown, el) => {
+      const parsed = converter.md.render(markdown);
+      el.innerHTML = parsed;
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter,
+      markdown: [
+        '> [!note]',
+        '> $$',
+        '> E = mc^2',
+        '> $$',
+      ].join('\n'),
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+    });
+
+    expect(html).toMatch(/mjx-container|<svg/);
+    expect(html).not.toContain('&gt;');
+  });
+
   it('should handle multiple inline math formulas in preprocessing', async () => {
     const converter = await createLegacyConverter();
 

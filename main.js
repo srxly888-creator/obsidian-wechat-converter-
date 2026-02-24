@@ -2518,6 +2518,9 @@ var require_obsidian_triplet_renderer = __commonJS({
     function stripQuotePrefix(line) {
       return String(line || "").replace(/^\s{0,3}(?:>\s?)+/, "");
     }
+    function isQuotePrefix(prefix) {
+      return /^\s{0,3}(?:>\s?)+$/.test(String(prefix || ""));
+    }
     function startsNewBlock(trimmedLine) {
       if (!trimmedLine)
         return true;
@@ -2882,10 +2885,18 @@ var require_obsidian_triplet_renderer = __commonJS({
         return { markdown, formulas };
       let output = markdown;
       const blockMathPattern = /\$\$([\s\S]+?)\$\$/g;
-      output = output.replace(blockMathPattern, (match, formula) => {
+      output = output.replace(blockMathPattern, (match, formula, offset, fullText) => {
         const placeholder = generateMathPlaceholder("BLOCK");
         try {
-          const rendered = converter.md.render(`$$${formula}$$`);
+          let normalizedFormula = formula;
+          const safeOffset = Number(offset) || 0;
+          const source = String(fullText || "");
+          const lineStart = source.lastIndexOf("\n", Math.max(0, safeOffset - 1)) + 1;
+          const openingPrefix = source.slice(lineStart, safeOffset);
+          if (isQuotePrefix(openingPrefix)) {
+            normalizedFormula = String(formula || "").split("\n").map((line) => stripQuotePrefix(line)).join("\n");
+          }
+          const rendered = converter.md.render(`$$${normalizedFormula}$$`);
           const cleaned = rendered.replace(/^<p>|<\/p>$/g, "").trim();
           formulas.push({ placeholder, rendered: cleaned, isBlock: true });
           return placeholder;
@@ -3965,6 +3976,7 @@ var { resolveSyncAccount, toSyncFriendlyMessage } = require_sync_context();
 var { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require_wechat_media();
 var { cleanHtmlForDraft: cleanHtmlForDraftService } = require_wechat_html_cleaner();
 var APPLE_STYLE_VIEW = "apple-style-converter";
+var APPLE_STYLE_VIEW_TITLE = "\u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668";
 var DEFAULT_SETTINGS = {
   theme: "github",
   themeColor: "blue",
@@ -4279,12 +4291,18 @@ var AppleStyleView = class extends ItemView {
     this.renderGeneration = 0;
     this.lastRenderError = "";
     this.lastRenderFailureNoticeKey = "";
+    this.activeLeafRenderTimer = null;
+    this.loadingGeneration = 0;
+    this.loadingVisibilityTimer = null;
+    this.sidePaddingPreviewTimer = null;
+    this.lastResolvedMarkdown = "";
+    this.lastResolvedSourcePath = "";
   }
   getViewType() {
     return APPLE_STYLE_VIEW;
   }
   getDisplayText() {
-    return "\u{1F4DD} \u5FAE\u4FE1\u6392\u7248\u8F6C\u6362";
+    return APPLE_STYLE_VIEW_TITLE;
   }
   getIcon() {
     return "wand";
@@ -4294,6 +4312,9 @@ var AppleStyleView = class extends ItemView {
     const container = this.containerEl.children[1];
     container.empty();
     container.addClass("apple-converter-container");
+    if (isMobileClient(this.app)) {
+      container.addClass("apple-converter-mobile");
+    }
     await this.loadDependencies();
     this.createSettingsPanel(container);
     const usePhoneFrame = this.plugin.settings.usePhoneFrame && !isMobileClient(this.app);
@@ -4349,9 +4370,7 @@ var AppleStyleView = class extends ItemView {
           this.registerScrollSync(activeView);
         }
         if (activeView && this.converter) {
-          setTimeout(async () => {
-            await this.convertCurrent(true);
-          }, 300);
+          this.scheduleActiveLeafRender();
         }
       })
     );
@@ -4374,6 +4393,41 @@ var AppleStyleView = class extends ItemView {
     this.registerEvent(
       this.app.workspace.on("editor-change", debouncedConvert)
     );
+  }
+  scheduleActiveLeafRender() {
+    if (this.activeLeafRenderTimer) {
+      clearTimeout(this.activeLeafRenderTimer);
+      this.activeLeafRenderTimer = null;
+    }
+    this.activeLeafRenderTimer = setTimeout(() => {
+      this.activeLeafRenderTimer = null;
+      this.convertCurrent(true, {
+        showLoading: true,
+        loadingText: "\u6B63\u5728\u5207\u6362\u6587\u7AE0\u9884\u89C8...",
+        loadingDelay: 150
+      });
+    }, 16);
+  }
+  scheduleSidePaddingPreview(delay = 120) {
+    if (this.sidePaddingPreviewTimer) {
+      clearTimeout(this.sidePaddingPreviewTimer);
+      this.sidePaddingPreviewTimer = null;
+    }
+    this.sidePaddingPreviewTimer = setTimeout(() => {
+      this.sidePaddingPreviewTimer = null;
+      this.convertCurrent(true);
+    }, delay);
+  }
+  setPreviewLoading(active, text = "\u6B63\u5728\u6E32\u67D3\u9884\u89C8...") {
+    if (!this.previewContainer)
+      return;
+    if (active) {
+      this.previewContainer.addClass("apple-preview-loading");
+      this.previewContainer.dataset.loadingText = text;
+      return;
+    }
+    this.previewContainer.removeClass("apple-preview-loading");
+    delete this.previewContainer.dataset.loadingText;
   }
   /**
    * 注册同步滚动 (双向: Editor <-> Preview)
@@ -4492,7 +4546,9 @@ var AppleStyleView = class extends ItemView {
     const { setIcon } = require("obsidian");
     const toolbar = container.createEl("div", { cls: "apple-top-toolbar" });
     this.currentDocLabel = toolbar.createEl("div", { cls: "apple-toolbar-title" });
-    this.currentDocLabel.createDiv({ text: "\u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668", cls: "apple-toolbar-plugin-name" });
+    if (!isMobileClient(this.app)) {
+      this.currentDocLabel.createDiv({ text: APPLE_STYLE_VIEW_TITLE, cls: "apple-toolbar-plugin-name" });
+    }
     this.docTitleText = this.currentDocLabel.createDiv({ text: "\u672A\u9009\u62E9\u6587\u6863", cls: "apple-toolbar-doc-name" });
     const actions = toolbar.createEl("div", { cls: "apple-toolbar-actions" });
     const createIconBtn = (icon, title, onClick) => {
@@ -4635,6 +4691,7 @@ var AppleStyleView = class extends ItemView {
       checkbox.addEventListener("change", () => this.onCodeLineNumberChange(checkbox.checked));
     });
     this.createSection(settingsArea, "\u9875\u9762\u4E24\u4FA7\u7559\u767D", (section) => {
+      const mobile = isMobileClient(this.app);
       const container2 = section.createEl("div", {
         cls: "apple-slider-container",
         style: "width: 100%; display: flex; align-items: center; gap: 10px;"
@@ -4642,7 +4699,7 @@ var AppleStyleView = class extends ItemView {
       const slider = container2.createEl("input", {
         type: "range",
         cls: "apple-slider",
-        attr: { min: 0, max: 40, step: 1 }
+        attr: { min: 0, max: mobile ? 36 : 40, step: 1 }
       });
       slider.value = this.plugin.settings.sidePadding;
       slider.style.flex = "1";
@@ -4650,7 +4707,7 @@ var AppleStyleView = class extends ItemView {
         text: `${this.plugin.settings.sidePadding}px`,
         style: "font-size: 12px; color: var(--apple-secondary); min-width: 32px; text-align: right;"
       });
-      slider.addEventListener("input", async (e) => {
+      slider.addEventListener("input", (e) => {
         const val = parseInt(e.target.value);
         valueLabel.setText(`${val}px`);
         this.plugin.settings.sidePadding = val;
@@ -4660,6 +4717,18 @@ var AppleStyleView = class extends ItemView {
         this.saveTimeout = setTimeout(async () => {
           await this.plugin.saveSettings();
         }, 500);
+        this.scheduleSidePaddingPreview(mobile ? 220 : 120);
+      });
+      slider.addEventListener("change", async (e) => {
+        const val = parseInt(e.target.value);
+        valueLabel.setText(`${val}px`);
+        this.plugin.settings.sidePadding = val;
+        this.theme.update({ sidePadding: val });
+        if (this.sidePaddingPreviewTimer) {
+          clearTimeout(this.sidePaddingPreviewTimer);
+          this.sidePaddingPreviewTimer = null;
+        }
+        await this.plugin.saveSettings();
         await this.convertCurrent(true);
       });
     });
@@ -5256,19 +5325,19 @@ var AppleStyleView = class extends ItemView {
         sessionDigest: this.sessionDigest,
         onStatus: (stage) => {
           if (stage === "cover")
-            notice.setMessage("\u2460 \u6B63\u5728\u5904\u7406\u5C01\u9762\u56FE...");
+            notice.setMessage("\u6B63\u5728\u5904\u7406\u5C01\u9762\u56FE...");
           if (stage === "images")
-            notice.setMessage("\u2461 \u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247...");
+            notice.setMessage("\u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247...");
           if (stage === "math")
-            notice.setMessage("\u2462 \u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F...");
+            notice.setMessage("\u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F...");
           if (stage === "draft")
-            notice.setMessage("\u2463 \u6B63\u5728\u53D1\u9001\u5230\u5FAE\u4FE1\u8349\u7A3F\u7BB1...");
+            notice.setMessage("\u6B63\u5728\u53D1\u9001\u5230\u5FAE\u4FE1\u8349\u7A3F\u7BB1...");
         },
         onImageProgress: (current, total) => {
-          notice.setMessage(`\u2461 \u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247 (${current}/${total})...`);
+          notice.setMessage(`\u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247 (${current}/${total})...`);
         },
         onMathProgress: (current, total) => {
-          notice.setMessage(`\u2462 \u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F (${current}/${total})...`);
+          notice.setMessage(`\u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F (${current}/${total})...`);
         }
       });
       notice.hide();
@@ -5538,23 +5607,69 @@ var AppleStyleView = class extends ItemView {
   /**
    * 转换当前文档
    */
-  async convertCurrent(silent = false) {
+  async convertCurrent(silent = false, options = {}) {
+    const {
+      showLoading = false,
+      loadingText = "\u6B63\u5728\u6E32\u67D3\u9884\u89C8...",
+      loadingDelay = 0
+    } = options;
     const generation = ++this.renderGeneration;
+    if (showLoading) {
+      this.loadingGeneration = generation;
+      if (this.loadingVisibilityTimer) {
+        clearTimeout(this.loadingVisibilityTimer);
+        this.loadingVisibilityTimer = null;
+      }
+      if (loadingDelay > 0) {
+        this.loadingVisibilityTimer = setTimeout(() => {
+          if (this.loadingGeneration === generation) {
+            this.setPreviewLoading(true, loadingText);
+          }
+          this.loadingVisibilityTimer = null;
+        }, loadingDelay);
+      } else {
+        this.setPreviewLoading(true, loadingText);
+      }
+    }
     const source = await resolveMarkdownSource({
       app: this.app,
       lastActiveFile: this.lastActiveFile,
       MarkdownViewType: MarkdownView
     });
-    if (!source.ok) {
+    let markdown = "";
+    let sourcePath = "";
+    if (source.ok) {
+      markdown = source.markdown || "";
+      sourcePath = source.sourcePath || "";
+      if (markdown.trim()) {
+        this.lastResolvedMarkdown = markdown;
+        this.lastResolvedSourcePath = sourcePath;
+      }
+    } else if (this.lastResolvedMarkdown.trim()) {
+      markdown = this.lastResolvedMarkdown;
+      sourcePath = this.lastResolvedSourcePath || "";
+    } else {
       if (!silent)
         new Notice("\u8BF7\u5148\u6253\u5F00\u4E00\u4E2A Markdown \u6587\u4EF6");
+      if (showLoading && this.loadingGeneration === generation) {
+        if (this.loadingVisibilityTimer) {
+          clearTimeout(this.loadingVisibilityTimer);
+          this.loadingVisibilityTimer = null;
+        }
+        this.setPreviewLoading(false);
+      }
       return;
     }
-    const markdown = source.markdown;
-    const sourcePath = source.sourcePath;
     if (!markdown.trim()) {
       if (!silent)
         new Notice("\u5F53\u524D\u6587\u4EF6\u5185\u5BB9\u4E3A\u7A7A");
+      if (showLoading && this.loadingGeneration === generation) {
+        if (this.loadingVisibilityTimer) {
+          clearTimeout(this.loadingVisibilityTimer);
+          this.loadingVisibilityTimer = null;
+        }
+        this.setPreviewLoading(false);
+      }
       return;
     }
     try {
@@ -5586,6 +5701,14 @@ var AppleStyleView = class extends ItemView {
       if (!silent || this.lastRenderFailureNoticeKey !== noticeKey) {
         new Notice("\u274C \u8F6C\u6362\u5931\u8D25: " + this.lastRenderError);
         this.lastRenderFailureNoticeKey = noticeKey;
+      }
+    } finally {
+      if (showLoading && this.loadingGeneration === generation) {
+        if (this.loadingVisibilityTimer) {
+          clearTimeout(this.loadingVisibilityTimer);
+          this.loadingVisibilityTimer = null;
+        }
+        this.setPreviewLoading(false);
       }
     }
   }
@@ -5824,6 +5947,19 @@ var AppleStyleView = class extends ItemView {
   }
   async onClose() {
     var _a;
+    if (this.activeLeafRenderTimer) {
+      clearTimeout(this.activeLeafRenderTimer);
+      this.activeLeafRenderTimer = null;
+    }
+    if (this.loadingVisibilityTimer) {
+      clearTimeout(this.loadingVisibilityTimer);
+      this.loadingVisibilityTimer = null;
+    }
+    if (this.sidePaddingPreviewTimer) {
+      clearTimeout(this.sidePaddingPreviewTimer);
+      this.sidePaddingPreviewTimer = null;
+    }
+    this.setPreviewLoading(false);
     if (this.activeEditorScroller && this.editorScrollListener) {
       this.activeEditorScroller.removeEventListener("scroll", this.editorScrollListener);
     }
@@ -6150,18 +6286,48 @@ var AppleStylePlugin = class extends Plugin {
       APPLE_STYLE_VIEW,
       (leaf) => new AppleStyleView(leaf, this)
     );
-    this.addRibbonIcon("wand", "\u{1F4DD} \u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668", async () => {
+    this.addRibbonIcon("wand", APPLE_STYLE_VIEW_TITLE, async () => {
       await this.openConverter();
     });
     this.addCommand({
       id: "open-apple-converter",
-      name: "\u6253\u5F00\u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668",
+      name: `\u6253\u5F00${APPLE_STYLE_VIEW_TITLE}`,
       callback: async () => {
         await this.openConverter();
       }
     });
     this.addSettingTab(new AppleStyleSettingTab(this.app, this));
+    this.app.workspace.onLayoutReady(() => {
+      this.migrateLegacyConverterLeafTitles().catch((error) => {
+        console.warn("\u540C\u6B65\u8F6C\u6362\u5668\u6807\u9898\u5931\u8D25:", error);
+      });
+    });
     console.log("\u2705 \u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668\u52A0\u8F7D\u5B8C\u6210");
+  }
+  toConverterViewState(baseState = {}, options = {}) {
+    const safeState = baseState && typeof baseState === "object" ? baseState : {};
+    const shouldActivate = options && typeof options === "object" && options.active === true;
+    return {
+      ...safeState,
+      type: APPLE_STYLE_VIEW,
+      state: safeState.state && typeof safeState.state === "object" ? safeState.state : {},
+      icon: "wand",
+      title: APPLE_STYLE_VIEW_TITLE,
+      active: shouldActivate
+    };
+  }
+  async migrateLegacyConverterLeafTitles() {
+    const leaves = this.app.workspace.getLeavesOfType(APPLE_STYLE_VIEW);
+    if (!Array.isArray(leaves) || leaves.length === 0)
+      return;
+    for (const leaf of leaves) {
+      const currentViewState = typeof leaf.getViewState === "function" ? leaf.getViewState() : null;
+      if (!currentViewState || currentViewState.title === APPLE_STYLE_VIEW_TITLE)
+        continue;
+      await leaf.setViewState(
+        this.toConverterViewState(currentViewState, { active: currentViewState.active === true })
+      );
+    }
   }
   async openConverter() {
     var _a, _b, _c, _d;
@@ -6170,11 +6336,13 @@ var AppleStylePlugin = class extends Plugin {
       const targetLeaf = isMobileClient(this.app) ? ((_b = (_a = this.app.workspace).getLeaf) == null ? void 0 : _b.call(_a, "tab")) || ((_d = (_c = this.app.workspace).getLeaf) == null ? void 0 : _d.call(_c, false)) : this.app.workspace.getRightLeaf(false);
       if (!targetLeaf)
         return;
-      await targetLeaf.setViewState({
-        type: APPLE_STYLE_VIEW,
-        active: true
-      });
+      await targetLeaf.setViewState(this.toConverterViewState({}, { active: true }));
       leaf = targetLeaf;
+    } else {
+      const currentViewState = typeof leaf.getViewState === "function" ? leaf.getViewState() : null;
+      if (!currentViewState || currentViewState.title !== APPLE_STYLE_VIEW_TITLE) {
+        await leaf.setViewState(this.toConverterViewState(currentViewState || {}, { active: true }));
+      }
     }
     this.app.workspace.revealLeaf(leaf);
   }
@@ -6241,7 +6409,18 @@ var AppleStylePlugin = class extends Plugin {
     }
   }
   async saveSettings() {
-    await this.saveData(this.settings);
+    try {
+      await this.saveData(this.settings);
+      return true;
+    } catch (error) {
+      console.error("\u4FDD\u5B58\u63D2\u4EF6\u8BBE\u7F6E\u5931\u8D25:", error);
+      const now = Date.now();
+      if (!this._lastSaveSettingsErrorAt || now - this._lastSaveSettingsErrorAt > 3e3) {
+        this._lastSaveSettingsErrorAt = now;
+        new Notice("\u26A0\uFE0F \u8BBE\u7F6E\u4FDD\u5B58\u5931\u8D25\uFF0C\u672C\u6B21\u4FEE\u6539\u4EC5\u5728\u5F53\u524D\u4F1A\u8BDD\u751F\u6548");
+      }
+      return false;
+    }
   }
   onunload() {
     console.log("\u{1F4DD} \u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668\u5DF2\u5378\u8F7D");

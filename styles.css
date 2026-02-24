@@ -132,6 +132,35 @@
   flex-shrink: 0;
 }
 
+.apple-converter-container.apple-converter-mobile .apple-top-toolbar {
+  height: 52px;
+  padding: 0 10px;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-toolbar-title {
+  margin-right: 8px;
+  min-width: 0;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-toolbar-plugin-name {
+  display: none;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-toolbar-doc-name {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-toolbar-actions {
+  gap: 6px;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-icon-btn {
+  width: 34px;
+  height: 34px;
+}
+
 .apple-icon-btn {
   display: flex;
   align-items: center;
@@ -185,6 +214,11 @@
   /* === 核心修改：高度限制与动画 === */
   max-height: 60%; /* 限制高度为 60%，内部自动滚动 */
   overflow-y: auto;
+  /* 保持滚动可感知（移动端也允许惯性滚动） */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 120, 128, 0.5) transparent;
 
   /* 初始状态：向上隐去 (收起) */
   opacity: 0;
@@ -208,6 +242,119 @@
   opacity: 1;
   visibility: visible;
   transform: translateY(0); /* 向下展开，回到原位 */
+}
+
+.apple-converter-container.apple-converter-mobile .apple-settings-overlay {
+  top: 56px;
+  left: clamp(10px, 3.2vw, 16px);
+  right: clamp(10px, 3.2vw, 16px);
+  max-height: calc(100% - 56px - max(8px, env(safe-area-inset-bottom)));
+  border-radius: 14px;
+  border: 1px solid var(--apple-border);
+  box-shadow:
+    0 16px 36px -24px rgba(0, 0, 0, 0.38),
+    0 4px 14px rgba(0, 0, 0, 0.1);
+  padding: 12px 12px calc(24px + env(safe-area-inset-bottom)) 12px;
+  scrollbar-gutter: stable;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-settings-area {
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
+  gap: 12px;
+  padding: 2px 2px 0;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-setting-section {
+  gap: 7px;
+  padding: 8px 10px 10px;
+  border: 1px solid var(--apple-border);
+  border-radius: 10px;
+  background: var(--apple-surface);
+}
+
+.apple-converter-container.apple-converter-mobile .apple-setting-content {
+  width: 100%;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-settings-area > .setting-item {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--apple-border);
+  border-radius: 10px;
+  background: var(--apple-surface);
+}
+
+/* 移动端底部预留，避免被 Obsidian 底栏覆盖 */
+.apple-converter-container.apple-converter-mobile .apple-settings-area::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: max(88px, calc(56px + env(safe-area-inset-bottom)));
+  flex-shrink: 0;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-setting-label {
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0.1px;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-btn-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-btn-theme {
+  min-height: 32px;
+  font-size: 12px;
+  padding: 5px 6px;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-btn-size {
+  min-height: 32px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-select {
+  min-height: 34px;
+  font-size: 13px;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-btn-row {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.theme-dark .apple-converter-container.apple-converter-mobile .apple-settings-overlay {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .apple-converter-container.apple-converter-mobile .apple-setting-section,
+.theme-dark .apple-converter-container.apple-converter-mobile .apple-settings-area > .setting-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 统一 Obsidian 原生 Setting Toggle 颜色，避免出现宿主题紫色 */
+.apple-settings-overlay .setting-item .checkbox-container.is-enabled {
+  background-color: var(--apple-accent) !important;
+  border-color: var(--apple-accent) !important;
+}
+
+.apple-settings-overlay::-webkit-scrollbar {
+  width: 4px;
+}
+
+.apple-settings-overlay::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.apple-settings-overlay::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 128, 0.5);
+  border-radius: 999px;
 }
 
 /* 隐藏旧的折叠样式，直接平铺 */
@@ -581,6 +728,52 @@ input[type="range"].apple-slider {
   flex: 1;
 }
 
+.apple-converter-container.apple-converter-mobile input[type="range"].apple-slider {
+  min-height: 26px;
+  touch-action: pan-y;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 26px;
+  background: transparent;
+}
+
+.apple-converter-container.apple-converter-mobile input[type="range"].apple-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(120, 120, 128, 0.36);
+}
+
+.apple-converter-container.apple-converter-mobile input[type="range"].apple-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 18px;
+  margin-top: 0px;
+  border-radius: 999px;
+  background: #f8f8f8;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
+.apple-converter-container.apple-converter-mobile input[type="range"].apple-slider:active::-webkit-slider-thumb {
+  background: var(--apple-accent);
+  border-color: var(--apple-accent);
+}
+
+.theme-dark .apple-converter-container.apple-converter-mobile input[type="range"].apple-slider::-webkit-slider-runnable-track {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.theme-dark .apple-converter-container.apple-converter-mobile input[type="range"].apple-slider::-webkit-slider-thumb {
+  background: #ececef;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.apple-converter-container.apple-converter-mobile input[type="range"].apple-slider::-webkit-slider-thumb:hover {
+  transform: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
 /* 深色模式适配 */
 .theme-dark input[type="range"].apple-slider::-webkit-slider-runnable-track {
   background: #424244;
@@ -765,6 +958,38 @@ input[type="range"].apple-slider:active::-webkit-slider-thumb {
   /* zoom: 0.85;  用户反馈太小，移除 */
 }
 
+.apple-converter-preview.apple-preview-loading {
+  position: relative;
+}
+
+.apple-converter-preview.apple-preview-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 4;
+  background: linear-gradient(90deg, transparent 0%, var(--interactive-accent) 45%, transparent 100%);
+  animation: apple-preview-loading-bar 1.1s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes apple-preview-loading-bar {
+  0% {
+    transform: translateX(-40%);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(40%);
+    opacity: 0.45;
+  }
+}
+
 /* 处理表格：优先换行，仅在极个别长单词情况下滚动 */
 .apple-converter-preview table {
   width: 100% !important;
@@ -872,6 +1097,15 @@ input[type="range"].apple-slider:active::-webkit-slider-thumb {
   padding: 32px 40px !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-preview-wrapper.mode-classic {
+  padding: 0 !important;
+  overflow: auto !important;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-preview-wrapper.mode-classic .apple-converter-preview {
+  padding: 10px 8px calc(14px + env(safe-area-inset-bottom)) !important;
 }
 
 .theme-dark .apple-preview-wrapper.mode-classic {

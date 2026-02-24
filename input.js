@@ -12,6 +12,7 @@ const { cleanHtmlForDraft: cleanHtmlForDraftService } = require('./services/wech
 
 // 视图类型标识
 const APPLE_STYLE_VIEW = 'apple-style-converter';
+const APPLE_STYLE_VIEW_TITLE = '微信公众号转换器';
 
 // 默认设置
 const DEFAULT_SETTINGS = {
@@ -408,6 +409,12 @@ class AppleStyleView extends ItemView {
     this.renderGeneration = 0;
     this.lastRenderError = '';
     this.lastRenderFailureNoticeKey = '';
+    this.activeLeafRenderTimer = null;
+    this.loadingGeneration = 0;
+    this.loadingVisibilityTimer = null;
+    this.sidePaddingPreviewTimer = null;
+    this.lastResolvedMarkdown = '';
+    this.lastResolvedSourcePath = '';
   }
 
   getViewType() {
@@ -415,7 +422,7 @@ class AppleStyleView extends ItemView {
   }
 
   getDisplayText() {
-    return '📝 微信排版转换';
+    return APPLE_STYLE_VIEW_TITLE;
   }
 
   getIcon() {
@@ -427,6 +434,9 @@ class AppleStyleView extends ItemView {
     const container = this.containerEl.children[1];
     container.empty();
     container.addClass('apple-converter-container');
+    if (isMobileClient(this.app)) {
+      container.addClass('apple-converter-mobile');
+    }
 
     // 加载依赖
     await this.loadDependencies();
@@ -522,9 +532,7 @@ class AppleStyleView extends ItemView {
         }
 
         if (activeView && this.converter) {
-          setTimeout(async () => {
-            await this.convertCurrent(true);
-          }, 300);
+          this.scheduleActiveLeafRender();
         }
       })
     );
@@ -554,6 +562,45 @@ class AppleStyleView extends ItemView {
     this.registerEvent(
       this.app.workspace.on('editor-change', debouncedConvert)
     );
+  }
+
+  scheduleActiveLeafRender() {
+    if (this.activeLeafRenderTimer) {
+      clearTimeout(this.activeLeafRenderTimer);
+      this.activeLeafRenderTimer = null;
+    }
+
+    // 下一帧立即触发，避免切文档固定等待带来的卡顿感。
+    this.activeLeafRenderTimer = setTimeout(() => {
+      this.activeLeafRenderTimer = null;
+      this.convertCurrent(true, {
+        showLoading: true,
+        loadingText: '正在切换文章预览...',
+        loadingDelay: 150
+      });
+    }, 16);
+  }
+
+  scheduleSidePaddingPreview(delay = 120) {
+    if (this.sidePaddingPreviewTimer) {
+      clearTimeout(this.sidePaddingPreviewTimer);
+      this.sidePaddingPreviewTimer = null;
+    }
+    this.sidePaddingPreviewTimer = setTimeout(() => {
+      this.sidePaddingPreviewTimer = null;
+      this.convertCurrent(true);
+    }, delay);
+  }
+
+  setPreviewLoading(active, text = '正在渲染预览...') {
+    if (!this.previewContainer) return;
+    if (active) {
+      this.previewContainer.addClass('apple-preview-loading');
+      this.previewContainer.dataset.loadingText = text;
+      return;
+    }
+    this.previewContainer.removeClass('apple-preview-loading');
+    delete this.previewContainer.dataset.loadingText;
   }
 
   /**
@@ -712,7 +759,9 @@ class AppleStyleView extends ItemView {
 
     // 1.1 左侧：双层信息（插件名 + 文档名）
     this.currentDocLabel = toolbar.createEl('div', { cls: 'apple-toolbar-title' });
-    this.currentDocLabel.createDiv({ text: '微信公众号转换器', cls: 'apple-toolbar-plugin-name' });
+    if (!isMobileClient(this.app)) {
+      this.currentDocLabel.createDiv({ text: APPLE_STYLE_VIEW_TITLE, cls: 'apple-toolbar-plugin-name' });
+    }
     this.docTitleText = this.currentDocLabel.createDiv({ text: '未选择文档', cls: 'apple-toolbar-doc-name' });
 
     // 1.2 右侧：操作按钮组
@@ -905,6 +954,7 @@ class AppleStyleView extends ItemView {
 
     // === 页面两侧留白 ===
     this.createSection(settingsArea, '页面两侧留白', (section) => {
+      const mobile = isMobileClient(this.app);
       const container = section.createEl('div', {
         cls: 'apple-slider-container',
         style: 'width: 100%; display: flex; align-items: center; gap: 10px;'
@@ -913,7 +963,7 @@ class AppleStyleView extends ItemView {
       const slider = container.createEl('input', {
         type: 'range',
         cls: 'apple-slider',
-        attr: { min: 0, max: 40, step: 1 }
+        attr: { min: 0, max: mobile ? 36 : 40, step: 1 }
       });
       slider.value = this.plugin.settings.sidePadding;
       slider.style.flex = '1';
@@ -923,17 +973,30 @@ class AppleStyleView extends ItemView {
         style: 'font-size: 12px; color: var(--apple-secondary); min-width: 32px; text-align: right;'
       });
 
-      slider.addEventListener('input', async (e) => {
+      slider.addEventListener('input', (e) => {
         const val = parseInt(e.target.value);
         valueLabel.setText(`${val}px`);
-        // 实时更新主题，触发预览
+        // 拖动过程中只做轻量更新，避免移动端手势被重渲染卡住。
         this.plugin.settings.sidePadding = val;
         this.theme.update({ sidePadding: val });
-        // 保存设置需要防抖，避免频繁写入
+
         if (this.saveTimeout) clearTimeout(this.saveTimeout);
         this.saveTimeout = setTimeout(async () => {
           await this.plugin.saveSettings();
         }, 500);
+        this.scheduleSidePaddingPreview(mobile ? 220 : 120);
+      });
+
+      slider.addEventListener('change', async (e) => {
+        const val = parseInt(e.target.value);
+        valueLabel.setText(`${val}px`);
+        this.plugin.settings.sidePadding = val;
+        this.theme.update({ sidePadding: val });
+        if (this.sidePaddingPreviewTimer) {
+          clearTimeout(this.sidePaddingPreviewTimer);
+          this.sidePaddingPreviewTimer = null;
+        }
+        await this.plugin.saveSettings();
         await this.convertCurrent(true);
       });
     });
@@ -1638,16 +1701,16 @@ class AppleStyleView extends ItemView {
         sessionCoverBase64: this.sessionCoverBase64,
         sessionDigest: this.sessionDigest,
         onStatus: (stage) => {
-          if (stage === 'cover') notice.setMessage('① 正在处理封面图...');
-          if (stage === 'images') notice.setMessage('② 正在同步正文图片...');
-          if (stage === 'math') notice.setMessage('③ 正在转换矢量图/数学公式...');
-          if (stage === 'draft') notice.setMessage('④ 正在发送到微信草稿箱...');
+          if (stage === 'cover') notice.setMessage('正在处理封面图...');
+          if (stage === 'images') notice.setMessage('正在同步正文图片...');
+          if (stage === 'math') notice.setMessage('正在转换矢量图/数学公式...');
+          if (stage === 'draft') notice.setMessage('正在发送到微信草稿箱...');
         },
         onImageProgress: (current, total) => {
-          notice.setMessage(`② 正在同步正文图片 (${current}/${total})...`);
+          notice.setMessage(`正在同步正文图片 (${current}/${total})...`);
         },
         onMathProgress: (current, total) => {
-          notice.setMessage(`③ 正在转换矢量图/数学公式 (${current}/${total})...`);
+          notice.setMessage(`正在转换矢量图/数学公式 (${current}/${total})...`);
         },
       });
 
@@ -1974,23 +2037,70 @@ class AppleStyleView extends ItemView {
   /**
    * 转换当前文档
    */
-  async convertCurrent(silent = false) {
+  async convertCurrent(silent = false, options = {}) {
+    const {
+      showLoading = false,
+      loadingText = '正在渲染预览...',
+      loadingDelay = 0
+    } = options;
     const generation = ++this.renderGeneration;
+    if (showLoading) {
+      this.loadingGeneration = generation;
+      if (this.loadingVisibilityTimer) {
+        clearTimeout(this.loadingVisibilityTimer);
+        this.loadingVisibilityTimer = null;
+      }
+      if (loadingDelay > 0) {
+        this.loadingVisibilityTimer = setTimeout(() => {
+          if (this.loadingGeneration === generation) {
+            this.setPreviewLoading(true, loadingText);
+          }
+          this.loadingVisibilityTimer = null;
+        }, loadingDelay);
+      } else {
+        this.setPreviewLoading(true, loadingText);
+      }
+    }
     const source = await resolveMarkdownSource({
       app: this.app,
       lastActiveFile: this.lastActiveFile,
       MarkdownViewType: MarkdownView,
     });
 
-    if (!source.ok) {
+    let markdown = '';
+    let sourcePath = '';
+    if (source.ok) {
+      markdown = source.markdown || '';
+      sourcePath = source.sourcePath || '';
+      // 缓存最近一次可用源，确保移动端在“当前无激活编辑器”时仍可按最新内容重渲染样式。
+      if (markdown.trim()) {
+        this.lastResolvedMarkdown = markdown;
+        this.lastResolvedSourcePath = sourcePath;
+      }
+    } else if (this.lastResolvedMarkdown.trim()) {
+      markdown = this.lastResolvedMarkdown;
+      sourcePath = this.lastResolvedSourcePath || '';
+    } else {
       if (!silent) new Notice('请先打开一个 Markdown 文件');
+      if (showLoading && this.loadingGeneration === generation) {
+        if (this.loadingVisibilityTimer) {
+          clearTimeout(this.loadingVisibilityTimer);
+          this.loadingVisibilityTimer = null;
+        }
+        this.setPreviewLoading(false);
+      }
       return;
     }
-    const markdown = source.markdown;
-    const sourcePath = source.sourcePath;
 
     if (!markdown.trim()) {
       if (!silent) new Notice('当前文件内容为空');
+      if (showLoading && this.loadingGeneration === generation) {
+        if (this.loadingVisibilityTimer) {
+          clearTimeout(this.loadingVisibilityTimer);
+          this.loadingVisibilityTimer = null;
+        }
+        this.setPreviewLoading(false);
+      }
       return;
     }
 
@@ -2028,6 +2138,14 @@ class AppleStyleView extends ItemView {
       if (!silent || this.lastRenderFailureNoticeKey !== noticeKey) {
         new Notice('❌ 转换失败: ' + this.lastRenderError);
         this.lastRenderFailureNoticeKey = noticeKey;
+      }
+    } finally {
+      if (showLoading && this.loadingGeneration === generation) {
+        if (this.loadingVisibilityTimer) {
+          clearTimeout(this.loadingVisibilityTimer);
+          this.loadingVisibilityTimer = null;
+        }
+        this.setPreviewLoading(false);
       }
     }
   }
@@ -2329,6 +2447,20 @@ class AppleStyleView extends ItemView {
 
 
   async onClose() {
+    if (this.activeLeafRenderTimer) {
+      clearTimeout(this.activeLeafRenderTimer);
+      this.activeLeafRenderTimer = null;
+    }
+    if (this.loadingVisibilityTimer) {
+      clearTimeout(this.loadingVisibilityTimer);
+      this.loadingVisibilityTimer = null;
+    }
+    if (this.sidePaddingPreviewTimer) {
+      clearTimeout(this.sidePaddingPreviewTimer);
+      this.sidePaddingPreviewTimer = null;
+    }
+    this.setPreviewLoading(false);
+
     // 清理滚动监听 (Critical: Fix memory leak)
     if (this.activeEditorScroller && this.editorScrollListener) {
       this.activeEditorScroller.removeEventListener('scroll', this.editorScrollListener);
@@ -2795,13 +2927,13 @@ class AppleStylePlugin extends Plugin {
       (leaf) => new AppleStyleView(leaf, this)
     );
 
-    this.addRibbonIcon('wand', '📝 微信公众号转换器', async () => {
+    this.addRibbonIcon('wand', APPLE_STYLE_VIEW_TITLE, async () => {
       await this.openConverter();
     });
 
     this.addCommand({
       id: 'open-apple-converter',
-      name: '打开微信公众号转换器',
+      name: `打开${APPLE_STYLE_VIEW_TITLE}`,
       callback: async () => {
         await this.openConverter();
       },
@@ -2812,7 +2944,39 @@ class AppleStylePlugin extends Plugin {
 
     this.addSettingTab(new AppleStyleSettingTab(this.app, this));
 
+    this.app.workspace.onLayoutReady(() => {
+      this.migrateLegacyConverterLeafTitles().catch((error) => {
+        console.warn('同步转换器标题失败:', error);
+      });
+    });
+
     console.log('✅ 微信公众号转换器加载完成');
+  }
+
+  toConverterViewState(baseState = {}, options = {}) {
+    const safeState = (baseState && typeof baseState === 'object') ? baseState : {};
+    const shouldActivate = options && typeof options === 'object' && options.active === true;
+    return {
+      ...safeState,
+      type: APPLE_STYLE_VIEW,
+      state: (safeState.state && typeof safeState.state === 'object') ? safeState.state : {},
+      icon: 'wand',
+      title: APPLE_STYLE_VIEW_TITLE,
+      active: shouldActivate,
+    };
+  }
+
+  async migrateLegacyConverterLeafTitles() {
+    const leaves = this.app.workspace.getLeavesOfType(APPLE_STYLE_VIEW);
+    if (!Array.isArray(leaves) || leaves.length === 0) return;
+
+    for (const leaf of leaves) {
+      const currentViewState = (typeof leaf.getViewState === 'function') ? leaf.getViewState() : null;
+      if (!currentViewState || currentViewState.title === APPLE_STYLE_VIEW_TITLE) continue;
+      await leaf.setViewState(
+        this.toConverterViewState(currentViewState, { active: currentViewState.active === true })
+      );
+    }
   }
 
   async openConverter() {
@@ -2825,11 +2989,13 @@ class AppleStylePlugin extends Plugin {
 
       if (!targetLeaf) return;
 
-      await targetLeaf.setViewState({
-        type: APPLE_STYLE_VIEW,
-        active: true,
-      });
+      await targetLeaf.setViewState(this.toConverterViewState({}, { active: true }));
       leaf = targetLeaf;
+    } else {
+      const currentViewState = (typeof leaf.getViewState === 'function') ? leaf.getViewState() : null;
+      if (!currentViewState || currentViewState.title !== APPLE_STYLE_VIEW_TITLE) {
+        await leaf.setViewState(this.toConverterViewState(currentViewState || {}, { active: true }));
+      }
     }
 
     this.app.workspace.revealLeaf(leaf);
@@ -2912,7 +3078,18 @@ class AppleStylePlugin extends Plugin {
   }
 
   async saveSettings() {
-    await this.saveData(this.settings);
+    try {
+      await this.saveData(this.settings);
+      return true;
+    } catch (error) {
+      console.error('保存插件设置失败:', error);
+      const now = Date.now();
+      if (!this._lastSaveSettingsErrorAt || now - this._lastSaveSettingsErrorAt > 3000) {
+        this._lastSaveSettingsErrorAt = now;
+        new Notice('⚠️ 设置保存失败，本次修改仅在当前会话生效');
+      }
+      return false;
+    }
   }
 
   onunload() {
