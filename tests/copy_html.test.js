@@ -6,6 +6,7 @@ const { AppleStyleView } = require('../input.js');
 describe('AppleStyleView - copyHTML clipboard behavior', () => {
   let view;
   let writeMock;
+  let readTextMock;
   let realBlob;
   let realExecCommand;
   const blobToText = async (blob) => {
@@ -20,8 +21,9 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     view.cleanHtmlForDraft = vi.fn(() => '<ol><li>清理时机： 正文</li></ol>');
 
     writeMock = vi.fn().mockResolvedValue(undefined);
+    readTextMock = vi.fn().mockResolvedValue('清理时机： 正文');
     Object.defineProperty(global.navigator, 'clipboard', {
-      value: { write: writeMock },
+      value: { write: writeMock, readText: readTextMock },
       configurable: true,
     });
 
@@ -62,26 +64,28 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     }
   });
 
-  it('should prefer rich selection copy and expose debug snapshots', async () => {
+  it('should use clipboard html on desktop and expose debug snapshots', async () => {
     await view.copyHTML();
 
-    expect(document.execCommand).toHaveBeenCalledWith('copy');
-    expect(writeMock).not.toHaveBeenCalled();
-    const html = window.__OWC_LAST_CLIPBOARD_HTML;
-    expect(html).toBe('<ol><li>清理时机： 正文</li></ol>');
-    expect(window.__OWC_LAST_CLIPBOARD_TEXT).toBe('清理时机： 正文');
-  });
-
-  it('should fallback to clipboard html on desktop when selection copy fails', async () => {
-    document.execCommand = vi.fn().mockReturnValue(false);
-
-    await view.copyHTML();
-
+    expect(document.execCommand).not.toHaveBeenCalled();
     expect(writeMock).toHaveBeenCalledTimes(1);
     const item = writeMock.mock.calls[0][0][0];
     expect(Object.keys(item.items)).toEqual(['text/html']);
     const html = await blobToText(item.items['text/html']);
     expect(html).toBe('<ol><li>清理时机： 正文</li></ol>');
+    expect(window.__OWC_LAST_CLIPBOARD_TEXT).toBe('清理时机： 正文');
+  });
+
+  it('should fail on desktop when clipboard html write is unavailable', async () => {
+    Object.defineProperty(global.navigator, 'clipboard', {
+      value: {},
+      configurable: true,
+    });
+
+    await view.copyHTML();
+
+    expect(document.execCommand).not.toHaveBeenCalled();
+    expect(writeMock).not.toHaveBeenCalled();
   });
 
   it('should fail fast on mobile when rich selection copy fails', async () => {
@@ -91,9 +95,22 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     await view.copyHTML();
 
     expect(writeMock).not.toHaveBeenCalled();
+    expect(readTextMock).not.toHaveBeenCalled();
+  });
+
+  it('should fail on mobile when copy cannot be verified by clipboard readback', async () => {
+    view.app = { isMobile: true };
+    document.execCommand = vi.fn().mockReturnValue(true);
+    readTextMock.mockResolvedValue('旧剪贴板内容');
+
+    await view.copyHTML();
+
+    expect(writeMock).not.toHaveBeenCalled();
+    expect(readTextMock).toHaveBeenCalledTimes(1);
   });
 
   it('should restore user selection after rich selection copy', async () => {
+    view.app = { isMobile: true };
     const textEl = document.createElement('div');
     textEl.textContent = 'abcdef';
     document.body.appendChild(textEl);

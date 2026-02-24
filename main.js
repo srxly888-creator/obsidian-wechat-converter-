@@ -3203,8 +3203,19 @@ var require_sync_context = __commonJS({
   "services/sync-context.js"(exports2, module2) {
     function resolveSyncAccount2({ accounts, selectedAccountId, defaultAccountId }) {
       const list = Array.isArray(accounts) ? accounts : [];
-      const accountId = selectedAccountId || defaultAccountId;
-      return list.find((account) => account.id === accountId) || null;
+      if (list.length === 0)
+        return null;
+      if (selectedAccountId) {
+        const selected = list.find((account) => account.id === selectedAccountId);
+        if (selected)
+          return selected;
+      }
+      if (defaultAccountId) {
+        const byDefault = list.find((account) => account.id === defaultAccountId);
+        if (byDefault)
+          return byDefault;
+      }
+      return list[0];
     }
     function toSyncFriendlyMessage2(errorMessage = "") {
       if (errorMessage.includes("45002")) {
@@ -4498,7 +4509,11 @@ var AppleStyleView = class extends ItemView {
       this.settingsOverlay.classList.toggle("visible");
       settingsBtn.classList.toggle("active");
     });
-    this.copyBtn = createIconBtn("copy", "\u590D\u5236\u5230\u516C\u4F17\u53F7", () => this.copyHTML());
+    if (!isMobileClient(this.app)) {
+      this.copyBtn = createIconBtn("copy", "\u590D\u5236\u5230\u516C\u4F17\u53F7", () => this.copyHTML());
+    } else {
+      this.copyBtn = null;
+    }
     createIconBtn("send", "\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1", () => this.showSyncModal());
     this.settingsOverlay = container.createEl("div", { cls: "apple-settings-overlay" });
     const settingsArea = this.settingsOverlay.createEl("div", { cls: "apple-settings-area" });
@@ -4953,25 +4968,95 @@ var AppleStyleView = class extends ItemView {
     const content = section.createEl("div", { cls: "apple-setting-content" });
     builder(content);
   }
-  /**
-   * 提示用户先配置公众号账号，并尽量直接打开插件设置页
-   */
-  promptConfigureWechatAccount() {
+  openPluginSettings() {
     var _a, _b, _c;
-    new Notice("\u274C \u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u6DFB\u52A0\u516C\u4F17\u53F7\u8D26\u53F7\uFF08AppID / AppSecret\uFF09");
     const settingApi = (_a = this.app) == null ? void 0 : _a.setting;
     if (!settingApi || typeof settingApi.open !== "function")
-      return;
+      return false;
     settingApi.open();
     const tabId = ((_c = (_b = this.plugin) == null ? void 0 : _b.manifest) == null ? void 0 : _c.id) || "wechat-converter";
     if (typeof settingApi.openTabById === "function") {
       settingApi.openTabById(tabId);
     }
+    return true;
+  }
+  showAccountSetupEmptyState() {
+    var _a;
+    const { Modal } = require("obsidian");
+    if (typeof Modal !== "function") {
+      if (!this.openPluginSettings()) {
+        new Notice("\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u6DFB\u52A0\u516C\u4F17\u53F7\u8D26\u53F7\uFF08AppID / AppSecret\uFF09");
+      }
+      return;
+    }
+    const modal = new Modal(this.app);
+    modal.titleEl.setText("\u672A\u914D\u7F6E\u516C\u4F17\u53F7\u8D26\u53F7");
+    modal.contentEl.addClass("wechat-sync-modal");
+    if (isMobileClient(this.app)) {
+      modal.contentEl.addClass("wechat-sync-modal-mobile");
+      (_a = modal.modalEl) == null ? void 0 : _a.addClass("wechat-sync-shell-mobile");
+    }
+    const emptyState = modal.contentEl.createDiv({ cls: "wechat-sync-empty-state" });
+    emptyState.createEl("div", { cls: "wechat-sync-empty-icon", text: "\u2699\uFE0F" });
+    emptyState.createEl("h3", { text: "\u5148\u914D\u7F6E\u516C\u4F17\u53F7\u8D26\u53F7" });
+    emptyState.createEl("p", { text: "\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u586B\u5199 AppID / AppSecret\uFF0C\u518D\u4F7F\u7528\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1\u3002" });
+    const btnRow = modal.contentEl.createDiv({ cls: "wechat-modal-buttons" });
+    const cancelBtn = btnRow.createEl("button", { text: "\u53D6\u6D88" });
+    cancelBtn.onclick = () => modal.close();
+    const configBtn = btnRow.createEl("button", { text: "\u53BB\u914D\u7F6E\u8D26\u53F7", cls: "mod-cta" });
+    configBtn.onclick = () => {
+      modal.close();
+      if (!this.openPluginSettings()) {
+        new Notice("\u8BF7\u5728\u8BBE\u7F6E\u4E2D\u6253\u5F00 Wechat Converter \u5E76\u914D\u7F6E\u8D26\u53F7");
+      }
+    };
+    modal.open();
+  }
+  showSyncFailureActions(message) {
+    var _a;
+    const { Modal } = require("obsidian");
+    if (typeof Modal !== "function") {
+      new Notice(`\u274C \u540C\u6B65\u5931\u8D25: ${message}`);
+      return;
+    }
+    const modal = new Modal(this.app);
+    modal.titleEl.setText("\u540C\u6B65\u5931\u8D25");
+    modal.contentEl.addClass("wechat-sync-modal");
+    if (isMobileClient(this.app)) {
+      modal.contentEl.addClass("wechat-sync-modal-mobile");
+      (_a = modal.modalEl) == null ? void 0 : _a.addClass("wechat-sync-shell-mobile");
+    }
+    const body = modal.contentEl.createDiv({ cls: "wechat-sync-failure-state" });
+    body.createEl("p", { cls: "wechat-sync-failure-message", text: message });
+    body.createEl("p", { cls: "wechat-sync-failure-hint", text: "\u53EF\u4EE5\u91CD\u8BD5\u540C\u6B65\uFF0C\u6216\u5148\u68C0\u67E5\u8D26\u53F7\u914D\u7F6E\u3002" });
+    const btnRow = modal.contentEl.createDiv({ cls: "wechat-modal-buttons" });
+    const closeBtn = btnRow.createEl("button", { text: "\u5173\u95ED" });
+    closeBtn.onclick = () => modal.close();
+    const settingsBtn = btnRow.createEl("button", { text: "\u53BB\u914D\u7F6E\u8D26\u53F7" });
+    settingsBtn.onclick = () => {
+      modal.close();
+      if (!this.openPluginSettings()) {
+        new Notice("\u8BF7\u5728\u8BBE\u7F6E\u4E2D\u6253\u5F00 Wechat Converter \u5E76\u914D\u7F6E\u8D26\u53F7");
+      }
+    };
+    const retryBtn = btnRow.createEl("button", { text: "\u91CD\u8BD5\u540C\u6B65", cls: "mod-cta" });
+    retryBtn.onclick = async () => {
+      modal.close();
+      await this.onSyncToWechat();
+    };
+    modal.open();
+  }
+  /**
+   * 提示用户先配置公众号账号（空状态 + 引导操作）
+   */
+  promptConfigureWechatAccount() {
+    this.showAccountSetupEmptyState();
   }
   /**
    * 显示同步选项 Modal
    */
   showSyncModal() {
+    var _a, _b;
     if (!this.currentHtml) {
       new Notice(this.getMissingRenderNotice());
       return;
@@ -4983,8 +5068,13 @@ var AppleStyleView = class extends ItemView {
     }
     const { Modal } = require("obsidian");
     const modal = new Modal(this.app);
+    const mobileSync = isMobileClient(this.app);
     modal.titleEl.setText("\u540C\u6B65\u5230\u5FAE\u4FE1\u8349\u7A3F\u7BB1");
     modal.contentEl.addClass("wechat-sync-modal");
+    if (mobileSync) {
+      modal.contentEl.addClass("wechat-sync-modal-mobile");
+      (_a = modal.modalEl) == null ? void 0 : _a.addClass("wechat-sync-shell-mobile");
+    }
     const activeFile = this.getPublishContextFile();
     const currentPath = activeFile ? activeFile.path : null;
     const frontmatterMeta = this.getFrontmatterPublishMeta(activeFile);
@@ -4993,24 +5083,49 @@ var AppleStyleView = class extends ItemView {
       cachedState = this.articleStates.get(currentPath);
     }
     const defaultId = this.plugin.settings.defaultAccountId;
-    let selectedAccountId = defaultId;
+    const hasDefault = accounts.some((account) => account.id === defaultId);
+    let selectedAccountId = hasDefault ? defaultId : ((_b = accounts[0]) == null ? void 0 : _b.id) || "";
     let coverBase64 = (cachedState == null ? void 0 : cachedState.coverBase64) || frontmatterMeta.coverSrc || this.getFirstImageFromArticle();
     this.sessionCoverBase64 = coverBase64;
     const accountSection = modal.contentEl.createDiv({ cls: "wechat-modal-section" });
     accountSection.createEl("label", { text: "\u8D26\u53F7", cls: "wechat-modal-label" });
-    const accountSelect = accountSection.createEl("select", { cls: "wechat-account-select" });
-    for (const account of accounts) {
-      const option = accountSelect.createEl("option", {
-        value: account.id,
-        text: account.id === defaultId ? `${account.name} (\u9ED8\u8BA4)` : account.name
+    if (accounts.length === 1) {
+      const onlyAccount = accounts[0];
+      selectedAccountId = onlyAccount.id;
+      accountSection.createEl("div", {
+        cls: "wechat-sync-account-single",
+        text: `${onlyAccount.name} (\u9ED8\u8BA4)`
       });
-      if (account.id === defaultId)
-        option.selected = true;
+    } else {
+      const accountSelect = accountSection.createEl("select", { cls: "wechat-account-select" });
+      for (const account of accounts) {
+        const option = accountSelect.createEl("option", {
+          value: account.id,
+          text: account.id === defaultId ? `${account.name} (\u9ED8\u8BA4)` : account.name
+        });
+        if (account.id === selectedAccountId)
+          option.selected = true;
+      }
+      accountSelect.addEventListener("change", (e) => {
+        selectedAccountId = e.target.value;
+      });
     }
-    accountSelect.addEventListener("change", (e) => {
-      selectedAccountId = e.target.value;
+    if (mobileSync) {
+      modal.contentEl.createEl("p", {
+        cls: "wechat-sync-mobile-quick-hint",
+        text: coverBase64 ? "\u53EF\u76F4\u63A5\u540C\u6B65\uFF1B\u5C01\u9762\u4E0E\u6458\u8981\u53EF\u5728\u9AD8\u7EA7\u9009\u9879\u4E2D\u8C03\u6574\u3002" : "\u5F53\u524D\u672A\u68C0\u6D4B\u5230\u5C01\u9762\uFF0C\u8BF7\u5728\u9AD8\u7EA7\u9009\u9879\u4E2D\u4E0A\u4F20\u5C01\u9762\u540E\u518D\u540C\u6B65\u3002"
+      });
+    }
+    const advancedOptions = modal.contentEl.createEl("details", { cls: "wechat-sync-advanced" });
+    const shouldExpandAdvanced = !mobileSync || !coverBase64;
+    if (shouldExpandAdvanced)
+      advancedOptions.setAttribute("open", "");
+    advancedOptions.createEl("summary", {
+      cls: "wechat-sync-advanced-summary",
+      text: "\u9AD8\u7EA7\u9009\u9879\uFF08\u5C01\u9762\u4E0E\u6458\u8981\uFF09"
     });
-    const coverSection = modal.contentEl.createDiv({ cls: "wechat-modal-section" });
+    const advancedBody = advancedOptions.createDiv({ cls: "wechat-sync-advanced-body" });
+    const coverSection = advancedBody.createDiv({ cls: "wechat-modal-section" });
     coverSection.createEl("label", { text: "\u5C01\u9762\u56FE", cls: "wechat-modal-label" });
     const coverContent = coverSection.createDiv({ cls: "wechat-modal-cover-content" });
     const coverPreview = coverContent.createDiv({ cls: "wechat-modal-cover-preview" });
@@ -5033,7 +5148,7 @@ var AppleStyleView = class extends ItemView {
     };
     const coverBtns = coverContent.createDiv({ cls: "wechat-modal-cover-btns" });
     const uploadBtn = coverBtns.createEl("button", { text: "\u4E0A\u4F20" });
-    const digestSection = modal.contentEl.createDiv({ cls: "wechat-modal-section" });
+    const digestSection = advancedBody.createDiv({ cls: "wechat-modal-section" });
     digestSection.createEl("label", { text: "\u6587\u7AE0\u6458\u8981\uFF08\u53EF\u9009\uFF09", cls: "wechat-modal-label" });
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = this.currentHtml || "";
@@ -5141,19 +5256,19 @@ var AppleStyleView = class extends ItemView {
         sessionDigest: this.sessionDigest,
         onStatus: (stage) => {
           if (stage === "cover")
-            notice.setMessage("\u{1F5BC}\uFE0F \u6B63\u5728\u5904\u7406\u5C01\u9762\u56FE...");
+            notice.setMessage("\u2460 \u6B63\u5728\u5904\u7406\u5C01\u9762\u56FE...");
           if (stage === "images")
-            notice.setMessage("\u{1F4F8} \u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247...");
+            notice.setMessage("\u2461 \u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247...");
           if (stage === "math")
-            notice.setMessage("\u{1F9EE} \u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F...");
+            notice.setMessage("\u2462 \u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F...");
           if (stage === "draft")
-            notice.setMessage("\u{1F4DD} \u6B63\u5728\u53D1\u9001\u5230\u5FAE\u4FE1\u8349\u7A3F\u7BB1...");
+            notice.setMessage("\u2463 \u6B63\u5728\u53D1\u9001\u5230\u5FAE\u4FE1\u8349\u7A3F\u7BB1...");
         },
         onImageProgress: (current, total) => {
-          notice.setMessage(`\u{1F4F8} \u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247 (${current}/${total})...`);
+          notice.setMessage(`\u2461 \u6B63\u5728\u540C\u6B65\u6B63\u6587\u56FE\u7247 (${current}/${total})...`);
         },
         onMathProgress: (current, total) => {
-          notice.setMessage(`\u{1F9EE} \u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F (${current}/${total})...`);
+          notice.setMessage(`\u2462 \u6B63\u5728\u8F6C\u6362\u77E2\u91CF\u56FE/\u6570\u5B66\u516C\u5F0F (${current}/${total})...`);
         }
       });
       notice.hide();
@@ -5165,7 +5280,7 @@ var AppleStyleView = class extends ItemView {
       notice.hide();
       console.error("Wechat Sync Error:", error);
       const friendlyMsg = toSyncFriendlyMessage(error.message);
-      new Notice(`\u274C \u540C\u6B65\u5931\u8D25: ${friendlyMsg}`);
+      this.showSyncFailureActions(friendlyMsg);
     }
   }
   /**
@@ -5551,6 +5666,20 @@ var AppleStyleView = class extends ItemView {
     await navigator.clipboard.write([item]);
     return true;
   }
+  normalizeClipboardText(text) {
+    return (text || "").replace(/\s+/g, " ").trim();
+  }
+  async readClipboardTextSnapshot() {
+    if (!navigator.clipboard || typeof navigator.clipboard.readText !== "function") {
+      return { supported: false, text: "" };
+    }
+    try {
+      const text = await navigator.clipboard.readText();
+      return { supported: true, text: this.normalizeClipboardText(text) };
+    } catch (error) {
+      return { supported: false, text: "" };
+    }
+  }
   /**
    * 复制 HTML
    */
@@ -5580,9 +5709,16 @@ var AppleStyleView = class extends ItemView {
       const plainDiv = document.createElement("div");
       plainDiv.innerHTML = cleanedHtml;
       window.__OWC_LAST_CLIPBOARD_TEXT = plainDiv.textContent || "";
-      let copied = this.copyRichHTMLBySelection(htmlContent);
+      const expectedPlainText = this.normalizeClipboardText(window.__OWC_LAST_CLIPBOARD_TEXT);
       const mobile = isMobileClient(this.app);
-      if (!copied && !mobile) {
+      let copied = false;
+      if (mobile) {
+        copied = this.copyRichHTMLBySelection(htmlContent);
+        if (copied) {
+          const snapshot = await this.readClipboardTextSnapshot();
+          copied = snapshot.supported && snapshot.text === expectedPlainText;
+        }
+      } else {
         copied = await this.copyRichHTMLByClipboard(htmlContent);
       }
       if (!copied) {

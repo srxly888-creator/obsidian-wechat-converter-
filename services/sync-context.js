@@ -1,7 +1,18 @@
 function resolveSyncAccount({ accounts, selectedAccountId, defaultAccountId }) {
   const list = Array.isArray(accounts) ? accounts : [];
-  const accountId = selectedAccountId || defaultAccountId;
-  return list.find((account) => account.id === accountId) || null;
+  if (list.length === 0) return null;
+
+  if (selectedAccountId) {
+    const selected = list.find((account) => account.id === selectedAccountId);
+    if (selected) return selected;
+  }
+
+  if (defaultAccountId) {
+    const byDefault = list.find((account) => account.id === defaultAccountId);
+    if (byDefault) return byDefault;
+  }
+
+  return list[0];
 }
 
 function toSyncFriendlyMessage(errorMessage = '') {

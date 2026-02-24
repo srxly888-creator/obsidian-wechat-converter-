@@ -735,8 +735,12 @@ class AppleStyleView extends ItemView {
       settingsBtn.classList.toggle('active');
     });
 
-    // [复制] 按钮
-    this.copyBtn = createIconBtn('copy', '复制到公众号', () => this.copyHTML());
+    // [复制] 按钮（移动端隐藏，避免误导）
+    if (!isMobileClient(this.app)) {
+      this.copyBtn = createIconBtn('copy', '复制到公众号', () => this.copyHTML());
+    } else {
+      this.copyBtn = null;
+    }
 
     // [同步] 按钮（始终显示；未配置账号时点击后引导去设置）
     createIconBtn('send', '一键同步到草稿箱', () => this.showSyncModal());
@@ -1276,20 +1280,100 @@ class AppleStyleView extends ItemView {
     builder(content);
   }
 
-  /**
-   * 提示用户先配置公众号账号，并尽量直接打开插件设置页
-   */
-  promptConfigureWechatAccount() {
-    new Notice('❌ 请先在插件设置中添加公众号账号（AppID / AppSecret）');
-
+  openPluginSettings() {
     const settingApi = this.app?.setting;
-    if (!settingApi || typeof settingApi.open !== 'function') return;
+    if (!settingApi || typeof settingApi.open !== 'function') return false;
 
     settingApi.open();
     const tabId = this.plugin?.manifest?.id || 'wechat-converter';
     if (typeof settingApi.openTabById === 'function') {
       settingApi.openTabById(tabId);
     }
+    return true;
+  }
+
+  showAccountSetupEmptyState() {
+    const { Modal } = require('obsidian');
+    if (typeof Modal !== 'function') {
+      if (!this.openPluginSettings()) {
+        new Notice('请先在插件设置中添加公众号账号（AppID / AppSecret）');
+      }
+      return;
+    }
+
+    const modal = new Modal(this.app);
+    modal.titleEl.setText('未配置公众号账号');
+    modal.contentEl.addClass('wechat-sync-modal');
+    if (isMobileClient(this.app)) {
+      modal.contentEl.addClass('wechat-sync-modal-mobile');
+      modal.modalEl?.addClass('wechat-sync-shell-mobile');
+    }
+
+    const emptyState = modal.contentEl.createDiv({ cls: 'wechat-sync-empty-state' });
+    emptyState.createEl('div', { cls: 'wechat-sync-empty-icon', text: '⚙️' });
+    emptyState.createEl('h3', { text: '先配置公众号账号' });
+    emptyState.createEl('p', { text: '请先在插件设置中填写 AppID / AppSecret，再使用一键同步到草稿箱。' });
+
+    const btnRow = modal.contentEl.createDiv({ cls: 'wechat-modal-buttons' });
+    const cancelBtn = btnRow.createEl('button', { text: '取消' });
+    cancelBtn.onclick = () => modal.close();
+
+    const configBtn = btnRow.createEl('button', { text: '去配置账号', cls: 'mod-cta' });
+    configBtn.onclick = () => {
+      modal.close();
+      if (!this.openPluginSettings()) {
+        new Notice('请在设置中打开 Wechat Converter 并配置账号');
+      }
+    };
+
+    modal.open();
+  }
+
+  showSyncFailureActions(message) {
+    const { Modal } = require('obsidian');
+    if (typeof Modal !== 'function') {
+      new Notice(`❌ 同步失败: ${message}`);
+      return;
+    }
+
+    const modal = new Modal(this.app);
+    modal.titleEl.setText('同步失败');
+    modal.contentEl.addClass('wechat-sync-modal');
+    if (isMobileClient(this.app)) {
+      modal.contentEl.addClass('wechat-sync-modal-mobile');
+      modal.modalEl?.addClass('wechat-sync-shell-mobile');
+    }
+
+    const body = modal.contentEl.createDiv({ cls: 'wechat-sync-failure-state' });
+    body.createEl('p', { cls: 'wechat-sync-failure-message', text: message });
+    body.createEl('p', { cls: 'wechat-sync-failure-hint', text: '可以重试同步，或先检查账号配置。' });
+
+    const btnRow = modal.contentEl.createDiv({ cls: 'wechat-modal-buttons' });
+    const closeBtn = btnRow.createEl('button', { text: '关闭' });
+    closeBtn.onclick = () => modal.close();
+
+    const settingsBtn = btnRow.createEl('button', { text: '去配置账号' });
+    settingsBtn.onclick = () => {
+      modal.close();
+      if (!this.openPluginSettings()) {
+        new Notice('请在设置中打开 Wechat Converter 并配置账号');
+      }
+    };
+
+    const retryBtn = btnRow.createEl('button', { text: '重试同步', cls: 'mod-cta' });
+    retryBtn.onclick = async () => {
+      modal.close();
+      await this.onSyncToWechat();
+    };
+
+    modal.open();
+  }
+
+  /**
+   * 提示用户先配置公众号账号（空状态 + 引导操作）
+   */
+  promptConfigureWechatAccount() {
+    this.showAccountSetupEmptyState();
   }
 
   /**
@@ -1309,8 +1393,13 @@ class AppleStyleView extends ItemView {
 
     const { Modal } = require('obsidian');
     const modal = new Modal(this.app);
+    const mobileSync = isMobileClient(this.app);
     modal.titleEl.setText('同步到微信草稿箱');
     modal.contentEl.addClass('wechat-sync-modal');
+    if (mobileSync) {
+      modal.contentEl.addClass('wechat-sync-modal-mobile');
+      modal.modalEl?.addClass('wechat-sync-shell-mobile');
+    }
 
     // 获取当前活动文件的路径，用于状态缓存
     const activeFile = this.getPublishContextFile();
@@ -1324,7 +1413,8 @@ class AppleStyleView extends ItemView {
     }
 
     const defaultId = this.plugin.settings.defaultAccountId;
-    let selectedAccountId = defaultId;
+    const hasDefault = accounts.some((account) => account.id === defaultId);
+    let selectedAccountId = hasDefault ? defaultId : (accounts[0]?.id || '');
 
     // 封面逻辑：优先使用缓存 -> frontmatter.cover -> 文章第一张图
     let coverBase64 = cachedState?.coverBase64 || frontmatterMeta.coverSrc || this.getFirstImageFromArticle();
@@ -1335,21 +1425,48 @@ class AppleStyleView extends ItemView {
     // 账号选择器
     const accountSection = modal.contentEl.createDiv({ cls: 'wechat-modal-section' });
     accountSection.createEl('label', { text: '账号', cls: 'wechat-modal-label' });
-    const accountSelect = accountSection.createEl('select', { cls: 'wechat-account-select' });
-
-    for (const account of accounts) {
-      const option = accountSelect.createEl('option', {
-        value: account.id,
-        text: account.id === defaultId ? `${account.name} (默认)` : account.name
+    if (accounts.length === 1) {
+      const onlyAccount = accounts[0];
+      selectedAccountId = onlyAccount.id;
+      accountSection.createEl('div', {
+        cls: 'wechat-sync-account-single',
+        text: `${onlyAccount.name} (默认)`
       });
-      if (account.id === defaultId) option.selected = true;
+    } else {
+      const accountSelect = accountSection.createEl('select', { cls: 'wechat-account-select' });
+
+      for (const account of accounts) {
+        const option = accountSelect.createEl('option', {
+          value: account.id,
+          text: account.id === defaultId ? `${account.name} (默认)` : account.name
+        });
+        if (account.id === selectedAccountId) option.selected = true;
+      }
+      accountSelect.addEventListener('change', (e) => {
+        selectedAccountId = e.target.value;
+      });
     }
-    accountSelect.addEventListener('change', (e) => {
-      selectedAccountId = e.target.value;
+
+    if (mobileSync) {
+      modal.contentEl.createEl('p', {
+        cls: 'wechat-sync-mobile-quick-hint',
+        text: coverBase64
+          ? '可直接同步；封面与摘要可在高级选项中调整。'
+          : '当前未检测到封面，请在高级选项中上传封面后再同步。'
+      });
+    }
+
+    const advancedOptions = modal.contentEl.createEl('details', { cls: 'wechat-sync-advanced' });
+    const shouldExpandAdvanced = !mobileSync || !coverBase64;
+    if (shouldExpandAdvanced) advancedOptions.setAttribute('open', '');
+    advancedOptions.createEl('summary', {
+      cls: 'wechat-sync-advanced-summary',
+      text: '高级选项（封面与摘要）'
     });
+    const advancedBody = advancedOptions.createDiv({ cls: 'wechat-sync-advanced-body' });
 
     // 封面设置
-    const coverSection = modal.contentEl.createDiv({ cls: 'wechat-modal-section' });
+    const coverSection = advancedBody.createDiv({ cls: 'wechat-modal-section' });
     coverSection.createEl('label', { text: '封面图', cls: 'wechat-modal-label' });
 
     const coverContent = coverSection.createDiv({ cls: 'wechat-modal-cover-content' });
@@ -1380,7 +1497,7 @@ class AppleStyleView extends ItemView {
     const uploadBtn = coverBtns.createEl('button', { text: '上传' });
 
     // 摘要设置
-    const digestSection = modal.contentEl.createDiv({ cls: 'wechat-modal-section' });
+    const digestSection = advancedBody.createDiv({ cls: 'wechat-modal-section' });
     digestSection.createEl('label', { text: '文章摘要（可选）', cls: 'wechat-modal-label' });
 
     // 自动提取文章前 45 字作为默认摘要
@@ -1521,16 +1638,16 @@ class AppleStyleView extends ItemView {
         sessionCoverBase64: this.sessionCoverBase64,
         sessionDigest: this.sessionDigest,
         onStatus: (stage) => {
-          if (stage === 'cover') notice.setMessage('🖼️ 正在处理封面图...');
-          if (stage === 'images') notice.setMessage('📸 正在同步正文图片...');
-          if (stage === 'math') notice.setMessage('🧮 正在转换矢量图/数学公式...');
-          if (stage === 'draft') notice.setMessage('📝 正在发送到微信草稿箱...');
+          if (stage === 'cover') notice.setMessage('① 正在处理封面图...');
+          if (stage === 'images') notice.setMessage('② 正在同步正文图片...');
+          if (stage === 'math') notice.setMessage('③ 正在转换矢量图/数学公式...');
+          if (stage === 'draft') notice.setMessage('④ 正在发送到微信草稿箱...');
         },
         onImageProgress: (current, total) => {
-          notice.setMessage(`📸 正在同步正文图片 (${current}/${total})...`);
+          notice.setMessage(`② 正在同步正文图片 (${current}/${total})...`);
         },
         onMathProgress: (current, total) => {
-          notice.setMessage(`🧮 正在转换矢量图/数学公式 (${current}/${total})...`);
+          notice.setMessage(`③ 正在转换矢量图/数学公式 (${current}/${total})...`);
         },
       });
 
@@ -1543,7 +1660,7 @@ class AppleStyleView extends ItemView {
       notice.hide();
       console.error('Wechat Sync Error:', error);
       const friendlyMsg = toSyncFriendlyMessage(error.message);
-      new Notice(`❌ 同步失败: ${friendlyMsg}`);
+      this.showSyncFailureActions(friendlyMsg);
     }
   }
 
@@ -2005,6 +2122,22 @@ class AppleStyleView extends ItemView {
     return true;
   }
 
+  normalizeClipboardText(text) {
+    return (text || '').replace(/\s+/g, ' ').trim();
+  }
+
+  async readClipboardTextSnapshot() {
+    if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') {
+      return { supported: false, text: '' };
+    }
+    try {
+      const text = await navigator.clipboard.readText();
+      return { supported: true, text: this.normalizeClipboardText(text) };
+    } catch (error) {
+      return { supported: false, text: '' };
+    }
+  }
+
 
   /**
    * 复制 HTML
@@ -2047,11 +2180,17 @@ class AppleStyleView extends ItemView {
       const plainDiv = document.createElement('div');
       plainDiv.innerHTML = cleanedHtml;
       window.__OWC_LAST_CLIPBOARD_TEXT = plainDiv.textContent || '';
+      const expectedPlainText = this.normalizeClipboardText(window.__OWC_LAST_CLIPBOARD_TEXT);
 
-      let copied = this.copyRichHTMLBySelection(htmlContent);
       const mobile = isMobileClient(this.app);
-
-      if (!copied && !mobile) {
+      let copied = false;
+      if (mobile) {
+        copied = this.copyRichHTMLBySelection(htmlContent);
+        if (copied) {
+          const snapshot = await this.readClipboardTextSnapshot();
+          copied = snapshot.supported && snapshot.text === expectedPlainText;
+        }
+      } else {
         copied = await this.copyRichHTMLByClipboard(htmlContent);
       }
 

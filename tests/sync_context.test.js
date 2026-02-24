@@ -32,6 +32,46 @@ describe('Sync Context Service', () => {
     expect(selected).toEqual({ id: 'a', name: 'A' });
   });
 
+  it('resolveSyncAccount should fallback to default when selected id is invalid', () => {
+    const accounts = [
+      { id: 'a', name: 'A' },
+      { id: 'b', name: 'B' },
+    ];
+
+    const selected = resolveSyncAccount({
+      accounts,
+      selectedAccountId: 'missing',
+      defaultAccountId: 'a',
+    });
+
+    expect(selected).toEqual({ id: 'a', name: 'A' });
+  });
+
+  it('resolveSyncAccount should fallback to first account when selected/default are invalid', () => {
+    const accounts = [
+      { id: 'a', name: 'A' },
+      { id: 'b', name: 'B' },
+    ];
+
+    const selected = resolveSyncAccount({
+      accounts,
+      selectedAccountId: 'missing-selected',
+      defaultAccountId: 'missing-default',
+    });
+
+    expect(selected).toEqual({ id: 'a', name: 'A' });
+  });
+
+  it('resolveSyncAccount should return null when account list is empty', () => {
+    const selected = resolveSyncAccount({
+      accounts: [],
+      selectedAccountId: 'a',
+      defaultAccountId: 'b',
+    });
+
+    expect(selected).toBeNull();
+  });
+
   it('toSyncFriendlyMessage should map 45002 to user friendly message', () => {
     const msg = toSyncFriendlyMessage('create draft failed (45002)');
     expect(msg).toContain('文章太长，微信接口拒收');

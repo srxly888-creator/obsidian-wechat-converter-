@@ -9,3 +9,7 @@ coverage/
 ClaudeFix.md
 
 review.md
+
+# Local skill directories
+.codex/
+.claude/skills/project-release/
