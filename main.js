@@ -5000,6 +5000,23 @@ var AppleStyleView = class extends ItemView {
         await this.convertCurrent(true);
       });
     });
+    this.createSection(settingsArea, "\u6B63\u6587\u6807\u70B9\u6807\u51C6\u5316", (section) => {
+      const toggle = section.createEl("label", { cls: "apple-toggle" });
+      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
+      checkbox.checked = this.plugin.settings.normalizeChinesePunctuation === true;
+      toggle.createEl("span", { cls: "apple-toggle-slider" });
+      section.createEl("span", {
+        text: "\u4EC5\u4F5C\u7528\u4E8E\u9884\u89C8 / \u590D\u5236 / \u540C\u6B65\u7ED3\u679C",
+        attr: {
+          style: "font-size: 11px; color: var(--apple-secondary); margin-left: 12px; opacity: 0.8; font-weight: 500; transform: translateY(-1px);"
+        }
+      });
+      checkbox.addEventListener("change", async () => {
+        this.plugin.settings.normalizeChinesePunctuation = checkbox.checked;
+        await this.plugin.saveSettings();
+        await this.convertCurrent(true);
+      });
+    });
     this.createSection(settingsArea, "Mac \u98CE\u683C\u4EE3\u7801\u5757", (section) => {
       const toggle = section.createEl("label", { cls: "apple-toggle" });
       const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
@@ -6377,10 +6394,6 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
     }
     new Setting(containerEl).setName("\u5934\u50CF URL\uFF08\u5907\u7528\uFF09").setDesc("\u5982\u672A\u4E0A\u4F20\u672C\u5730\u5934\u50CF\uFF0C\u5C06\u4F7F\u7528\u6B64 URL").addText((text) => text.setPlaceholder("https://example.com/avatar.jpg").setValue(this.plugin.settings.avatarUrl).onChange(async (value) => {
       this.plugin.settings.avatarUrl = value;
-      await this.plugin.saveSettings();
-    }));
-    new Setting(containerEl).setName("\u6B63\u6587\u6807\u70B9\u6807\u51C6\u5316").setDesc("\u4EC5\u4F5C\u7528\u4E8E\u9884\u89C8 / \u590D\u5236 / \u540C\u6B65\u7ED3\u679C\uFF0C\u4E0D\u4FEE\u6539\u539F\u59CB Markdown\uFF1B\u4F1A\u8DF3\u8FC7\u884C\u5185\u4EE3\u7801\u3001\u4EE3\u7801\u5757\u7B49\u5185\u5BB9\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.normalizeChinesePunctuation === true).onChange(async (value) => {
-      this.plugin.settings.normalizeChinesePunctuation = value;
       await this.plugin.saveSettings();
     }));
     new Setting(containerEl).setName("\u5FAE\u4FE1\u516C\u4F17\u53F7\u8D26\u53F7").setDesc("\u8BF7\u5728\u5FAE\u4FE1\u516C\u4F17\u53F7\u540E\u53F0 [\u8BBE\u7F6E\u4E0E\u5F00\u53D1] -> [\u57FA\u672C\u914D\u7F6E] \u4E2D\u83B7\u53D6 AppID \u548C AppSecret\uFF0C\u5E76\u786E\u4FDD\u5DF2\u5C06\u5F53\u524D IP \u52A0\u5165\u767D\u540D\u5355\u3002").setHeading();

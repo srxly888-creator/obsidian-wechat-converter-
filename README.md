@@ -7,7 +7,7 @@
 
 只需一键，即可将您的 Markdown 笔记转换为符合微信生态美学、阅读体验极佳的 HTML，无论是代码块、引用、列表还是本地图片，都能完美呈现。
 
-![Version](https://img.shields.io/badge/version-2.6.4-blue)
+![Version](https://img.shields.io/badge/version-2.6.5-blue)
 ![Obsidian](https://img.shields.io/badge/Obsidian-1.0.0+-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -161,10 +161,9 @@
 
 ## ✍️ 中文标点标准化规则
 
-插件默认开启“正文标点标准化”，也可以在设置中手动关闭：
+插件支持在右侧排版 `setting panel` 中开启或关闭“正文标点标准化”：
 
-- 入口：插件设置 → `正文标点标准化`
-- 默认值：开启
+- 入口：右侧排版 `setting panel` → `正文标点标准化`
 - 作用范围：仅作用于预览 / 复制 / 同步结果
 - 不会修改原始 Markdown 文件
 

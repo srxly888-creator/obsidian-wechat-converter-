@@ -14,7 +14,10 @@ describe('Render Pipeline Wiring (Native-only)', () => {
     const html = await view.renderMarkdownForPreview('# title', 'notes/a.md');
 
     expect(view.getActiveRenderPipeline()).toBe(view.nativeRenderPipeline);
-    expect(renderForPreview).toHaveBeenCalledWith('# title', { sourcePath: 'notes/a.md' });
+    expect(renderForPreview).toHaveBeenCalledWith('# title', {
+      sourcePath: 'notes/a.md',
+      settings: view.plugin.settings,
+    });
     expect(html).toBe('<section>ok</section>');
   });
 

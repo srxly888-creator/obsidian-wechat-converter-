@@ -936,6 +936,27 @@ class AppleStyleView extends ItemView {
       });
     });
 
+    // === 正文标点标准化 ===
+    this.createSection(settingsArea, '正文标点标准化', (section) => {
+      const toggle = section.createEl('label', { cls: 'apple-toggle' });
+      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
+      checkbox.checked = this.plugin.settings.normalizeChinesePunctuation === true;
+      toggle.createEl('span', { cls: 'apple-toggle-slider' });
+
+      section.createEl('span', {
+        text: '仅作用于预览 / 复制 / 同步结果',
+        attr: {
+          style: 'font-size: 11px; color: var(--apple-secondary); margin-left: 12px; opacity: 0.8; font-weight: 500; transform: translateY(-1px);'
+        }
+      });
+
+      checkbox.addEventListener('change', async () => {
+        this.plugin.settings.normalizeChinesePunctuation = checkbox.checked;
+        await this.plugin.saveSettings();
+        await this.convertCurrent(true);
+      });
+    });
+
     // === Mac 代码块开关 ===
     this.createSection(settingsArea, 'Mac 风格代码块', (section) => {
       const toggle = section.createEl('label', { cls: 'apple-toggle' });
@@ -2613,16 +2634,6 @@ class AppleStyleSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.avatarUrl)
         .onChange(async (value) => {
           this.plugin.settings.avatarUrl = value;
-          await this.plugin.saveSettings();
-        }));
-
-    new Setting(containerEl)
-      .setName('正文标点标准化')
-      .setDesc('仅作用于预览 / 复制 / 同步结果，不修改原始 Markdown；会跳过行内代码、代码块等内容。')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.normalizeChinesePunctuation === true)
-        .onChange(async (value) => {
-          this.plugin.settings.normalizeChinesePunctuation = value;
           await this.plugin.saveSettings();
         }));
 
