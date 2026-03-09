@@ -1,5 +1,6 @@
 const { MarkdownRenderer } = require('obsidian');
 const { serializeObsidianRenderedHtml } = require('./obsidian-triplet-serializer');
+const { normalizeRenderedDomPunctuation } = require('./chinese-punctuation');
 
 function isFencedBlockDelimiter(line) {
   return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ''));
@@ -647,6 +648,7 @@ async function renderObsidianTripletMarkdown({
   markdown,
   sourcePath = '',
   component = null,
+  settings = {},
   markdownRenderer = MarkdownRenderer,
   serializer = serializeObsidianRenderedHtml,
 }) {
@@ -673,6 +675,10 @@ async function renderObsidianTripletMarkdown({
   // Wait for image embeds to settle; MarkdownRenderer may resolve embeds asynchronously.
   await waitForTripletDomToSettle(container, shouldObserveWindow ? {} : { minObserveMs: 0 });
 
+  normalizeRenderedDomPunctuation(container, {
+    enabled: settings.normalizeChinesePunctuation === true,
+  });
+
   const serializedHtml = serializer({
     root: container,
     converter,
@@ -689,6 +695,7 @@ module.exports = {
   neutralizePlainWikilinks,
   preprocessMarkdownForTriplet,
   injectHardBreaksForLegacyParity,
+  normalizeRenderedDomPunctuation,
   shouldObserveAsyncEmbedWindow,
   waitForTripletDomToSettle,
   renderByObsidianMarkdownRenderer,

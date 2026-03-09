@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS = {
   avatarBase64: '',  // Base64 编码的本地头像，优先级高于 avatarUrl
   enableWatermark: false,
   showImageCaption: true,  // 关闭水印时是否显示图片说明文字
+  normalizeChinesePunctuation: true, // 默认开启：仅在渲染结果中将英文标点标准化为中文标点
   // 多账号支持
   wechatAccounts: [],  // [{ id, name, appId, appSecret }]
   defaultAccountId: '',
@@ -734,6 +735,7 @@ class AppleStyleView extends ItemView {
             converter: this.converter,
             markdown,
             sourcePath: context.sourcePath || '',
+            settings: context.settings || this.plugin.settings,
             component: this,
           });
         },
@@ -1970,7 +1972,10 @@ class AppleStyleView extends ItemView {
     if (!pipeline) {
       throw new Error('渲染管线未初始化');
     }
-    return pipeline.renderForPreview(markdown, { sourcePath });
+    return pipeline.renderForPreview(markdown, {
+      sourcePath,
+      settings: this.plugin.settings,
+    });
   }
 
   /**
@@ -2608,6 +2613,16 @@ class AppleStyleSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.avatarUrl)
         .onChange(async (value) => {
           this.plugin.settings.avatarUrl = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('正文标点标准化')
+      .setDesc('仅作用于预览 / 复制 / 同步结果，不修改原始 Markdown；会跳过行内代码、代码块等内容。')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.normalizeChinesePunctuation === true)
+        .onChange(async (value) => {
+          this.plugin.settings.normalizeChinesePunctuation = value;
           await this.plugin.saveSettings();
         }));
 

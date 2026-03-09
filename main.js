@@ -2487,11 +2487,327 @@ var require_obsidian_triplet_serializer = __commonJS({
   }
 });
 
+// services/chinese-punctuation.js
+var require_chinese_punctuation = __commonJS({
+  "services/chinese-punctuation.js"(exports2, module2) {
+    var CJK_CONTEXT_PATTERN = /[\p{sc=Han}“”‘’（）《》「」『』【】]/u;
+    var INLINE_PUNCTUATION_MAP = {
+      ",": "\uFF0C",
+      ":": "\uFF1A",
+      ";": "\uFF1B",
+      "!": "\uFF01",
+      "?": "\uFF1F"
+    };
+    var SKIP_TAGS = /* @__PURE__ */ new Set([
+      "CODE",
+      "PRE",
+      "SCRIPT",
+      "STYLE",
+      "TEXTAREA",
+      "SVG"
+    ]);
+    function createProtectedSegmentStore() {
+      const values = [];
+      return {
+        protect(value) {
+          const token = `\uE000OWC_PUNC_${values.length}\uE001`;
+          values.push(String(value || ""));
+          return token;
+        },
+        restore(text) {
+          let output = String(text || "");
+          let previous = null;
+          while (output !== previous) {
+            previous = output;
+            output = output.replace(/\uE000OWC_PUNC_(\d+)\uE001/gu, (match, index) => {
+              const resolved = values[Number(index)];
+              return resolved === void 0 ? match : resolved;
+            });
+          }
+          return output;
+        }
+      };
+    }
+    function protectByPattern(text, pattern, shouldProtect, store) {
+      return String(text || "").replace(pattern, (match, ...args) => {
+        if (typeof shouldProtect === "function" && !shouldProtect(match, ...args)) {
+          return match;
+        }
+        return store.protect(match);
+      });
+    }
+    function protectUrlSegments(text, store) {
+      return String(text || "").replace(/\b(?:https?:\/\/|mailto:|www\.)[^\s<>"'）】」』]+/giu, (match) => {
+        const trimmed = match.match(/^(.*?)([,:;!?]+)?$/u);
+        const core = (trimmed == null ? void 0 : trimmed[1]) || match;
+        const trailing = (trimmed == null ? void 0 : trimmed[2]) || "";
+        return `${store.protect(core)}${trailing}`;
+      });
+    }
+    function protectTokenWithTrailingPunctuation(text, pattern, store) {
+      return String(text || "").replace(pattern, (match) => {
+        const trimmed = match.match(/^(.*?)([,:;!?]+)?$/u);
+        const core = (trimmed == null ? void 0 : trimmed[1]) || match;
+        const trailing = (trimmed == null ? void 0 : trimmed[2]) || "";
+        return `${store.protect(core)}${trailing}`;
+      });
+    }
+    function looksLikeFunctionSyntax(segment) {
+      const value = String(segment || "").trim();
+      if (!value)
+        return false;
+      if (/[\p{sc=Han}]/u.test(value))
+        return false;
+      if (!/[$A-Za-z_][\w$.]*\s*\(/u.test(value))
+        return false;
+      return true;
+    }
+    function protectFunctionSegments(text, store) {
+      return protectByPattern(
+        text,
+        /\b[$A-Za-z_][\w$.]*\s*\((?:[^()\n]|\([^()\n]*\))*\)/gu,
+        (match) => looksLikeFunctionSyntax(match),
+        store
+      );
+    }
+    function protectEmailSegments(text, store) {
+      return protectTokenWithTrailingPunctuation(
+        text,
+        /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}(?:\b|$)[,:;!?]?/giu,
+        store
+      );
+    }
+    function protectVersionSegments(text, store) {
+      return protectTokenWithTrailingPunctuation(
+        text,
+        /\b(?:v)?\d+\.\d+(?:\.\d+){0,3}(?:-[A-Za-z0-9.-]+)?\b[,:;!?]?/gu,
+        store
+      );
+    }
+    function protectPathSegments(text, store) {
+      let output = protectTokenWithTrailingPunctuation(
+        text,
+        /(?:^|[\s(（\[【])((?:\.{0,2}\/|\/|~\/)[^\s"'<>|，。！？；：)）\]】]+)[,:;!?]?/gu,
+        store
+      );
+      output = output.replace(/(^|[\s(（\[【])((?:[A-Za-z0-9_.-]+\/)+[A-Za-z0-9_.-]+(?:\.[A-Za-z0-9_-]+)?)([,:;!?]?)/gu, (match, prefix, token, trailing) => {
+        return `${prefix}${store.protect(token)}${trailing || ""}`;
+      });
+      output = output.replace(/(^|[\s(（\[【])([A-Za-z0-9_.-]+\.(?:md|txt|pdf|docx?|xlsx?|pptx?|csv|json|ya?ml|xml|html?|css|scss|js|jsx|ts|tsx|py|sh|bash|zsh|java|c|cc|cpp|go|rs|swift|kt|sql))(?:[,:;!?]?)/giu, (match, prefix, token) => {
+        const trailing = match.slice(prefix.length + token.length);
+        return `${prefix}${store.protect(token)}${trailing}`;
+      });
+      return output;
+    }
+    function protectWindowsPathSegments(text, store) {
+      return protectTokenWithTrailingPunctuation(
+        text,
+        /\b[A-Za-z]:\\(?:[^\\/:*?"<>|\r\n\s]+\\)*[^\\/:*?"<>|\r\n\s]+[,:;!?]?/gu,
+        store
+      );
+    }
+    function protectDateTimeSegments(text, store) {
+      let output = protectTokenWithTrailingPunctuation(
+        text,
+        /\b\d{4}[-/.]\d{1,2}[-/.]\d{1,2}(?:[T\s]\d{1,2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})?)?[,:;!?]?/gu,
+        store
+      );
+      output = protectTokenWithTrailingPunctuation(
+        output,
+        /\b\d{1,2}:\d{2}(?::\d{2})?(?:\s?(?:AM|PM|am|pm))?[,:;!?]?/gu,
+        store
+      );
+      return output;
+    }
+    function protectCliSegments(text, store) {
+      let output = text.replace(/(^|[\s(（\[【])(-{1,2}[A-Za-z0-9][\w-]*)(?=$|[\s,.:;!?，。！？；：)）\]】])/gu, (match, prefix, token) => {
+        return `${prefix}${store.protect(token)}`;
+      });
+      output = output.replace(/(^|[\s(（\[【])([A-Za-z][\w-]*:[A-Za-z0-9][\w:.-]*)(?=$|[\s,.;!?，。！？；：)）\]】])/gu, (match, prefix, token) => {
+        return `${prefix}${store.protect(token)}`;
+      });
+      return output;
+    }
+    function protectEnvAssignmentSegments(text, store) {
+      return protectTokenWithTrailingPunctuation(
+        text,
+        /\b[A-Z_][A-Z0-9_]*=(?:"[^"\n]*"|'[^'\n]*'|[^\s,;!?，。！？；：]+)[,:;!?]?/gu,
+        store
+      );
+    }
+    function protectEllipsisSegments(text, store) {
+      return String(text || "").replace(/\.{3,}/gu, (match) => store.protect(match));
+    }
+    function isTechnicalParentheticalContent(content) {
+      const value = String(content || "").trim();
+      if (!value)
+        return false;
+      if (/[\p{sc=Han}]/u.test(value))
+        return false;
+      if (/^[A-Za-z][A-Za-z0-9_.-]*$/u.test(value))
+        return true;
+      if (/^[A-Za-z]\d*$/u.test(value))
+        return true;
+      if (/[+\-*/=<>^%&|~]/u.test(value))
+        return true;
+      if (/^[A-Za-z0-9_.]+\s*,\s*[A-Za-z0-9_.]+(?:\s*,\s*[A-Za-z0-9_.]+)*$/u.test(value))
+        return true;
+      if (/^[A-Za-z_][\w.]*\s*(?:,\s*[A-Za-z_][\w.]*)+$/u.test(value))
+        return true;
+      if (/^[A-Za-z_][\w.]*\s*(?:=\s*[^,\s()]+)(?:\s*,\s*[A-Za-z_][\w.]*\s*=\s*[^,\s()]+)+$/u.test(value))
+        return true;
+      return false;
+    }
+    function protectTechnicalParentheticalSegments(text, store) {
+      return String(text || "").replace(/\(([^()\n]+)\)/gu, (match, content) => {
+        return isTechnicalParentheticalContent(content) ? store.protect(match) : match;
+      });
+    }
+    function isCjkContextChar(char) {
+      return !!char && CJK_CONTEXT_PATTERN.test(char);
+    }
+    function findPrevNonSpace(text, index) {
+      for (let i = index; i >= 0; i -= 1) {
+        if (text.charAt(i) === "\uE001") {
+          const startIndex = text.lastIndexOf("\uE000", i);
+          if (startIndex !== -1) {
+            i = startIndex;
+            continue;
+          }
+        }
+        const char = text.charAt(i);
+        if (!/\s/u.test(char))
+          return char;
+      }
+      return "";
+    }
+    function findNextNonSpace(text, index) {
+      for (let i = index; i < text.length; i += 1) {
+        if (text.charAt(i) === "\uE000") {
+          const endIndex = text.indexOf("\uE001", i);
+          if (endIndex !== -1) {
+            i = endIndex;
+            continue;
+          }
+        }
+        const char = text.charAt(i);
+        if (!/\s/u.test(char))
+          return char;
+      }
+      return "";
+    }
+    function hasCjkContext(text, index) {
+      const prev = findPrevNonSpace(text, index - 1);
+      const next = findNextNonSpace(text, index + 1);
+      return isCjkContextChar(prev) || isCjkContextChar(next);
+    }
+    function normalizeQuotedText(text, quoteChar, openQuote, closeQuote) {
+      const pattern = quoteChar === '"' ? /"([^"\n]*?)"/gu : /'([^'\n]*?)'/gu;
+      return text.replace(pattern, (match, inner, offset, fullText) => {
+        const prev = findPrevNonSpace(fullText, offset - 1);
+        const next = findNextNonSpace(fullText, offset + match.length);
+        if (!(isCjkContextChar(prev) || isCjkContextChar(next) || /[\p{sc=Han}]/u.test(inner))) {
+          return match;
+        }
+        return `${openQuote}${inner}${closeQuote}`;
+      });
+    }
+    function normalizePeriods(text) {
+      return text.replace(/\./gu, (match, offset, fullText) => {
+        const prev = findPrevNonSpace(fullText, offset - 1);
+        const next = findNextNonSpace(fullText, offset + 1);
+        if (/\d/u.test(prev) && /\d/u.test(next))
+          return match;
+        return isCjkContextChar(prev) ? "\u3002" : match;
+      });
+    }
+    function normalizeParentheses(text) {
+      let output = text.replace(/([\p{sc=Han}])\(([^()\n]+?)\)/gu, "$1\uFF08$2\uFF09");
+      output = output.replace(/(?<=[\p{sc=Han}“”‘’])\(([^()\n]+?)\)/gu, "\uFF08$1\uFF09");
+      output = output.replace(/\(([^()\n]+?)\)(?=[\p{sc=Han}])/gu, "\uFF08$1\uFF09");
+      return output;
+    }
+    function normalizeTextForChinesePunctuation(text) {
+      let output = String(text || "");
+      if (!output || !/[\p{sc=Han}]/u.test(output))
+        return output;
+      const protectedSegments = createProtectedSegmentStore();
+      output = protectEllipsisSegments(output, protectedSegments);
+      output = protectUrlSegments(output, protectedSegments);
+      output = protectEmailSegments(output, protectedSegments);
+      output = protectVersionSegments(output, protectedSegments);
+      output = protectPathSegments(output, protectedSegments);
+      output = protectWindowsPathSegments(output, protectedSegments);
+      output = protectDateTimeSegments(output, protectedSegments);
+      output = protectCliSegments(output, protectedSegments);
+      output = protectEnvAssignmentSegments(output, protectedSegments);
+      output = protectTechnicalParentheticalSegments(output, protectedSegments);
+      output = protectFunctionSegments(output, protectedSegments);
+      output = normalizeQuotedText(output, '"', "\u201C", "\u201D");
+      output = normalizeQuotedText(output, "'", "\u2018", "\u2019");
+      output = normalizeParentheses(output);
+      output = normalizePeriods(output);
+      output = output.replace(/[,:;!?]/gu, (match, offset, fullText) => {
+        if (!hasCjkContext(fullText, offset))
+          return match;
+        return INLINE_PUNCTUATION_MAP[match] || match;
+      });
+      return protectedSegments.restore(output);
+    }
+    function shouldSkipTextNode(node) {
+      if (!node || !node.parentElement)
+        return true;
+      let current = node.parentElement;
+      while (current) {
+        if (SKIP_TAGS.has(current.tagName))
+          return true;
+        current = current.parentElement;
+      }
+      return false;
+    }
+    function normalizeRenderedDomPunctuation(root, options = {}) {
+      var _a;
+      if (!root || options.enabled !== true)
+        return;
+      const documentRef = root.ownerDocument;
+      const nodeFilter = (_a = documentRef == null ? void 0 : documentRef.defaultView) == null ? void 0 : _a.NodeFilter;
+      if (!documentRef || !nodeFilter)
+        return;
+      const walker = documentRef.createTreeWalker(
+        root,
+        nodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            if (!node || !node.nodeValue || !node.nodeValue.trim()) {
+              return nodeFilter.FILTER_REJECT;
+            }
+            return shouldSkipTextNode(node) ? nodeFilter.FILTER_REJECT : nodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+      const textNodes = [];
+      let current = walker.nextNode();
+      while (current) {
+        textNodes.push(current);
+        current = walker.nextNode();
+      }
+      for (const node of textNodes) {
+        node.nodeValue = normalizeTextForChinesePunctuation(node.nodeValue);
+      }
+    }
+    module2.exports = {
+      normalizeTextForChinesePunctuation,
+      normalizeRenderedDomPunctuation
+    };
+  }
+});
+
 // services/obsidian-triplet-renderer.js
 var require_obsidian_triplet_renderer = __commonJS({
   "services/obsidian-triplet-renderer.js"(exports2, module2) {
     var { MarkdownRenderer } = require("obsidian");
     var { serializeObsidianRenderedHtml } = require_obsidian_triplet_serializer();
+    var { normalizeRenderedDomPunctuation } = require_chinese_punctuation();
     function isFencedBlockDelimiter(line) {
       return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ""));
     }
@@ -3084,6 +3400,7 @@ var require_obsidian_triplet_renderer = __commonJS({
       markdown,
       sourcePath = "",
       component = null,
+      settings = {},
       markdownRenderer = MarkdownRenderer,
       serializer = serializeObsidianRenderedHtml
     }) {
@@ -3105,6 +3422,9 @@ var require_obsidian_triplet_renderer = __commonJS({
         markdownRenderer
       });
       await waitForTripletDomToSettle(container, shouldObserveWindow ? {} : { minObserveMs: 0 });
+      normalizeRenderedDomPunctuation(container, {
+        enabled: settings.normalizeChinesePunctuation === true
+      });
       const serializedHtml = serializer({
         root: container,
         converter,
@@ -3119,6 +3439,7 @@ var require_obsidian_triplet_renderer = __commonJS({
       neutralizePlainWikilinks,
       preprocessMarkdownForTriplet,
       injectHardBreaksForLegacyParity,
+      normalizeRenderedDomPunctuation,
       shouldObserveAsyncEmbedWindow,
       waitForTripletDomToSettle,
       renderByObsidianMarkdownRenderer,
@@ -3991,6 +4312,8 @@ var DEFAULT_SETTINGS = {
   enableWatermark: false,
   showImageCaption: true,
   // 关闭水印时是否显示图片说明文字
+  normalizeChinesePunctuation: true,
+  // 默认开启：仅在渲染结果中将英文标点标准化为中文标点
   // 多账号支持
   wechatAccounts: [],
   // [{ id, name, appId, appSecret }]
@@ -4528,6 +4851,7 @@ var AppleStyleView = class extends ItemView {
             converter: this.converter,
             markdown,
             sourcePath: context.sourcePath || "",
+            settings: context.settings || this.plugin.settings,
             component: this
           });
         }
@@ -5546,7 +5870,10 @@ var AppleStyleView = class extends ItemView {
     if (!pipeline) {
       throw new Error("\u6E32\u67D3\u7BA1\u7EBF\u672A\u521D\u59CB\u5316");
     }
-    return pipeline.renderForPreview(markdown, { sourcePath });
+    return pipeline.renderForPreview(markdown, {
+      sourcePath,
+      settings: this.plugin.settings
+    });
   }
   /**
    * 更新当前文档显示
@@ -6050,6 +6377,10 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
     }
     new Setting(containerEl).setName("\u5934\u50CF URL\uFF08\u5907\u7528\uFF09").setDesc("\u5982\u672A\u4E0A\u4F20\u672C\u5730\u5934\u50CF\uFF0C\u5C06\u4F7F\u7528\u6B64 URL").addText((text) => text.setPlaceholder("https://example.com/avatar.jpg").setValue(this.plugin.settings.avatarUrl).onChange(async (value) => {
       this.plugin.settings.avatarUrl = value;
+      await this.plugin.saveSettings();
+    }));
+    new Setting(containerEl).setName("\u6B63\u6587\u6807\u70B9\u6807\u51C6\u5316").setDesc("\u4EC5\u4F5C\u7528\u4E8E\u9884\u89C8 / \u590D\u5236 / \u540C\u6B65\u7ED3\u679C\uFF0C\u4E0D\u4FEE\u6539\u539F\u59CB Markdown\uFF1B\u4F1A\u8DF3\u8FC7\u884C\u5185\u4EE3\u7801\u3001\u4EE3\u7801\u5757\u7B49\u5185\u5BB9\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.normalizeChinesePunctuation === true).onChange(async (value) => {
+      this.plugin.settings.normalizeChinesePunctuation = value;
       await this.plugin.saveSettings();
     }));
     new Setting(containerEl).setName("\u5FAE\u4FE1\u516C\u4F17\u53F7\u8D26\u53F7").setDesc("\u8BF7\u5728\u5FAE\u4FE1\u516C\u4F17\u53F7\u540E\u53F0 [\u8BBE\u7F6E\u4E0E\u5F00\u53D1] -> [\u57FA\u672C\u914D\u7F6E] \u4E2D\u83B7\u53D6 AppID \u548C AppSecret\uFF0C\u5E76\u786E\u4FDD\u5DF2\u5C06\u5F53\u524D IP \u52A0\u5165\u767D\u540D\u5355\u3002").setHeading();

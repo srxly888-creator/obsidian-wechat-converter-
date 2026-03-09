@@ -307,6 +307,20 @@ describe('Obsidian Triplet Renderer', () => {
     expect(target.innerHTML).toContain('body');
   });
 
+  it('should throw when legacy render API is used without app', async () => {
+    const render = vi.fn(async () => {});
+    const target = document.createElement('div');
+
+    await expect(
+      renderByObsidianMarkdownRenderer({
+        markdown: 'body',
+        sourcePath: 'a.md',
+        targetEl: target,
+        markdownRenderer: { render },
+      })
+    ).rejects.toThrow('Obsidian app instance is required for MarkdownRenderer.render');
+  });
+
   it('should throw when renderer API is unavailable', async () => {
     await expect(
       renderObsidianTripletMarkdown({
@@ -316,6 +330,33 @@ describe('Obsidian Triplet Renderer', () => {
         markdownRenderer: {},
       })
     ).rejects.toThrow('renderMarkdown/render');
+  });
+
+  it('should throw when triplet renderer runs without DOM environment', async () => {
+    const previousDocument = global.document;
+    try {
+      delete global.document;
+      await expect(
+        renderObsidianTripletMarkdown({
+          app: {},
+          converter: {},
+          markdown: 'x',
+          markdownRenderer: { renderMarkdown: vi.fn(async () => {}) },
+        })
+      ).rejects.toThrow('Triplet renderer requires DOM environment');
+    } finally {
+      global.document = previousDocument;
+    }
+  });
+
+  it('should throw when triplet renderer runs without converter', async () => {
+    await expect(
+      renderObsidianTripletMarkdown({
+        app: {},
+        markdown: 'x',
+        markdownRenderer: { renderMarkdown: vi.fn(async () => {}) },
+      })
+    ).rejects.toThrow('Triplet renderer requires converter runtime');
   });
 
   it('waitForTripletDomToSettle should return quickly for settled dom', async () => {
