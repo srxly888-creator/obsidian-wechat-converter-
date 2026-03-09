@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-wechat-converter",
-	"version": "2.6.7",
+	"version": "2.6.8",
 	"description": "Apple Style Formatter for Obsidian",
 	"main": "main.js",
 	"scripts": {
@@ -24,7 +24,7 @@
 		"style",
 		"formatter"
 	],
-	"author": "林小卫很行 (DavidLam)",
+	"author": "DavidLam (林小卫很行)",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^16.11.6",
