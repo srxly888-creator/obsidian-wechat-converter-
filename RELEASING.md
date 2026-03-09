@@ -14,9 +14,9 @@ This project now uses the standard Obsidian three-file runtime.
 5. Build and validate release artifact:
    - `npm run release:pack`
    - `npm run release:validate`
-6. Create git tag (same as plugin version, supports both `2.5.5` and `v2.5.5`):
-   - `git tag v2.5.5`
-   - `git push origin v2.5.5`
+6. Create git tag (must exactly match the plugin version):
+   - `git tag 2.5.5`
+   - `git push origin 2.5.5`
 7. Create GitHub Release for that tag and upload:
    - `obsidian-wechat-converter.zip`
    - `main.js`
@@ -31,6 +31,16 @@ This project now uses the standard Obsidian three-file runtime.
 - `styles.css`
 - `README.md`
 - `LICENSE`
+
+## Obsidian Community Plugins
+
+- Obsidian community plugin releases expect the Git tag to match `manifest.json.version` exactly.
+- Use `2.5.5`, not `v2.5.5`.
+- The GitHub Release should include:
+  - `main.js`
+  - `manifest.json`
+  - `styles.css`
+  - `versions.json`
 
 ## BRAT Notes
 
