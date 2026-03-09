@@ -4,7 +4,7 @@
 
 Convert Obsidian Markdown into polished WeChat articles with live preview, copy-to-editor, and optional draft sync.
 
-![Version](https://img.shields.io/badge/version-2.6.8-blue)
+![Version](https://img.shields.io/badge/version-2.6.9-blue)
 ![Obsidian](https://img.shields.io/badge/Obsidian-1.0.0+-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -82,7 +82,7 @@ If WeChat API IP allowlisting is a problem in your network, you can use a Cloudf
 
 <p align="center">
   <img src="images/phone_style.png" alt="Phone preview" height="420" />
-  <img src="images/code_render.png" alt="Mac-style code block" width="420" />
+  <img src="images/code_render.png" alt="Mac-style code block" height="420" />
 </p>
 
 ## Who this is for
