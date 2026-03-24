@@ -6,6 +6,7 @@ const {
   isAiProviderRunnable,
   summarizeAiProviderIssues,
   extractImageRefsFromHtml,
+  extractMarkdownSections,
   extractMarkdownSignals,
   buildFallbackLayout,
   normalizeArticleLayout,
@@ -13,6 +14,7 @@ const {
   generateArticleLayout,
   AiLayoutSchemaError,
   renderArticleLayoutHtml,
+  AiLayoutTimeoutError,
 } = require('../services/ai-layout');
 
 describe('ai-layout service', () => {
@@ -77,6 +79,32 @@ describe('ai-layout service', () => {
     expect(refs[1].id).toBe('image-2');
   });
 
+  it('should extract markdown sections while skipping frontmatter', () => {
+    const structure = extractMarkdownSections(`---
+title: 示例
+---
+
+前言段落。
+
+## 第一部分
+
+第一段。
+
+- 要点一
+- 要点二
+
+## 第二部分
+
+第二段。
+`);
+
+    expect(structure.sections).toHaveLength(2);
+    expect(structure.sections[0].title).toBe('第一部分');
+    expect(structure.sections[0].paragraphs[0]).toContain('第一段');
+    expect(structure.sections[0].bulletGroups[0]).toEqual(['要点一', '要点二']);
+    expect(structure.introParagraphs[0]).toContain('前言段落');
+  });
+
   it('should render structured layout json into inline html', () => {
     const html = renderArticleLayoutHtml({
       stylePack: 'tech-green',
@@ -135,11 +163,11 @@ describe('ai-layout service', () => {
     });
 
     expect(layout.blocks[0].type).toBe('hero');
-    expect(layout.blocks.some((block) => block.type === 'case-block')).toBe(true);
-    expect(layout.blocks.some((block) => block.type === 'cta-card')).toBe(true);
+    expect(layout.blocks.some((block) => block.type === 'section-block')).toBe(true);
+    expect(layout.blocks.some((block) => block.type === 'cta-card')).toBe(false);
   });
 
-  it('should merge sparse ai output with fallback blocks', () => {
+  it('should merge sparse ai output with fallback section blocks without forcing cta', () => {
     const layout = normalizeArticleLayout({
       articleType: 'tutorial',
       stylePack: 'tech-green',
@@ -160,9 +188,185 @@ describe('ai-layout service', () => {
     });
 
     expect(layout.blocks.length).toBeGreaterThan(1);
-    expect(layout.blocks[0].type).toBe('lead-quote');
+    expect(layout.blocks[0].type).toBe('hero');
+    expect(layout.blocks[1].type).toBe('part-nav');
+    expect(layout.blocks[2].type).toBe('lead-quote');
     expect(layout.blocks.some((block) => block.type === 'hero')).toBe(true);
-    expect(layout.blocks.some((block) => block.type === 'cta-card')).toBe(true);
+    expect(layout.blocks.some((block) => block.type === 'section-block')).toBe(true);
+    expect(layout.blocks.some((block) => block.type === 'cta-card')).toBe(false);
+  });
+
+  it('should honor the user-selected style pack over ai-returned style pack', () => {
+    const layout = normalizeArticleLayout({
+      articleType: 'tutorial',
+      stylePack: 'tech-green',
+      blocks: [
+        { type: 'hero', title: '文章标题' },
+      ],
+    }, {
+      title: '文章标题',
+      markdown: `
+## 第一部分
+正文一。
+      `,
+      stylePack: 'ocean-blue',
+      imageRefs: [],
+    });
+
+    expect(layout.stylePack).toBe('ocean-blue');
+  });
+
+  it('should render different colors when a non-green style pack is selected', () => {
+    const html = renderArticleLayoutHtml({
+      stylePack: 'ocean-blue',
+      title: '测试文章',
+      blocks: [
+        { type: 'hero', eyebrow: 'AI Layout', title: '测试标题', subtitle: '测试副标题', variant: 'cover-right' },
+      ],
+    }, {
+      imageRefs: [],
+    });
+
+    expect(html).toContain('#2c6bed');
+    expect(html).not.toContain('#14b37d');
+  });
+
+  it('should preserve more sections in fallback layout and avoid phone frame for normal images', () => {
+    const layout = buildFallbackLayout({
+      title: '标签入门',
+      markdown: `
+## 第一部分
+第一段内容。
+
+## 第二部分
+第二段内容。
+
+## 第三部分
+第三段内容。
+
+## 第四部分
+第四段内容。
+      `,
+      stylePack: 'tech-green',
+      imageRefs: [{ id: 'image-1', src: 'https://example.com/cover.jpg', caption: '封面图', alt: '封面图' }],
+    });
+
+    expect(layout.blocks.filter((block) => block.type === 'section-block')).toHaveLength(4);
+    expect(layout.blocks.some((block) => block.type === 'phone-frame')).toBe(false);
+  });
+
+  it('should keep later sections when ai output only covers the front half', () => {
+    const markdown = Array.from({ length: 14 }, (_, index) => `## 第${index + 1}部分\n第${index + 1}段内容。`).join('\n\n');
+    const layout = normalizeArticleLayout({
+      articleType: 'tutorial',
+      stylePack: 'tech-green',
+      blocks: [
+        { type: 'hero', title: '长文测试' },
+        { type: 'section-block', sectionIndex: 0 },
+        { type: 'section-block', sectionIndex: 1 },
+        { type: 'section-block', sectionIndex: 2 },
+      ],
+    }, {
+      title: '长文测试',
+      markdown,
+      stylePack: 'tech-green',
+      imageRefs: [],
+    });
+
+    expect(layout.blocks.filter((block) => block.type === 'section-block')).toHaveLength(14);
+    expect(layout.blocks.some((block) => block.type === 'section-block' && block.title === '第14部分')).toBe(true);
+  });
+
+  it('should not duplicate intro singleton blocks from fallback when ai already provides them', () => {
+    const layout = normalizeArticleLayout({
+      articleType: 'tutorial',
+      stylePack: 'tech-green',
+      blocks: [
+        { type: 'hero', title: '文章标题', subtitle: '导语' },
+        { type: 'lead-quote', text: '一句重点摘要' },
+      ],
+    }, {
+      title: '文章标题',
+      markdown: `
+## 第一部分
+正文一。
+
+## 第二部分
+正文二。
+      `,
+      stylePack: 'tech-green',
+      imageRefs: [],
+    });
+
+    expect(layout.blocks.filter((block) => block.type === 'hero')).toHaveLength(1);
+    expect(layout.blocks.filter((block) => block.type === 'lead-quote')).toHaveLength(1);
+    expect(layout.blocks.filter((block) => block.type === 'part-nav')).toHaveLength(1);
+  });
+
+  it('should keep source section order before deferred ai tail blocks', () => {
+    const layout = normalizeArticleLayout({
+      articleType: 'tutorial',
+      stylePack: 'tech-green',
+      blocks: [
+        { type: 'hero', title: '文章标题', subtitle: '导语' },
+        { type: 'lead-quote', text: '一句重点摘要' },
+        { type: 'section-block', sectionIndex: 0 },
+        { type: 'section-block', sectionIndex: 1 },
+        { type: 'case-block', title: '今日挑战', summary: '补充练习' },
+      ],
+    }, {
+      title: '文章标题',
+      markdown: `
+## 第一部分
+正文一。
+
+## 第二部分
+正文二。
+
+## 第三部分
+正文三。
+      `,
+      stylePack: 'tech-green',
+      imageRefs: [],
+    });
+
+    const typesAndTitles = layout.blocks.map((block) => `${block.type}:${block.title || block.text || ''}`);
+    expect(typesAndTitles.slice(0, 2)).toEqual([
+      'hero:文章标题',
+      'part-nav:',
+    ]);
+    expect(typesAndTitles[2]).toBe('lead-quote:一句重点摘要');
+    expect(typesAndTitles[3]).toBe('section-block:第一部分');
+    expect(typesAndTitles[4]).toBe('section-block:第二部分');
+    expect(typesAndTitles[5]).toBe('section-block:第三部分');
+    expect(typesAndTitles[6]).toBe('case-block:今日挑战');
+  });
+
+  it('should map ai case blocks back to source sections when titles match', () => {
+    const layout = normalizeArticleLayout({
+      articleType: 'tutorial',
+      stylePack: 'tech-green',
+      blocks: [
+        { type: 'case-block', title: '第二部分', summary: '模型摘要', bullets: ['模型要点'] },
+      ],
+    }, {
+      title: 'AI 编排实践',
+      markdown: `
+## 第一部分
+这是第一部分原文。
+
+## 第二部分
+这是第二部分原文。
+- 原始要点
+      `,
+      stylePack: 'tech-green',
+      imageRefs: [],
+    });
+
+    const mapped = layout.blocks.find((block) => block.type === 'section-block' && block.title === '第二部分');
+    expect(mapped).toBeTruthy();
+    expect(mapped.paragraphs.join(' ')).toContain('这是第二部分原文');
+    expect(mapped.bulletGroups[0]).toContain('原始要点');
   });
 
   it('should keep generation meta when restoring cached article layouts', () => {
@@ -286,6 +490,58 @@ describe('ai-layout service', () => {
     expect(result.generationMeta.schemaValidation.fatal).toBe(false);
   });
 
+  it('should infer missing block types from structured ai payloads', async () => {
+    const provider = {
+      id: 'p1',
+      name: '测试 Provider',
+      kind: 'openai-compatible',
+      baseUrl: 'https://api.example.com/v1',
+      apiKey: 'secret',
+      model: 'test-model',
+      enabled: true,
+    };
+    const fetchImpl = async () => ({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                articleType: 'tutorial',
+                stylePack: 'tech-green',
+                title: 'AI 编排实践',
+                summary: '一句摘要',
+                blocks: [
+                  { blockType: 'hero', title: '文章标题', subtitle: '导语' },
+                  { blockType: 'lead-quote', text: '一句重点摘要' },
+                  { blockType: 'section-block', sectionIndex: 0 },
+                ],
+              }),
+            },
+          },
+        ],
+      }),
+    });
+
+    const result = await generateArticleLayout({
+      provider,
+      title: 'AI 编排实践',
+      markdown: `
+## 第一部分
+这里是正文。
+      `,
+      stylePack: 'tech-green',
+      imageRefs: [],
+      fetchImpl,
+      timeoutMs: 2000,
+    });
+
+    expect(result.layoutJson.blocks[0].type).toBe('hero');
+    expect(result.layoutJson.blocks[1].type).toBe('lead-quote');
+    expect(result.layoutJson.blocks.some((block) => block.type === 'section-block')).toBe(true);
+    expect(result.generationMeta.schemaValidation.issueCount).toBe(0);
+  });
+
   it('should throw schema error when ai payload is fatally invalid', async () => {
     const provider = {
       id: 'p1',
@@ -397,5 +653,51 @@ describe('ai-layout service', () => {
     expect(userMessage.length).toBeLessThan(longMarkdown.length);
     expect(userMessage).toContain('内容已截断');
     expect(userMessage).toContain('原文如下');
+  });
+
+  it('should convert aborted provider requests into timeout errors', async () => {
+    const provider = {
+      id: 'p1',
+      name: '测试 Provider',
+      kind: 'openai-compatible',
+      baseUrl: 'https://api.example.com/v1',
+      apiKey: 'secret',
+      model: 'test-model',
+      enabled: true,
+    };
+    const fetchImpl = (_url, options) => new Promise((_, reject) => {
+      options.signal.addEventListener('abort', () => {
+        reject(new Error('signal is aborted without reason'));
+      }, { once: true });
+    });
+
+    await expect(generateArticleLayout({
+      provider,
+      title: 'AI 编排实践',
+      markdown: '这是一段导语。',
+      stylePack: 'tech-green',
+      imageRefs: [],
+      fetchImpl,
+      timeoutMs: 10,
+    })).rejects.toMatchObject({
+      name: 'AiLayoutTimeoutError',
+      code: 'ai-layout-timeout',
+      message: 'AI 请求超时（1s）',
+    });
+
+    try {
+      await generateArticleLayout({
+        provider,
+        title: 'AI 编排实践',
+        markdown: '这是一段导语。',
+        stylePack: 'tech-green',
+        imageRefs: [],
+        fetchImpl,
+        timeoutMs: 10,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(AiLayoutTimeoutError);
+      expect(error.timeoutMs).toBe(10);
+    }
   });
 });

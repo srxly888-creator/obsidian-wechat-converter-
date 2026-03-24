@@ -5,6 +5,24 @@
       "label": "科技绿",
       "description": "信息卡与案例教程风格，适合产品介绍、操作指南和案例拆解。",
       "recommendedFor": ["tutorial", "case-study", "product-intro"]
+    },
+    {
+      "id": "ocean-blue",
+      "label": "深海蓝",
+      "description": "更冷静的科技信息风格，适合教程、知识卡片和产品更新。",
+      "recommendedFor": ["tutorial", "knowledge-card", "release-note"]
+    },
+    {
+      "id": "sunset-amber",
+      "label": "暖砂金",
+      "description": "更偏内容杂志感的暖色风格，适合观点、清单和经验分享。",
+      "recommendedFor": ["essay", "checklist", "experience"]
+    },
+    {
+      "id": "graphite-rose",
+      "label": "石墨玫瑰",
+      "description": "偏编辑感的灰粉中性色，适合案例拆解和品牌内容。",
+      "recommendedFor": ["case-study", "brand-story", "editorial"]
     }
   ]
 }

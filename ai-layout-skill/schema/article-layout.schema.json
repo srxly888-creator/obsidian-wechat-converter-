@@ -13,7 +13,7 @@
     "blocks": {
       "type": "array",
       "minItems": 1,
-      "maxItems": 6,
+      "maxItems": 24,
       "items": {
         "oneOf": [
           {
@@ -80,6 +80,25 @@
                 "items": { "type": "string" }
               },
               "highlight": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "sectionIndex"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "const": "section-block" },
+              "sectionIndex": {
+                "oneOf": [
+                  { "type": "integer", "minimum": 0 },
+                  { "type": "string", "pattern": "^[0-9]+$" }
+                ]
+              },
+              "imageIds": {
+                "type": "array",
+                "maxItems": 3,
+                "items": { "type": "string" }
+              }
             }
           },
           {

@@ -22,6 +22,11 @@ const AI_LAYOUT_ALLOWED_BLOCKS = [
     description: '案例/教程主体区块，适合分章节承载正文。',
   },
   {
+    type: 'section-block',
+    fields: ['sectionIndex', 'imageIds'],
+    description: '正文保真区块，按 sectionIndex 引用原文章节内容，不改写正文。',
+  },
+  {
     type: 'phone-frame',
     fields: ['imageId', 'caption'],
     description: '手机截图展示块，适合 App 界面或聊天截图。',
@@ -40,9 +45,11 @@ const AI_LAYOUT_SKILL_SYSTEM_LINES = [
   `只允许使用这些 block type: ${AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type).join(', ')}。`,
   'block 内不要杜撰图片 URL，只能使用提供的 image id。',
   '尽量保留原文信息，不要改写作者观点，不要编造数据。',
-  '优先做教程/案例型公众号编排：封面概览 -> 导语摘要 -> 分章节 case -> 截图 -> 收尾 CTA。',
-  '如果原文存在明显章节标题，优先将其转成 part-nav 和 case-block。',
-  '如果有图片，优先挑 1 到 2 张最像封面/截图的图进入 hero 或 phone-frame。',
+  '优先覆盖全文主要章节，保真优先于花哨编排。',
+  '优先做教程/案例型公众号编排：封面概览 -> 导语摘要 -> 分章节正文 -> 可选截图块 -> 可选收尾总结。',
+  '如果原文存在明显章节标题，正文主体优先转成 section-block。',
+  '如果有图片，优先挑 1 到 2 张最像封面/截图的图进入 hero 或 phone-frame；普通配图不要强行套手机壳。',
+  '不要默认追加 CTA；只有原文本身适合收尾引导时才使用 cta-card。',
 ];
 
 const AI_LAYOUT_OUTPUT_FIELDS = ['articleType', 'stylePack', 'title', 'summary', 'blocks'];
@@ -154,6 +161,16 @@ function validateAiLayoutPayload(rawLayout) {
         issues.push(createSchemaIssue(`${path}.imageIds`, 'case-block.imageIds 必须是数组。', false));
       }
     }
+    if (block.type === 'section-block') {
+      const isNumber = Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0;
+      const isNumericString = typeof block.sectionIndex === 'string' && /^\d+$/.test(block.sectionIndex.trim());
+      if (!isNumber && !isNumericString) {
+        issues.push(createSchemaIssue(`${path}.sectionIndex`, 'section-block.sectionIndex 必须是非负整数。', true));
+      }
+      if ('imageIds' in block && !Array.isArray(block.imageIds)) {
+        issues.push(createSchemaIssue(`${path}.imageIds`, 'section-block.imageIds 必须是数组。', false));
+      }
+    }
     if (block.type === 'phone-frame' && typeof block.imageId !== 'string') {
       issues.push(createSchemaIssue(`${path}.imageId`, 'phone-frame.imageId 必须是字符串。', true));
     }
@@ -189,20 +206,9 @@ function getAiLayoutTemplate() {
         note: '补充说明或上下文。',
       },
       {
-        type: 'case-block',
-        caseLabel: 'CASE 01',
-        title: '第一部分',
-        summary: '这一节的核心内容。',
-        bullets: ['要点一', '要点二'],
+        type: 'section-block',
+        sectionIndex: 0,
         imageIds: ['image-1'],
-        highlight: '本节最值得高亮的一句话。',
-      },
-      {
-        type: 'cta-card',
-        title: '继续阅读',
-        body: '收尾总结或 CTA。',
-        buttonText: '整理后发布',
-        note: '本版式为 AI 辅助生成。',
       },
     ],
   };

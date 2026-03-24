@@ -25,20 +25,9 @@
       "note": "补充说明或上下文。"
     },
     {
-      "type": "case-block",
-      "caseLabel": "CASE 01",
-      "title": "第一部分",
-      "summary": "这一节的核心内容。",
-      "bullets": ["要点一", "要点二"],
-      "imageIds": ["image-1"],
-      "highlight": "本节最值得高亮的一句话。"
-    },
-    {
-      "type": "cta-card",
-      "title": "继续阅读",
-      "body": "收尾总结或 CTA。",
-      "buttonText": "整理后发布",
-      "note": "本版式为 AI 辅助生成。"
+      "type": "section-block",
+      "sectionIndex": 0,
+      "imageIds": ["image-1"]
     }
   ]
 }

@@ -3474,6 +3474,11 @@ var require_ai_layout_skill_bundle = __commonJS({
         description: "\u6848\u4F8B/\u6559\u7A0B\u4E3B\u4F53\u533A\u5757\uFF0C\u9002\u5408\u5206\u7AE0\u8282\u627F\u8F7D\u6B63\u6587\u3002"
       },
       {
+        type: "section-block",
+        fields: ["sectionIndex", "imageIds"],
+        description: "\u6B63\u6587\u4FDD\u771F\u533A\u5757\uFF0C\u6309 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u5185\u5BB9\uFF0C\u4E0D\u6539\u5199\u6B63\u6587\u3002"
+      },
+      {
         type: "phone-frame",
         fields: ["imageId", "caption"],
         description: "\u624B\u673A\u622A\u56FE\u5C55\u793A\u5757\uFF0C\u9002\u5408 App \u754C\u9762\u6216\u804A\u5929\u622A\u56FE\u3002"
@@ -3491,9 +3496,11 @@ var require_ai_layout_skill_bundle = __commonJS({
       `\u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B block type: ${AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type).join(", ")}\u3002`,
       "block \u5185\u4E0D\u8981\u675C\u64B0\u56FE\u7247 URL\uFF0C\u53EA\u80FD\u4F7F\u7528\u63D0\u4F9B\u7684 image id\u3002",
       "\u5C3D\u91CF\u4FDD\u7559\u539F\u6587\u4FE1\u606F\uFF0C\u4E0D\u8981\u6539\u5199\u4F5C\u8005\u89C2\u70B9\uFF0C\u4E0D\u8981\u7F16\u9020\u6570\u636E\u3002",
-      "\u4F18\u5148\u505A\u6559\u7A0B/\u6848\u4F8B\u578B\u516C\u4F17\u53F7\u7F16\u6392\uFF1A\u5C01\u9762\u6982\u89C8 -> \u5BFC\u8BED\u6458\u8981 -> \u5206\u7AE0\u8282 case -> \u622A\u56FE -> \u6536\u5C3E CTA\u3002",
-      "\u5982\u679C\u539F\u6587\u5B58\u5728\u660E\u663E\u7AE0\u8282\u6807\u9898\uFF0C\u4F18\u5148\u5C06\u5176\u8F6C\u6210 part-nav \u548C case-block\u3002",
-      "\u5982\u679C\u6709\u56FE\u7247\uFF0C\u4F18\u5148\u6311 1 \u5230 2 \u5F20\u6700\u50CF\u5C01\u9762/\u622A\u56FE\u7684\u56FE\u8FDB\u5165 hero \u6216 phone-frame\u3002"
+      "\u4F18\u5148\u8986\u76D6\u5168\u6587\u4E3B\u8981\u7AE0\u8282\uFF0C\u4FDD\u771F\u4F18\u5148\u4E8E\u82B1\u54E8\u7F16\u6392\u3002",
+      "\u4F18\u5148\u505A\u6559\u7A0B/\u6848\u4F8B\u578B\u516C\u4F17\u53F7\u7F16\u6392\uFF1A\u5C01\u9762\u6982\u89C8 -> \u5BFC\u8BED\u6458\u8981 -> \u5206\u7AE0\u8282\u6B63\u6587 -> \u53EF\u9009\u622A\u56FE\u5757 -> \u53EF\u9009\u6536\u5C3E\u603B\u7ED3\u3002",
+      "\u5982\u679C\u539F\u6587\u5B58\u5728\u660E\u663E\u7AE0\u8282\u6807\u9898\uFF0C\u6B63\u6587\u4E3B\u4F53\u4F18\u5148\u8F6C\u6210 section-block\u3002",
+      "\u5982\u679C\u6709\u56FE\u7247\uFF0C\u4F18\u5148\u6311 1 \u5230 2 \u5F20\u6700\u50CF\u5C01\u9762/\u622A\u56FE\u7684\u56FE\u8FDB\u5165 hero \u6216 phone-frame\uFF1B\u666E\u901A\u914D\u56FE\u4E0D\u8981\u5F3A\u884C\u5957\u624B\u673A\u58F3\u3002",
+      "\u4E0D\u8981\u9ED8\u8BA4\u8FFD\u52A0 CTA\uFF1B\u53EA\u6709\u539F\u6587\u672C\u8EAB\u9002\u5408\u6536\u5C3E\u5F15\u5BFC\u65F6\u624D\u4F7F\u7528 cta-card\u3002"
     ];
     var AI_LAYOUT_OUTPUT_FIELDS = ["articleType", "stylePack", "title", "summary", "blocks"];
     function getAiLayoutBlockConstraintLines() {
@@ -3596,6 +3603,16 @@ var require_ai_layout_skill_bundle = __commonJS({
             issues.push(createSchemaIssue(`${path}.imageIds`, "case-block.imageIds \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
           }
         }
+        if (block.type === "section-block") {
+          const isNumber = Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0;
+          const isNumericString = typeof block.sectionIndex === "string" && /^\d+$/.test(block.sectionIndex.trim());
+          if (!isNumber && !isNumericString) {
+            issues.push(createSchemaIssue(`${path}.sectionIndex`, "section-block.sectionIndex \u5FC5\u987B\u662F\u975E\u8D1F\u6574\u6570\u3002", true));
+          }
+          if ("imageIds" in block && !Array.isArray(block.imageIds)) {
+            issues.push(createSchemaIssue(`${path}.imageIds`, "section-block.imageIds \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+        }
         if (block.type === "phone-frame" && typeof block.imageId !== "string") {
           issues.push(createSchemaIssue(`${path}.imageId`, "phone-frame.imageId \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", true));
         }
@@ -3629,20 +3646,9 @@ var require_ai_layout_skill_bundle = __commonJS({
             note: "\u8865\u5145\u8BF4\u660E\u6216\u4E0A\u4E0B\u6587\u3002"
           },
           {
-            type: "case-block",
-            caseLabel: "CASE 01",
-            title: "\u7B2C\u4E00\u90E8\u5206",
-            summary: "\u8FD9\u4E00\u8282\u7684\u6838\u5FC3\u5185\u5BB9\u3002",
-            bullets: ["\u8981\u70B9\u4E00", "\u8981\u70B9\u4E8C"],
-            imageIds: ["image-1"],
-            highlight: "\u672C\u8282\u6700\u503C\u5F97\u9AD8\u4EAE\u7684\u4E00\u53E5\u8BDD\u3002"
-          },
-          {
-            type: "cta-card",
-            title: "\u7EE7\u7EED\u9605\u8BFB",
-            body: "\u6536\u5C3E\u603B\u7ED3\u6216 CTA\u3002",
-            buttonText: "\u6574\u7406\u540E\u53D1\u5E03",
-            note: "\u672C\u7248\u5F0F\u4E3A AI \u8F85\u52A9\u751F\u6210\u3002"
+            type: "section-block",
+            sectionIndex: 0,
+            imageIds: ["image-1"]
           }
         ]
       };
@@ -3664,6 +3670,7 @@ var require_ai_layout = __commonJS({
   "services/ai-layout.js"(exports2, module2) {
     var {
       AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_ALLOWED_BLOCKS,
       AI_LAYOUT_SKILL_SYSTEM_LINES,
       AI_LAYOUT_OUTPUT_FIELDS,
       getAiLayoutBlockConstraintLines,
@@ -3673,6 +3680,7 @@ var require_ai_layout = __commonJS({
     var AI_PROVIDER_KINDS2 = {
       OPENAI_COMPATIBLE: "openai-compatible"
     };
+    var MAX_LAYOUT_BLOCKS = 24;
     var AI_STYLE_PACKS = {
       "tech-green": {
         id: "tech-green",
@@ -3688,6 +3696,54 @@ var require_ai_layout = __commonJS({
           surface: "#ffffff",
           surfaceSoft: "#f5f8f7",
           quoteBg: "#f4f7f6"
+        }
+      },
+      "ocean-blue": {
+        id: "ocean-blue",
+        label: "\u6DF1\u6D77\u84DD",
+        description: "\u66F4\u51B7\u9759\u7684\u79D1\u6280\u4FE1\u606F\u98CE\u683C\uFF0C\u9002\u5408\u6559\u7A0B\u3001\u77E5\u8BC6\u5361\u7247\u548C\u4EA7\u54C1\u66F4\u65B0\u3002",
+        tokens: {
+          accent: "#2c6bed",
+          accentDeep: "#1f4fb2",
+          accentSoft: "#edf4ff",
+          text: "#223047",
+          muted: "#5e718f",
+          border: "#d8e2f2",
+          surface: "#ffffff",
+          surfaceSoft: "#f6f9fd",
+          quoteBg: "#f2f6fc"
+        }
+      },
+      "sunset-amber": {
+        id: "sunset-amber",
+        label: "\u6696\u7802\u91D1",
+        description: "\u66F4\u504F\u5185\u5BB9\u6742\u5FD7\u611F\u7684\u6696\u8272\u98CE\u683C\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u6E05\u5355\u548C\u7ECF\u9A8C\u5206\u4EAB\u3002",
+        tokens: {
+          accent: "#d8892b",
+          accentDeep: "#a66218",
+          accentSoft: "#fff5e8",
+          text: "#3a2b1f",
+          muted: "#7b6756",
+          border: "#eadfce",
+          surface: "#fffdf9",
+          surfaceSoft: "#faf6f0",
+          quoteBg: "#f8f2ea"
+        }
+      },
+      "graphite-rose": {
+        id: "graphite-rose",
+        label: "\u77F3\u58A8\u73AB\u7470",
+        description: "\u504F\u7F16\u8F91\u611F\u7684\u7070\u7C89\u4E2D\u6027\u8272\uFF0C\u9002\u5408\u6848\u4F8B\u62C6\u89E3\u548C\u54C1\u724C\u5185\u5BB9\u3002",
+        tokens: {
+          accent: "#cc5f82",
+          accentDeep: "#9f4764",
+          accentSoft: "#fff0f5",
+          text: "#2e2c33",
+          muted: "#6f6874",
+          border: "#e7dce3",
+          surface: "#fffefe",
+          surfaceSoft: "#faf7f9",
+          quoteBg: "#f8f2f5"
         }
       }
     };
@@ -3836,12 +3892,22 @@ var require_ai_layout = __commonJS({
         this.generationMeta = generationMeta;
       }
     };
+    var AiLayoutTimeoutError = class extends Error {
+      constructor(timeoutMs) {
+        const seconds = Math.max(1, Math.round(Number(timeoutMs || 0) / 1e3));
+        super(`AI \u8BF7\u6C42\u8D85\u65F6\uFF08${seconds}s\uFF09`);
+        this.name = "AiLayoutTimeoutError";
+        this.code = "ai-layout-timeout";
+        this.timeoutMs = Number(timeoutMs || 0);
+      }
+    };
     function normalizeArticleLayoutState(raw = {}) {
       if (!raw || typeof raw !== "object")
         return null;
       const layoutJson = raw.layoutJson && typeof raw.layoutJson === "object" ? raw.layoutJson : null;
       if (!layoutJson)
         return null;
+      const dismissedBlockKeys = Array.isArray(raw.dismissedBlockKeys) ? raw.dismissedBlockKeys.map((item) => coerceString(item)).filter(Boolean).slice(0, 128) : [];
       return {
         version: clampNumber(raw.version, AI_LAYOUT_SCHEMA_VERSION2, 1, 999),
         updatedAt: clampNumber(raw.updatedAt, Date.now(), 0, 9999999999999),
@@ -3855,8 +3921,44 @@ var require_ai_layout = __commonJS({
         lastAttemptError: typeof raw.lastAttemptError === "string" ? raw.lastAttemptError : "",
         lastAttemptAt: clampNumber(raw.lastAttemptAt, 0, 0, 9999999999999),
         lastAttemptSchemaValidation: normalizeSchemaValidation(raw.lastAttemptSchemaValidation),
+        dismissedBlockKeys,
         generationMeta: normalizeLayoutGenerationMeta(raw.generationMeta, layoutJson),
         layoutJson
+      };
+    }
+    function normalizeArticleLayoutCacheEntry2(raw = {}) {
+      if (!raw || typeof raw !== "object")
+        return null;
+      const legacyState = normalizeArticleLayoutState(raw);
+      if (legacyState) {
+        const stylePack = legacyState.stylePack || "tech-green";
+        return {
+          lastStylePack: stylePack,
+          stylePackStates: {
+            [stylePack]: legacyState
+          }
+        };
+      }
+      const stylePackStates = {};
+      if (raw.stylePackStates && typeof raw.stylePackStates === "object") {
+        for (const [stylePackId, value] of Object.entries(raw.stylePackStates)) {
+          const normalizedState = normalizeArticleLayoutState(value);
+          if (!normalizedState)
+            continue;
+          const effectiveStylePack = normalizedState.stylePack || stylePackId || "tech-green";
+          stylePackStates[effectiveStylePack] = {
+            ...normalizedState,
+            stylePack: effectiveStylePack
+          };
+        }
+      }
+      const stylePackIds = Object.keys(stylePackStates);
+      if (!stylePackIds.length)
+        return null;
+      const lastStylePack = coerceString(raw.lastStylePack);
+      return {
+        lastStylePack: stylePackStates[lastStylePack] ? lastStylePack : stylePackIds[0],
+        stylePackStates
       };
     }
     function truncateMarkdownForPrompt(markdown = "", maxChars = 12e3) {
@@ -3883,7 +3985,7 @@ var require_ai_layout = __commonJS({
         for (const [path, value] of Object.entries(raw.articleLayoutsByPath)) {
           if (!path || typeof path !== "string")
             continue;
-          const normalized = normalizeArticleLayoutState(value);
+          const normalized = normalizeArticleLayoutCacheEntry2(value);
           if (normalized) {
             articleLayoutsByPath[path] = normalized;
           }
@@ -3910,7 +4012,7 @@ var require_ai_layout = __commonJS({
         description: pack.description
       }));
     }
-    function getStylePackById(id) {
+    function getStylePackById2(id) {
       return AI_STYLE_PACKS[id] || AI_STYLE_PACKS["tech-green"];
     }
     function listEnabledAiProviders(aiSettings = {}) {
@@ -3943,8 +4045,72 @@ var require_ai_layout = __commonJS({
       }
       return candidate.slice(firstBrace, lastBrace + 1);
     }
+    function inferBlockType(rawBlock = {}) {
+      if (!rawBlock || typeof rawBlock !== "object" || Array.isArray(rawBlock))
+        return "";
+      const explicitType = coerceString(
+        rawBlock.type || rawBlock.blockType || rawBlock.block_type || rawBlock.kind || rawBlock.component
+      );
+      const allowedTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((item) => item.type));
+      if (allowedTypes.has(explicitType))
+        return explicitType;
+      if ("sectionIndex" in rawBlock || "paragraphs" in rawBlock || "bulletGroups" in rawBlock)
+        return "section-block";
+      if (Array.isArray(rawBlock.items))
+        return "part-nav";
+      if (typeof rawBlock.imageId === "string")
+        return "phone-frame";
+      if ("coverImageId" in rawBlock || "eyebrow" in rawBlock || "subtitle" in rawBlock || explicitType === "cover")
+        return "hero";
+      if ("buttonText" in rawBlock || "body" in rawBlock)
+        return "cta-card";
+      if ("text" in rawBlock || "quote" in rawBlock)
+        return "lead-quote";
+      if ("summary" in rawBlock || "caseLabel" in rawBlock || "bullets" in rawBlock || "highlight" in rawBlock || "imageIds" in rawBlock)
+        return "case-block";
+      if (typeof rawBlock.title === "string")
+        return "section-block";
+      return "";
+    }
+    function repairRawLayoutPayload(rawLayout = {}) {
+      if (!rawLayout || typeof rawLayout !== "object" || Array.isArray(rawLayout))
+        return rawLayout;
+      if (!Array.isArray(rawLayout.blocks))
+        return rawLayout;
+      return {
+        ...rawLayout,
+        blocks: rawLayout.blocks.map((block) => {
+          if (!block || typeof block !== "object" || Array.isArray(block))
+            return block;
+          const inferredType = inferBlockType(block);
+          if (!inferredType)
+            return block;
+          const repaired = {
+            ...block,
+            type: inferredType
+          };
+          delete repaired.blockType;
+          delete repaired.block_type;
+          delete repaired.kind;
+          delete repaired.component;
+          return repaired;
+        })
+      };
+    }
     function coerceString(value, fallback = "") {
       return typeof value === "string" ? value.trim() : fallback;
+    }
+    function normalizeTitleKey(value) {
+      return coerceString(value).toLowerCase().replace(/\s+/g, "");
+    }
+    function toSectionIndex(value, fallback = -1) {
+      if (Number.isInteger(value) && value >= 0)
+        return value;
+      if (typeof value === "string" && /^\d+$/.test(value.trim())) {
+        const parsed = parseInt(value.trim(), 10);
+        return parsed >= 0 ? parsed : fallback;
+      }
+      return fallback;
     }
     function toTextArray(value, limit = 6) {
       if (!Array.isArray(value))
@@ -3956,7 +4122,36 @@ var require_ai_layout = __commonJS({
         return [];
       return value.map((item) => coerceString(item)).filter((item) => imageIds.has(item)).slice(0, limit);
     }
-    function normalizeLayoutBlock(block, imageIds, index) {
+    function buildSectionBlockFromSource(section, {
+      imageIds = [],
+      fallbackIndex = 0
+    } = {}) {
+      if (!section || typeof section !== "object")
+        return null;
+      const title = coerceString(section.title || section.heading || "");
+      const paragraphs = Array.isArray(section.paragraphs) ? section.paragraphs.map((item) => coerceString(item)).filter(Boolean) : [];
+      const bulletGroups = Array.isArray(section.bulletGroups) ? section.bulletGroups.map((group) => Array.isArray(group) ? group.map((item) => coerceString(item)).filter(Boolean).slice(0, 10) : []).filter((group) => group.length) : [];
+      const normalizedImageIds = Array.isArray(imageIds) ? imageIds.map((item) => coerceString(item)).filter(Boolean).slice(0, 3) : [];
+      if (!title && !paragraphs.length && !bulletGroups.length)
+        return null;
+      return {
+        type: "section-block",
+        sectionIndex: toSectionIndex(section.index, fallbackIndex),
+        sectionLabel: (section.level || 2) >= 3 ? `SUB ${String(fallbackIndex + 1).padStart(2, "0")}` : `PART ${String(fallbackIndex + 1).padStart(2, "0")}`,
+        headingLevel: Number.isInteger(section.level) ? section.level : 2,
+        title,
+        paragraphs,
+        bulletGroups,
+        imageIds: normalizedImageIds
+      };
+    }
+    function findSourceSectionByTitle(sourceSections = [], title = "") {
+      const expectedKey = normalizeTitleKey(title);
+      if (!expectedKey)
+        return null;
+      return sourceSections.find((section) => normalizeTitleKey(section == null ? void 0 : section.title) === expectedKey) || null;
+    }
+    function normalizeLayoutBlock(block, imageIds, sourceSections, index) {
       if (!block || typeof block !== "object")
         return null;
       const type = coerceString(block.type);
@@ -3994,6 +4189,13 @@ var require_ai_layout = __commonJS({
         const summary = coerceString(block.summary);
         if (!title && !summary)
           return null;
+        const matchedSection = findSourceSectionByTitle(sourceSections, title);
+        if (matchedSection) {
+          return buildSectionBlockFromSource(matchedSection, {
+            imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+            fallbackIndex: toSectionIndex(matchedSection.index, index)
+          });
+        }
         return {
           type,
           caseLabel: coerceString(block.caseLabel || `CASE ${String(index + 1).padStart(2, "0")}`),
@@ -4003,6 +4205,16 @@ var require_ai_layout = __commonJS({
           imageIds: toImageIdArray(block.imageIds, imageIds, 3),
           highlight: coerceString(block.highlight)
         };
+      }
+      if (type === "section-block") {
+        const sectionIndex = toSectionIndex(block.sectionIndex, -1);
+        const sourceSection = sectionIndex >= 0 ? sourceSections.find((item) => toSectionIndex(item == null ? void 0 : item.index, -1) === sectionIndex) : null;
+        if (!sourceSection)
+          return null;
+        return buildSectionBlockFromSource(sourceSection, {
+          imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+          fallbackIndex: sectionIndex
+        });
       }
       if (type === "phone-frame") {
         const imageId = coerceString(block.imageId);
@@ -4035,57 +4247,127 @@ var require_ai_layout = __commonJS({
         return "";
       return text.length > maxLength ? `${text.slice(0, maxLength - 1)}\u2026` : text;
     }
+    function looksLikeScreenshotRef(image = {}) {
+      const signature = [
+        image.id,
+        image.alt,
+        image.caption,
+        image.src
+      ].map((item) => coerceString(item).toLowerCase()).join(" ");
+      if (!signature)
+        return false;
+      return /(截图|界面|对话|聊天|微信|面板|后台|screenshot|screen|cleanshot|dialog|chat|ui)/i.test(signature);
+    }
+    function stripFrontmatterBlock(markdown = "") {
+      const content = String(markdown || "").replace(/^\uFEFF/, "");
+      if (!content.startsWith("---"))
+        return content;
+      const match = content.match(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/);
+      return match ? content.slice(match[0].length) : content;
+    }
     function stripMarkdown(value) {
       return String(value || "").replace(/```[\s\S]*?```/g, " ").replace(/`([^`]+)`/g, "$1").replace(/!\[[^\]]*]\([^)]+\)/g, " ").replace(/\[[^\]]+]\([^)]+\)/g, "$1").replace(/^\s{0,3}>\s?/gm, "").replace(/[*_~#>-]/g, " ").replace(/\s+/g, " ").trim();
     }
-    function extractMarkdownSignals(markdown = "") {
-      const lines = String(markdown || "").split(/\r?\n/);
-      const headings = [];
-      const bulletGroups = [];
-      const paragraphs = [];
+    function extractMarkdownSections(markdown = "") {
+      const lines = stripFrontmatterBlock(markdown).split(/\r?\n/);
+      const sections = [];
+      const introParagraphs = [];
+      const introBulletGroups = [];
+      let currentSection = null;
       let currentParagraph = [];
       let currentBullets = [];
-      const flushParagraph = () => {
+      const pushParagraphToTarget = () => {
         const text = stripMarkdown(currentParagraph.join(" ").trim());
-        if (text)
-          paragraphs.push(text);
+        if (text) {
+          if (currentSection) {
+            currentSection.paragraphs.push(text);
+          } else {
+            introParagraphs.push(text);
+          }
+        }
         currentParagraph = [];
       };
-      const flushBullets = () => {
-        if (currentBullets.length)
-          bulletGroups.push(currentBullets);
+      const pushBulletsToTarget = () => {
+        if (currentBullets.length) {
+          if (currentSection) {
+            currentSection.bulletGroups.push(currentBullets);
+          } else {
+            introBulletGroups.push(currentBullets);
+          }
+        }
         currentBullets = [];
+      };
+      const finalizeSection = () => {
+        if (currentSection && (currentSection.title || currentSection.paragraphs.length || currentSection.bulletGroups.length)) {
+          currentSection.index = sections.length;
+          sections.push(currentSection);
+        }
+        currentSection = null;
       };
       for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line) {
-          flushParagraph();
-          flushBullets();
+          pushParagraphToTarget();
+          pushBulletsToTarget();
           continue;
         }
-        const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+        const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
         if (headingMatch) {
-          flushParagraph();
-          flushBullets();
-          headings.push({
+          pushParagraphToTarget();
+          pushBulletsToTarget();
+          finalizeSection();
+          currentSection = {
+            index: sections.length,
             level: headingMatch[1].length,
-            text: stripMarkdown(headingMatch[2])
-          });
+            title: stripMarkdown(headingMatch[2]),
+            paragraphs: [],
+            bulletGroups: []
+          };
           continue;
         }
         const bulletMatch = line.match(/^[-*+]\s+(.+)$/) || line.match(/^\d+\.\s+(.+)$/);
         if (bulletMatch) {
-          flushParagraph();
+          pushParagraphToTarget();
           currentBullets.push(stripMarkdown(bulletMatch[1]));
           continue;
         }
         currentParagraph.push(line);
       }
-      flushParagraph();
-      flushBullets();
+      pushParagraphToTarget();
+      pushBulletsToTarget();
+      finalizeSection();
+      if (!sections.length && (introParagraphs.length || introBulletGroups.length)) {
+        sections.push({
+          index: 0,
+          level: 2,
+          title: "\u6838\u5FC3\u5185\u5BB9",
+          paragraphs: introParagraphs.slice(),
+          bulletGroups: introBulletGroups.slice()
+        });
+      }
+      return {
+        introParagraphs,
+        introBulletGroups,
+        sections
+      };
+    }
+    function extractMarkdownSignals(markdown = "") {
+      const structure = extractMarkdownSections(markdown);
+      const headings = structure.sections.map((section) => ({
+        level: section.level || 2,
+        text: coerceString(section.title)
+      })).filter((section) => section.text);
+      const bulletGroups = [
+        ...structure.introBulletGroups,
+        ...structure.sections.flatMap((section) => section.bulletGroups || [])
+      ];
+      const paragraphs = [
+        ...structure.introParagraphs,
+        ...structure.sections.flatMap((section) => section.paragraphs || [])
+      ];
       const leadParagraphs = paragraphs.slice(0, 3);
       const lastParagraph = paragraphs[paragraphs.length - 1] || "";
-      const sectionTitles = headings.filter((item) => item.level <= 3).map((item) => item.text).slice(0, 6);
+      const sectionTitles = headings.filter((item) => item.level <= 3).map((item) => item.text).slice(0, 12);
       return {
         headings,
         sectionTitles,
@@ -4096,16 +4378,16 @@ var require_ai_layout = __commonJS({
       };
     }
     function buildFallbackLayout(context = {}) {
-      var _a, _b, _c, _d;
+      var _a;
       const title = coerceString(context.title || "\u672A\u547D\u540D\u6587\u7AE0");
       const stylePack = coerceString(context.stylePack || "tech-green");
       const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
       const signals = extractMarkdownSignals(context.markdown || "");
+      const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
       const firstImageId = ((_a = imageRefs[0]) == null ? void 0 : _a.id) || "";
-      const secondImageId = ((_b = imageRefs[1]) == null ? void 0 : _b.id) || "";
       const leadText = summarizeText(signals.leadParagraphs[0] || signals.paragraphs[0] || "");
       const leadNote = summarizeText(signals.leadParagraphs[1] || "");
-      const partItems = signals.sectionTitles.slice(0, 3).map((text, index) => ({
+      const partItems = signals.sectionTitles.slice(0, 5).map((text, index) => ({
         label: `PART ${String(index + 1).padStart(2, "0")}`,
         text
       }));
@@ -4129,52 +4411,43 @@ var require_ai_layout = __commonJS({
           note: leadNote
         });
       }
-      const sectionTitles = signals.sectionTitles.length ? signals.sectionTitles : ["\u6838\u5FC3\u5185\u5BB9"];
-      sectionTitles.slice(0, 2).forEach((heading, index) => {
-        const bullets = signals.bulletGroups[index] || [];
-        const paragraph = signals.paragraphs[index + 1] || signals.paragraphs[index] || "";
-        bodyBlocks.push({
-          type: "case-block",
-          caseLabel: `CASE ${String(index + 1).padStart(2, "0")}`,
-          title: heading,
-          summary: summarizeText(paragraph, 96),
-          bullets: bullets.slice(0, 4),
-          imageIds: index === 0 && firstImageId ? [firstImageId] : index === 1 && secondImageId ? [secondImageId] : [],
-          highlight: bullets[0] ? summarizeText(bullets[0], 48) : ""
+      sourceSections.forEach((section, index) => {
+        const block = buildSectionBlockFromSource(section, {
+          imageIds: index === 0 && firstImageId ? [firstImageId] : [],
+          fallbackIndex: index
         });
+        if (block)
+          bodyBlocks.push(block);
       });
-      if (firstImageId) {
+      const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
+      if (screenshotImage == null ? void 0 : screenshotImage.id) {
         bodyBlocks.push({
           type: "phone-frame",
-          imageId: secondImageId || firstImageId,
-          caption: ((_c = imageRefs[1]) == null ? void 0 : _c.caption) || ((_d = imageRefs[0]) == null ? void 0 : _d.caption) || "\u793A\u610F\u622A\u56FE"
+          imageId: screenshotImage.id,
+          caption: screenshotImage.caption || screenshotImage.alt || "\u793A\u610F\u622A\u56FE"
         });
       }
-      const ctaBlock = {
-        type: "cta-card",
-        title: signals.sectionTitles[0] ? `\u7EE7\u7EED\u9605\u8BFB\uFF1A${signals.sectionTitles[0]}` : "\u7EE7\u7EED\u9605\u8BFB",
-        body: summarizeText(signals.lastParagraph || leadText || title, 88),
-        buttonText: "\u6574\u7406\u540E\u53D1\u5E03",
-        note: "\u672C\u7248\u5F0F\u4E3A AI \u8F85\u52A9\u751F\u6210\uFF0C\u53EF\u7EE7\u7EED\u8C03\u6574\u540E\u590D\u5236\u6216\u540C\u6B65\u5230\u516C\u4F17\u53F7\u3002"
-      };
-      const blocks = [...headBlocks, ...bodyBlocks].slice(0, 5);
-      blocks.push(ctaBlock);
       return {
         version: AI_LAYOUT_SCHEMA_VERSION2,
         articleType: signals.sectionTitles.length >= 2 ? "tutorial" : "article",
         stylePack,
         title,
         summary: summarizeText(leadText || signals.lastParagraph || title, 90),
-        blocks: blocks.filter(Boolean).slice(0, 6)
+        blocks: [...headBlocks, ...bodyBlocks].filter(Boolean).slice(0, MAX_LAYOUT_BLOCKS)
       };
     }
     function mergeBlocksWithFallback(aiBlocks = [], fallbackBlocks = []) {
       return mergeBlocksWithFallbackDetailed(aiBlocks, fallbackBlocks).map((entry) => entry.block);
     }
     function mergeBlocksWithFallbackDetailed(aiBlocks = [], fallbackBlocks = []) {
-      const merged = [];
+      const introOrder = ["hero", "part-nav", "lead-quote"];
+      const introAiByType = /* @__PURE__ */ new Map();
+      const introFallbackByType = /* @__PURE__ */ new Map();
+      const fallbackSectionsByIndex = /* @__PURE__ */ new Map();
+      const deferredAi = [];
+      const deferredFallback = [];
       const seenKeys = /* @__PURE__ */ new Set();
-      const fallbackCta = fallbackBlocks.find((block) => (block == null ? void 0 : block.type) === "cta-card") || null;
+      const merged = [];
       const addBlock = (block, source) => {
         if (!block || !block.type)
           return;
@@ -4184,27 +4457,87 @@ var require_ai_layout = __commonJS({
         seenKeys.add(dedupeKey);
         merged.push({ block, source });
       };
-      aiBlocks.forEach((block) => addBlock(block, "ai"));
-      fallbackBlocks.filter((block) => (block == null ? void 0 : block.type) !== "cta-card").forEach((block) => addBlock(block, "fallback"));
-      const limited = merged.slice(0, 5);
-      const limitedKeys = new Set(limited.map((entry) => getLayoutBlockKey(entry.block)));
-      if (fallbackCta) {
-        const ctaKey = getLayoutBlockKey(fallbackCta);
-        if (!limitedKeys.has(ctaKey)) {
-          limited.push({ block: fallbackCta, source: "fallback" });
+      const fallbackSectionIndices = [];
+      fallbackBlocks.forEach((block) => {
+        if (!block || !block.type)
+          return;
+        if (introOrder.includes(block.type)) {
+          if (!introFallbackByType.has(block.type)) {
+            introFallbackByType.set(block.type, block);
+          }
+          return;
         }
-      }
-      return limited.slice(0, 6);
+        if (block.type === "section-block" && Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0) {
+          if (!fallbackSectionsByIndex.has(block.sectionIndex)) {
+            fallbackSectionsByIndex.set(block.sectionIndex, block);
+            fallbackSectionIndices.push(block.sectionIndex);
+          }
+          return;
+        }
+        deferredFallback.push({ block, source: "fallback" });
+      });
+      aiBlocks.forEach((block) => {
+        if (!block || !block.type)
+          return;
+        if (introOrder.includes(block.type)) {
+          if (!introAiByType.has(block.type)) {
+            introAiByType.set(block.type, block);
+          }
+          return;
+        }
+        deferredAi.push({ block, source: "ai" });
+      });
+      introOrder.forEach((type) => {
+        const aiBlock = introAiByType.get(type);
+        const fallbackBlock = introFallbackByType.get(type);
+        if (aiBlock) {
+          addBlock(aiBlock, "ai");
+        } else if (fallbackBlock) {
+          addBlock(fallbackBlock, "fallback");
+        }
+      });
+      const sortedFallbackIndices = Array.from(new Set(fallbackSectionIndices)).sort((a, b) => a - b);
+      let fallbackPointer = 0;
+      const flushFallbackSectionsBefore = (targetIndex) => {
+        while (fallbackPointer < sortedFallbackIndices.length && sortedFallbackIndices[fallbackPointer] < targetIndex) {
+          const sectionIndex = sortedFallbackIndices[fallbackPointer];
+          addBlock(fallbackSectionsByIndex.get(sectionIndex), "fallback");
+          fallbackPointer += 1;
+        }
+      };
+      const consumeFallbackSection = (sectionIndex) => {
+        while (fallbackPointer < sortedFallbackIndices.length && sortedFallbackIndices[fallbackPointer] <= sectionIndex) {
+          fallbackPointer += 1;
+        }
+      };
+      deferredAi.forEach((entry) => {
+        const block = entry.block;
+        if ((block == null ? void 0 : block.type) === "section-block" && Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0) {
+          flushFallbackSectionsBefore(block.sectionIndex);
+          addBlock(block, "ai");
+          consumeFallbackSection(block.sectionIndex);
+          return;
+        }
+        if ((block == null ? void 0 : block.type) === "hero" || (block == null ? void 0 : block.type) === "part-nav" || (block == null ? void 0 : block.type) === "lead-quote") {
+          return;
+        }
+        deferredFallback.push(entry);
+      });
+      flushFallbackSectionsBefore(Number.POSITIVE_INFINITY);
+      deferredFallback.forEach((entry) => addBlock(entry.block, entry.source));
+      return merged.slice(0, MAX_LAYOUT_BLOCKS);
     }
     function normalizeArticleLayout(rawLayout = {}, context = {}) {
       const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
-      const requestedStylePack = coerceString(rawLayout.stylePack || context.stylePack || "tech-green");
-      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, index)).filter(Boolean) : [];
+      const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || "tech-green");
+      const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
+      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, sourceSections, index)).filter(Boolean) : [];
       const fallbackLayout = buildFallbackLayout({
         title: rawLayout.title || context.title,
         markdown: context.markdown,
         stylePack: requestedStylePack,
-        imageRefs: context.imageRefs
+        imageRefs: context.imageRefs,
+        sourceSections
       });
       const blocks = mergeBlocksWithFallback(normalizedAiBlocks, fallbackLayout.blocks);
       return {
@@ -4225,7 +4558,7 @@ var require_ai_layout = __commonJS({
       mergedEntries = [],
       schemaValidation = null
     }) {
-      const stylePackInfo = getStylePackById(stylePack);
+      const stylePackInfo = getStylePackById2(stylePack);
       const fallbackEntries = mergedEntries.filter((entry) => entry.source === "fallback");
       return {
         providerName: coerceString(provider == null ? void 0 : provider.name),
@@ -4258,7 +4591,7 @@ var require_ai_layout = __commonJS({
     }
     function buildLayoutResult(rawLayout = {}, context = {}) {
       const validation = validateAiLayoutPayload(rawLayout);
-      const requestedStylePack = coerceString(rawLayout.stylePack || context.stylePack || "tech-green");
+      const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || "tech-green");
       if (validation.fatal) {
         const generationMeta = createLayoutGenerationMeta({
           provider: context.provider,
@@ -4272,12 +4605,14 @@ var require_ai_layout = __commonJS({
         throw new AiLayoutSchemaError(`AI \u8FD4\u56DE\u7684\u5E03\u5C40\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF08${validation.issueCount} \u9879\uFF09`, validation, generationMeta);
       }
       const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
-      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, index)).filter(Boolean) : [];
+      const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
+      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, sourceSections, index)).filter(Boolean) : [];
       const fallbackLayout = buildFallbackLayout({
         title: rawLayout.title || context.title,
         markdown: context.markdown,
         stylePack: requestedStylePack,
-        imageRefs: context.imageRefs
+        imageRefs: context.imageRefs,
+        sourceSections
       });
       const mergedEntries = mergeBlocksWithFallbackDetailed(normalizedAiBlocks, fallbackLayout.blocks);
       const layoutJson = {
@@ -4324,10 +4659,11 @@ var require_ai_layout = __commonJS({
       return refs;
     }
     function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
-      const stylePackInfo = getStylePackById(stylePack);
+      const stylePackInfo = getStylePackById2(stylePack);
       const signals = extractMarkdownSignals(markdown);
       const promptMarkdown = truncateMarkdownForPrompt(markdown);
       const imageSummary = imageRefs.length ? imageRefs.map((image) => `- ${image.id}: ${image.caption}`).join("\n") : "- \u65E0\u53EF\u7528\u56FE\u7247";
+      const sectionSummary = signals.sectionTitles.length ? signals.sectionTitles.map((item, index) => `- ${index}: ${item}`).join("\n") : "- \u65E0\u660E\u663E\u7AE0\u8282\u7ED3\u6784";
       const headingSummary = signals.sectionTitles.length ? signals.sectionTitles.map((item, index) => `${index + 1}. ${item}`).join("\n") : "- \u65E0\u660E\u663E\u6807\u9898\u7ED3\u6784";
       const leadSummary = signals.leadParagraphs.length ? signals.leadParagraphs.map((item, index) => `${index + 1}. ${summarizeText(item, 90)}`).join("\n") : "- \u65E0\u53EF\u63D0\u53D6\u5BFC\u8BED";
       const bulletSummary = signals.bulletGroups.length ? signals.bulletGroups.slice(0, 2).map((group, groupIndex) => `\u7EC4 ${groupIndex + 1}: ${group.slice(0, 4).join(" / ")}`).join("\n") : "- \u65E0\u660E\u663E\u5217\u8868\u4FE1\u606F";
@@ -4346,6 +4682,9 @@ var require_ai_layout = __commonJS({
             "\u53EF\u7528\u56FE\u7247\uFF1A",
             imageSummary,
             "",
+            "\u53EF\u7528\u6B63\u6587 section\uFF1A",
+            sectionSummary,
+            "",
             "\u6587\u7AE0\u7ED3\u6784\u6458\u8981\uFF1A",
             "\u6807\u9898\u5927\u7EB2\uFF1A",
             headingSummary,
@@ -4360,7 +4699,11 @@ var require_ai_layout = __commonJS({
             "block \u7EA6\u675F\uFF1A",
             ...getAiLayoutBlockConstraintLines(),
             "",
-            "\u4F18\u5148\u751F\u6210 4 \u5230 6 \u4E2A block\uFF0C\u9002\u5408\u6559\u7A0B/\u6848\u4F8B\u7C7B\u516C\u4F17\u53F7\u6587\u7AE0\u3002",
+            "\u6B63\u6587\u4E3B\u4F53\u8BF7\u4F18\u5148\u4F7F\u7528 section-block\uFF0C\u5E76\u901A\u8FC7 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u3002",
+            "sectionIndex \u4ECE 0 \u5F00\u59CB\uFF0C\u5BF9\u5E94\u4E0A\u9762\u201C\u53EF\u7528\u6B63\u6587 section\u201D\u7684\u7F16\u53F7\u3002",
+            "\u4F18\u5148\u8986\u76D6\u5168\u6587\u4E3B\u8981\u7AE0\u8282\uFF0C\u4E0D\u8981\u53EA\u5904\u7406\u524D\u534A\u7BC7\uFF0C\u4E5F\u4E0D\u8981\u9057\u6F0F\u540E\u534A\u90E8\u5206\u5185\u5BB9\u3002",
+            "\u5982\u679C\u7AE0\u8282\u8F83\u591A\uFF0C\u5141\u8BB8\u751F\u6210\u66F4\u591A block \u6765\u8986\u76D6\u5168\u6587\uFF1B\u4FDD\u771F\u4F18\u5148\u4E8E\u82B1\u54E8\u7F16\u6392\u3002",
+            "CTA \u548C phone-frame \u90FD\u662F\u53EF\u9009\u5757\uFF0C\u4E0D\u8981\u9ED8\u8BA4\u5F3A\u52A0\u3002",
             "",
             "\u539F\u6587\u5982\u4E0B\uFF1A",
             promptMarkdown
@@ -4413,7 +4756,12 @@ var require_ai_layout = __commonJS({
         const data = await response.json();
         const content = readChatCompletionContent(data);
         const jsonPayload = extractJsonPayload(content);
-        return JSON.parse(jsonPayload);
+        return repairRawLayoutPayload(JSON.parse(jsonPayload));
+      } catch (error) {
+        if (controller.signal.aborted || (error == null ? void 0 : error.name) === "AbortError") {
+          throw new AiLayoutTimeoutError(timeoutMs);
+        }
+        throw error;
       } finally {
         clearTimeout(timer);
       }
@@ -4434,6 +4782,7 @@ var require_ai_layout = __commonJS({
       if (!markdown || !String(markdown).trim())
         throw new Error("\u6587\u7AE0\u5185\u5BB9\u4E3A\u7A7A\uFF0C\u65E0\u6CD5\u8FDB\u884C AI \u7F16\u6392");
       const signals = extractMarkdownSignals(markdown);
+      const sourceSections = extractMarkdownSections(markdown).sections;
       let rawLayout;
       switch (provider.kind) {
         case AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE:
@@ -4456,7 +4805,8 @@ var require_ai_layout = __commonJS({
         imageRefs,
         markdown,
         provider,
-        signals
+        signals,
+        sourceSections
       });
     }
     async function testAiProviderConnection2(provider, fetchImpl = globalThis.fetch) {
@@ -4482,14 +4832,18 @@ var require_ai_layout = __commonJS({
       })[char]);
     }
     function renderArticleLayoutHtml2(layout, { imageRefs = [] } = {}) {
-      const stylePack = getStylePackById(layout == null ? void 0 : layout.stylePack);
+      const stylePack = getStylePackById2(layout == null ? void 0 : layout.stylePack);
       const tokens = stylePack.tokens;
       const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
+      const bodyFontSize = 16;
+      const bodyLineHeight = 1.8;
+      const bodyParagraphGap = 20;
       const wrapperStyle = [
         'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif',
         `color:${tokens.text}`,
-        "font-size:16px",
-        "line-height:1.8",
+        `font-size:${bodyFontSize}px`,
+        `line-height:${bodyLineHeight}`,
+        "letter-spacing:0",
         "padding:24px 18px",
         `background:${tokens.surface}`
       ].join(";");
@@ -4557,19 +4911,43 @@ var require_ai_layout = __commonJS({
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
         ${block.title ? `<h2 style="margin:0 0 8px;font-size:22px;line-height:1.35;color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ""}
-        ${block.summary ? `<p style="margin:0;color:${tokens.muted};">${escapeHtml(block.summary)}</p>` : ""}
-        ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;">${escapeHtml(block.highlight)}</div>` : ""}
+        ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ""}
+        ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ""}
         ${bulletsHtml}
         ${imagesHtml}
       </section>`;
         }
+        if (block.type === "section-block") {
+          const sectionDisplayIndex = Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0 ? block.sectionIndex + 1 : index + 1;
+          const headingLevel = Number.isInteger(block.headingLevel) ? block.headingLevel : 2;
+          const titleFontSize = headingLevel >= 3 ? 18 : 22;
+          const titleMarginBottom = headingLevel >= 3 ? 10 : 12;
+          const titleColor = headingLevel >= 3 ? tokens.accentDeep : tokens.text;
+          const paragraphsHtml = Array.isArray(block.paragraphs) ? block.paragraphs.map((paragraph) => `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(paragraph)}</p>`).join("") : "";
+          const bulletGroupsHtml = Array.isArray(block.bulletGroups) ? block.bulletGroups.map((group) => {
+            if (!Array.isArray(group) || !group.length)
+              return "";
+            return `<ul style="margin:12px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>`;
+          }).join("") : "";
+          const imagesHtml = Array.isArray(block.imageIds) ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("") : "";
+          return `<section style="margin:26px 0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+        </div>
+        ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:1.4;color:${titleColor};">${escapeHtml(block.title)}</h2>` : ""}
+        ${paragraphsHtml}
+        ${bulletGroupsHtml}
+        ${imagesHtml}
+      </section>`;
+        }
         if (block.type === "phone-frame") {
-          return `<section style="margin:24px auto;max-width:380px;padding:14px;border:1px solid ${tokens.border};border-radius:42px;background:#111;box-shadow:0 20px 40px -28px rgba(0,0,0,0.45);">
-        <div style="width:42%;height:18px;margin:0 auto 14px;border-radius:999px;background:#000;"></div>
-        <div style="background:#fff;border-radius:28px;padding:10px;overflow:hidden;">
+          return `<section style="margin:24px auto;max-width:380px;padding:14px;border:1px solid ${tokens.border};border-radius:42px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);">
+        <div style="width:42%;height:18px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
+        <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:28px;padding:10px;overflow:hidden;">
           ${renderImage(block.imageId, "border-radius:22px;")}
         </div>
-        ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:#d7e2dd;">${escapeHtml(block.caption)}</div>` : ""}
+        ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:${tokens.muted};">${escapeHtml(block.caption)}</div>` : ""}
       </section>`;
         }
         if (block.type === "cta-card") {
@@ -4596,18 +4974,21 @@ var require_ai_layout = __commonJS({
       isAiProviderRunnable: isAiProviderRunnable2,
       summarizeAiProviderIssues: summarizeAiProviderIssues2,
       normalizeArticleLayoutState,
+      normalizeArticleLayoutCacheEntry: normalizeArticleLayoutCacheEntry2,
       normalizeSchemaValidation,
       getStylePackList: getStylePackList2,
-      getStylePackById,
+      getStylePackById: getStylePackById2,
       listEnabledAiProviders,
       resolveAiProvider: resolveAiProvider2,
       extractImageRefsFromHtml: extractImageRefsFromHtml2,
+      extractMarkdownSections,
       extractMarkdownSignals,
       buildFallbackLayout,
       normalizeArticleLayout,
       normalizeLayoutGenerationMeta,
       buildLayoutResult,
       AiLayoutSchemaError,
+      AiLayoutTimeoutError,
       generateArticleLayout: generateArticleLayout2,
       renderArticleLayoutHtml: renderArticleLayoutHtml2,
       testAiProviderConnection: testAiProviderConnection2
@@ -5485,7 +5866,9 @@ var {
   isAiProviderRunnable,
   summarizeAiProviderIssues,
   getStylePackList,
+  getStylePackById,
   resolveAiProvider,
+  normalizeArticleLayoutCacheEntry,
   extractImageRefsFromHtml,
   generateArticleLayout,
   renderArticleLayoutHtml,
@@ -5894,7 +6277,7 @@ var AppleStyleView = class extends ItemView {
           this.registerScrollSync(activeView);
         }
         if (activeView && this.converter) {
-          this.scheduleActiveLeafRender();
+          this.scheduleActiveLeafRender(activeView);
         }
       })
     );
@@ -5911,24 +6294,35 @@ var AppleStyleView = class extends ItemView {
         return;
       const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
       if (activeView && activeView.file && this.lastActiveFile && activeView.file.path === this.lastActiveFile.path) {
-        await this.convertCurrent(true);
+        await this.convertCurrent(true, {
+          sourceOverride: {
+            markdown: activeView.editor.getValue(),
+            sourcePath: activeView.file.path || ""
+          }
+        });
       }
     }, 500);
     this.registerEvent(
       this.app.workspace.on("editor-change", debouncedConvert)
     );
   }
-  scheduleActiveLeafRender() {
+  scheduleActiveLeafRender(activeViewOverride = null) {
     if (this.activeLeafRenderTimer) {
       clearTimeout(this.activeLeafRenderTimer);
       this.activeLeafRenderTimer = null;
     }
     this.activeLeafRenderTimer = setTimeout(() => {
       this.activeLeafRenderTimer = null;
+      const activeView = activeViewOverride || this.app.workspace.getActiveViewOfType(MarkdownView);
+      const sourceOverride = activeView && activeView.file ? {
+        markdown: activeView.editor.getValue(),
+        sourcePath: activeView.file.path || ""
+      } : null;
       this.convertCurrent(true, {
         showLoading: true,
         loadingText: "\u6B63\u5728\u5207\u6362\u6587\u7AE0\u9884\u89C8...",
-        loadingDelay: 150
+        loadingDelay: 120,
+        sourceOverride
       });
     }, 16);
   }
@@ -6594,6 +6988,42 @@ var AppleStyleView = class extends ItemView {
         onOpen();
     }
   }
+  canScrollElementInDirection(element, deltaY) {
+    if (!element)
+      return false;
+    const maxScroll = Math.max(0, (element.scrollHeight || 0) - (element.clientHeight || 0));
+    if (maxScroll <= 0)
+      return false;
+    if (deltaY < 0)
+      return (element.scrollTop || 0) > 0;
+    if (deltaY > 0)
+      return (element.scrollTop || 0) < maxScroll - 1;
+    return true;
+  }
+  attachOverlayScrollGuard(overlay, nestedSelectors = []) {
+    if (!overlay || overlay.__appleScrollGuardAttached)
+      return;
+    const normalizedSelectors = Array.isArray(nestedSelectors) ? nestedSelectors.filter(Boolean) : [];
+    const handleWheel = (event) => {
+      if (!overlay.classList.contains("visible"))
+        return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      const nestedScrollable = target ? normalizedSelectors.map((selector) => target.closest(selector)).find(Boolean) : null;
+      const activeScrollable = nestedScrollable || overlay;
+      if (!this.canScrollElementInDirection(activeScrollable, event.deltaY)) {
+        event.preventDefault();
+      }
+      event.stopPropagation();
+    };
+    const handleTouchMove = (event) => {
+      if (!overlay.classList.contains("visible"))
+        return;
+      event.stopPropagation();
+    };
+    overlay.addEventListener("wheel", handleWheel, { passive: false });
+    overlay.addEventListener("touchmove", handleTouchMove, { passive: false });
+    overlay.__appleScrollGuardAttached = true;
+  }
   closeTransientPanels() {
     if (this.settingsOverlay)
       this.settingsOverlay.classList.remove("visible");
@@ -6623,20 +7053,22 @@ var AppleStyleView = class extends ItemView {
     this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
   }
   createAiLayoutPanel(parent) {
-    var _a;
-    const header = parent.createDiv({ cls: "apple-ai-layout-header" });
+    var _a, _b;
+    this.attachOverlayScrollGuard(parent, [".apple-ai-layout-debug-body"]);
+    const area = parent.createDiv({ cls: "apple-ai-layout-area" });
+    const header = area.createDiv({ cls: "apple-ai-layout-header" });
     header.createEl("div", { cls: "apple-ai-layout-title", text: "AI \u7F16\u6392" });
     header.createEl("div", {
       cls: "apple-ai-layout-subtitle",
       text: "\u6309\u5F53\u524D\u6587\u7AE0\u5185\u5BB9\u751F\u6210\u533A\u5757\u5316\u6392\u7248\u5EFA\u8BAE"
     });
-    this.aiLayoutStatus = parent.createDiv({ cls: "apple-ai-layout-status" });
+    this.aiLayoutStatus = area.createDiv({ cls: "apple-ai-layout-status" });
     this.aiLayoutStatusBadge = this.aiLayoutStatus.createEl("span", { cls: "apple-ai-layout-badge", text: "\u672A\u751F\u6210" });
     this.aiLayoutStatusText = this.aiLayoutStatus.createEl("span", {
       cls: "apple-ai-layout-status-text",
       text: "\u5C1A\u672A\u751F\u6210\u5F53\u524D\u6587\u7AE0\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002"
     });
-    const controlSection = parent.createDiv({ cls: "apple-ai-layout-section" });
+    const controlSection = area.createDiv({ cls: "apple-ai-layout-section" });
     controlSection.createEl("label", { cls: "apple-setting-label", text: "\u98CE\u683C\u5305" });
     this.aiStylePackSelect = controlSection.createEl("select", { cls: "apple-select" });
     const stylePacks = getStylePackList();
@@ -6650,11 +7082,32 @@ var AppleStyleView = class extends ItemView {
         option.selected = true;
       }
     });
+    this.pendingAiStylePack = this.pendingAiStylePack || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultStylePack) || "tech-green";
+    this.aiStylePackSelect.value = this.pendingAiStylePack;
+    this.aiStylePackSelect.addEventListener("change", () => {
+      var _a2;
+      this.pendingAiStylePack = this.aiStylePackSelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultStylePack) || "tech-green";
+      this.refreshAiLayoutPanel();
+    });
     this.aiIncludeImagesNote = controlSection.createEl("div", {
       cls: "apple-ai-layout-mini-note",
-      text: ((_a = this.plugin.settings.ai) == null ? void 0 : _a.includeImagesInLayout) === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
+      text: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.includeImagesInLayout) === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
     });
-    const summarySection = parent.createDiv({ cls: "apple-ai-layout-section" });
+    const actionRow = area.createDiv({ cls: "apple-ai-layout-actions" });
+    this.aiGenerateBtn = actionRow.createEl("button", { cls: "apple-btn-primary", text: "\u751F\u6210\u7F16\u6392" });
+    this.aiGenerateBtn.addEventListener("click", () => this.generateAiLayoutForCurrentArticle());
+    this.aiApplyBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u5E94\u7528\u5230\u9884\u89C8" });
+    this.aiApplyBtn.addEventListener("click", () => this.applyAiLayoutToPreview());
+    this.aiResetBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u666E\u901A\u9884\u89C8" });
+    this.aiResetBtn.addEventListener("click", () => this.restoreBasePreview());
+    this.aiRestoreBlocksBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u5DF2\u79FB\u9664" });
+    this.aiRestoreBlocksBtn.addEventListener("click", () => this.restoreRemovedAiLayoutBlocks());
+    const debugRow = area.createDiv({ cls: "apple-ai-layout-debug-actions" });
+    this.aiViewJsonBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u5E03\u5C40 JSON" });
+    this.aiViewJsonBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("json"));
+    this.aiViewErrorBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5" });
+    this.aiViewErrorBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("error"));
+    const summarySection = area.createDiv({ cls: "apple-ai-layout-section" });
     summarySection.createEl("label", { cls: "apple-setting-label", text: "\u7ED3\u679C\u6458\u8981" });
     this.aiLayoutSummary = summarySection.createDiv({
       cls: "apple-ai-layout-summary",
@@ -6663,20 +7116,8 @@ var AppleStyleView = class extends ItemView {
     this.aiLayoutMetaChips = summarySection.createDiv({ cls: "apple-ai-layout-meta-chips" });
     this.aiLayoutMetaNote = summarySection.createDiv({ cls: "apple-ai-layout-mini-note" });
     this.aiSchemaIssuePanel = summarySection.createDiv({ cls: "apple-ai-layout-issues" });
-    this.aiBlockList = parent.createDiv({ cls: "apple-ai-layout-block-list" });
-    const actionRow = parent.createDiv({ cls: "apple-ai-layout-actions" });
-    this.aiGenerateBtn = actionRow.createEl("button", { cls: "apple-btn-primary", text: "\u751F\u6210\u7F16\u6392" });
-    this.aiGenerateBtn.addEventListener("click", () => this.generateAiLayoutForCurrentArticle());
-    this.aiApplyBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u5E94\u7528\u5230\u9884\u89C8" });
-    this.aiApplyBtn.addEventListener("click", () => this.applyAiLayoutToPreview());
-    this.aiResetBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u666E\u901A\u9884\u89C8" });
-    this.aiResetBtn.addEventListener("click", () => this.restoreBasePreview());
-    const debugRow = parent.createDiv({ cls: "apple-ai-layout-debug-actions" });
-    this.aiViewJsonBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u5E03\u5C40 JSON" });
-    this.aiViewJsonBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("json"));
-    this.aiViewErrorBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5" });
-    this.aiViewErrorBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("error"));
-    this.aiDebugPanel = parent.createDiv({ cls: "apple-ai-layout-debug-panel" });
+    this.aiBlockList = area.createDiv({ cls: "apple-ai-layout-block-list" });
+    this.aiDebugPanel = area.createDiv({ cls: "apple-ai-layout-debug-panel" });
     const debugHeader = this.aiDebugPanel.createDiv({ cls: "apple-ai-layout-debug-header" });
     this.aiDebugPanelTitle = debugHeader.createDiv({ cls: "apple-ai-layout-debug-title", text: "\u8C03\u8BD5\u8F93\u51FA" });
     const debugTools = debugHeader.createDiv({ cls: "apple-ai-layout-debug-tools" });
@@ -6691,21 +7132,150 @@ var AppleStyleView = class extends ItemView {
     });
     this.aiCopyDebugBtn.addEventListener("click", () => this.copyAiLayoutDebugSnapshot());
     this.aiDebugPanelBody = this.aiDebugPanel.createEl("pre", { cls: "apple-ai-layout-debug-body" });
-    const footer = parent.createDiv({ cls: "apple-ai-layout-footer" });
-    this.aiPanelHint = footer.createDiv({
-      cls: "apple-ai-layout-mini-note",
-      text: "\u6A21\u578B\u914D\u7F6E\u5728\u63D2\u4EF6\u8BBE\u7F6E\u9875\u4E2D\u7EF4\u62A4\u3002\u7B2C\u4E00\u7248\u4EC5\u652F\u6301\u751F\u6210 / \u5E94\u7528 / \u91CD\u751F\u6210\u3002"
+    this.aiLayoutLoadingMask = parent.createDiv({ cls: "apple-ai-layout-loading-mask" });
+    const loadingBar = this.aiLayoutLoadingMask.createDiv({ cls: "apple-ai-layout-loading-bar" });
+    loadingBar.createDiv({ cls: "apple-ai-layout-loading-bar-fill" });
+    this.aiLayoutLoadingSpinner = this.aiLayoutLoadingMask.createDiv({ cls: "apple-ai-layout-loading-spinner" });
+    this.aiLayoutLoadingMaskText = this.aiLayoutLoadingMask.createDiv({
+      cls: "apple-ai-layout-loading-text",
+      text: "\u6B63\u5728\u751F\u6210 AI \u7F16\u6392..."
     });
-    const settingsLink = footer.createEl("button", {
-      cls: "apple-ai-layout-link",
-      text: "\u6253\u5F00\u63D2\u4EF6\u8BBE\u7F6E"
-    });
-    settingsLink.addEventListener("click", () => {
-      this.closeTransientPanels();
-      if (!this.openPluginSettings()) {
-        new Notice("\u8BF7\u5728 Obsidian \u8BBE\u7F6E\u4E2D\u6253\u5F00\u5F53\u524D\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875");
+    this.refreshAiLayoutPanel();
+  }
+  applyAiLayoutPanelStylePack(stylePackId) {
+    if (!this.aiLayoutOverlay)
+      return;
+    const pack = getStylePackById(stylePackId || "tech-green");
+    const tokens = (pack == null ? void 0 : pack.tokens) || {};
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent", tokens.accent || "#0a84ff");
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-deep", tokens.accentDeep || tokens.accent || "#0a84ff");
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-soft", tokens.accentSoft || "rgba(0, 122, 255, 0.08)");
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-border", tokens.accent || "#0a84ff");
+  }
+  getAiLayoutBlockStateKey(block = {}, index = 0) {
+    const type = String((block == null ? void 0 : block.type) || "").trim();
+    const sectionIndex = Number.isInteger(block == null ? void 0 : block.sectionIndex) ? String(block.sectionIndex) : "";
+    const label = String(
+      (block == null ? void 0 : block.title) || (block == null ? void 0 : block.caseLabel) || (block == null ? void 0 : block.text) || (block == null ? void 0 : block.caption) || (block == null ? void 0 : block.buttonText) || (block == null ? void 0 : block.imageId) || type
+    ).trim();
+    return [type, sectionIndex, label, String(index)].join("::");
+  }
+  getVisibleAiLayoutSnapshot(state) {
+    var _a, _b;
+    if (!((_b = (_a = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
+      return {
+        layoutJson: (state == null ? void 0 : state.layoutJson) || null,
+        blockOrigins: [],
+        hiddenCount: 0
+      };
+    }
+    const dismissedKeys = new Set(Array.isArray(state.dismissedBlockKeys) ? state.dismissedBlockKeys : []);
+    const visibleBlocks = [];
+    const visibleOrigins = [];
+    let hiddenCount = 0;
+    state.layoutJson.blocks.forEach((block, index) => {
+      var _a2, _b2;
+      const blockKey = this.getAiLayoutBlockStateKey(block, index);
+      if (dismissedKeys.has(blockKey)) {
+        hiddenCount += 1;
+        return;
+      }
+      visibleBlocks.push(block);
+      const origin = (_b2 = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b2[index];
+      if (origin) {
+        visibleOrigins.push({
+          ...origin,
+          originalIndex: index,
+          blockKey
+        });
+      } else {
+        visibleOrigins.push({
+          index: visibleBlocks.length - 1,
+          type: (block == null ? void 0 : block.type) || "",
+          source: "ai",
+          label: this.getAiLayoutBlockLabel(block),
+          originalIndex: index,
+          blockKey
+        });
       }
     });
+    return {
+      layoutJson: {
+        ...state.layoutJson,
+        blocks: visibleBlocks
+      },
+      blockOrigins: visibleOrigins,
+      hiddenCount
+    };
+  }
+  queueAiLayoutRemovalAnchor(originalIndex, itemEl = null) {
+    const state = this.getCurrentArticleLayoutState();
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    const visibleOrigins = Array.isArray(visibleSnapshot.blockOrigins) ? visibleSnapshot.blockOrigins : [];
+    const removedVisibleIndex = visibleOrigins.findIndex((origin) => origin.originalIndex === originalIndex);
+    const nextOrigin = removedVisibleIndex >= 0 ? visibleOrigins[removedVisibleIndex + 1] || visibleOrigins[removedVisibleIndex - 1] || null : null;
+    const overlay = this.aiLayoutOverlay;
+    const relativeTop = overlay && itemEl ? Math.max(0, itemEl.offsetTop - overlay.scrollTop) : 0;
+    this.aiLayoutPendingAnchor = {
+      blockKey: (nextOrigin == null ? void 0 : nextOrigin.blockKey) || "",
+      relativeTop,
+      fallbackScrollTop: (overlay == null ? void 0 : overlay.scrollTop) || 0
+    };
+  }
+  restoreAiLayoutPendingAnchor() {
+    var _a, _b;
+    const pendingAnchor = this.aiLayoutPendingAnchor;
+    if (!pendingAnchor || !this.aiLayoutOverlay)
+      return;
+    const items = Array.from(((_b = (_a = this.aiBlockList) == null ? void 0 : _a.querySelectorAll) == null ? void 0 : _b.call(_a, ".apple-ai-layout-block-item")) || []);
+    const targetItem = pendingAnchor.blockKey ? items.find((item) => item.dataset.blockKey === pendingAnchor.blockKey) : null;
+    if (targetItem) {
+      this.aiLayoutOverlay.scrollTop = Math.max(0, targetItem.offsetTop - (pendingAnchor.relativeTop || 0));
+    } else {
+      this.aiLayoutOverlay.scrollTop = Math.max(0, pendingAnchor.fallbackScrollTop || 0);
+    }
+    this.aiLayoutPendingAnchor = null;
+  }
+  async removeAiLayoutBlock(originalIndex, itemEl = null) {
+    var _a, _b;
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    if (!context.sourcePath || !((_b = (_a = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length))
+      return;
+    const block = state.layoutJson.blocks[originalIndex];
+    if (!block)
+      return;
+    this.queueAiLayoutRemovalAnchor(originalIndex, itemEl);
+    const blockKey = this.getAiLayoutBlockStateKey(block, originalIndex);
+    const nextDismissedBlockKeys = Array.from(/* @__PURE__ */ new Set([
+      ...Array.isArray(state.dismissedBlockKeys) ? state.dismissedBlockKeys : [],
+      blockKey
+    ]));
+    await this.plugin.saveArticleLayoutState(context.sourcePath, {
+      ...state,
+      dismissedBlockKeys: nextDismissedBlockKeys
+    });
+    if (this.aiPreviewApplied) {
+      this.applyAiLayoutToPreview();
+      return;
+    }
+    this.refreshAiLayoutPanel();
+  }
+  async restoreRemovedAiLayoutBlocks() {
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    if (!context.sourcePath || !state)
+      return;
+    if (!Array.isArray(state.dismissedBlockKeys) || !state.dismissedBlockKeys.length)
+      return;
+    await this.plugin.saveArticleLayoutState(context.sourcePath, {
+      ...state,
+      dismissedBlockKeys: []
+    });
+    if (this.aiPreviewApplied) {
+      this.applyAiLayoutToPreview();
+      return;
+    }
     this.refreshAiLayoutPanel();
   }
   toggleAiLayoutDebugMode(mode) {
@@ -6725,14 +7295,22 @@ var AppleStyleView = class extends ItemView {
     };
   }
   getCurrentArticleLayoutState() {
-    var _a;
+    var _a, _b, _c, _d, _e;
     const { sourcePath } = this.getCurrentLayoutContext();
     if (!sourcePath)
       return null;
-    if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
-      return this.plugin.getArticleLayoutState(sourcePath);
+    const stylePack = this.pendingAiStylePack || ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || ((_d = (_c = (_b = this.plugin) == null ? void 0 : _b.settings) == null ? void 0 : _c.ai) == null ? void 0 : _d.defaultStylePack) || "tech-green";
+    if (typeof ((_e = this.plugin) == null ? void 0 : _e.getArticleLayoutState) === "function") {
+      return this.plugin.getArticleLayoutState(sourcePath, stylePack);
     }
     return null;
+  }
+  isAiLayoutPanelVisible() {
+    var _a;
+    return !!(this.aiLayoutOverlay && ((_a = this.aiLayoutOverlay.classList) == null ? void 0 : _a.contains("visible")));
+  }
+  shouldSyncAiLayoutUi() {
+    return this.aiPreviewApplied === true || this.aiLayoutLoading === true || this.isAiLayoutPanelVisible();
   }
   getArticleLayoutProviderLabel(state, aiSettings) {
     var _a;
@@ -6752,6 +7330,18 @@ var AppleStyleView = class extends ItemView {
   }
   getAiLayoutBlockLabel(block) {
     return (block == null ? void 0 : block.title) || (block == null ? void 0 : block.caseLabel) || (block == null ? void 0 : block.text) || (block == null ? void 0 : block.caption) || (block == null ? void 0 : block.buttonText) || (block == null ? void 0 : block.type) || "\u672A\u547D\u540D\u533A\u5757";
+  }
+  getVisibleAiSchemaValidation(state) {
+    var _a, _b;
+    if (!state)
+      return null;
+    if (state.lastAttemptStatus === "schema-error") {
+      return ((_a = state.lastAttemptSchemaValidation) == null ? void 0 : _a.issueCount) ? state.lastAttemptSchemaValidation : null;
+    }
+    if (state.lastAttemptStatus === "error") {
+      return null;
+    }
+    return ((_b = state.generationMeta) == null ? void 0 : _b.schemaValidation) || null;
   }
   renderAiLayoutMetaChips(chips = []) {
     if (!this.aiLayoutMetaChips)
@@ -6805,7 +7395,13 @@ var AppleStyleView = class extends ItemView {
       return "";
     return JSON.stringify({
       layoutJson: state.layoutJson || null,
-      generationMeta: state.generationMeta || null
+      generationMeta: state.generationMeta || null,
+      lastAttempt: {
+        status: state.lastAttemptStatus || "idle",
+        error: state.lastAttemptError || "",
+        at: state.lastAttemptAt ? new Date(state.lastAttemptAt).toISOString() : "",
+        schemaValidation: state.lastAttemptSchemaValidation || null
+      }
     }, null, 2);
   }
   buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }) {
@@ -6819,7 +7415,13 @@ var AppleStyleView = class extends ItemView {
       updatedAt: (state == null ? void 0 : state.updatedAt) ? new Date(state.updatedAt).toISOString() : "",
       sourceHash: (state == null ? void 0 : state.sourceHash) || "",
       isStale: isStale === true,
-      generationMeta: (state == null ? void 0 : state.generationMeta) || null
+      currentLayoutGenerationMeta: (state == null ? void 0 : state.generationMeta) || null,
+      lastAttempt: {
+        status: (state == null ? void 0 : state.lastAttemptStatus) || "idle",
+        error: (state == null ? void 0 : state.lastAttemptError) || "",
+        at: (state == null ? void 0 : state.lastAttemptAt) ? new Date(state.lastAttemptAt).toISOString() : "",
+        schemaValidation: (state == null ? void 0 : state.lastAttemptSchemaValidation) || null
+      }
     }, null, 2);
   }
   buildAiLayoutDebugSnapshot({ mode, state, providerLabel, modelLabel, isStale, sourcePath }) {
@@ -6845,12 +7447,13 @@ var AppleStyleView = class extends ItemView {
     return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}\u2026` : normalized;
   }
   buildAiLayoutPromptContext({ state, context, providerLabel, modelLabel, isStale }) {
-    var _a, _b;
+    var _a;
     if (!(state == null ? void 0 : state.layoutJson))
       return "";
+    const visibleSchemaValidation = this.getVisibleAiSchemaValidation(state);
     const blockLines = Array.isArray(state.layoutJson.blocks) ? state.layoutJson.blocks.map((block, index) => {
-      var _a2, _b2, _c;
-      const origin = ((_c = (_b2 = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b2[index]) == null ? void 0 : _c.source) === "fallback" ? "\u8865\u5168" : "AI";
+      var _a2, _b, _c;
+      const origin = ((_c = (_b = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b[index]) == null ? void 0 : _c.source) === "fallback" ? "\u8865\u5168" : "AI";
       return `${index + 1}. [${origin}] ${block.type} - ${this.getAiLayoutBlockLabel(block)}`;
     }).join("\n") : "- \u65E0\u533A\u5757";
     const markdownExcerpt = this.truncateAiPromptMarkdown((context == null ? void 0 : context.markdown) || "");
@@ -6900,7 +7503,7 @@ var AppleStyleView = class extends ItemView {
       "",
       "## Schema \u95EE\u9898",
       "```json",
-      JSON.stringify(((_b = state.generationMeta) == null ? void 0 : _b.schemaValidation) || null, null, 2),
+      JSON.stringify(visibleSchemaValidation, null, 2),
       "```",
       "",
       "## \u5F53\u524D\u8C03\u8BD5\u5FEB\u7167",
@@ -7025,21 +7628,22 @@ var AppleStyleView = class extends ItemView {
   refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale }) {
     if (!this.aiDebugPanel || !this.aiDebugPanelBody || !this.aiDebugPanelTitle)
       return;
+    const isLoading = this.aiLayoutLoading === true;
     const canShowJson = !!(state == null ? void 0 : state.layoutJson);
     const canShowError = !!((state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || (state == null ? void 0 : state.lastError));
     if (this.aiViewJsonBtn) {
-      this.aiViewJsonBtn.disabled = !canShowJson;
+      this.aiViewJsonBtn.disabled = !canShowJson || isLoading;
       this.aiViewJsonBtn.classList.toggle("is-active", this.aiLayoutDebugMode === "json");
     }
     if (this.aiViewErrorBtn) {
-      this.aiViewErrorBtn.disabled = !canShowError;
+      this.aiViewErrorBtn.disabled = !canShowError || isLoading;
       this.aiViewErrorBtn.classList.toggle("is-active", this.aiLayoutDebugMode === "error");
     }
     if (this.aiCopyDebugBtn) {
-      this.aiCopyDebugBtn.disabled = !this.aiLayoutDebugMode;
+      this.aiCopyDebugBtn.disabled = !this.aiLayoutDebugMode || isLoading;
     }
     if (this.aiCopyPromptBtn) {
-      this.aiCopyPromptBtn.disabled = !(state == null ? void 0 : state.layoutJson);
+      this.aiCopyPromptBtn.disabled = !(state == null ? void 0 : state.layoutJson) || isLoading;
     }
     if (this.aiLayoutDebugMode === "json" && !canShowJson || this.aiLayoutDebugMode === "error" && !canShowError) {
       this.aiLayoutDebugMode = "";
@@ -7064,33 +7668,47 @@ var AppleStyleView = class extends ItemView {
     this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
   }
   refreshAiLayoutPanel() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
     if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
       return;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
     const provider = resolveAiProvider(aiSettings);
     const configuredProviders = Array.isArray(aiSettings.providers) ? aiSettings.providers.length : 0;
     const context = this.getCurrentLayoutContext();
-    const state = this.getCurrentArticleLayoutState();
+    const storedState = this.getCurrentArticleLayoutState();
+    const effectiveStylePack = this.pendingAiStylePack || (storedState == null ? void 0 : storedState.stylePack) || aiSettings.defaultStylePack || "tech-green";
+    const hasStylePackMismatch = !!((storedState == null ? void 0 : storedState.stylePack) && storedState.stylePack !== effectiveStylePack);
+    const state = hasStylePackMismatch ? null : storedState;
     const generationMeta = (state == null ? void 0 : state.generationMeta) || null;
-    const schemaValidation = (state == null ? void 0 : state.lastAttemptStatus) === "schema-error" && ((_a = state == null ? void 0 : state.lastAttemptSchemaValidation) == null ? void 0 : _a.issueCount) ? state.lastAttemptSchemaValidation : (generationMeta == null ? void 0 : generationMeta.schemaValidation) || null;
+    const schemaValidation = this.getVisibleAiSchemaValidation(state);
     const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
     const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
     const aiFeatureEnabled = aiSettings.enabled === true;
-    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length));
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    const visibleLayout = visibleSnapshot.layoutJson;
+    const visibleBlockOrigins = visibleSnapshot.blockOrigins;
+    const hiddenBlockCount = visibleSnapshot.hiddenCount;
+    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length));
     const hasLastAttemptFailure = (state == null ? void 0 : state.lastAttemptStatus) === "error" || (state == null ? void 0 : state.lastAttemptStatus) === "schema-error";
     const hasDoc = !!context.sourcePath;
     const hasProvider = !!provider;
     const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
     const hasApplied = this.aiPreviewApplied === true && !!state && !isStale;
+    const isLoading = this.aiLayoutLoading === true;
     let badge = "\u672A\u751F\u6210";
     let statusText = hasDoc ? "\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709 AI \u7F16\u6392\u7ED3\u679C\u3002" : "\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u3002";
-    if (!aiFeatureEnabled) {
+    if (isLoading) {
+      badge = "\u751F\u6210\u4E2D";
+      statusText = "\u6B63\u5728\u57FA\u4E8E\u5F53\u524D\u6587\u7AE0\u548C\u98CE\u683C\u5305\u751F\u6210\u533A\u5757\u5316\u6392\u7248\uFF0C\u8BF7\u7A0D\u5019\u3002";
+    } else if (!aiFeatureEnabled) {
       badge = "\u5DF2\u5173\u95ED";
       statusText = "AI \u7F16\u6392\u5DF2\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u5173\u95ED\u3002\u542F\u7528\u540E\u53EF\u5BF9\u5F53\u524D\u6587\u7AE0\u751F\u6210\u6392\u7248\u5EFA\u8BAE\u3002";
     } else if (!hasProvider) {
       badge = "\u5F85\u914D\u7F6E";
       statusText = configuredProviders > 0 ? "\u5F53\u524D\u5DF2\u6709 AI Provider\uFF0C\u4F46\u6CA1\u6709\u53EF\u76F4\u63A5\u8FD0\u884C\u7684\u914D\u7F6E\u3002\u8BF7\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\uFF0C\u6216\u542F\u7528\u53EF\u7528 Provider\u3002" : "\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u53EF\u7528\u7684 AI Provider\u3002";
+    } else if (hasStylePackMismatch) {
+      badge = "\u672A\u751F\u6210";
+      statusText = "\u5F53\u524D\u98CE\u683C\u5305\u8FD8\u6CA1\u6709\u751F\u6210\u7ED3\u679C\uFF0C\u8BF7\u91CD\u65B0\u751F\u6210\u7F16\u6392\u3002";
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
       badge = "\u6821\u9A8C\u5931\u8D25";
       statusText = (schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0 ? `AI \u8FD4\u56DE\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u5171\u53D1\u73B0 ${schemaValidation.issueCount} \u9879\u95EE\u9898\u3002` : "AI \u8FD4\u56DE\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u8BF7\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002";
@@ -7114,19 +7732,42 @@ var AppleStyleView = class extends ItemView {
     this.aiLayoutStatusBadge.setText(badge);
     this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
     this.aiLayoutStatusText.setText(statusText);
-    this.aiStylePackSelect.value = (state == null ? void 0 : state.stylePack) || aiSettings.defaultStylePack || "tech-green";
-    this.aiStylePackSelect.disabled = !aiFeatureEnabled;
+    this.applyAiLayoutPanelStylePack(effectiveStylePack);
+    this.aiStylePackSelect.value = effectiveStylePack;
+    this.aiStylePackSelect.disabled = !aiFeatureEnabled || isLoading;
+    if (this.aiLayoutOverlay) {
+      this.aiLayoutOverlay.classList.toggle("is-loading", isLoading);
+    }
+    const converterContainer = (_b = this.previewContainer) == null ? void 0 : _b.closest(".apple-converter-container");
+    if (converterContainer) {
+      converterContainer.classList.toggle("apple-ai-layout-panel-loading", isLoading);
+    }
+    if (this.aiLayoutLoadingMask) {
+      this.aiLayoutLoadingMask.classList.toggle("visible", isLoading);
+    }
+    if (this.aiLayoutLoadingMaskText) {
+      const stylePackLabel = ((_e = (_d = (_c = this.aiStylePackSelect) == null ? void 0 : _c.selectedOptions) == null ? void 0 : _d[0]) == null ? void 0 : _e.textContent) || "\u5F53\u524D\u98CE\u683C\u5305";
+      this.aiLayoutLoadingMaskText.setText(`\u6B63\u5728\u751F\u6210\u300C${stylePackLabel}\u300D\u7F16\u6392...`);
+    }
     this.aiIncludeImagesNote.setText(
       aiSettings.includeImagesInLayout === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
     );
-    if (!aiFeatureEnabled) {
+    if (isLoading) {
+      this.aiLayoutSummary.setText(`\u6B63\u5728\u4E3A\u300C${context.title || "\u5F53\u524D\u6587\u7AE0"}\u300D\u751F\u6210\u65B0\u7684\u533A\u5757\u7ED3\u679C\u3002`);
+      this.renderAiLayoutMetaChips([
+        `\u98CE\u683C ${((_h = (_g = (_f = this.aiStylePackSelect) == null ? void 0 : _f.selectedOptions) == null ? void 0 : _g[0]) == null ? void 0 : _h.textContent) || "\u79D1\u6280\u7EFF"}`,
+        aiSettings.includeImagesInLayout === false ? "\u4EC5\u6B63\u6587\u7ED3\u6784" : "\u4F18\u5148\u53C2\u8003\u56FE\u7247"
+      ]);
+      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u81EA\u52A8\u5237\u65B0\u533A\u5757\u6E05\u5355\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u6839\u636E\u7ED3\u679C\u79FB\u9664\u591A\u4F59\u533A\u5757\u3002");
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (!aiFeatureEnabled) {
       this.aiLayoutSummary.setText("\u4F60\u53EF\u4EE5\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E Provider\uFF0C\u5E76\u542F\u7528 AI \u7F16\u6392\u540E\u518D\u56DE\u5230\u8FD9\u91CC\u64CD\u4F5C\u3002");
-      (_d = this.aiLayoutMetaNote) == null ? void 0 : _d.setText("AI \u8F93\u51FA\u53EA\u8D1F\u8D23\u7ED3\u6784\u5316\u7F16\u6392\uFF0C\u6700\u7EC8\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
+      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("AI \u8F93\u51FA\u53EA\u8D1F\u8D23\u7ED3\u6784\u5316\u7F16\u6392\uFF0C\u6700\u7EC8\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (!hasDoc) {
       this.aiLayoutSummary.setText("\u6253\u5F00\u6587\u7AE0\u540E\uFF0C\u53EF\u4EE5\u9488\u5BF9\u5F53\u524D\u6587\u6863\u751F\u6210\u4E13\u5C5E\u6392\u7248\u3002");
-      (_e = this.aiLayoutMetaNote) == null ? void 0 : _e.setText("\u7B2C\u4E00\u7248\u4F1A\u4F18\u5148\u751F\u6210\u6559\u7A0B/\u6848\u4F8B\u98CE\u683C\u7684\u533A\u5757\u987A\u5E8F\u3002");
+      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u7B2C\u4E00\u7248\u4F1A\u4F18\u5148\u751F\u6210\u6559\u7A0B/\u6848\u4F8B\u98CE\u683C\u7684\u533A\u5757\u987A\u5E8F\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
@@ -7141,7 +7782,7 @@ var AppleStyleView = class extends ItemView {
       if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
         errorChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
       this.renderAiLayoutMetaChips(errorChips);
-      (_f = this.aiLayoutMetaNote) == null ? void 0 : _f.setText("\u8FD9\u901A\u5E38\u8868\u793A\u6A21\u578B\u8F93\u51FA\u5B57\u6BB5\u4E0D\u5408\u89C4\u3001block type \u4E0D\u652F\u6301\uFF0C\u6216\u9876\u5C42\u7ED3\u6784\u7F3A\u5931\u3002");
+      (_l = this.aiLayoutMetaNote) == null ? void 0 : _l.setText("\u8FD9\u901A\u5E38\u8868\u793A\u6A21\u578B\u8F93\u51FA\u5B57\u6BB5\u4E0D\u5408\u89C4\u3001block type \u4E0D\u652F\u6301\uFF0C\u6216\u9876\u5C42\u7ED3\u6784\u7F3A\u5931\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
       this.aiLayoutSummary.setText(`\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25\uFF1A${state.lastError}`);
@@ -7151,20 +7792,20 @@ var AppleStyleView = class extends ItemView {
       if (modelLabel)
         errorChips.push(`\u6A21\u578B ${modelLabel}`);
       this.renderAiLayoutMetaChips(errorChips);
-      (_g = this.aiLayoutMetaNote) == null ? void 0 : _g.setText("\u4FEE\u6B63\u914D\u7F6E\u540E\u53EF\u4EE5\u76F4\u63A5\u91CD\u751F\u6210\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u666E\u901A\u9884\u89C8\u3002");
+      (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText("\u4FEE\u6B63\u914D\u7F6E\u540E\u53EF\u4EE5\u76F4\u63A5\u91CD\u751F\u6210\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u666E\u901A\u9884\u89C8\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if (!state) {
       this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u6559\u7A0B/\u6848\u4F8B\u98CE\u683C\u7684\u7248\u5F0F JSON\u3002`);
       this.renderAiLayoutMetaChips([
         aiSettings.includeImagesInLayout === false ? "\u4EC5\u6B63\u6587\u7ED3\u6784" : "\u4F18\u5148\u53C2\u8003\u56FE\u7247",
-        `\u98CE\u683C ${((_j = (_i = (_h = this.aiStylePackSelect) == null ? void 0 : _h.selectedOptions) == null ? void 0 : _i[0]) == null ? void 0 : _j.textContent) || "\u79D1\u6280\u7EFF"}`
+        `\u98CE\u683C ${((_p = (_o = (_n = this.aiStylePackSelect) == null ? void 0 : _n.selectedOptions) == null ? void 0 : _o[0]) == null ? void 0 : _p.textContent) || "\u79D1\u6280\u7EFF"}`
       ]);
-      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u751F\u6210\u540E\u4F1A\u5C55\u793A\u8FD9\u6B21\u8BC6\u522B\u5230\u7684\u7ED3\u6784\u3001\u7D20\u6750\u548C\u8865\u5168\u60C5\u51B5\u3002");
+      (_q = this.aiLayoutMetaNote) == null ? void 0 : _q.setText(hasStylePackMismatch ? "\u4F60\u5207\u6362\u4E86\u65B0\u7684\u98CE\u683C\u5305\uFF0C\u65E7\u7ED3\u679C\u5DF2\u6682\u65F6\u9690\u85CF\uFF1B\u91CD\u65B0\u751F\u6210\u540E\u4F1A\u5C55\u793A\u65B0\u7684\u533A\u5757\u6E05\u5355\u3002" : "\u751F\u6210\u540E\u4F1A\u5C55\u793A\u8FD9\u6B21\u8BC6\u522B\u5230\u7684\u7ED3\u6784\u3001\u7D20\u6750\u548C\u8865\u5168\u60C5\u51B5\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else {
       const summaryBits = [
-        `\u6587\u7AE0\u7C7B\u578B\uFF1A${state.layoutJson.articleType || "article"}`,
-        `\u533A\u5757\u6570\uFF1A${((_l = state.layoutJson.blocks) == null ? void 0 : _l.length) || 0}`
+        `\u6587\u7AE0\u7C7B\u578B\uFF1A${visibleLayout.articleType || state.layoutJson.articleType || "article"}`,
+        `\u533A\u5757\u6570\uFF1A${((_r = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _r.length) || 0}`
       ];
       if (generationMeta == null ? void 0 : generationMeta.sectionCount) {
         summaryBits.push(`\u7AE0\u8282\uFF1A${generationMeta.sectionCount}`);
@@ -7189,6 +7830,8 @@ var AppleStyleView = class extends ItemView {
       } else if (generationMeta == null ? void 0 : generationMeta.finalBlockCount) {
         metaChips.push("\u7EAF AI \u8F93\u51FA");
       }
+      if (hiddenBlockCount > 0)
+        metaChips.push(`\u5DF2\u79FB\u9664 ${hiddenBlockCount} \u5757`);
       if (hasLastAttemptFailure) {
         metaChips.push(state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u6821\u9A8C\u5931\u8D25" : "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25");
       }
@@ -7197,18 +7840,29 @@ var AppleStyleView = class extends ItemView {
       const baseNote = (generationMeta == null ? void 0 : generationMeta.fallbackUsed) ? `\u5DF2\u8BC6\u522B ${generationMeta.sectionCount || generationMeta.headingCount || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${generationMeta.imageCount || 0} \u5F20\uFF1B\u5176\u4E2D ${generationMeta.fallbackBlockCount} \u4E2A\u533A\u5757\u7531\u672C\u5730\u89C4\u5219\u8865\u5168\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002` : `\u5DF2\u8BC6\u522B ${(generationMeta == null ? void 0 : generationMeta.sectionCount) || (generationMeta == null ? void 0 : generationMeta.headingCount) || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${(generationMeta == null ? void 0 : generationMeta.imageCount) || 0} \u5F20\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002`;
       if (hasLastAttemptFailure && state.lastAttemptError) {
         const lastAttemptText = state.lastAttemptAt ? `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u4E8E ${new Date(state.lastAttemptAt).toLocaleString()} \u5931\u8D25\uFF1A${state.lastAttemptError}` : `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u5931\u8D25\uFF1A${state.lastAttemptError}`;
-        (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(`${baseNote} ${lastAttemptText}`);
+        (_s = this.aiLayoutMetaNote) == null ? void 0 : _s.setText(`${baseNote} ${lastAttemptText}`);
       } else {
-        (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(baseNote);
+        (_t = this.aiLayoutMetaNote) == null ? void 0 : _t.setText(baseNote);
       }
       this.refreshAiSchemaIssuePanel(schemaValidation);
     }
     this.aiBlockList.empty();
-    if ((_p = (_o = state == null ? void 0 : state.layoutJson) == null ? void 0 : _o.blocks) == null ? void 0 : _p.length) {
-      state.layoutJson.blocks.forEach((block, index) => {
-        var _a2;
+    if (isLoading) {
+      for (let index = 0; index < 4; index += 1) {
+        const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item is-skeleton" });
+        item.createDiv({ cls: "apple-ai-layout-block-skeleton-index" });
+        const content = item.createDiv({ cls: "apple-ai-layout-block-main" });
+        content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-title" });
+        content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-meta" });
+        item.createDiv({ cls: "apple-ai-layout-block-skeleton-badge" });
+      }
+    } else if ((_u = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _u.length) {
+      visibleLayout.blocks.forEach((block, index) => {
         const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
-        const origin = ((_a2 = generationMeta == null ? void 0 : generationMeta.blockOrigins) == null ? void 0 : _a2[index]) || null;
+        const origin = (visibleBlockOrigins == null ? void 0 : visibleBlockOrigins[index]) || null;
+        if (origin == null ? void 0 : origin.blockKey) {
+          item.dataset.blockKey = origin.blockKey;
+        }
         item.createEl("span", { cls: "apple-ai-layout-block-index", text: String(index + 1).padStart(2, "0") });
         const content = item.createDiv({ cls: "apple-ai-layout-block-main" });
         content.createEl("span", {
@@ -7220,24 +7874,33 @@ var AppleStyleView = class extends ItemView {
           text: block.type
         });
         if (origin == null ? void 0 : origin.source) {
+          const originText = origin.source === "fallback" ? block.type === "section-block" ? "\u539F\u6587" : "\u8865\u5168" : "AI";
           item.createEl("span", {
             cls: `apple-ai-layout-block-origin ${origin.source === "fallback" ? "is-fallback" : "is-ai"}`,
-            text: origin.source === "fallback" ? "\u8865\u5168" : "AI"
+            text: originText
           });
+        }
+        if ((origin == null ? void 0 : origin.originalIndex) >= 0) {
+          const removeBtn = item.createEl("button", {
+            cls: "apple-ai-layout-block-remove",
+            text: "\u79FB\u9664"
+          });
+          removeBtn.addEventListener("click", () => this.removeAiLayoutBlock(origin.originalIndex, item));
         }
       });
     } else {
       this.aiBlockList.createDiv({
         cls: "apple-ai-layout-empty",
-        text: aiFeatureEnabled ? "\u751F\u6210\u540E\u4F1A\u5C55\u793A\u533A\u5757\u6E05\u5355\u3002" : "\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u5C55\u793A\u5F53\u524D\u6587\u7AE0\u7684\u533A\u5757\u6E05\u5355\u3002"
+        text: hiddenBlockCount > 0 ? "\u5F53\u524D\u533A\u5757\u90FD\u5DF2\u88AB\u79FB\u9664\uFF0C\u53EF\u4EE5\u70B9\u51FB\u201C\u6062\u590D\u5DF2\u79FB\u9664\u201D\u91CD\u65B0\u67E5\u770B\u3002" : aiFeatureEnabled ? "\u751F\u6210\u540E\u4F1A\u5C55\u793A\u533A\u5757\u6E05\u5355\u3002" : "\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u5C55\u793A\u5F53\u524D\u6587\u7AE0\u7684\u533A\u5757\u6E05\u5355\u3002"
       });
     }
-    this.aiGenerateBtn.disabled = !hasDoc || !hasProvider || !aiFeatureEnabled;
-    this.aiApplyBtn.disabled = !state || isStale || (state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || !aiFeatureEnabled;
-    this.aiResetBtn.disabled = !this.aiPreviewApplied;
-    this.aiPanelHint.setText(
-      aiFeatureEnabled ? "\u6A21\u578B\u914D\u7F6E\u5728\u63D2\u4EF6\u8BBE\u7F6E\u9875\u4E2D\u7EF4\u62A4\u3002\u7B2C\u4E00\u7248\u4EC5\u652F\u6301\u751F\u6210 / \u5E94\u7528 / \u91CD\u751F\u6210\u3002" : "\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u91CC\u5F00\u542F AI \u7F16\u6392\uFF0C\u518D\u56DE\u5230\u8FD9\u91CC\u4E3A\u5F53\u524D\u6587\u7AE0\u751F\u6210\u6392\u7248\u5EFA\u8BAE\u3002"
-    );
+    this.aiGenerateBtn.disabled = !hasDoc || !hasProvider || !aiFeatureEnabled || isLoading;
+    this.aiApplyBtn.disabled = !state || !((_v = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _v.length) || isStale || (state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || !aiFeatureEnabled || isLoading;
+    this.aiResetBtn.disabled = !this.aiPreviewApplied || isLoading;
+    if (this.aiRestoreBlocksBtn) {
+      this.aiRestoreBlocksBtn.disabled = hiddenBlockCount <= 0 || isLoading;
+    }
+    this.restoreAiLayoutPendingAnchor();
     this.refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale });
     this.updateAiToolbarState();
   }
@@ -7280,9 +7943,11 @@ var AppleStyleView = class extends ItemView {
       await this.convertCurrent(true, { showLoading: true, loadingText: "\u6B63\u5728\u51C6\u5907\u6587\u7AE0\u4E0A\u4E0B\u6587..." });
     }
     const imageRefs = aiSettings.includeImagesInLayout === false ? [] : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
-    const stylePack = ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || aiSettings.defaultStylePack || "tech-green";
+    const stylePack = this.pendingAiStylePack || ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || aiSettings.defaultStylePack || "tech-green";
     const originalText = (_b = this.aiGenerateBtn) == null ? void 0 : _b.textContent;
     try {
+      this.aiLayoutLoading = true;
+      this.refreshAiLayoutPanel();
       if (this.aiGenerateBtn) {
         this.aiGenerateBtn.disabled = true;
         this.aiGenerateBtn.setText("\u751F\u6210\u4E2D...");
@@ -7309,9 +7974,11 @@ var AppleStyleView = class extends ItemView {
         lastAttemptError: "",
         lastAttemptAt: Date.now(),
         lastAttemptSchemaValidation: null,
+        dismissedBlockKeys: [],
         generationMeta: result.generationMeta,
         layoutJson
       });
+      this.pendingAiStylePack = layoutJson.stylePack || stylePack;
       new Notice("\u2705 AI \u7F16\u6392\u5DF2\u751F\u6210\uFF0C\u53EF\u5E94\u7528\u5230\u9884\u89C8\u67E5\u770B\u6548\u679C");
     } catch (error) {
       console.error("AI \u7F16\u6392\u751F\u6210\u5931\u8D25:", error);
@@ -7331,6 +7998,7 @@ var AppleStyleView = class extends ItemView {
         lastAttemptError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
         lastAttemptAt: Date.now(),
         lastAttemptSchemaValidation: (error == null ? void 0 : error.schemaValidation) || ((_e = error == null ? void 0 : error.generationMeta) == null ? void 0 : _e.schemaValidation) || null,
+        dismissedBlockKeys: hasReusablePreviousLayout ? previousState.dismissedBlockKeys || [] : [],
         generationMeta: hasReusablePreviousLayout ? previousState.generationMeta : (error == null ? void 0 : error.generationMeta) || (previousState == null ? void 0 : previousState.generationMeta) || null,
         layoutJson: hasReusablePreviousLayout ? previousState.layoutJson : (previousState == null ? void 0 : previousState.layoutJson) || {
           version: AI_LAYOUT_SCHEMA_VERSION,
@@ -7345,6 +8013,7 @@ var AppleStyleView = class extends ItemView {
         isSchemaError ? `\u274C AI \u7F16\u6392\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF1A${error.message}` : `\u274C AI \u7F16\u6392\u5931\u8D25\uFF1A${error.message}`
       );
     } finally {
+      this.aiLayoutLoading = false;
       if (this.aiGenerateBtn) {
         this.aiGenerateBtn.disabled = false;
         this.aiGenerateBtn.setText(originalText || "\u751F\u6210\u7F16\u6392");
@@ -7356,7 +8025,8 @@ var AppleStyleView = class extends ItemView {
     var _a, _b, _c;
     const context = this.getCurrentLayoutContext();
     const state = this.getCurrentArticleLayoutState();
-    if (!state || !((_b = (_a = state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    if (!state || !((_b = (_a = visibleSnapshot.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
       new Notice("\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709\u53EF\u7528\u7684 AI \u7F16\u6392\u7ED3\u679C");
       return;
     }
@@ -7366,7 +8036,7 @@ var AppleStyleView = class extends ItemView {
       return;
     }
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
-    const html = renderArticleLayoutHtml(state.layoutJson, { imageRefs });
+    const html = renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs });
     const scrollTop = ((_c = this.previewContainer) == null ? void 0 : _c.scrollTop) || 0;
     this.currentHtml = html;
     this.aiPreviewApplied = true;
@@ -7962,11 +8632,12 @@ var AppleStyleView = class extends ItemView {
    * 转换当前文档
    */
   async convertCurrent(silent = false, options = {}) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d, _e, _f, _g;
     const {
       showLoading = false,
       loadingText = "\u6B63\u5728\u6E32\u67D3\u9884\u89C8...",
-      loadingDelay = 0
+      loadingDelay = 0,
+      sourceOverride = null
     } = options;
     const generation = ++this.renderGeneration;
     if (showLoading) {
@@ -7986,7 +8657,11 @@ var AppleStyleView = class extends ItemView {
         this.setPreviewLoading(true, loadingText);
       }
     }
-    const source = await resolveMarkdownSource({
+    const source = sourceOverride && typeof sourceOverride === "object" ? {
+      ok: true,
+      markdown: typeof sourceOverride.markdown === "string" ? sourceOverride.markdown : "",
+      sourcePath: typeof sourceOverride.sourcePath === "string" ? sourceOverride.sourcePath : ""
+    } : await resolveMarkdownSource({
       app: this.app,
       lastActiveFile: this.lastActiveFile,
       MarkdownViewType: MarkdownView
@@ -8044,14 +8719,17 @@ var AppleStyleView = class extends ItemView {
       this.previewContainer.scrollTop = scrollTop;
       this.previewContainer.addClass("apple-has-content");
       this.updateCurrentDoc();
-      const layoutState = sourcePath && typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function" ? this.plugin.getArticleLayoutState(sourcePath) : null;
-      const canReuseAiLayout = !!(this.aiPreviewApplied && ((_c = (_b = layoutState == null ? void 0 : layoutState.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length) && this.lastResolvedSourceHash && layoutState.sourceHash === this.lastResolvedSourceHash);
-      if (canReuseAiLayout) {
-        this.applyAiLayoutToPreview();
-      } else if (this.aiPreviewApplied) {
-        this.aiPreviewApplied = false;
+      if (this.shouldSyncAiLayoutUi()) {
+        const activeStylePack = this.pendingAiStylePack || ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || ((_d = (_c = (_b = this.plugin) == null ? void 0 : _b.settings) == null ? void 0 : _c.ai) == null ? void 0 : _d.defaultStylePack) || "tech-green";
+        const layoutState = sourcePath && typeof ((_e = this.plugin) == null ? void 0 : _e.getArticleLayoutState) === "function" ? this.plugin.getArticleLayoutState(sourcePath, activeStylePack) : null;
+        const canReuseAiLayout = !!(this.aiPreviewApplied && ((_g = (_f = layoutState == null ? void 0 : layoutState.layoutJson) == null ? void 0 : _f.blocks) == null ? void 0 : _g.length) && this.lastResolvedSourceHash && layoutState.sourceHash === this.lastResolvedSourceHash);
+        if (canReuseAiLayout) {
+          this.applyAiLayoutToPreview();
+        } else if (this.aiPreviewApplied) {
+          this.aiPreviewApplied = false;
+        }
+        this.refreshAiLayoutPanel();
       }
-      this.refreshAiLayoutPanel();
       if (!silent)
         new Notice("\u2705 \u8F6C\u6362\u6210\u529F\uFF01");
     } catch (error) {
@@ -8064,7 +8742,9 @@ var AppleStyleView = class extends ItemView {
       this.lastRenderError = (error == null ? void 0 : error.message) || "\u672A\u77E5\u6E32\u67D3\u9519\u8BEF";
       this.showRenderFailurePlaceholder(this.lastRenderError);
       this.updateCurrentDoc();
-      this.refreshAiLayoutPanel();
+      if (this.shouldSyncAiLayoutUi()) {
+        this.refreshAiLayoutPanel();
+      }
       const noticeKey = `${sourcePath || ""}:${this.lastRenderError}`;
       if (!silent || this.lastRenderFailureNoticeKey !== noticeKey) {
         new Notice("\u274C \u8F6C\u6362\u5931\u8D25: " + this.lastRenderError);
@@ -9060,14 +9740,19 @@ var AppleStylePlugin = class extends Plugin {
       await this.saveSettings();
     }
   }
-  getArticleLayoutState(sourcePath = "") {
-    var _a, _b, _c;
+  getArticleLayoutState(sourcePath = "", stylePack = "") {
+    var _a, _b, _c, _d, _e, _f;
     const normalizedPath = normalizeVaultPath(sourcePath || "");
     if (!normalizedPath)
       return null;
-    return ((_c = (_b = (_a = this.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.articleLayoutsByPath) == null ? void 0 : _c[normalizedPath]) || null;
+    const entry = ((_c = (_b = (_a = this.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.articleLayoutsByPath) == null ? void 0 : _c[normalizedPath]) || null;
+    const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+    if (!normalizedEntry)
+      return null;
+    const effectiveStylePack = stylePack || normalizedEntry.lastStylePack || ((_e = (_d = this.settings) == null ? void 0 : _d.ai) == null ? void 0 : _e.defaultStylePack) || "tech-green";
+    return ((_f = normalizedEntry.stylePackStates) == null ? void 0 : _f[effectiveStylePack]) || null;
   }
-  async saveArticleLayoutState(sourcePath = "", nextState = null) {
+  async saveArticleLayoutState(sourcePath = "", nextState = null, stylePack = "") {
     const normalizedPath = normalizeVaultPath(sourcePath || "");
     if (!normalizedPath)
       return false;
@@ -9077,10 +9762,34 @@ var AppleStylePlugin = class extends Plugin {
     if (!this.settings.ai.articleLayoutsByPath || typeof this.settings.ai.articleLayoutsByPath !== "object") {
       this.settings.ai.articleLayoutsByPath = {};
     }
+    const existingEntry = normalizeArticleLayoutCacheEntry(this.settings.ai.articleLayoutsByPath[normalizedPath]) || {
+      lastStylePack: this.settings.ai.defaultStylePack || "tech-green",
+      stylePackStates: {}
+    };
+    const requestedStylePack = String(
+      (nextState == null ? void 0 : nextState.stylePack) || stylePack || existingEntry.lastStylePack || this.settings.ai.defaultStylePack || "tech-green"
+    ).trim();
+    const effectiveStylePack = requestedStylePack || this.settings.ai.defaultStylePack || "tech-green";
     if (!nextState) {
-      delete this.settings.ai.articleLayoutsByPath[normalizedPath];
+      if (stylePack) {
+        delete existingEntry.stylePackStates[effectiveStylePack];
+        const remainingStylePacks = Object.keys(existingEntry.stylePackStates);
+        if (!remainingStylePacks.length) {
+          delete this.settings.ai.articleLayoutsByPath[normalizedPath];
+        } else {
+          existingEntry.lastStylePack = existingEntry.stylePackStates[existingEntry.lastStylePack] ? existingEntry.lastStylePack : remainingStylePacks[0];
+          this.settings.ai.articleLayoutsByPath[normalizedPath] = existingEntry;
+        }
+      } else {
+        delete this.settings.ai.articleLayoutsByPath[normalizedPath];
+      }
     } else {
-      this.settings.ai.articleLayoutsByPath[normalizedPath] = nextState;
+      existingEntry.stylePackStates[effectiveStylePack] = {
+        ...nextState,
+        stylePack: effectiveStylePack
+      };
+      existingEntry.lastStylePack = effectiveStylePack;
+      this.settings.ai.articleLayoutsByPath[normalizedPath] = existingEntry;
     }
     return this.saveSettings();
   }

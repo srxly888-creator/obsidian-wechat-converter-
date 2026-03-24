@@ -1,5 +1,6 @@
 const {
   AI_LAYOUT_SKILL_VERSION,
+  AI_LAYOUT_ALLOWED_BLOCKS,
   AI_LAYOUT_SKILL_SYSTEM_LINES,
   AI_LAYOUT_OUTPUT_FIELDS,
   getAiLayoutBlockConstraintLines,
@@ -11,6 +12,8 @@ const AI_LAYOUT_SCHEMA_VERSION = 1;
 const AI_PROVIDER_KINDS = {
   OPENAI_COMPATIBLE: 'openai-compatible',
 };
+
+const MAX_LAYOUT_BLOCKS = 24;
 
 const AI_STYLE_PACKS = {
   'tech-green': {
@@ -27,6 +30,54 @@ const AI_STYLE_PACKS = {
       surface: '#ffffff',
       surfaceSoft: '#f5f8f7',
       quoteBg: '#f4f7f6',
+    },
+  },
+  'ocean-blue': {
+    id: 'ocean-blue',
+    label: '深海蓝',
+    description: '更冷静的科技信息风格，适合教程、知识卡片和产品更新。',
+    tokens: {
+      accent: '#2c6bed',
+      accentDeep: '#1f4fb2',
+      accentSoft: '#edf4ff',
+      text: '#223047',
+      muted: '#5e718f',
+      border: '#d8e2f2',
+      surface: '#ffffff',
+      surfaceSoft: '#f6f9fd',
+      quoteBg: '#f2f6fc',
+    },
+  },
+  'sunset-amber': {
+    id: 'sunset-amber',
+    label: '暖砂金',
+    description: '更偏内容杂志感的暖色风格，适合观点、清单和经验分享。',
+    tokens: {
+      accent: '#d8892b',
+      accentDeep: '#a66218',
+      accentSoft: '#fff5e8',
+      text: '#3a2b1f',
+      muted: '#7b6756',
+      border: '#eadfce',
+      surface: '#fffdf9',
+      surfaceSoft: '#faf6f0',
+      quoteBg: '#f8f2ea',
+    },
+  },
+  'graphite-rose': {
+    id: 'graphite-rose',
+    label: '石墨玫瑰',
+    description: '偏编辑感的灰粉中性色，适合案例拆解和品牌内容。',
+    tokens: {
+      accent: '#cc5f82',
+      accentDeep: '#9f4764',
+      accentSoft: '#fff0f5',
+      text: '#2e2c33',
+      muted: '#6f6874',
+      border: '#e7dce3',
+      surface: '#fffefe',
+      surfaceSoft: '#faf7f9',
+      quoteBg: '#f8f2f5',
     },
   },
 };
@@ -208,10 +259,23 @@ class AiLayoutSchemaError extends Error {
   }
 }
 
+class AiLayoutTimeoutError extends Error {
+  constructor(timeoutMs) {
+    const seconds = Math.max(1, Math.round(Number(timeoutMs || 0) / 1000));
+    super(`AI 请求超时（${seconds}s）`);
+    this.name = 'AiLayoutTimeoutError';
+    this.code = 'ai-layout-timeout';
+    this.timeoutMs = Number(timeoutMs || 0);
+  }
+}
+
 function normalizeArticleLayoutState(raw = {}) {
   if (!raw || typeof raw !== 'object') return null;
   const layoutJson = raw.layoutJson && typeof raw.layoutJson === 'object' ? raw.layoutJson : null;
   if (!layoutJson) return null;
+  const dismissedBlockKeys = Array.isArray(raw.dismissedBlockKeys)
+    ? raw.dismissedBlockKeys.map((item) => coerceString(item)).filter(Boolean).slice(0, 128)
+    : [];
   return {
     version: clampNumber(raw.version, AI_LAYOUT_SCHEMA_VERSION, 1, 999),
     updatedAt: clampNumber(raw.updatedAt, Date.now(), 0, 9999999999999),
@@ -227,8 +291,45 @@ function normalizeArticleLayoutState(raw = {}) {
     lastAttemptError: typeof raw.lastAttemptError === 'string' ? raw.lastAttemptError : '',
     lastAttemptAt: clampNumber(raw.lastAttemptAt, 0, 0, 9999999999999),
     lastAttemptSchemaValidation: normalizeSchemaValidation(raw.lastAttemptSchemaValidation),
+    dismissedBlockKeys,
     generationMeta: normalizeLayoutGenerationMeta(raw.generationMeta, layoutJson),
     layoutJson,
+  };
+}
+
+function normalizeArticleLayoutCacheEntry(raw = {}) {
+  if (!raw || typeof raw !== 'object') return null;
+
+  const legacyState = normalizeArticleLayoutState(raw);
+  if (legacyState) {
+    const stylePack = legacyState.stylePack || 'tech-green';
+    return {
+      lastStylePack: stylePack,
+      stylePackStates: {
+        [stylePack]: legacyState,
+      },
+    };
+  }
+
+  const stylePackStates = {};
+  if (raw.stylePackStates && typeof raw.stylePackStates === 'object') {
+    for (const [stylePackId, value] of Object.entries(raw.stylePackStates)) {
+      const normalizedState = normalizeArticleLayoutState(value);
+      if (!normalizedState) continue;
+      const effectiveStylePack = normalizedState.stylePack || stylePackId || 'tech-green';
+      stylePackStates[effectiveStylePack] = {
+        ...normalizedState,
+        stylePack: effectiveStylePack,
+      };
+    }
+  }
+
+  const stylePackIds = Object.keys(stylePackStates);
+  if (!stylePackIds.length) return null;
+  const lastStylePack = coerceString(raw.lastStylePack);
+  return {
+    lastStylePack: stylePackStates[lastStylePack] ? lastStylePack : stylePackIds[0],
+    stylePackStates,
   };
 }
 
@@ -255,7 +356,7 @@ function normalizeAiSettings(raw = {}) {
   if (raw.articleLayoutsByPath && typeof raw.articleLayoutsByPath === 'object') {
     for (const [path, value] of Object.entries(raw.articleLayoutsByPath)) {
       if (!path || typeof path !== 'string') continue;
-      const normalized = normalizeArticleLayoutState(value);
+      const normalized = normalizeArticleLayoutCacheEntry(value);
       if (normalized) {
         articleLayoutsByPath[path] = normalized;
       }
@@ -323,8 +424,66 @@ function extractJsonPayload(text) {
   return candidate.slice(firstBrace, lastBrace + 1);
 }
 
+function inferBlockType(rawBlock = {}) {
+  if (!rawBlock || typeof rawBlock !== 'object' || Array.isArray(rawBlock)) return '';
+  const explicitType = coerceString(
+    rawBlock.type
+    || rawBlock.blockType
+    || rawBlock.block_type
+    || rawBlock.kind
+    || rawBlock.component
+  );
+  const allowedTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((item) => item.type));
+  if (allowedTypes.has(explicitType)) return explicitType;
+
+  if ('sectionIndex' in rawBlock || 'paragraphs' in rawBlock || 'bulletGroups' in rawBlock) return 'section-block';
+  if (Array.isArray(rawBlock.items)) return 'part-nav';
+  if (typeof rawBlock.imageId === 'string') return 'phone-frame';
+  if ('coverImageId' in rawBlock || 'eyebrow' in rawBlock || 'subtitle' in rawBlock || explicitType === 'cover') return 'hero';
+  if ('buttonText' in rawBlock || 'body' in rawBlock) return 'cta-card';
+  if ('text' in rawBlock || 'quote' in rawBlock) return 'lead-quote';
+  if ('summary' in rawBlock || 'caseLabel' in rawBlock || 'bullets' in rawBlock || 'highlight' in rawBlock || 'imageIds' in rawBlock) return 'case-block';
+  if (typeof rawBlock.title === 'string') return 'section-block';
+  return '';
+}
+
+function repairRawLayoutPayload(rawLayout = {}) {
+  if (!rawLayout || typeof rawLayout !== 'object' || Array.isArray(rawLayout)) return rawLayout;
+  if (!Array.isArray(rawLayout.blocks)) return rawLayout;
+  return {
+    ...rawLayout,
+    blocks: rawLayout.blocks.map((block) => {
+      if (!block || typeof block !== 'object' || Array.isArray(block)) return block;
+      const inferredType = inferBlockType(block);
+      if (!inferredType) return block;
+      const repaired = {
+        ...block,
+        type: inferredType,
+      };
+      delete repaired.blockType;
+      delete repaired.block_type;
+      delete repaired.kind;
+      delete repaired.component;
+      return repaired;
+    }),
+  };
+}
+
 function coerceString(value, fallback = '') {
   return typeof value === 'string' ? value.trim() : fallback;
+}
+
+function normalizeTitleKey(value) {
+  return coerceString(value).toLowerCase().replace(/\s+/g, '');
+}
+
+function toSectionIndex(value, fallback = -1) {
+  if (Number.isInteger(value) && value >= 0) return value;
+  if (typeof value === 'string' && /^\d+$/.test(value.trim())) {
+    const parsed = parseInt(value.trim(), 10);
+    return parsed >= 0 ? parsed : fallback;
+  }
+  return fallback;
 }
 
 function toTextArray(value, limit = 6) {
@@ -343,7 +502,43 @@ function toImageIdArray(value, imageIds, limit = 4) {
     .slice(0, limit);
 }
 
-function normalizeLayoutBlock(block, imageIds, index) {
+function buildSectionBlockFromSource(section, {
+  imageIds = [],
+  fallbackIndex = 0,
+} = {}) {
+  if (!section || typeof section !== 'object') return null;
+  const title = coerceString(section.title || section.heading || '');
+  const paragraphs = Array.isArray(section.paragraphs)
+    ? section.paragraphs.map((item) => coerceString(item)).filter(Boolean)
+    : [];
+  const bulletGroups = Array.isArray(section.bulletGroups)
+    ? section.bulletGroups
+      .map((group) => Array.isArray(group) ? group.map((item) => coerceString(item)).filter(Boolean).slice(0, 10) : [])
+      .filter((group) => group.length)
+    : [];
+  const normalizedImageIds = Array.isArray(imageIds)
+    ? imageIds.map((item) => coerceString(item)).filter(Boolean).slice(0, 3)
+    : [];
+  if (!title && !paragraphs.length && !bulletGroups.length) return null;
+  return {
+    type: 'section-block',
+    sectionIndex: toSectionIndex(section.index, fallbackIndex),
+    sectionLabel: (section.level || 2) >= 3 ? `SUB ${String(fallbackIndex + 1).padStart(2, '0')}` : `PART ${String(fallbackIndex + 1).padStart(2, '0')}`,
+    headingLevel: Number.isInteger(section.level) ? section.level : 2,
+    title,
+    paragraphs,
+    bulletGroups,
+    imageIds: normalizedImageIds,
+  };
+}
+
+function findSourceSectionByTitle(sourceSections = [], title = '') {
+  const expectedKey = normalizeTitleKey(title);
+  if (!expectedKey) return null;
+  return sourceSections.find((section) => normalizeTitleKey(section?.title) === expectedKey) || null;
+}
+
+function normalizeLayoutBlock(block, imageIds, sourceSections, index) {
   if (!block || typeof block !== 'object') return null;
   const type = coerceString(block.type);
   if (!type) return null;
@@ -383,6 +578,13 @@ function normalizeLayoutBlock(block, imageIds, index) {
     const title = coerceString(block.title);
     const summary = coerceString(block.summary);
     if (!title && !summary) return null;
+    const matchedSection = findSourceSectionByTitle(sourceSections, title);
+    if (matchedSection) {
+      return buildSectionBlockFromSource(matchedSection, {
+        imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+        fallbackIndex: toSectionIndex(matchedSection.index, index),
+      });
+    }
     return {
       type,
       caseLabel: coerceString(block.caseLabel || `CASE ${String(index + 1).padStart(2, '0')}`),
@@ -392,6 +594,16 @@ function normalizeLayoutBlock(block, imageIds, index) {
       imageIds: toImageIdArray(block.imageIds, imageIds, 3),
       highlight: coerceString(block.highlight),
     };
+  }
+
+  if (type === 'section-block') {
+    const sectionIndex = toSectionIndex(block.sectionIndex, -1);
+    const sourceSection = sectionIndex >= 0 ? sourceSections.find((item) => toSectionIndex(item?.index, -1) === sectionIndex) : null;
+    if (!sourceSection) return null;
+    return buildSectionBlockFromSource(sourceSection, {
+      imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+      fallbackIndex: sectionIndex,
+    });
   }
 
   if (type === 'phone-frame') {
@@ -426,6 +638,24 @@ function summarizeText(value, maxLength = 80) {
   return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
 }
 
+function looksLikeScreenshotRef(image = {}) {
+  const signature = [
+    image.id,
+    image.alt,
+    image.caption,
+    image.src,
+  ].map((item) => coerceString(item).toLowerCase()).join(' ');
+  if (!signature) return false;
+  return /(截图|界面|对话|聊天|微信|面板|后台|screenshot|screen|cleanshot|dialog|chat|ui)/i.test(signature);
+}
+
+function stripFrontmatterBlock(markdown = '') {
+  const content = String(markdown || '').replace(/^\uFEFF/, '');
+  if (!content.startsWith('---')) return content;
+  const match = content.match(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/);
+  return match ? content.slice(match[0].length) : content;
+}
+
 function stripMarkdown(value) {
   return String(value || '')
     .replace(/```[\s\S]*?```/g, ' ')
@@ -438,47 +668,72 @@ function stripMarkdown(value) {
     .trim();
 }
 
-function extractMarkdownSignals(markdown = '') {
-  const lines = String(markdown || '').split(/\r?\n/);
-  const headings = [];
-  const bulletGroups = [];
-  const paragraphs = [];
+function extractMarkdownSections(markdown = '') {
+  const lines = stripFrontmatterBlock(markdown).split(/\r?\n/);
+  const sections = [];
+  const introParagraphs = [];
+  const introBulletGroups = [];
+  let currentSection = null;
   let currentParagraph = [];
   let currentBullets = [];
 
-  const flushParagraph = () => {
+  const pushParagraphToTarget = () => {
     const text = stripMarkdown(currentParagraph.join(' ').trim());
-    if (text) paragraphs.push(text);
+    if (text) {
+      if (currentSection) {
+        currentSection.paragraphs.push(text);
+      } else {
+        introParagraphs.push(text);
+      }
+    }
     currentParagraph = [];
   };
 
-  const flushBullets = () => {
-    if (currentBullets.length) bulletGroups.push(currentBullets);
+  const pushBulletsToTarget = () => {
+    if (currentBullets.length) {
+      if (currentSection) {
+        currentSection.bulletGroups.push(currentBullets);
+      } else {
+        introBulletGroups.push(currentBullets);
+      }
+    }
     currentBullets = [];
+  };
+
+  const finalizeSection = () => {
+    if (currentSection && (currentSection.title || currentSection.paragraphs.length || currentSection.bulletGroups.length)) {
+      currentSection.index = sections.length;
+      sections.push(currentSection);
+    }
+    currentSection = null;
   };
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
     if (!line) {
-      flushParagraph();
-      flushBullets();
+      pushParagraphToTarget();
+      pushBulletsToTarget();
       continue;
     }
 
-    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
     if (headingMatch) {
-      flushParagraph();
-      flushBullets();
-      headings.push({
+      pushParagraphToTarget();
+      pushBulletsToTarget();
+      finalizeSection();
+      currentSection = {
+        index: sections.length,
         level: headingMatch[1].length,
-        text: stripMarkdown(headingMatch[2]),
-      });
+        title: stripMarkdown(headingMatch[2]),
+        paragraphs: [],
+        bulletGroups: [],
+      };
       continue;
     }
 
     const bulletMatch = line.match(/^[-*+]\s+(.+)$/) || line.match(/^\d+\.\s+(.+)$/);
     if (bulletMatch) {
-      flushParagraph();
+      pushParagraphToTarget();
       currentBullets.push(stripMarkdown(bulletMatch[1]));
       continue;
     }
@@ -486,12 +741,44 @@ function extractMarkdownSignals(markdown = '') {
     currentParagraph.push(line);
   }
 
-  flushParagraph();
-  flushBullets();
+  pushParagraphToTarget();
+  pushBulletsToTarget();
+  finalizeSection();
 
+  if (!sections.length && (introParagraphs.length || introBulletGroups.length)) {
+    sections.push({
+      index: 0,
+      level: 2,
+      title: '核心内容',
+      paragraphs: introParagraphs.slice(),
+      bulletGroups: introBulletGroups.slice(),
+    });
+  }
+
+  return {
+    introParagraphs,
+    introBulletGroups,
+    sections,
+  };
+}
+
+function extractMarkdownSignals(markdown = '') {
+  const structure = extractMarkdownSections(markdown);
+  const headings = structure.sections.map((section) => ({
+    level: section.level || 2,
+    text: coerceString(section.title),
+  })).filter((section) => section.text);
+  const bulletGroups = [
+    ...structure.introBulletGroups,
+    ...structure.sections.flatMap((section) => section.bulletGroups || []),
+  ];
+  const paragraphs = [
+    ...structure.introParagraphs,
+    ...structure.sections.flatMap((section) => section.paragraphs || []),
+  ];
   const leadParagraphs = paragraphs.slice(0, 3);
   const lastParagraph = paragraphs[paragraphs.length - 1] || '';
-  const sectionTitles = headings.filter((item) => item.level <= 3).map((item) => item.text).slice(0, 6);
+  const sectionTitles = headings.filter((item) => item.level <= 3).map((item) => item.text).slice(0, 12);
   return {
     headings,
     sectionTitles,
@@ -507,11 +794,11 @@ function buildFallbackLayout(context = {}) {
   const stylePack = coerceString(context.stylePack || 'tech-green');
   const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
   const signals = extractMarkdownSignals(context.markdown || '');
+  const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || '').sections;
   const firstImageId = imageRefs[0]?.id || '';
-  const secondImageId = imageRefs[1]?.id || '';
   const leadText = summarizeText(signals.leadParagraphs[0] || signals.paragraphs[0] || '');
   const leadNote = summarizeText(signals.leadParagraphs[1] || '');
-  const partItems = signals.sectionTitles.slice(0, 3).map((text, index) => ({
+  const partItems = signals.sectionTitles.slice(0, 5).map((text, index) => ({
     label: `PART ${String(index + 1).padStart(2, '0')}`,
     text,
   }));
@@ -539,39 +826,22 @@ function buildFallbackLayout(context = {}) {
     });
   }
 
-  const sectionTitles = signals.sectionTitles.length ? signals.sectionTitles : ['核心内容'];
-  sectionTitles.slice(0, 2).forEach((heading, index) => {
-    const bullets = signals.bulletGroups[index] || [];
-    const paragraph = signals.paragraphs[index + 1] || signals.paragraphs[index] || '';
-    bodyBlocks.push({
-      type: 'case-block',
-      caseLabel: `CASE ${String(index + 1).padStart(2, '0')}`,
-      title: heading,
-      summary: summarizeText(paragraph, 96),
-      bullets: bullets.slice(0, 4),
-      imageIds: index === 0 && firstImageId ? [firstImageId] : (index === 1 && secondImageId ? [secondImageId] : []),
-      highlight: bullets[0] ? summarizeText(bullets[0], 48) : '',
+  sourceSections.forEach((section, index) => {
+    const block = buildSectionBlockFromSource(section, {
+      imageIds: index === 0 && firstImageId ? [firstImageId] : [],
+      fallbackIndex: index,
     });
+    if (block) bodyBlocks.push(block);
   });
 
-  if (firstImageId) {
+  const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
+  if (screenshotImage?.id) {
     bodyBlocks.push({
       type: 'phone-frame',
-      imageId: secondImageId || firstImageId,
-      caption: imageRefs[1]?.caption || imageRefs[0]?.caption || '示意截图',
+      imageId: screenshotImage.id,
+      caption: screenshotImage.caption || screenshotImage.alt || '示意截图',
     });
   }
-
-  const ctaBlock = {
-    type: 'cta-card',
-    title: signals.sectionTitles[0] ? `继续阅读：${signals.sectionTitles[0]}` : '继续阅读',
-    body: summarizeText(signals.lastParagraph || leadText || title, 88),
-    buttonText: '整理后发布',
-    note: '本版式为 AI 辅助生成，可继续调整后复制或同步到公众号。',
-  };
-
-  const blocks = [...headBlocks, ...bodyBlocks].slice(0, 5);
-  blocks.push(ctaBlock);
 
   return {
     version: AI_LAYOUT_SCHEMA_VERSION,
@@ -579,7 +849,7 @@ function buildFallbackLayout(context = {}) {
     stylePack,
     title,
     summary: summarizeText(leadText || signals.lastParagraph || title, 90),
-    blocks: blocks.filter(Boolean).slice(0, 6),
+    blocks: [...headBlocks, ...bodyBlocks].filter(Boolean).slice(0, MAX_LAYOUT_BLOCKS),
   };
 }
 
@@ -588,9 +858,15 @@ function mergeBlocksWithFallback(aiBlocks = [], fallbackBlocks = []) {
 }
 
 function mergeBlocksWithFallbackDetailed(aiBlocks = [], fallbackBlocks = []) {
-  const merged = [];
+  const introOrder = ['hero', 'part-nav', 'lead-quote'];
+  const introAiByType = new Map();
+  const introFallbackByType = new Map();
+  const fallbackSectionsByIndex = new Map();
+  const deferredAi = [];
+  const deferredFallback = [];
   const seenKeys = new Set();
-  const fallbackCta = fallbackBlocks.find((block) => block?.type === 'cta-card') || null;
+  const merged = [];
+
   const addBlock = (block, source) => {
     if (!block || !block.type) return;
     const dedupeKey = getLayoutBlockKey(block);
@@ -598,25 +874,89 @@ function mergeBlocksWithFallbackDetailed(aiBlocks = [], fallbackBlocks = []) {
     seenKeys.add(dedupeKey);
     merged.push({ block, source });
   };
-  aiBlocks.forEach((block) => addBlock(block, 'ai'));
-  fallbackBlocks.filter((block) => block?.type !== 'cta-card').forEach((block) => addBlock(block, 'fallback'));
-  const limited = merged.slice(0, 5);
-  const limitedKeys = new Set(limited.map((entry) => getLayoutBlockKey(entry.block)));
-  if (fallbackCta) {
-    const ctaKey = getLayoutBlockKey(fallbackCta);
-    if (!limitedKeys.has(ctaKey)) {
-      limited.push({ block: fallbackCta, source: 'fallback' });
+
+  const fallbackSectionIndices = [];
+  fallbackBlocks.forEach((block) => {
+    if (!block || !block.type) return;
+    if (introOrder.includes(block.type)) {
+      if (!introFallbackByType.has(block.type)) {
+        introFallbackByType.set(block.type, block);
+      }
+      return;
     }
-  }
-  return limited.slice(0, 6);
+    if (block.type === 'section-block' && Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0) {
+      if (!fallbackSectionsByIndex.has(block.sectionIndex)) {
+        fallbackSectionsByIndex.set(block.sectionIndex, block);
+        fallbackSectionIndices.push(block.sectionIndex);
+      }
+      return;
+    }
+    deferredFallback.push({ block, source: 'fallback' });
+  });
+
+  aiBlocks.forEach((block) => {
+    if (!block || !block.type) return;
+    if (introOrder.includes(block.type)) {
+      if (!introAiByType.has(block.type)) {
+        introAiByType.set(block.type, block);
+      }
+      return;
+    }
+    deferredAi.push({ block, source: 'ai' });
+  });
+
+  introOrder.forEach((type) => {
+    const aiBlock = introAiByType.get(type);
+    const fallbackBlock = introFallbackByType.get(type);
+    if (aiBlock) {
+      addBlock(aiBlock, 'ai');
+    } else if (fallbackBlock) {
+      addBlock(fallbackBlock, 'fallback');
+    }
+  });
+
+  const sortedFallbackIndices = Array.from(new Set(fallbackSectionIndices)).sort((a, b) => a - b);
+  let fallbackPointer = 0;
+  const flushFallbackSectionsBefore = (targetIndex) => {
+    while (fallbackPointer < sortedFallbackIndices.length && sortedFallbackIndices[fallbackPointer] < targetIndex) {
+      const sectionIndex = sortedFallbackIndices[fallbackPointer];
+      addBlock(fallbackSectionsByIndex.get(sectionIndex), 'fallback');
+      fallbackPointer += 1;
+    }
+  };
+  const consumeFallbackSection = (sectionIndex) => {
+    while (fallbackPointer < sortedFallbackIndices.length && sortedFallbackIndices[fallbackPointer] <= sectionIndex) {
+      fallbackPointer += 1;
+    }
+  };
+
+  deferredAi.forEach((entry) => {
+    const block = entry.block;
+    if (block?.type === 'section-block' && Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0) {
+      flushFallbackSectionsBefore(block.sectionIndex);
+      addBlock(block, 'ai');
+      consumeFallbackSection(block.sectionIndex);
+      return;
+    }
+    if (block?.type === 'hero' || block?.type === 'part-nav' || block?.type === 'lead-quote') {
+      return;
+    }
+    deferredFallback.push(entry);
+  });
+
+  flushFallbackSectionsBefore(Number.POSITIVE_INFINITY);
+  deferredFallback.forEach((entry) => addBlock(entry.block, entry.source));
+
+  return merged.slice(0, MAX_LAYOUT_BLOCKS);
 }
 
 function normalizeArticleLayout(rawLayout = {}, context = {}) {
   const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
-  const requestedStylePack = coerceString(rawLayout.stylePack || context.stylePack || 'tech-green');
+  const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || 'tech-green');
+  const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || '').sections;
   const normalizedAiBlocks = Array.isArray(rawLayout.blocks)
     ? rawLayout.blocks
-      .map((block, index) => normalizeLayoutBlock(block, imageIds, index))
+      .map((block, index) => normalizeLayoutBlock(block, imageIds, sourceSections, index))
       .filter(Boolean)
     : [];
   const fallbackLayout = buildFallbackLayout({
@@ -624,6 +964,7 @@ function normalizeArticleLayout(rawLayout = {}, context = {}) {
     markdown: context.markdown,
     stylePack: requestedStylePack,
     imageRefs: context.imageRefs,
+    sourceSections,
   });
   const blocks = mergeBlocksWithFallback(normalizedAiBlocks, fallbackLayout.blocks);
 
@@ -674,7 +1015,7 @@ function createLayoutGenerationMeta({
 
 function buildLayoutResult(rawLayout = {}, context = {}) {
   const validation = validateAiLayoutPayload(rawLayout);
-  const requestedStylePack = coerceString(rawLayout.stylePack || context.stylePack || 'tech-green');
+  const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || 'tech-green');
   if (validation.fatal) {
     const generationMeta = createLayoutGenerationMeta({
       provider: context.provider,
@@ -689,9 +1030,10 @@ function buildLayoutResult(rawLayout = {}, context = {}) {
   }
 
   const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
+  const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || '').sections;
   const normalizedAiBlocks = Array.isArray(rawLayout.blocks)
     ? rawLayout.blocks
-      .map((block, index) => normalizeLayoutBlock(block, imageIds, index))
+      .map((block, index) => normalizeLayoutBlock(block, imageIds, sourceSections, index))
       .filter(Boolean)
     : [];
   const fallbackLayout = buildFallbackLayout({
@@ -699,6 +1041,7 @@ function buildLayoutResult(rawLayout = {}, context = {}) {
     markdown: context.markdown,
     stylePack: requestedStylePack,
     imageRefs: context.imageRefs,
+    sourceSections,
   });
   const mergedEntries = mergeBlocksWithFallbackDetailed(normalizedAiBlocks, fallbackLayout.blocks);
   const layoutJson = {
@@ -753,6 +1096,9 @@ function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
   const imageSummary = imageRefs.length
     ? imageRefs.map((image) => `- ${image.id}: ${image.caption}`).join('\n')
     : '- 无可用图片';
+  const sectionSummary = signals.sectionTitles.length
+    ? signals.sectionTitles.map((item, index) => `- ${index}: ${item}`).join('\n')
+    : '- 无明显章节结构';
   const headingSummary = signals.sectionTitles.length
     ? signals.sectionTitles.map((item, index) => `${index + 1}. ${item}`).join('\n')
     : '- 无明显标题结构';
@@ -778,6 +1124,9 @@ function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
         '可用图片：',
         imageSummary,
         '',
+        '可用正文 section：',
+        sectionSummary,
+        '',
         '文章结构摘要：',
         '标题大纲：',
         headingSummary,
@@ -792,7 +1141,11 @@ function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
         'block 约束：',
         ...getAiLayoutBlockConstraintLines(),
         '',
-        '优先生成 4 到 6 个 block，适合教程/案例类公众号文章。',
+        '正文主体请优先使用 section-block，并通过 sectionIndex 引用原文章节。',
+        'sectionIndex 从 0 开始，对应上面“可用正文 section”的编号。',
+        '优先覆盖全文主要章节，不要只处理前半篇，也不要遗漏后半部分内容。',
+        '如果章节较多，允许生成更多 block 来覆盖全文；保真优先于花哨编排。',
+        'CTA 和 phone-frame 都是可选块，不要默认强加。',
         '',
         '原文如下：',
         promptMarkdown,
@@ -850,7 +1203,12 @@ async function requestOpenAICompatibleLayout({
     const data = await response.json();
     const content = readChatCompletionContent(data);
     const jsonPayload = extractJsonPayload(content);
-    return JSON.parse(jsonPayload);
+    return repairRawLayoutPayload(JSON.parse(jsonPayload));
+  } catch (error) {
+    if (controller.signal.aborted || error?.name === 'AbortError') {
+      throw new AiLayoutTimeoutError(timeoutMs);
+    }
+    throw error;
   } finally {
     clearTimeout(timer);
   }
@@ -869,6 +1227,7 @@ async function generateArticleLayout({
   if (typeof fetchImpl !== 'function') throw new Error('当前环境不支持 AI 网络请求');
   if (!markdown || !String(markdown).trim()) throw new Error('文章内容为空，无法进行 AI 编排');
   const signals = extractMarkdownSignals(markdown);
+  const sourceSections = extractMarkdownSections(markdown).sections;
 
   let rawLayout;
   switch (provider.kind) {
@@ -894,6 +1253,7 @@ async function generateArticleLayout({
     markdown,
     provider,
     signals,
+    sourceSections,
   });
 }
 
@@ -924,11 +1284,15 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
   const stylePack = getStylePackById(layout?.stylePack);
   const tokens = stylePack.tokens;
   const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
+  const bodyFontSize = 16;
+  const bodyLineHeight = 1.8;
+  const bodyParagraphGap = 20;
   const wrapperStyle = [
     'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif',
     `color:${tokens.text}`,
-    'font-size:16px',
-    'line-height:1.8',
+    `font-size:${bodyFontSize}px`,
+    `line-height:${bodyLineHeight}`,
+    'letter-spacing:0',
     'padding:24px 18px',
     `background:${tokens.surface}`,
   ].join(';');
@@ -1003,20 +1367,52 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
         ${block.title ? `<h2 style="margin:0 0 8px;font-size:22px;line-height:1.35;color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ''}
-        ${block.summary ? `<p style="margin:0;color:${tokens.muted};">${escapeHtml(block.summary)}</p>` : ''}
-        ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;">${escapeHtml(block.highlight)}</div>` : ''}
+        ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ''}
+        ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ''}
         ${bulletsHtml}
         ${imagesHtml}
       </section>`;
     }
 
+    if (block.type === 'section-block') {
+      const sectionDisplayIndex = Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0
+        ? block.sectionIndex + 1
+        : index + 1;
+      const headingLevel = Number.isInteger(block.headingLevel) ? block.headingLevel : 2;
+      const titleFontSize = headingLevel >= 3 ? 18 : 22;
+      const titleMarginBottom = headingLevel >= 3 ? 10 : 12;
+      const titleColor = headingLevel >= 3 ? tokens.accentDeep : tokens.text;
+      const paragraphsHtml = Array.isArray(block.paragraphs)
+        ? block.paragraphs.map((paragraph) => `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(paragraph)}</p>`).join('')
+        : '';
+      const bulletGroupsHtml = Array.isArray(block.bulletGroups)
+        ? block.bulletGroups.map((group) => {
+          if (!Array.isArray(group) || !group.length) return '';
+          return `<ul style="margin:12px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join('')}</ul>`;
+        }).join('')
+        : '';
+      const imagesHtml = Array.isArray(block.imageIds)
+        ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join('')
+        : '';
+      return `<section style="margin:26px 0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, '0')}</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
+        </div>
+        ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:1.4;color:${titleColor};">${escapeHtml(block.title)}</h2>` : ''}
+        ${paragraphsHtml}
+        ${bulletGroupsHtml}
+        ${imagesHtml}
+      </section>`;
+    }
+
     if (block.type === 'phone-frame') {
-      return `<section style="margin:24px auto;max-width:380px;padding:14px;border:1px solid ${tokens.border};border-radius:42px;background:#111;box-shadow:0 20px 40px -28px rgba(0,0,0,0.45);">
-        <div style="width:42%;height:18px;margin:0 auto 14px;border-radius:999px;background:#000;"></div>
-        <div style="background:#fff;border-radius:28px;padding:10px;overflow:hidden;">
+      return `<section style="margin:24px auto;max-width:380px;padding:14px;border:1px solid ${tokens.border};border-radius:42px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);">
+        <div style="width:42%;height:18px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
+        <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:28px;padding:10px;overflow:hidden;">
           ${renderImage(block.imageId, 'border-radius:22px;')}
         </div>
-        ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:#d7e2dd;">${escapeHtml(block.caption)}</div>` : ''}
+        ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:${tokens.muted};">${escapeHtml(block.caption)}</div>` : ''}
       </section>`;
     }
 
@@ -1047,18 +1443,21 @@ module.exports = {
   isAiProviderRunnable,
   summarizeAiProviderIssues,
   normalizeArticleLayoutState,
+  normalizeArticleLayoutCacheEntry,
   normalizeSchemaValidation,
   getStylePackList,
   getStylePackById,
   listEnabledAiProviders,
   resolveAiProvider,
   extractImageRefsFromHtml,
+  extractMarkdownSections,
   extractMarkdownSignals,
   buildFallbackLayout,
   normalizeArticleLayout,
   normalizeLayoutGenerationMeta,
   buildLayoutResult,
   AiLayoutSchemaError,
+  AiLayoutTimeoutError,
   generateArticleLayout,
   renderArticleLayoutHtml,
   testAiProviderConnection,

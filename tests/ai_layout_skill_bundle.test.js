@@ -18,15 +18,18 @@ describe('ai-layout skill bundle', () => {
       'part-nav',
       'lead-quote',
       'case-block',
+      'section-block',
       'phone-frame',
       'cta-card',
     ]);
     expect(AI_LAYOUT_SKILL_SYSTEM_LINES.join('\n')).toContain('只允许使用这些 block type');
+    expect(AI_LAYOUT_SKILL_SYSTEM_LINES.join('\n')).toContain('保真优先');
   });
 
   it('should expose output fields and block constraints for prompt building', () => {
     expect(AI_LAYOUT_OUTPUT_FIELDS).toEqual(['articleType', 'stylePack', 'title', 'summary', 'blocks']);
     expect(getAiLayoutBlockConstraintLines()).toContain('- hero: eyebrow, title, subtitle, coverImageId, variant');
+    expect(getAiLayoutBlockConstraintLines()).toContain('- section-block: sectionIndex, imageIds');
     expect(getAiLayoutBlockConstraintLines()).toContain('- cta-card: title, body, buttonText, note');
   });
 
@@ -35,7 +38,8 @@ describe('ai-layout skill bundle', () => {
     expect(template.articleType).toBe('tutorial');
     expect(template.stylePack).toBe('tech-green');
     expect(Array.isArray(template.blocks)).toBe(true);
-    expect(template.blocks.some((block) => block.type === 'case-block')).toBe(true);
+    expect(template.blocks.some((block) => block.type === 'section-block')).toBe(true);
+    expect(template.blocks.some((block) => block.type === 'cta-card')).toBe(false);
   });
 
   it('should validate layout payload schema issues', () => {

@@ -138,7 +138,40 @@ describe('AppleStylePlugin - Settings Migration', () => {
     expect(plugin.settings.ai.providers[0].name).toBe('未命名 Provider');
     expect(plugin.settings.ai.providers[0].model).toBe('gpt-4.1-mini');
     expect(plugin.settings.ai.articleLayoutsByPath['notes/demo.md']).toBeTruthy();
-    expect(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].lastAttemptStatus).toBe('idle');
+    expect(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].stylePackStates['tech-green'].lastAttemptStatus).toBe('idle');
     expect(plugin.saveData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should keep separate cached layouts for the same note across style packs', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: true,
+        defaultStylePack: 'tech-green',
+        providers: [],
+        articleLayoutsByPath: {},
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    await plugin.saveArticleLayoutState('notes/demo.md', {
+      layoutJson: { articleType: 'tutorial', stylePack: 'tech-green', blocks: [{ type: 'hero', title: 'green' }] },
+      stylePack: 'tech-green',
+    });
+
+    await plugin.saveArticleLayoutState('notes/demo.md', {
+      layoutJson: { articleType: 'tutorial', stylePack: 'ocean-blue', blocks: [{ type: 'hero', title: 'blue' }] },
+      stylePack: 'ocean-blue',
+    });
+
+    expect(plugin.getArticleLayoutState('notes/demo.md', 'tech-green')?.layoutJson?.blocks?.[0]?.title).toBe('green');
+    expect(plugin.getArticleLayoutState('notes/demo.md', 'ocean-blue')?.layoutJson?.blocks?.[0]?.title).toBe('blue');
+    expect(Object.keys(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].stylePackStates)).toEqual(
+      expect.arrayContaining(['tech-green', 'ocean-blue'])
+    );
   });
 });
