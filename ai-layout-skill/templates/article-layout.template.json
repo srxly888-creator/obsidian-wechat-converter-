@@ -1,0 +1,44 @@
+{
+  "articleType": "tutorial",
+  "stylePack": "tech-green",
+  "title": "文章标题",
+  "summary": "一句摘要",
+  "blocks": [
+    {
+      "type": "hero",
+      "eyebrow": "AI Layout Draft",
+      "title": "文章标题",
+      "subtitle": "封面导语",
+      "coverImageId": "image-1",
+      "variant": "cover-right"
+    },
+    {
+      "type": "part-nav",
+      "items": [
+        { "label": "PART 01", "text": "第一部分" },
+        { "label": "PART 02", "text": "第二部分" }
+      ]
+    },
+    {
+      "type": "lead-quote",
+      "text": "一段适合做导语的重点摘要。",
+      "note": "补充说明或上下文。"
+    },
+    {
+      "type": "case-block",
+      "caseLabel": "CASE 01",
+      "title": "第一部分",
+      "summary": "这一节的核心内容。",
+      "bullets": ["要点一", "要点二"],
+      "imageIds": ["image-1"],
+      "highlight": "本节最值得高亮的一句话。"
+    },
+    {
+      "type": "cta-card",
+      "title": "继续阅读",
+      "body": "收尾总结或 CTA。",
+      "buttonText": "整理后发布",
+      "note": "本版式为 AI 辅助生成。"
+    }
+  ]
+}

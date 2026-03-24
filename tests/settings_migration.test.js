@@ -96,4 +96,49 @@ describe('AppleStylePlugin - Settings Migration', () => {
 
     expect(plugin.saveData).not.toHaveBeenCalled();
   });
+
+  it('should normalize partial ai settings without forcing a save when field is missing', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      cleanupDirTemplate: '',
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.ai).toBeTruthy();
+    expect(plugin.settings.ai.defaultStylePack).toBe('tech-green');
+    expect(plugin.settings.ai.providers).toEqual([]);
+    expect(plugin.settings.ai.articleLayoutsByPath).toEqual({});
+    expect(plugin.saveData).not.toHaveBeenCalled();
+  });
+
+  it('should normalize stored ai settings when provider metadata is incomplete', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: true,
+        defaultProviderId: 'p1',
+        providers: [{ id: 'p1', apiKey: 'secret' }],
+        articleLayoutsByPath: {
+          'notes/demo.md': {
+            layoutJson: { articleType: 'tutorial', stylePack: 'tech-green', blocks: [{ type: 'lead-quote', text: 'hello' }] }
+          }
+        }
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.ai.providers[0].name).toBe('未命名 Provider');
+    expect(plugin.settings.ai.providers[0].model).toBe('gpt-4.1-mini');
+    expect(plugin.settings.ai.articleLayoutsByPath['notes/demo.md']).toBeTruthy();
+    expect(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].lastAttemptStatus).toBe('idle');
+    expect(plugin.saveData).toHaveBeenCalledTimes(1);
+  });
 });

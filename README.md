@@ -20,6 +20,7 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 - Math rendering with SVG output for better WeChat compatibility.
 - Local image handling for wiki links, relative paths, absolute paths, and GIFs.
 - Visual settings panel with theme, typography, preview, and code block controls.
+- Experimental AI layout planning with provider-based configuration, schema checks, and debug snapshots.
 - Chinese punctuation normalization for rendered output, with protection for code and technical tokens.
 
 <p align="center">
@@ -55,6 +56,12 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 2. Edit your Markdown note as usual. The right panel updates the article preview in real time.
 3. Click `Copy to WeChat` to paste rich HTML into the WeChat editor.
 4. Optionally click `Sync to Draft` after configuring your WeChat AppID and AppSecret in plugin settings.
+
+### Experimental AI layout planning
+
+- Configure AI providers from the plugin settings page.
+- Open `AI 编排` from the converter toolbar to generate layout suggestions for the current article.
+- Review schema warnings, inspect layout JSON, or copy a debug prompt snapshot before applying the result to preview.
 
 ### Draft sync
 

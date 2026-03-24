@@ -5,6 +5,23 @@ const { buildRenderRuntime } = require('./services/dependency-loader');
 const { resolveMarkdownSource } = require('./services/markdown-source');
 const { normalizeVaultPath, isAbsolutePathLike } = require('./services/path-utils');
 const { renderObsidianTripletMarkdown } = require('./services/obsidian-triplet-renderer');
+const {
+  AI_LAYOUT_SCHEMA_VERSION,
+  AI_LAYOUT_SKILL_VERSION,
+  AI_PROVIDER_KINDS,
+  createDefaultAiSettings,
+  normalizeAiSettings,
+  normalizeAiProvider,
+  getAiProviderIssues,
+  isAiProviderRunnable,
+  summarizeAiProviderIssues,
+  getStylePackList,
+  resolveAiProvider,
+  extractImageRefsFromHtml,
+  generateArticleLayout,
+  renderArticleLayoutHtml,
+  testAiProviderConnection,
+} = require('./services/ai-layout');
 const { createWechatSyncService } = require('./services/wechat-sync');
 const { resolveSyncAccount, toSyncFriendlyMessage } = require('./services/sync-context');
 const { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require('./services/wechat-media');
@@ -46,7 +63,7 @@ const DEFAULT_SETTINGS = {
   // 旧字段保留用于迁移检测
   wechatAppId: '',
   wechatAppSecret: '',
-
+  ai: createDefaultAiSettings(),
 };
 
 // 账号上限
@@ -416,6 +433,12 @@ class AppleStyleView extends ItemView {
     this.sidePaddingPreviewTimer = null;
     this.lastResolvedMarkdown = '';
     this.lastResolvedSourcePath = '';
+    this.lastResolvedSourceHash = '';
+    this.baseRenderedHtml = null;
+    this.aiPreviewApplied = false;
+    this.aiLayoutBtn = null;
+    this.settingsBtn = null;
+    this.aiLayoutDebugMode = '';
   }
 
   getViewType() {
@@ -453,22 +476,7 @@ class AppleStyleView extends ItemView {
 
     // Light Dismiss: 点击预览区域(手机框外)收起设置面板
     previewWrapper.addEventListener('click', (e) => {
-      // 确保点击的不是设置面板本身（虽然设置面板是 overlay，但为了保险起见）
-      // 且当前设置面板是可见的
-      if (this.settingsOverlay && this.settingsOverlay.classList.contains('visible')) {
-        // 如果点击的是 previewWrapper 本身（空白处），或者是 wrapper 内部非交互元素
-        // 这里简化为：只要点击发生，就尝试关闭面板。
-        // 由于 settingsOverlay 是 absolute 定位在 toolbar 下方，
-        // 且 z-index 高于 previewWrapper，所以点击 settingsOverlay 不会冒泡到 previewWrapper
-        // (前提是 settingsOverlay 不是 previewWrapper 的子元素，确实不是，它是兄弟元素)
-        this.settingsOverlay.classList.remove('visible');
-        // 同时移除按钮激活状态。需要获取 settingsBtn 引用？
-        // 由于 settingsBtn 是在 createSettingsPanel 内部定义的局部变量，这里无法直接访问。
-        // 我们需要一种方式来同步状态。
-        // 方案：查找 DOM 中的按钮并移除类
-        const btn = container.querySelector('.apple-icon-btn[aria-label="样式设置"]');
-        if (btn) btn.classList.remove('active');
-      }
+      this.closeTransientPanels();
     });
 
     if (usePhoneFrame) {
@@ -781,10 +789,11 @@ class AppleStyleView extends ItemView {
     };
 
     // [设置] 按钮
-    const settingsBtn = createIconBtn('sliders-horizontal', '样式设置', () => {
-      this.settingsOverlay.classList.toggle('visible');
-      settingsBtn.classList.toggle('active');
+    this.settingsBtn = createIconBtn('sliders-horizontal', '样式设置', () => {
+      this.togglePanel(this.settingsOverlay, this.settingsBtn);
     });
+
+    this.aiLayoutBtn = createIconBtn('sparkles', 'AI 编排', () => this.onAiLayoutButtonClick());
 
     // [复制] 按钮（移动端隐藏，避免误导）
     if (!isMobileClient(this.app)) {
@@ -1054,6 +1063,10 @@ class AppleStyleView extends ItemView {
         toggleComp.toggleEl.style.filter = 'grayscale(100%)';
       }
     }
+
+    this.aiLayoutOverlay = container.createEl('div', { cls: 'apple-ai-layout-overlay' });
+    this.createAiLayoutPanel(this.aiLayoutOverlay);
+    this.updateAiToolbarState();
   }
 
 
@@ -1364,6 +1377,875 @@ class AppleStyleView extends ItemView {
     section.createEl('label', { cls: 'apple-setting-label', text: label });
     const content = section.createEl('div', { cls: 'apple-setting-content' });
     builder(content);
+  }
+
+  togglePanel(overlay, button, onOpen) {
+    if (!overlay || !button) return;
+    const willOpen = !overlay.classList.contains('visible');
+    this.closeTransientPanels();
+    if (willOpen) {
+      overlay.classList.add('visible');
+      button.classList.add('active');
+      if (typeof onOpen === 'function') onOpen();
+    }
+  }
+
+  closeTransientPanels() {
+    if (this.settingsOverlay) this.settingsOverlay.classList.remove('visible');
+    if (this.aiLayoutOverlay) this.aiLayoutOverlay.classList.remove('visible');
+    if (this.settingsBtn) this.settingsBtn.classList.remove('active');
+    if (this.aiLayoutBtn) this.aiLayoutBtn.classList.remove('active');
+  }
+
+  updateAiToolbarState() {
+    if (!this.aiLayoutBtn) return;
+    const enabled = this.plugin.settings?.ai?.enabled === true;
+    this.aiLayoutBtn.classList.toggle('is-disabled', !enabled);
+    this.aiLayoutBtn.setAttribute('title', enabled ? 'AI 编排' : 'AI 编排已关闭，请先在插件设置中启用');
+  }
+
+  onAiLayoutButtonClick() {
+    if (this.plugin.settings?.ai?.enabled !== true) {
+      this.closeTransientPanels();
+      this.updateAiToolbarState();
+      new Notice('AI 编排当前已关闭，请先在插件设置中启用');
+      return;
+    }
+    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
+  }
+
+  createAiLayoutPanel(parent) {
+    const header = parent.createDiv({ cls: 'apple-ai-layout-header' });
+    header.createEl('div', { cls: 'apple-ai-layout-title', text: 'AI 编排' });
+    header.createEl('div', {
+      cls: 'apple-ai-layout-subtitle',
+      text: '按当前文章内容生成区块化排版建议',
+    });
+
+    this.aiLayoutStatus = parent.createDiv({ cls: 'apple-ai-layout-status' });
+    this.aiLayoutStatusBadge = this.aiLayoutStatus.createEl('span', { cls: 'apple-ai-layout-badge', text: '未生成' });
+    this.aiLayoutStatusText = this.aiLayoutStatus.createEl('span', {
+      cls: 'apple-ai-layout-status-text',
+      text: '尚未生成当前文章的 AI 编排结果。',
+    });
+
+    const controlSection = parent.createDiv({ cls: 'apple-ai-layout-section' });
+    controlSection.createEl('label', { cls: 'apple-setting-label', text: '风格包' });
+    this.aiStylePackSelect = controlSection.createEl('select', { cls: 'apple-select' });
+    const stylePacks = getStylePackList();
+    stylePacks.forEach((pack) => {
+      const option = this.aiStylePackSelect.createEl('option', {
+        value: pack.value,
+        text: pack.label,
+      });
+      if (this.plugin.settings.ai?.defaultStylePack === pack.value) {
+        option.selected = true;
+      }
+    });
+
+    this.aiIncludeImagesNote = controlSection.createEl('div', {
+      cls: 'apple-ai-layout-mini-note',
+      text: this.plugin.settings.ai?.includeImagesInLayout === false
+        ? '图片参考已关闭，本次将只基于正文结构生成。'
+        : '将优先参考当前文章里的配图与截图。',
+    });
+
+    const summarySection = parent.createDiv({ cls: 'apple-ai-layout-section' });
+    summarySection.createEl('label', { cls: 'apple-setting-label', text: '结果摘要' });
+    this.aiLayoutSummary = summarySection.createDiv({
+      cls: 'apple-ai-layout-summary',
+      text: '生成后会在这里展示文章类型、区块数量和最近一次模型信息。',
+    });
+    this.aiLayoutMetaChips = summarySection.createDiv({ cls: 'apple-ai-layout-meta-chips' });
+    this.aiLayoutMetaNote = summarySection.createDiv({ cls: 'apple-ai-layout-mini-note' });
+    this.aiSchemaIssuePanel = summarySection.createDiv({ cls: 'apple-ai-layout-issues' });
+
+    this.aiBlockList = parent.createDiv({ cls: 'apple-ai-layout-block-list' });
+
+    const actionRow = parent.createDiv({ cls: 'apple-ai-layout-actions' });
+    this.aiGenerateBtn = actionRow.createEl('button', { cls: 'apple-btn-primary', text: '生成编排' });
+    this.aiGenerateBtn.addEventListener('click', () => this.generateAiLayoutForCurrentArticle());
+
+    this.aiApplyBtn = actionRow.createEl('button', { cls: 'apple-btn-secondary', text: '应用到预览' });
+    this.aiApplyBtn.addEventListener('click', () => this.applyAiLayoutToPreview());
+
+    this.aiResetBtn = actionRow.createEl('button', { cls: 'apple-btn-secondary', text: '恢复普通预览' });
+    this.aiResetBtn.addEventListener('click', () => this.restoreBasePreview());
+
+    const debugRow = parent.createDiv({ cls: 'apple-ai-layout-debug-actions' });
+    this.aiViewJsonBtn = debugRow.createEl('button', { cls: 'apple-btn-secondary apple-ai-layout-debug-btn', text: '查看布局 JSON' });
+    this.aiViewJsonBtn.addEventListener('click', () => this.toggleAiLayoutDebugMode('json'));
+
+    this.aiViewErrorBtn = debugRow.createEl('button', { cls: 'apple-btn-secondary apple-ai-layout-debug-btn', text: '查看错误详情' });
+    this.aiViewErrorBtn.addEventListener('click', () => this.toggleAiLayoutDebugMode('error'));
+
+    this.aiDebugPanel = parent.createDiv({ cls: 'apple-ai-layout-debug-panel' });
+    const debugHeader = this.aiDebugPanel.createDiv({ cls: 'apple-ai-layout-debug-header' });
+    this.aiDebugPanelTitle = debugHeader.createDiv({ cls: 'apple-ai-layout-debug-title', text: '调试输出' });
+    const debugTools = debugHeader.createDiv({ cls: 'apple-ai-layout-debug-tools' });
+    this.aiCopyPromptBtn = debugTools.createEl('button', {
+      cls: 'apple-ai-layout-link apple-ai-layout-debug-copy',
+      text: '复制为 Prompt',
+    });
+    this.aiCopyPromptBtn.addEventListener('click', () => this.copyAiLayoutPromptContext());
+    this.aiCopyDebugBtn = debugTools.createEl('button', {
+      cls: 'apple-ai-layout-link apple-ai-layout-debug-copy',
+      text: '复制当前快照',
+    });
+    this.aiCopyDebugBtn.addEventListener('click', () => this.copyAiLayoutDebugSnapshot());
+    this.aiDebugPanelBody = this.aiDebugPanel.createEl('pre', { cls: 'apple-ai-layout-debug-body' });
+
+    const footer = parent.createDiv({ cls: 'apple-ai-layout-footer' });
+    this.aiPanelHint = footer.createDiv({
+      cls: 'apple-ai-layout-mini-note',
+      text: '模型配置在插件设置页中维护。第一版仅支持生成 / 应用 / 重生成。',
+    });
+
+    const settingsLink = footer.createEl('button', {
+      cls: 'apple-ai-layout-link',
+      text: '打开插件设置',
+    });
+    settingsLink.addEventListener('click', () => {
+      this.closeTransientPanels();
+      if (!this.openPluginSettings()) {
+        new Notice('请在 Obsidian 设置中打开当前插件的设置页');
+      }
+    });
+
+    this.refreshAiLayoutPanel();
+  }
+
+  toggleAiLayoutDebugMode(mode) {
+    this.aiLayoutDebugMode = this.aiLayoutDebugMode === mode ? '' : mode;
+    this.refreshAiLayoutPanel();
+  }
+
+  getCurrentLayoutContext() {
+    const sourcePath = this.lastResolvedSourcePath || this.app?.workspace?.getActiveFile?.()?.path || '';
+    const markdown = this.lastResolvedMarkdown || '';
+    const sourceHash = markdown ? String(this.simpleHash(markdown)) : '';
+    return {
+      sourcePath,
+      markdown,
+      sourceHash,
+      title: this.getPublishContextFile()?.basename || '未命名文章',
+    };
+  }
+
+  getCurrentArticleLayoutState() {
+    const { sourcePath } = this.getCurrentLayoutContext();
+    if (!sourcePath) return null;
+    if (typeof this.plugin?.getArticleLayoutState === 'function') {
+      return this.plugin.getArticleLayoutState(sourcePath);
+    }
+    return null;
+  }
+
+  getArticleLayoutProviderLabel(state, aiSettings) {
+    if (!state) return '';
+    const providerList = Array.isArray(aiSettings?.providers) ? aiSettings.providers : [];
+    const matchedProvider = state.providerId
+      ? providerList.find((item) => item.id === state.providerId)
+      : null;
+    return state.generationMeta?.providerName || matchedProvider?.name || '';
+  }
+
+  getArticleLayoutModelLabel(state, aiSettings) {
+    if (!state) return '';
+    const providerList = Array.isArray(aiSettings?.providers) ? aiSettings.providers : [];
+    const matchedProvider = state.providerId
+      ? providerList.find((item) => item.id === state.providerId)
+      : null;
+    return state.generationMeta?.providerModel || state.model || matchedProvider?.model || '';
+  }
+
+  getAiLayoutBlockLabel(block) {
+    return block?.title || block?.caseLabel || block?.text || block?.caption || block?.buttonText || block?.type || '未命名区块';
+  }
+
+  renderAiLayoutMetaChips(chips = []) {
+    if (!this.aiLayoutMetaChips) return;
+    this.aiLayoutMetaChips.empty();
+    chips.forEach((chip) => {
+      if (!chip) return;
+      this.aiLayoutMetaChips.createEl('span', {
+        cls: 'apple-ai-layout-meta-chip',
+        text: chip,
+      });
+    });
+  }
+
+  refreshAiSchemaIssuePanel(schemaValidation = null) {
+    if (!this.aiSchemaIssuePanel) return;
+    this.aiSchemaIssuePanel.empty();
+    const issues = Array.isArray(schemaValidation?.issues) ? schemaValidation.issues.filter(Boolean) : [];
+    if (!issues.length) {
+      this.aiSchemaIssuePanel.classList.remove('visible');
+      return;
+    }
+
+    this.aiSchemaIssuePanel.classList.add('visible');
+    this.aiSchemaIssuePanel.createDiv({
+      cls: 'apple-ai-layout-issues-title',
+      text: schemaValidation?.fatal === true ? 'Schema 校验问题' : 'Schema 提醒',
+    });
+
+    issues.slice(0, 5).forEach((issue) => {
+      const item = this.aiSchemaIssuePanel.createDiv({
+        cls: `apple-ai-layout-issue-item ${issue?.fatal === true ? 'is-fatal' : ''}`,
+      });
+      item.createEl('span', {
+        cls: 'apple-ai-layout-issue-path',
+        text: issue?.path || '$',
+      });
+      item.createEl('span', {
+        cls: 'apple-ai-layout-issue-message',
+        text: issue?.message || '未知 schema 问题',
+      });
+    });
+
+    if (issues.length > 5) {
+      this.aiSchemaIssuePanel.createDiv({
+        cls: 'apple-ai-layout-mini-note',
+        text: `其余 ${issues.length - 5} 项请在“错误详情”或调试快照中查看。`,
+      });
+    }
+  }
+
+  buildAiLayoutDebugJson(state) {
+    if (!state) return '';
+    return JSON.stringify({
+      layoutJson: state.layoutJson || null,
+      generationMeta: state.generationMeta || null,
+    }, null, 2);
+  }
+
+  buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }) {
+    return JSON.stringify({
+      status: state?.status || 'unknown',
+      lastError: state?.lastError || '',
+      providerId: state?.providerId || '',
+      providerName: providerLabel || '',
+      model: modelLabel || '',
+      stylePack: state?.stylePack || '',
+      updatedAt: state?.updatedAt ? new Date(state.updatedAt).toISOString() : '',
+      sourceHash: state?.sourceHash || '',
+      isStale: isStale === true,
+      generationMeta: state?.generationMeta || null,
+    }, null, 2);
+  }
+
+  buildAiLayoutDebugSnapshot({ mode, state, providerLabel, modelLabel, isStale, sourcePath }) {
+    if (!state || !mode) return '';
+    const header = [
+      `mode: ${mode}`,
+      `sourcePath: ${sourcePath || ''}`,
+      `provider: ${providerLabel || ''}`,
+      `model: ${modelLabel || ''}`,
+      `updatedAt: ${state?.updatedAt ? new Date(state.updatedAt).toISOString() : ''}`,
+      '',
+    ].join('\n');
+    if (mode === 'json') {
+      return `${header}${this.buildAiLayoutDebugJson(state)}`;
+    }
+    return `${header}${this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale })}`;
+  }
+
+  truncateAiPromptMarkdown(markdown, maxLength = 1600) {
+    const normalized = String(markdown || '').trim();
+    if (!normalized) return '';
+    return normalized.length > maxLength
+      ? `${normalized.slice(0, maxLength - 1)}…`
+      : normalized;
+  }
+
+  buildAiLayoutPromptContext({ state, context, providerLabel, modelLabel, isStale }) {
+    if (!state?.layoutJson) return '';
+
+    const blockLines = Array.isArray(state.layoutJson.blocks)
+      ? state.layoutJson.blocks.map((block, index) => {
+        const origin = state.generationMeta?.blockOrigins?.[index]?.source === 'fallback' ? '补全' : 'AI';
+        return `${index + 1}. [${origin}] ${block.type} - ${this.getAiLayoutBlockLabel(block)}`;
+      }).join('\n')
+      : '- 无区块';
+
+    const markdownExcerpt = this.truncateAiPromptMarkdown(context?.markdown || '');
+    const snapshot = this.aiLayoutDebugMode
+      ? this.buildAiLayoutDebugSnapshot({
+        mode: this.aiLayoutDebugMode,
+        state,
+        providerLabel,
+        modelLabel,
+        isStale,
+        sourcePath: context?.sourcePath,
+      })
+      : this.buildAiLayoutDebugSnapshot({
+        mode: 'json',
+        state,
+        providerLabel,
+        modelLabel,
+        isStale,
+        sourcePath: context?.sourcePath,
+      });
+
+    return [
+      '# 公众号 AI 编排调试上下文',
+      '',
+      '请基于下面的信息，帮我分析当前 Obsidian 微信公众号 AI 编排结果，并给出：',
+      '1. 当前 block 组合和顺序是否合理',
+      '2. 哪些区块适合保留、替换或重排',
+      '3. 如果存在失败或 fallback 介入，最可能的原因是什么',
+      '4. 下一步最值得调整的 prompt / schema / block 策略',
+      '',
+      '## 文章信息',
+      `- 标题：${context?.title || '未命名文章'}`,
+      `- 路径：${context?.sourcePath || ''}`,
+      `- 源哈希：${context?.sourceHash || ''}`,
+      `- AI 状态：${state.status || 'ready'}`,
+      `- 已过期：${isStale ? '是' : '否'}`,
+      `- 风格包：${state.stylePack || ''}`,
+      `- Provider：${providerLabel || ''}`,
+      `- Model：${modelLabel || ''}`,
+      '',
+      '## 当前布局摘要',
+      `- articleType: ${state.layoutJson.articleType || 'article'}`,
+      `- blockCount: ${state.layoutJson.blocks?.length || 0}`,
+      blockLines,
+      '',
+      '## 生成元信息',
+      '```json',
+      JSON.stringify(state.generationMeta || null, null, 2),
+      '```',
+      '',
+      '## Schema 问题',
+      '```json',
+      JSON.stringify(state.generationMeta?.schemaValidation || null, null, 2),
+      '```',
+      '',
+      '## 当前调试快照',
+      '```text',
+      snapshot,
+      '```',
+      '',
+      '## 文章正文摘录',
+      '```md',
+      markdownExcerpt || '(无可用正文)',
+      '```',
+    ].join('\n');
+  }
+
+  copyPlainTextBySelection(text) {
+    if (typeof document?.execCommand !== 'function') return false;
+    const selection = window.getSelection?.();
+    if (!selection) return false;
+    const previousRanges = [];
+    for (let i = 0; i < selection.rangeCount; i += 1) {
+      previousRanges.push(selection.getRangeAt(i).cloneRange());
+    }
+    const activeElement = document.activeElement;
+    const tempEl = document.createElement('textarea');
+    tempEl.value = text;
+    tempEl.setAttribute('readonly', 'readonly');
+    tempEl.style.position = 'fixed';
+    tempEl.style.left = '-9999px';
+    tempEl.style.top = '0';
+    document.body.appendChild(tempEl);
+    tempEl.select();
+
+    let success = false;
+    try {
+      success = document.execCommand('copy');
+    } catch (error) {
+      success = false;
+    } finally {
+      tempEl.remove();
+      selection.removeAllRanges();
+      for (const prevRange of previousRanges) {
+        try {
+          selection.addRange(prevRange);
+        } catch (restoreError) {
+          // ignore invalid stale ranges
+        }
+      }
+      if (activeElement && typeof activeElement.focus === 'function') {
+        try {
+          activeElement.focus({ preventScroll: true });
+        } catch (focusError) {
+          activeElement.focus();
+        }
+      }
+    }
+    return success;
+  }
+
+  async copyPlainTextSnapshot(text) {
+    if (!text) return false;
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return this.copyPlainTextBySelection(text);
+  }
+
+  async copyAiLayoutDebugSnapshot() {
+    const state = this.getCurrentArticleLayoutState();
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const context = this.getCurrentLayoutContext();
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const payload = this.buildAiLayoutDebugSnapshot({
+      mode: this.aiLayoutDebugMode,
+      state,
+      providerLabel,
+      modelLabel,
+      isStale,
+      sourcePath: context.sourcePath,
+    });
+
+    if (!payload) {
+      new Notice('请先展开布局 JSON 或错误详情，再复制调试快照');
+      return;
+    }
+
+    try {
+      const copied = await this.copyPlainTextSnapshot(payload);
+      if (!copied) throw new Error('clipboard unavailable');
+      new Notice('✅ 调试快照已复制');
+    } catch (error) {
+      new Notice('❌ 调试快照复制失败，请检查剪贴板权限');
+    }
+  }
+
+  async copyAiLayoutPromptContext() {
+    const state = this.getCurrentArticleLayoutState();
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const context = this.getCurrentLayoutContext();
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const payload = this.buildAiLayoutPromptContext({
+      state,
+      context,
+      providerLabel,
+      modelLabel,
+      isStale,
+    });
+
+    if (!payload) {
+      new Notice('当前还没有可用的 AI 编排结果，暂时无法生成 Prompt 上下文');
+      return;
+    }
+
+    try {
+      const copied = await this.copyPlainTextSnapshot(payload);
+      if (!copied) throw new Error('clipboard unavailable');
+      new Notice('✅ Prompt 上下文已复制');
+    } catch (error) {
+      new Notice('❌ Prompt 上下文复制失败，请检查剪贴板权限');
+    }
+  }
+
+  refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale }) {
+    if (!this.aiDebugPanel || !this.aiDebugPanelBody || !this.aiDebugPanelTitle) return;
+    const canShowJson = !!state?.layoutJson;
+    const canShowError = !!(state?.status === 'error' || state?.status === 'schema-error' || state?.lastError);
+
+    if (this.aiViewJsonBtn) {
+      this.aiViewJsonBtn.disabled = !canShowJson;
+      this.aiViewJsonBtn.classList.toggle('is-active', this.aiLayoutDebugMode === 'json');
+    }
+    if (this.aiViewErrorBtn) {
+      this.aiViewErrorBtn.disabled = !canShowError;
+      this.aiViewErrorBtn.classList.toggle('is-active', this.aiLayoutDebugMode === 'error');
+    }
+    if (this.aiCopyDebugBtn) {
+      this.aiCopyDebugBtn.disabled = !this.aiLayoutDebugMode;
+    }
+    if (this.aiCopyPromptBtn) {
+      this.aiCopyPromptBtn.disabled = !state?.layoutJson;
+    }
+
+    if ((this.aiLayoutDebugMode === 'json' && !canShowJson) || (this.aiLayoutDebugMode === 'error' && !canShowError)) {
+      this.aiLayoutDebugMode = '';
+    }
+
+    if (!this.aiLayoutDebugMode) {
+      this.aiDebugPanel.classList.remove('visible');
+      this.aiDebugPanelTitle.setText('调试输出');
+      this.aiDebugPanelBody.setText('');
+      if (this.aiCopyDebugBtn) this.aiCopyDebugBtn.disabled = true;
+      return;
+    }
+
+    this.aiDebugPanel.classList.add('visible');
+    if (this.aiCopyDebugBtn) this.aiCopyDebugBtn.disabled = false;
+    if (this.aiLayoutDebugMode === 'json') {
+      this.aiDebugPanelTitle.setText('布局 JSON');
+      this.aiDebugPanelBody.setText(this.buildAiLayoutDebugJson(state));
+      return;
+    }
+
+    this.aiDebugPanelTitle.setText('错误详情');
+    this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
+  }
+
+  refreshAiLayoutPanel() {
+    if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList) return;
+
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const provider = resolveAiProvider(aiSettings);
+    const configuredProviders = Array.isArray(aiSettings.providers) ? aiSettings.providers.length : 0;
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    const generationMeta = state?.generationMeta || null;
+    const schemaValidation = state?.lastAttemptStatus === 'schema-error' && state?.lastAttemptSchemaValidation?.issueCount
+      ? state.lastAttemptSchemaValidation
+      : (generationMeta?.schemaValidation || null);
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const aiFeatureEnabled = aiSettings.enabled === true;
+    const hasReusableLayout = !!(state?.status === 'ready' && state?.layoutJson?.blocks?.length);
+    const hasLastAttemptFailure = state?.lastAttemptStatus === 'error' || state?.lastAttemptStatus === 'schema-error';
+
+    const hasDoc = !!context.sourcePath;
+    const hasProvider = !!provider;
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const hasApplied = this.aiPreviewApplied === true && !!state && !isStale;
+
+    let badge = '未生成';
+    let statusText = hasDoc ? '当前文章还没有 AI 编排结果。' : '请先打开一篇文章。';
+    if (!aiFeatureEnabled) {
+      badge = '已关闭';
+      statusText = 'AI 编排已在插件设置中关闭。启用后可对当前文章生成排版建议。';
+    } else if (!hasProvider) {
+      badge = '待配置';
+      statusText = configuredProviders > 0
+        ? '当前已有 AI Provider，但没有可直接运行的配置。请补全 Base URL、API Key 和模型，或启用可用 Provider。'
+        : '请先在插件设置中配置可用的 AI Provider。';
+    } else if (state?.status === 'schema-error') {
+      badge = '校验失败';
+      statusText = schemaValidation?.issueCount > 0
+        ? `AI 返回结果未通过 schema 校验，共发现 ${schemaValidation.issueCount} 项问题。`
+        : 'AI 返回结果未通过 schema 校验，请查看错误详情。';
+    } else if (state?.status === 'error') {
+      badge = '失败';
+      statusText = state.lastError
+        ? `上次生成失败：${state.lastError}`
+        : '上次生成失败，请检查 Provider 配置后重试。';
+    } else if (state && isStale) {
+      badge = '已过期';
+      statusText = '文章内容已变化，建议重新生成编排。';
+    } else if (hasReusableLayout && hasLastAttemptFailure) {
+      badge = '可回退';
+      statusText = state.lastAttemptStatus === 'schema-error'
+        ? '最近一次重新生成未通过 schema 校验，仍可继续使用上一版成功结果。'
+        : '最近一次重新生成失败，仍可继续使用上一版成功结果。';
+    } else if (state) {
+      badge = hasApplied ? '已应用' : '已生成';
+      if (generationMeta?.fallbackUsed) {
+        statusText = `最近一次生成使用 ${modelLabel || provider.model}，并补全了 ${generationMeta.fallbackBlockCount} 个区块。`;
+      } else {
+        statusText = `最近一次生成使用 ${modelLabel || provider.model}，可直接应用到预览。`;
+      }
+    }
+
+    this.aiLayoutStatusBadge.setText(badge);
+    this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? 'is-applied' : ''} ${isStale ? 'is-stale' : ''} ${(state?.status === 'error' || state?.status === 'schema-error') ? 'is-error' : ''} ${!aiFeatureEnabled ? 'is-disabled' : ''}`;
+    this.aiLayoutStatusText.setText(statusText);
+    this.aiStylePackSelect.value = state?.stylePack || aiSettings.defaultStylePack || 'tech-green';
+    this.aiStylePackSelect.disabled = !aiFeatureEnabled;
+    this.aiIncludeImagesNote.setText(
+      aiSettings.includeImagesInLayout === false
+        ? '图片参考已关闭，本次将只基于正文结构生成。'
+        : '将优先参考当前文章里的配图与截图。'
+    );
+
+    if (!aiFeatureEnabled) {
+      this.aiLayoutSummary.setText('你可以先在插件设置中配置 Provider，并启用 AI 编排后再回到这里操作。');
+      this.aiLayoutMetaNote?.setText('AI 输出只负责结构化编排，最终样式仍由插件渲染。');
+      this.renderAiLayoutMetaChips([]);
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (!hasDoc) {
+      this.aiLayoutSummary.setText('打开文章后，可以针对当前文档生成专属排版。');
+      this.aiLayoutMetaNote?.setText('第一版会优先生成教程/案例风格的区块顺序。');
+      this.renderAiLayoutMetaChips([]);
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (state?.status === 'schema-error') {
+      this.aiLayoutSummary.setText(
+        schemaValidation?.issueCount > 0
+          ? `本次 AI 输出未通过 schema 校验：${schemaValidation.issueCount} 项。`
+          : '本次 AI 输出未通过 schema 校验。'
+      );
+      const errorChips = [];
+      if (providerLabel) errorChips.push(`Provider ${providerLabel}`);
+      if (modelLabel) errorChips.push(`模型 ${modelLabel}`);
+      if (schemaValidation?.issueCount > 0) errorChips.push(`Schema ${schemaValidation.issueCount} 项`);
+      this.renderAiLayoutMetaChips(errorChips);
+      this.aiLayoutMetaNote?.setText('这通常表示模型输出字段不合规、block type 不支持，或顶层结构缺失。');
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    } else if (state?.status === 'error' && state.lastError) {
+      this.aiLayoutSummary.setText(`最近一次生成失败：${state.lastError}`);
+      const errorChips = [];
+      if (providerLabel) errorChips.push(`Provider ${providerLabel}`);
+      if (modelLabel) errorChips.push(`模型 ${modelLabel}`);
+      this.renderAiLayoutMetaChips(errorChips);
+      this.aiLayoutMetaNote?.setText('修正配置后可以直接重生成，不会影响普通预览。');
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    } else if (!state) {
+      this.aiLayoutSummary.setText(`将为「${context.title}」生成教程/案例风格的版式 JSON。`);
+      this.renderAiLayoutMetaChips([
+        aiSettings.includeImagesInLayout === false ? '仅正文结构' : '优先参考图片',
+        `风格 ${this.aiStylePackSelect?.selectedOptions?.[0]?.textContent || '科技绿'}`,
+      ]);
+      this.aiLayoutMetaNote?.setText('生成后会展示这次识别到的结构、素材和补全情况。');
+      this.refreshAiSchemaIssuePanel(null);
+    } else {
+      const summaryBits = [
+        `文章类型：${state.layoutJson.articleType || 'article'}`,
+        `区块数：${state.layoutJson.blocks?.length || 0}`,
+      ];
+      if (generationMeta?.sectionCount) {
+        summaryBits.push(`章节：${generationMeta.sectionCount}`);
+      } else if (generationMeta?.headingCount) {
+        summaryBits.push(`标题：${generationMeta.headingCount}`);
+      }
+      if (generationMeta?.imageCount > 0) {
+        summaryBits.push(`图片：${generationMeta.imageCount}`);
+      }
+      this.aiLayoutSummary.setText(summaryBits.join(' · '));
+
+      const metaChips = [];
+      if (providerLabel) metaChips.push(`Provider ${providerLabel}`);
+      if (modelLabel) metaChips.push(`模型 ${modelLabel}`);
+      if (generationMeta?.stylePackLabel) metaChips.push(`风格 ${generationMeta.stylePackLabel}`);
+      if (schemaValidation?.issueCount > 0) metaChips.push(`Schema ${schemaValidation.issueCount} 项`);
+      if (generationMeta?.fallbackUsed) {
+        metaChips.push(`补全 ${generationMeta.fallbackBlockCount} 块`);
+      } else if (generationMeta?.finalBlockCount) {
+        metaChips.push('纯 AI 输出');
+      }
+      if (hasLastAttemptFailure) {
+        metaChips.push(state.lastAttemptStatus === 'schema-error' ? '最近一次校验失败' : '最近一次生成失败');
+      }
+      this.renderAiLayoutMetaChips(metaChips);
+      const updateText = new Date(state.updatedAt).toLocaleString();
+      const baseNote = generationMeta?.fallbackUsed
+        ? `已识别 ${generationMeta.sectionCount || generationMeta.headingCount || 0} 段结构，图片 ${generationMeta.imageCount || 0} 张；其中 ${generationMeta.fallbackBlockCount} 个区块由本地规则补全。最近更新于 ${updateText}。`
+        : `已识别 ${generationMeta?.sectionCount || generationMeta?.headingCount || 0} 段结构，图片 ${generationMeta?.imageCount || 0} 张。最近更新于 ${updateText}。`;
+      if (hasLastAttemptFailure && state.lastAttemptError) {
+        const lastAttemptText = state.lastAttemptAt
+          ? `最近一次尝试于 ${new Date(state.lastAttemptAt).toLocaleString()} 失败：${state.lastAttemptError}`
+          : `最近一次尝试失败：${state.lastAttemptError}`;
+        this.aiLayoutMetaNote?.setText(`${baseNote} ${lastAttemptText}`);
+      } else {
+        this.aiLayoutMetaNote?.setText(baseNote);
+      }
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    }
+
+    this.aiBlockList.empty();
+    if (state?.layoutJson?.blocks?.length) {
+      state.layoutJson.blocks.forEach((block, index) => {
+        const item = this.aiBlockList.createDiv({ cls: 'apple-ai-layout-block-item' });
+        const origin = generationMeta?.blockOrigins?.[index] || null;
+        item.createEl('span', { cls: 'apple-ai-layout-block-index', text: String(index + 1).padStart(2, '0') });
+        const content = item.createDiv({ cls: 'apple-ai-layout-block-main' });
+        content.createEl('span', {
+          cls: 'apple-ai-layout-block-name',
+          text: this.getAiLayoutBlockLabel(block),
+        });
+        content.createEl('span', {
+          cls: 'apple-ai-layout-block-type',
+          text: block.type,
+        });
+        if (origin?.source) {
+          item.createEl('span', {
+            cls: `apple-ai-layout-block-origin ${origin.source === 'fallback' ? 'is-fallback' : 'is-ai'}`,
+            text: origin.source === 'fallback' ? '补全' : 'AI',
+          });
+        }
+      });
+    } else {
+      this.aiBlockList.createDiv({
+        cls: 'apple-ai-layout-empty',
+        text: aiFeatureEnabled ? '生成后会展示区块清单。' : '启用 AI 编排后，这里会展示当前文章的区块清单。',
+      });
+    }
+
+    this.aiGenerateBtn.disabled = !hasDoc || !hasProvider || !aiFeatureEnabled;
+    this.aiApplyBtn.disabled = !state || isStale || state?.status === 'error' || state?.status === 'schema-error' || !aiFeatureEnabled;
+    this.aiResetBtn.disabled = !this.aiPreviewApplied;
+    this.aiPanelHint.setText(
+      aiFeatureEnabled
+        ? '模型配置在插件设置页中维护。第一版仅支持生成 / 应用 / 重生成。'
+        : '先在插件设置里开启 AI 编排，再回到这里为当前文章生成排版建议。'
+    );
+    this.refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale });
+    this.updateAiToolbarState();
+  }
+
+  async ensureCurrentArticleContext() {
+    const source = await resolveMarkdownSource({
+      app: this.app,
+      lastActiveFile: this.lastActiveFile,
+      MarkdownViewType: MarkdownView,
+    });
+
+    if (!source.ok || !String(source.markdown || '').trim()) {
+      return null;
+    }
+
+    const markdown = source.markdown || '';
+    const sourcePath = source.sourcePath || '';
+    this.lastResolvedMarkdown = markdown;
+    this.lastResolvedSourcePath = sourcePath;
+    this.lastResolvedSourceHash = String(this.simpleHash(markdown));
+    return {
+      markdown,
+      sourcePath,
+      sourceHash: this.lastResolvedSourceHash,
+      title: this.getPublishContextFile()?.basename || '未命名文章',
+    };
+  }
+
+  async generateAiLayoutForCurrentArticle() {
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const provider = resolveAiProvider(aiSettings);
+    if (!provider) {
+      new Notice('请先在插件设置中配置并启用 AI Provider');
+      return;
+    }
+
+    const context = await this.ensureCurrentArticleContext();
+    if (!context) {
+      new Notice('请先打开一篇有内容的 Markdown 文章');
+      return;
+    }
+
+    if (!this.baseRenderedHtml) {
+      await this.convertCurrent(true, { showLoading: true, loadingText: '正在准备文章上下文...' });
+    }
+
+    const imageRefs = aiSettings.includeImagesInLayout === false
+      ? []
+      : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
+
+    const stylePack = this.aiStylePackSelect?.value || aiSettings.defaultStylePack || 'tech-green';
+    const originalText = this.aiGenerateBtn?.textContent;
+    try {
+      if (this.aiGenerateBtn) {
+        this.aiGenerateBtn.disabled = true;
+        this.aiGenerateBtn.setText('生成中...');
+      }
+      const result = await generateArticleLayout({
+        provider,
+        title: context.title,
+        markdown: context.markdown,
+        stylePack,
+        imageRefs,
+        timeoutMs: aiSettings.requestTimeoutMs,
+      });
+      const layoutJson = result.layoutJson;
+
+      await this.plugin.saveArticleLayoutState(context.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: Date.now(),
+        sourceHash: context.sourceHash,
+        providerId: provider.id,
+        model: provider.model,
+        stylePack: layoutJson.stylePack,
+        status: 'ready',
+        lastError: '',
+        lastAttemptStatus: 'success',
+        lastAttemptError: '',
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: null,
+        generationMeta: result.generationMeta,
+        layoutJson,
+      });
+      new Notice('✅ AI 编排已生成，可应用到预览查看效果');
+    } catch (error) {
+      console.error('AI 编排生成失败:', error);
+      const previousState = this.getCurrentArticleLayoutState();
+      const isSchemaError = error?.code === 'ai-layout-schema-invalid';
+      const hasReusablePreviousLayout = !!(previousState?.status === 'ready' && previousState?.layoutJson?.blocks?.length);
+      await this.plugin.saveArticleLayoutState(context.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: hasReusablePreviousLayout ? previousState.updatedAt : Date.now(),
+        sourceHash: hasReusablePreviousLayout ? previousState.sourceHash : context.sourceHash,
+        providerId: provider.id,
+        model: provider.model,
+        stylePack: hasReusablePreviousLayout ? previousState.stylePack : stylePack,
+        status: hasReusablePreviousLayout ? previousState.status : (isSchemaError ? 'schema-error' : 'error'),
+        lastError: error?.message || '未知错误',
+        lastAttemptStatus: isSchemaError ? 'schema-error' : 'error',
+        lastAttemptError: error?.message || '未知错误',
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: error?.schemaValidation || error?.generationMeta?.schemaValidation || null,
+        generationMeta: hasReusablePreviousLayout
+          ? previousState.generationMeta
+          : (error?.generationMeta || previousState?.generationMeta || null),
+        layoutJson: hasReusablePreviousLayout
+          ? previousState.layoutJson
+          : (previousState?.layoutJson || {
+          version: AI_LAYOUT_SCHEMA_VERSION,
+          articleType: 'article',
+          stylePack,
+          title: context.title,
+          summary: '',
+          blocks: [],
+        }),
+      });
+      new Notice(
+        isSchemaError
+          ? `❌ AI 编排未通过 schema 校验：${error.message}`
+          : `❌ AI 编排失败：${error.message}`
+      );
+    } finally {
+      if (this.aiGenerateBtn) {
+        this.aiGenerateBtn.disabled = false;
+        this.aiGenerateBtn.setText(originalText || '生成编排');
+      }
+      this.refreshAiLayoutPanel();
+    }
+  }
+
+  applyAiLayoutToPreview() {
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    if (!state || !state.layoutJson?.blocks?.length) {
+      new Notice('当前文章还没有可用的 AI 编排结果');
+      return;
+    }
+    if (context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+      new Notice('当前文章内容已变化，请先重新生成 AI 编排');
+      this.refreshAiLayoutPanel();
+      return;
+    }
+
+    const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
+    const html = renderArticleLayoutHtml(state.layoutJson, { imageRefs });
+    const scrollTop = this.previewContainer?.scrollTop || 0;
+    this.currentHtml = html;
+    this.aiPreviewApplied = true;
+    if (this.previewContainer) {
+      this.previewContainer.innerHTML = html;
+      this.previewContainer.scrollTop = scrollTop;
+      this.previewContainer.addClass('apple-has-content');
+    }
+    this.refreshAiLayoutPanel();
+  }
+
+  restoreBasePreview() {
+    if (!this.baseRenderedHtml || !this.previewContainer) return;
+    const scrollTop = this.previewContainer.scrollTop;
+    this.currentHtml = this.baseRenderedHtml;
+    this.aiPreviewApplied = false;
+    this.previewContainer.innerHTML = this.baseRenderedHtml;
+    this.previewContainer.scrollTop = scrollTop;
+    this.previewContainer.addClass('apple-has-content');
+    this.refreshAiLayoutPanel();
   }
 
   openPluginSettings() {
@@ -2102,6 +2984,7 @@ class AppleStyleView extends ItemView {
       if (markdown.trim()) {
         this.lastResolvedMarkdown = markdown;
         this.lastResolvedSourcePath = sourcePath;
+        this.lastResolvedSourceHash = String(this.simpleHash(markdown));
       }
     } else if (this.lastResolvedMarkdown.trim()) {
       markdown = this.lastResolvedMarkdown;
@@ -2136,6 +3019,7 @@ class AppleStyleView extends ItemView {
 
       if (generation !== this.renderGeneration) return;
 
+      this.baseRenderedHtml = html;
       this.currentHtml = html;
       this.lastRenderError = '';
       this.lastRenderFailureNoticeKey = '';
@@ -2149,6 +3033,21 @@ class AppleStyleView extends ItemView {
 
       this.previewContainer.addClass('apple-has-content'); // 添加内容状态类
       this.updateCurrentDoc();
+      const layoutState = (sourcePath && typeof this.plugin?.getArticleLayoutState === 'function')
+        ? this.plugin.getArticleLayoutState(sourcePath)
+        : null;
+      const canReuseAiLayout = !!(
+        this.aiPreviewApplied
+        && layoutState?.layoutJson?.blocks?.length
+        && this.lastResolvedSourceHash
+        && layoutState.sourceHash === this.lastResolvedSourceHash
+      );
+      if (canReuseAiLayout) {
+        this.applyAiLayoutToPreview();
+      } else if (this.aiPreviewApplied) {
+        this.aiPreviewApplied = false;
+      }
+      this.refreshAiLayoutPanel();
       if (!silent) new Notice('✅ 转换成功！');
 
     } catch (error) {
@@ -2156,9 +3055,12 @@ class AppleStyleView extends ItemView {
       if (generation !== this.renderGeneration) return;
 
       this.currentHtml = null;
+      this.baseRenderedHtml = null;
+      this.aiPreviewApplied = false;
       this.lastRenderError = error?.message || '未知渲染错误';
       this.showRenderFailurePlaceholder(this.lastRenderError);
       this.updateCurrentDoc();
+      this.refreshAiLayoutPanel();
 
       const noticeKey = `${sourcePath || ''}:${this.lastRenderError}`;
       if (!silent || this.lastRenderFailureNoticeKey !== noticeKey) {
@@ -2495,6 +3397,9 @@ class AppleStyleView extends ItemView {
       this.previewContainer.removeEventListener('scroll', this.previewScrollListener);
     }
     this.previewContainer?.empty();
+    this.closeTransientPanels();
+    this.aiLayoutBtn = null;
+    this.settingsBtn = null;
 
     // 清理文章状态缓存
     if (this.articleStates) {
@@ -2539,6 +3444,13 @@ class AppleStyleSettingTab extends PluginSettingTab {
     return isAbsolutePathLike(vaultPath);
   }
 
+  refreshOpenConverterAiState() {
+    const view = this.plugin.getConverterView?.();
+    if (view && typeof view.refreshAiLayoutPanel === 'function') {
+      view.refreshAiLayoutPanel();
+    }
+  }
+
   display() {
     const { containerEl } = this;
     containerEl.empty();
@@ -2563,6 +3475,201 @@ class AppleStyleSettingTab extends PluginSettingTab {
           // 提示用户重启面板
           new Notice('设置已保存，请关闭并重新打开转换器面板以生效');
         }));
+
+    new Setting(containerEl)
+      .setName('AI 编排')
+      .setDesc('配置模型与默认行为。具体生成与应用入口在转换器顶部工具栏的「AI 编排」按钮中。')
+      .setHeading();
+
+    new Setting(containerEl)
+      .setName('内置协议版本')
+      .setDesc(`当前内置 layout skill v${AI_LAYOUT_SKILL_VERSION}，schema v${AI_LAYOUT_SCHEMA_VERSION}。`);
+
+    new Setting(containerEl)
+      .setName('启用 AI 编排')
+      .setDesc('关闭后会隐藏 AI 编排入口，但不会删除已缓存的文章布局结果。')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.ai.enabled === true)
+        .onChange(async (value) => {
+          this.plugin.settings.ai.enabled = value;
+          await this.plugin.saveSettings();
+          this.refreshOpenConverterAiState();
+        }));
+
+    const stylePackOptions = getStylePackList();
+    new Setting(containerEl)
+      .setName('默认风格包')
+      .setDesc('用于 AI 编排时的默认版式风格。')
+      .addDropdown((dropdown) => {
+        stylePackOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+        dropdown.setValue(this.plugin.settings.ai.defaultStylePack || 'tech-green');
+        dropdown.onChange(async (value) => {
+          this.plugin.settings.ai.defaultStylePack = value;
+          await this.plugin.saveSettings();
+          this.refreshOpenConverterAiState();
+        });
+      });
+
+    new Setting(containerEl)
+      .setName('编排时参考图片')
+      .setDesc('开启后，AI 会优先使用当前文章里的配图与截图作为排版素材。')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.ai.includeImagesInLayout !== false)
+        .onChange(async (value) => {
+          this.plugin.settings.ai.includeImagesInLayout = value;
+          await this.plugin.saveSettings();
+          this.refreshOpenConverterAiState();
+        }));
+
+    new Setting(containerEl)
+      .setName('AI 请求超时（秒）')
+      .setDesc('建议在 15 到 60 秒之间。')
+      .addText(text => text
+        .setPlaceholder('45')
+        .setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45000) / 1000)))
+        .onChange(async (value) => {
+          const seconds = Math.min(180, Math.max(5, parseInt(value || '45', 10) || 45));
+          this.plugin.settings.ai.requestTimeoutMs = seconds * 1000;
+          await this.plugin.saveSettings();
+          this.refreshOpenConverterAiState();
+        }));
+
+    const providers = this.plugin.settings.ai.providers || [];
+    const defaultProviderId = this.plugin.settings.ai.defaultProviderId;
+    const runnableProviders = providers.filter((provider) => isAiProviderRunnable(provider) && provider.enabled !== false);
+
+    new Setting(containerEl)
+      .setName('默认 AI Provider')
+      .setDesc(runnableProviders.length > 0
+        ? '当前 AI 编排会优先使用这里选中的 Provider。'
+        : '还没有可直接用于 AI 编排的 Provider，请先补全 Base URL、API Key 和模型。')
+      .addDropdown((dropdown) => {
+        dropdown.addOption('', '自动选择');
+        providers.forEach((provider) => {
+          const statusText = summarizeAiProviderIssues(provider);
+          dropdown.addOption(provider.id, `${provider.name} (${statusText})`);
+        });
+        dropdown.setValue(defaultProviderId || '');
+        dropdown.onChange(async (value) => {
+          this.plugin.settings.ai.defaultProviderId = value;
+          await this.plugin.saveSettings();
+          this.refreshOpenConverterAiState();
+        });
+      });
+
+    if (providers.length === 0) {
+      containerEl.createEl('p', {
+        text: '暂无 AI Provider，请点击下方按钮添加',
+        cls: 'setting-item-description',
+        attr: { style: 'color: var(--text-muted); font-style: italic;' }
+      });
+    } else {
+      const providerList = containerEl.createDiv({ cls: 'wechat-account-list' });
+      for (const provider of providers) {
+        const isDefault = provider.id === defaultProviderId;
+        const providerIssues = getAiProviderIssues(provider);
+        const isRunnable = isAiProviderRunnable(provider) && provider.enabled !== false;
+        const providerCard = providerList.createDiv({ cls: 'wechat-account-card' });
+        const info = providerCard.createDiv({ cls: 'wechat-account-info' });
+        const nameRow = info.createDiv({ cls: 'wechat-account-name-row' });
+        nameRow.createEl('span', { text: provider.name, cls: 'wechat-account-name' });
+        if (isDefault) {
+          nameRow.createEl('span', { text: '默认', cls: 'wechat-account-badge' });
+        }
+        if (provider.enabled === false) {
+          nameRow.createEl('span', { text: '已停用', cls: 'wechat-account-badge', attr: { style: 'background: var(--text-faint);' } });
+        } else if (isRunnable) {
+          nameRow.createEl('span', { text: '可用', cls: 'wechat-account-badge', attr: { style: 'background: #0f8f64;' } });
+        } else {
+          nameRow.createEl('span', { text: '待补全', cls: 'wechat-account-badge', attr: { style: 'background: #d97706;' } });
+        }
+        info.createDiv({
+          text: `${provider.kind} · ${provider.model || '未设置模型'}`,
+          cls: 'wechat-account-appid'
+        });
+        info.createDiv({
+          text: summarizeAiProviderIssues(provider),
+          cls: 'wechat-account-appid'
+        });
+
+        const actions = providerCard.createDiv({ cls: 'wechat-account-actions' });
+        if (!isDefault) {
+          const defaultBtn = actions.createEl('button', { text: '设为默认', cls: 'wechat-btn-small' });
+          defaultBtn.onclick = async () => {
+            this.plugin.settings.ai.defaultProviderId = provider.id;
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          };
+        }
+
+        const editBtn = actions.createEl('button', { text: '编辑', cls: 'wechat-btn-small' });
+        editBtn.onclick = () => this.showEditAiProviderModal(provider);
+
+        const testBtn = actions.createEl('button', { text: '测试', cls: 'wechat-btn-small wechat-btn-test' });
+        if (!isRunnable) {
+          testBtn.disabled = true;
+          testBtn.title = providerIssues.includes('disabled')
+            ? '请先启用该 Provider'
+            : `当前无法测试：${summarizeAiProviderIssues(provider)}`;
+        }
+        testBtn.onclick = async () => {
+          if (!isRunnable) return;
+          testBtn.disabled = true;
+          testBtn.textContent = '测试中...';
+          try {
+            await testAiProviderConnection(provider);
+            new Notice(`✅ ${provider.name} 连接成功！`);
+          } catch (error) {
+            new Notice(`❌ ${provider.name} 连接失败: ${error.message}`);
+          }
+          testBtn.disabled = false;
+          testBtn.textContent = '测试';
+        };
+
+        const deleteBtn = actions.createEl('button', { text: '删除', cls: 'wechat-btn-small wechat-btn-danger' });
+        deleteBtn.onclick = async () => {
+          if (confirm(`确定要删除 AI Provider "${provider.name}" 吗？`)) {
+            this.plugin.settings.ai.providers = providers.filter((item) => item.id !== provider.id);
+            if (provider.id === defaultProviderId) {
+              const nextRunnableProvider = this.plugin.settings.ai.providers.find((item) => item.enabled !== false && isAiProviderRunnable(item));
+              this.plugin.settings.ai.defaultProviderId = nextRunnableProvider?.id || '';
+            }
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          }
+        };
+      }
+    }
+
+    const addProviderContainer = containerEl.createDiv({ cls: 'wechat-add-account-container' });
+    const addProviderBtn = addProviderContainer.createEl('button', {
+      text: '+ 添加 AI Provider',
+      cls: 'wechat-btn-add'
+    });
+    addProviderBtn.onclick = () => this.showEditAiProviderModal(null);
+
+    const cachedLayoutCount = Object.keys(this.plugin.settings.ai.articleLayoutsByPath || {}).length;
+    const cacheSetting = new Setting(containerEl)
+      .setName('AI 编排缓存')
+      .setDesc(cachedLayoutCount > 0
+        ? `当前已缓存 ${cachedLayoutCount} 篇文章的编排结果。`
+        : '当前还没有缓存的文章编排结果。');
+
+    if (cachedLayoutCount > 0) {
+      cacheSetting.addButton((button) => button
+        .setButtonText('清空缓存')
+        .setWarning()
+        .onClick(async () => {
+          if (!confirm(`确定要清空 ${cachedLayoutCount} 篇文章的 AI 编排缓存吗？`)) return;
+          this.plugin.settings.ai.articleLayoutsByPath = {};
+          await this.plugin.saveSettings();
+          this.refreshOpenConverterAiState();
+          new Notice('已清空 AI 编排缓存');
+          this.display();
+        }));
+    }
 
     // 图片水印设置
     new Setting(containerEl)
@@ -2828,6 +3935,145 @@ class AppleStyleSettingTab extends PluginSettingTab {
   /**
    * 显示添加/编辑账号的模态框
    */
+  showEditAiProviderModal(provider) {
+    const { Modal } = require('obsidian');
+    const modal = new Modal(this.app);
+    modal.titleEl.setText(provider ? '编辑 AI Provider' : '添加 AI Provider');
+
+    const form = modal.contentEl.createDiv();
+
+    const nameGroup = form.createDiv({ cls: 'wechat-form-group' });
+    nameGroup.createEl('label', { text: '名称' });
+    const nameInput = nameGroup.createEl('input', {
+      type: 'text',
+      placeholder: '例如：OpenAI / OpenRouter / 自建网关',
+      value: provider?.name || ''
+    });
+
+    const kindGroup = form.createDiv({ cls: 'wechat-form-group' });
+    kindGroup.createEl('label', { text: '类型' });
+    const kindSelect = kindGroup.createEl('select');
+    const providerKinds = [
+      { value: AI_PROVIDER_KINDS.OPENAI_COMPATIBLE, label: 'OpenAI 兼容接口' },
+    ];
+    providerKinds.forEach((kind) => {
+      const option = kindSelect.createEl('option', { value: kind.value, text: kind.label });
+      if ((provider?.kind || AI_PROVIDER_KINDS.OPENAI_COMPATIBLE) === kind.value) {
+        option.selected = true;
+      }
+    });
+
+    const baseUrlGroup = form.createDiv({ cls: 'wechat-form-group' });
+    baseUrlGroup.createEl('label', { text: 'Base URL' });
+    const baseUrlInput = baseUrlGroup.createEl('input', {
+      type: 'text',
+      placeholder: 'https://api.openai.com/v1',
+      value: provider?.baseUrl || 'https://api.openai.com/v1'
+    });
+
+    const apiKeyGroup = form.createDiv({ cls: 'wechat-form-group' });
+    apiKeyGroup.createEl('label', { text: 'API Key' });
+    const apiKeyInput = apiKeyGroup.createEl('input', {
+      type: 'password',
+      placeholder: 'sk-...',
+      value: provider?.apiKey || ''
+    });
+
+    const modelGroup = form.createDiv({ cls: 'wechat-form-group' });
+    modelGroup.createEl('label', { text: '模型' });
+    const modelInput = modelGroup.createEl('input', {
+      type: 'text',
+      placeholder: 'gpt-4.1-mini',
+      value: provider?.model || 'gpt-4.1-mini'
+    });
+
+    const enabledGroup = form.createDiv({ cls: 'wechat-form-group' });
+    enabledGroup.createEl('label', { text: '状态' });
+    const enabledWrap = enabledGroup.createDiv({ attr: { style: 'display:flex;align-items:center;gap:10px;' } });
+    const enabledToggle = enabledWrap.createEl('input', {
+      type: 'checkbox',
+      checked: provider?.enabled !== false ? true : undefined,
+    });
+    enabledToggle.checked = provider?.enabled !== false;
+    enabledWrap.createEl('span', { text: '启用该 Provider' });
+
+    const btnRow = form.createDiv({ cls: 'wechat-modal-buttons' });
+    const cancelBtn = btnRow.createEl('button', { text: '取消' });
+    cancelBtn.onclick = () => modal.close();
+
+    const testBtn = btnRow.createEl('button', { text: '测试连接', cls: 'wechat-btn-test' });
+    testBtn.onclick = async () => {
+      const candidate = normalizeAiProvider({
+        id: provider?.id,
+        name: nameInput.value.trim() || '未命名 Provider',
+        kind: kindSelect.value,
+        baseUrl: baseUrlInput.value.trim(),
+        apiKey: apiKeyInput.value.trim(),
+        model: modelInput.value.trim(),
+        enabled: enabledToggle.checked,
+      });
+      const issueSummary = summarizeAiProviderIssues(candidate);
+      if (!isAiProviderRunnable(candidate)) {
+        new Notice(`请先补全 Provider 配置：${issueSummary}`);
+        return;
+      }
+      testBtn.disabled = true;
+      testBtn.textContent = '测试中...';
+      try {
+        await testAiProviderConnection(candidate);
+        new Notice('✅ AI Provider 连接成功！');
+      } catch (error) {
+        new Notice(`❌ 连接失败: ${error.message}`);
+      }
+      testBtn.disabled = false;
+      testBtn.textContent = '测试连接';
+    };
+
+    const saveBtn = btnRow.createEl('button', { text: '保存', cls: 'mod-cta' });
+    saveBtn.onclick = async () => {
+      const nextProvider = normalizeAiProvider({
+        id: provider?.id,
+        name: nameInput.value.trim() || '未命名 Provider',
+        kind: kindSelect.value,
+        baseUrl: baseUrlInput.value.trim(),
+        apiKey: apiKeyInput.value.trim(),
+        model: modelInput.value.trim(),
+        enabled: enabledToggle.checked,
+      });
+
+      const issues = getAiProviderIssues(nextProvider).filter((issue) => issue !== 'disabled');
+      if (issues.length > 0) {
+        new Notice(`请补全 Provider 配置：${summarizeAiProviderIssues(nextProvider)}`);
+        return;
+      }
+
+      const providers = this.plugin.settings.ai.providers || [];
+      if (provider) {
+        this.plugin.settings.ai.providers = providers.map((item) => item.id === provider.id ? nextProvider : item);
+      } else {
+        this.plugin.settings.ai.providers.push(nextProvider);
+        if (!this.plugin.settings.ai.defaultProviderId) {
+          this.plugin.settings.ai.defaultProviderId = nextProvider.id;
+        }
+      }
+
+      if (!this.plugin.settings.ai.defaultProviderId && nextProvider.enabled !== false && isAiProviderRunnable(nextProvider)) {
+        this.plugin.settings.ai.defaultProviderId = nextProvider.id;
+      }
+
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+      modal.close();
+      this.display();
+      new Notice(provider ? '✅ AI Provider 已更新' : '✅ AI Provider 已添加');
+    };
+
+    modal.open();
+  }
+
+  /**
+   * 显示添加/编辑账号的模态框
+   */
   showEditAccountModal(account) {
     const { Modal } = require('obsidian');
     const modal = new Modal(this.app);
@@ -3040,6 +4286,15 @@ class AppleStylePlugin extends Plugin {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
     let didMigrate = false;
 
+    const rawAiSettings = loadedData.ai;
+    this.settings.ai = normalizeAiSettings(rawAiSettings || this.settings.ai || {});
+    if (rawAiSettings !== undefined) {
+      const normalizedRawAi = normalizeAiSettings(rawAiSettings);
+      if (JSON.stringify(normalizedRawAi) !== JSON.stringify(rawAiSettings)) {
+        didMigrate = true;
+      }
+    }
+
     // 数据迁移：将旧的单账号格式迁移到新的多账号格式
     if (this.settings.wechatAppId && this.settings.wechatAccounts.length === 0) {
       const migratedAccount = {
@@ -3101,6 +4356,29 @@ class AppleStylePlugin extends Plugin {
     if (didMigrate) {
       await this.saveSettings();
     }
+  }
+
+  getArticleLayoutState(sourcePath = '') {
+    const normalizedPath = normalizeVaultPath(sourcePath || '');
+    if (!normalizedPath) return null;
+    return this.settings?.ai?.articleLayoutsByPath?.[normalizedPath] || null;
+  }
+
+  async saveArticleLayoutState(sourcePath = '', nextState = null) {
+    const normalizedPath = normalizeVaultPath(sourcePath || '');
+    if (!normalizedPath) return false;
+    if (!this.settings.ai) {
+      this.settings.ai = createDefaultAiSettings();
+    }
+    if (!this.settings.ai.articleLayoutsByPath || typeof this.settings.ai.articleLayoutsByPath !== 'object') {
+      this.settings.ai.articleLayoutsByPath = {};
+    }
+    if (!nextState) {
+      delete this.settings.ai.articleLayoutsByPath[normalizedPath];
+    } else {
+      this.settings.ai.articleLayoutsByPath[normalizedPath] = nextState;
+    }
+    return this.saveSettings();
   }
 
   async saveSettings() {

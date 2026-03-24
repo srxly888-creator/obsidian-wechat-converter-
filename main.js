@@ -3448,6 +3448,1173 @@ var require_obsidian_triplet_renderer = __commonJS({
   }
 });
 
+// services/ai-layout-skill-bundle.js
+var require_ai_layout_skill_bundle = __commonJS({
+  "services/ai-layout-skill-bundle.js"(exports2, module2) {
+    var AI_LAYOUT_SKILL_VERSION2 = "2026.03.24-alpha.1";
+    var AI_LAYOUT_ALLOWED_BLOCKS = [
+      {
+        type: "hero",
+        fields: ["eyebrow", "title", "subtitle", "coverImageId", "variant"],
+        description: "\u6587\u7AE0\u5C01\u9762\u5361\uFF0C\u9002\u5408\u6807\u9898\u3001\u5BFC\u8BED\u548C\u5C01\u9762\u56FE\u3002"
+      },
+      {
+        type: "part-nav",
+        fields: ["items[{label,text}]"],
+        description: "\u7AE0\u8282\u5BFC\u822A\u5361\uFF0C\u9002\u5408\u76EE\u5F55\u6216\u5206\u6BB5\u5BFC\u8BFB\u3002"
+      },
+      {
+        type: "lead-quote",
+        fields: ["text", "note"],
+        description: "\u5BFC\u8BED\u6458\u8981\u5361\uFF0C\u9002\u5408\u91D1\u53E5\u3001\u603B\u7ED3\u6216\u5F00\u573A\u91CD\u70B9\u3002"
+      },
+      {
+        type: "case-block",
+        fields: ["caseLabel", "title", "summary", "bullets", "imageIds", "highlight"],
+        description: "\u6848\u4F8B/\u6559\u7A0B\u4E3B\u4F53\u533A\u5757\uFF0C\u9002\u5408\u5206\u7AE0\u8282\u627F\u8F7D\u6B63\u6587\u3002"
+      },
+      {
+        type: "phone-frame",
+        fields: ["imageId", "caption"],
+        description: "\u624B\u673A\u622A\u56FE\u5C55\u793A\u5757\uFF0C\u9002\u5408 App \u754C\u9762\u6216\u804A\u5929\u622A\u56FE\u3002"
+      },
+      {
+        type: "cta-card",
+        fields: ["title", "body", "buttonText", "note"],
+        description: "\u6536\u5C3E CTA \u533A\u5757\uFF0C\u9002\u5408\u603B\u7ED3\u3001\u5F15\u5BFC\u6216\u540E\u7EED\u52A8\u4F5C\u3002"
+      }
+    ];
+    var AI_LAYOUT_SKILL_SYSTEM_LINES = [
+      "\u4F60\u662F\u5FAE\u4FE1\u516C\u4F17\u53F7\u6392\u7248\u52A9\u624B\u3002",
+      "\u4F60\u7684\u804C\u8D23\u662F\u628A\u6587\u7AE0\u5185\u5BB9\u6620\u5C04\u4E3A\u7ED3\u6784\u5316\u7684\u6392\u7248 JSON\u3002",
+      "\u4E0D\u8981\u8F93\u51FA Markdown\uFF0C\u4E0D\u8981\u8F93\u51FA HTML\uFF0C\u4E0D\u8981\u89E3\u91CA\uFF0C\u53EA\u8F93\u51FA\u4E00\u4E2A JSON \u5BF9\u8C61\u3002",
+      `\u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B block type: ${AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type).join(", ")}\u3002`,
+      "block \u5185\u4E0D\u8981\u675C\u64B0\u56FE\u7247 URL\uFF0C\u53EA\u80FD\u4F7F\u7528\u63D0\u4F9B\u7684 image id\u3002",
+      "\u5C3D\u91CF\u4FDD\u7559\u539F\u6587\u4FE1\u606F\uFF0C\u4E0D\u8981\u6539\u5199\u4F5C\u8005\u89C2\u70B9\uFF0C\u4E0D\u8981\u7F16\u9020\u6570\u636E\u3002",
+      "\u4F18\u5148\u505A\u6559\u7A0B/\u6848\u4F8B\u578B\u516C\u4F17\u53F7\u7F16\u6392\uFF1A\u5C01\u9762\u6982\u89C8 -> \u5BFC\u8BED\u6458\u8981 -> \u5206\u7AE0\u8282 case -> \u622A\u56FE -> \u6536\u5C3E CTA\u3002",
+      "\u5982\u679C\u539F\u6587\u5B58\u5728\u660E\u663E\u7AE0\u8282\u6807\u9898\uFF0C\u4F18\u5148\u5C06\u5176\u8F6C\u6210 part-nav \u548C case-block\u3002",
+      "\u5982\u679C\u6709\u56FE\u7247\uFF0C\u4F18\u5148\u6311 1 \u5230 2 \u5F20\u6700\u50CF\u5C01\u9762/\u622A\u56FE\u7684\u56FE\u8FDB\u5165 hero \u6216 phone-frame\u3002"
+    ];
+    var AI_LAYOUT_OUTPUT_FIELDS = ["articleType", "stylePack", "title", "summary", "blocks"];
+    function getAiLayoutBlockConstraintLines() {
+      return AI_LAYOUT_ALLOWED_BLOCKS.map((block) => `- ${block.type}: ${block.fields.join(", ")}`);
+    }
+    function createSchemaIssue(path, message, fatal = false) {
+      return {
+        path,
+        message,
+        fatal: fatal === true
+      };
+    }
+    function validateAiLayoutPayload(rawLayout) {
+      const issues = [];
+      const allowedBlockTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type));
+      const fieldMap = new Map(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => [block.type, /* @__PURE__ */ new Set(["type", ...block.fields.flatMap((field) => {
+        if (field === "items[{label,text}]")
+          return ["items"];
+        return [field];
+      })])]));
+      if (!rawLayout || typeof rawLayout !== "object" || Array.isArray(rawLayout)) {
+        issues.push(createSchemaIssue("$", "\u9876\u5C42\u5FC5\u987B\u662F\u4E00\u4E2A JSON \u5BF9\u8C61\u3002", true));
+        return {
+          isValid: false,
+          fatal: true,
+          issueCount: issues.length,
+          issues
+        };
+      }
+      const requiredTopLevelFields = ["articleType", "stylePack", "title", "summary", "blocks"];
+      requiredTopLevelFields.forEach((field) => {
+        if (!(field in rawLayout)) {
+          issues.push(createSchemaIssue(`$.${field}`, `\u7F3A\u5C11\u9876\u5C42\u5B57\u6BB5 ${field}\u3002`, field === "blocks"));
+          return;
+        }
+        if (field === "blocks") {
+          if (!Array.isArray(rawLayout.blocks)) {
+            issues.push(createSchemaIssue("$.blocks", "blocks \u5FC5\u987B\u662F\u6570\u7EC4\u3002", true));
+          }
+          return;
+        }
+        if (typeof rawLayout[field] !== "string") {
+          issues.push(createSchemaIssue(`$.${field}`, `${field} \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002`, false));
+        }
+      });
+      if (!Array.isArray(rawLayout.blocks)) {
+        return {
+          isValid: issues.length === 0,
+          fatal: issues.some((issue) => issue.fatal),
+          issueCount: issues.length,
+          issues
+        };
+      }
+      rawLayout.blocks.forEach((block, index) => {
+        const path = `$.blocks[${index}]`;
+        if (!block || typeof block !== "object" || Array.isArray(block)) {
+          issues.push(createSchemaIssue(path, "block \u5FC5\u987B\u662F\u5BF9\u8C61\u3002", true));
+          return;
+        }
+        if (typeof block.type !== "string" || !block.type.trim()) {
+          issues.push(createSchemaIssue(`${path}.type`, "block \u7F3A\u5C11\u5408\u6CD5\u7684 type\u3002", true));
+          return;
+        }
+        if (!allowedBlockTypes.has(block.type)) {
+          issues.push(createSchemaIssue(`${path}.type`, `\u4E0D\u652F\u6301\u7684 block type: ${block.type}\u3002`, true));
+          return;
+        }
+        const allowedFields = fieldMap.get(block.type) || /* @__PURE__ */ new Set(["type"]);
+        Object.keys(block).forEach((key) => {
+          if (!allowedFields.has(key)) {
+            issues.push(createSchemaIssue(`${path}.${key}`, `${block.type} \u4E0D\u652F\u6301\u5B57\u6BB5 ${key}\u3002`, false));
+          }
+        });
+        if (block.type === "hero" && typeof block.title !== "string") {
+          issues.push(createSchemaIssue(`${path}.title`, "hero.title \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+        }
+        if (block.type === "part-nav") {
+          if (!Array.isArray(block.items)) {
+            issues.push(createSchemaIssue(`${path}.items`, "part-nav.items \u5FC5\u987B\u662F\u6570\u7EC4\u3002", true));
+          } else {
+            block.items.forEach((item, itemIndex) => {
+              if (!item || typeof item !== "object") {
+                issues.push(createSchemaIssue(`${path}.items[${itemIndex}]`, "part-nav item \u5FC5\u987B\u662F\u5BF9\u8C61\u3002", false));
+                return;
+              }
+              if (typeof item.label !== "string" || typeof item.text !== "string") {
+                issues.push(createSchemaIssue(`${path}.items[${itemIndex}]`, "part-nav item \u9700\u8981 label \u548C text \u5B57\u7B26\u4E32\u3002", false));
+              }
+            });
+          }
+        }
+        if (block.type === "lead-quote" && typeof block.text !== "string") {
+          issues.push(createSchemaIssue(`${path}.text`, "lead-quote.text \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+        }
+        if (block.type === "case-block") {
+          if ("bullets" in block && !Array.isArray(block.bullets)) {
+            issues.push(createSchemaIssue(`${path}.bullets`, "case-block.bullets \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+          if ("imageIds" in block && !Array.isArray(block.imageIds)) {
+            issues.push(createSchemaIssue(`${path}.imageIds`, "case-block.imageIds \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+        }
+        if (block.type === "phone-frame" && typeof block.imageId !== "string") {
+          issues.push(createSchemaIssue(`${path}.imageId`, "phone-frame.imageId \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", true));
+        }
+      });
+      const fatal = issues.some((issue) => issue.fatal);
+      return {
+        isValid: issues.length === 0,
+        fatal,
+        issueCount: issues.length,
+        issues
+      };
+    }
+    function getAiLayoutTemplate() {
+      return {
+        articleType: "tutorial",
+        stylePack: "tech-green",
+        title: "\u6587\u7AE0\u6807\u9898",
+        summary: "\u4E00\u53E5\u6458\u8981",
+        blocks: [
+          {
+            type: "hero",
+            eyebrow: "AI Layout Draft",
+            title: "\u6587\u7AE0\u6807\u9898",
+            subtitle: "\u5C01\u9762\u5BFC\u8BED",
+            coverImageId: "image-1",
+            variant: "cover-right"
+          },
+          {
+            type: "lead-quote",
+            text: "\u4E00\u6BB5\u9002\u5408\u505A\u5BFC\u8BED\u7684\u91CD\u70B9\u6458\u8981\u3002",
+            note: "\u8865\u5145\u8BF4\u660E\u6216\u4E0A\u4E0B\u6587\u3002"
+          },
+          {
+            type: "case-block",
+            caseLabel: "CASE 01",
+            title: "\u7B2C\u4E00\u90E8\u5206",
+            summary: "\u8FD9\u4E00\u8282\u7684\u6838\u5FC3\u5185\u5BB9\u3002",
+            bullets: ["\u8981\u70B9\u4E00", "\u8981\u70B9\u4E8C"],
+            imageIds: ["image-1"],
+            highlight: "\u672C\u8282\u6700\u503C\u5F97\u9AD8\u4EAE\u7684\u4E00\u53E5\u8BDD\u3002"
+          },
+          {
+            type: "cta-card",
+            title: "\u7EE7\u7EED\u9605\u8BFB",
+            body: "\u6536\u5C3E\u603B\u7ED3\u6216 CTA\u3002",
+            buttonText: "\u6574\u7406\u540E\u53D1\u5E03",
+            note: "\u672C\u7248\u5F0F\u4E3A AI \u8F85\u52A9\u751F\u6210\u3002"
+          }
+        ]
+      };
+    }
+    module2.exports = {
+      AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_ALLOWED_BLOCKS,
+      AI_LAYOUT_SKILL_SYSTEM_LINES,
+      AI_LAYOUT_OUTPUT_FIELDS,
+      getAiLayoutBlockConstraintLines,
+      getAiLayoutTemplate,
+      validateAiLayoutPayload
+    };
+  }
+});
+
+// services/ai-layout.js
+var require_ai_layout = __commonJS({
+  "services/ai-layout.js"(exports2, module2) {
+    var {
+      AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_SKILL_SYSTEM_LINES,
+      AI_LAYOUT_OUTPUT_FIELDS,
+      getAiLayoutBlockConstraintLines,
+      validateAiLayoutPayload
+    } = require_ai_layout_skill_bundle();
+    var AI_LAYOUT_SCHEMA_VERSION2 = 1;
+    var AI_PROVIDER_KINDS2 = {
+      OPENAI_COMPATIBLE: "openai-compatible"
+    };
+    var AI_STYLE_PACKS = {
+      "tech-green": {
+        id: "tech-green",
+        label: "\u79D1\u6280\u7EFF",
+        description: "\u4FE1\u606F\u5361\u4E0E\u6848\u4F8B\u6559\u7A0B\u98CE\u683C\uFF0C\u9002\u5408\u4EA7\u54C1\u4ECB\u7ECD\u3001\u64CD\u4F5C\u6307\u5357\u548C\u6848\u4F8B\u62C6\u89E3\u3002",
+        tokens: {
+          accent: "#14b37d",
+          accentDeep: "#0f8f64",
+          accentSoft: "#e8faf4",
+          text: "#24323d",
+          muted: "#66737f",
+          border: "#dbe7e1",
+          surface: "#ffffff",
+          surfaceSoft: "#f5f8f7",
+          quoteBg: "#f4f7f6"
+        }
+      }
+    };
+    function createDefaultAiSettings2() {
+      return {
+        enabled: false,
+        defaultProviderId: "",
+        defaultStylePack: "tech-green",
+        includeImagesInLayout: true,
+        requestTimeoutMs: 45e3,
+        providers: [],
+        articleLayoutsByPath: {}
+      };
+    }
+    function clampNumber(value, fallback, min, max) {
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed))
+        return fallback;
+      return Math.min(max, Math.max(min, Math.round(parsed)));
+    }
+    function normalizeAiProvider2(raw = {}) {
+      const id = typeof raw.id === "string" && raw.id.trim() ? raw.id.trim() : `ai_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+      const kind = typeof raw.kind === "string" && raw.kind.trim() ? raw.kind.trim() : AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE;
+      return {
+        id,
+        name: typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : "\u672A\u547D\u540D Provider",
+        kind,
+        baseUrl: typeof raw.baseUrl === "string" && raw.baseUrl.trim() ? raw.baseUrl.trim().replace(/\/+$/, "") : "https://api.openai.com/v1",
+        apiKey: typeof raw.apiKey === "string" ? raw.apiKey : "",
+        model: typeof raw.model === "string" && raw.model.trim() ? raw.model.trim() : "gpt-4.1-mini",
+        enabled: raw.enabled !== false
+      };
+    }
+    function getAiProviderIssues2(provider = {}) {
+      const issues = [];
+      const baseUrl = coerceString(provider.baseUrl);
+      const apiKey = coerceString(provider.apiKey);
+      const model = coerceString(provider.model);
+      if (!baseUrl) {
+        issues.push("missing-base-url");
+      } else if (!/^https:\/\//i.test(baseUrl)) {
+        issues.push("invalid-base-url");
+      }
+      if (!apiKey)
+        issues.push("missing-api-key");
+      if (!model)
+        issues.push("missing-model");
+      if (provider.enabled === false)
+        issues.push("disabled");
+      return issues;
+    }
+    function isAiProviderRunnable2(provider = {}) {
+      const issues = getAiProviderIssues2(provider);
+      return !issues.some((issue) => issue !== "disabled");
+    }
+    function summarizeAiProviderIssues2(provider = {}) {
+      const issues = getAiProviderIssues2(provider);
+      if (!issues.length)
+        return "\u914D\u7F6E\u5B8C\u6574";
+      const labels = {
+        "missing-base-url": "\u7F3A\u5C11 Base URL",
+        "invalid-base-url": "Base URL \u5FC5\u987B\u662F HTTPS",
+        "missing-api-key": "\u7F3A\u5C11 API Key",
+        "missing-model": "\u7F3A\u5C11\u6A21\u578B\u540D",
+        disabled: "\u5DF2\u505C\u7528"
+      };
+      return issues.map((issue) => labels[issue] || issue).join(" / ");
+    }
+    function getLayoutBlockLabel(block = {}) {
+      return coerceString(
+        block.title || block.caseLabel || block.text || block.caption || block.buttonText || block.imageId || block.type
+      );
+    }
+    function getLayoutBlockKey(block = {}) {
+      return `${coerceString(block.type)}:${getLayoutBlockLabel(block)}`;
+    }
+    function normalizeGenerationBlockOrigin(raw = {}, fallbackIndex = 0) {
+      if (!raw || typeof raw !== "object")
+        return null;
+      const source = raw.source === "fallback" ? "fallback" : "ai";
+      const type = coerceString(raw.type);
+      if (!type)
+        return null;
+      return {
+        index: clampNumber(raw.index, fallbackIndex, 0, 99),
+        type,
+        source,
+        label: coerceString(raw.label || type)
+      };
+    }
+    function normalizeLayoutGenerationMeta(raw = {}, layoutJson = null) {
+      var _a;
+      const blockOrigins = Array.isArray(raw == null ? void 0 : raw.blockOrigins) ? raw.blockOrigins.map((item, index) => normalizeGenerationBlockOrigin(item, index)).filter(Boolean) : [];
+      const derivedFallbackCount = blockOrigins.filter((item) => item.source === "fallback").length;
+      const finalBlockCount = clampNumber(
+        raw == null ? void 0 : raw.finalBlockCount,
+        ((_a = layoutJson == null ? void 0 : layoutJson.blocks) == null ? void 0 : _a.length) || blockOrigins.length || 0,
+        0,
+        99
+      );
+      const fallbackBlockCount = clampNumber(
+        raw == null ? void 0 : raw.fallbackBlockCount,
+        derivedFallbackCount,
+        0,
+        finalBlockCount
+      );
+      return {
+        providerName: coerceString(raw == null ? void 0 : raw.providerName),
+        providerModel: coerceString(raw == null ? void 0 : raw.providerModel),
+        stylePackLabel: coerceString(raw == null ? void 0 : raw.stylePackLabel),
+        headingCount: clampNumber(raw == null ? void 0 : raw.headingCount, 0, 0, 999),
+        sectionCount: clampNumber(raw == null ? void 0 : raw.sectionCount, 0, 0, 999),
+        leadParagraphCount: clampNumber(raw == null ? void 0 : raw.leadParagraphCount, 0, 0, 999),
+        bulletGroupCount: clampNumber(raw == null ? void 0 : raw.bulletGroupCount, 0, 0, 999),
+        imageCount: clampNumber(raw == null ? void 0 : raw.imageCount, 0, 0, 999),
+        aiBlockCount: clampNumber(raw == null ? void 0 : raw.aiBlockCount, Math.max(0, finalBlockCount - fallbackBlockCount), 0, 99),
+        finalBlockCount,
+        fallbackUsed: (raw == null ? void 0 : raw.fallbackUsed) === true || fallbackBlockCount > 0,
+        fallbackBlockCount,
+        fallbackBlockTypes: Array.isArray(raw == null ? void 0 : raw.fallbackBlockTypes) ? raw.fallbackBlockTypes.map((item) => coerceString(item)).filter(Boolean).slice(0, 6) : [],
+        schemaValidation: normalizeSchemaValidation(raw == null ? void 0 : raw.schemaValidation),
+        blockOrigins
+      };
+    }
+    function normalizeSchemaValidation(raw = {}) {
+      const issues = Array.isArray(raw == null ? void 0 : raw.issues) ? raw.issues.map((item) => ({
+        path: coerceString(item == null ? void 0 : item.path),
+        message: coerceString(item == null ? void 0 : item.message),
+        fatal: (item == null ? void 0 : item.fatal) === true
+      })).filter((item) => item.path || item.message).slice(0, 12) : [];
+      const issueCount = clampNumber(raw == null ? void 0 : raw.issueCount, issues.length, 0, 99);
+      const fatal = (raw == null ? void 0 : raw.fatal) === true || issues.some((item) => item.fatal);
+      return {
+        isValid: (raw == null ? void 0 : raw.isValid) === true && issueCount === 0,
+        fatal,
+        issueCount,
+        issues
+      };
+    }
+    var AiLayoutSchemaError = class extends Error {
+      constructor(message, schemaValidation, generationMeta = null) {
+        super(message);
+        this.name = "AiLayoutSchemaError";
+        this.code = "ai-layout-schema-invalid";
+        this.schemaValidation = normalizeSchemaValidation(schemaValidation);
+        this.generationMeta = generationMeta;
+      }
+    };
+    function normalizeArticleLayoutState(raw = {}) {
+      if (!raw || typeof raw !== "object")
+        return null;
+      const layoutJson = raw.layoutJson && typeof raw.layoutJson === "object" ? raw.layoutJson : null;
+      if (!layoutJson)
+        return null;
+      return {
+        version: clampNumber(raw.version, AI_LAYOUT_SCHEMA_VERSION2, 1, 999),
+        updatedAt: clampNumber(raw.updatedAt, Date.now(), 0, 9999999999999),
+        sourceHash: typeof raw.sourceHash === "string" ? raw.sourceHash : "",
+        providerId: typeof raw.providerId === "string" ? raw.providerId : "",
+        model: typeof raw.model === "string" ? raw.model : "",
+        stylePack: typeof raw.stylePack === "string" ? raw.stylePack : "tech-green",
+        status: raw.status === "schema-error" ? "schema-error" : raw.status === "error" ? "error" : "ready",
+        lastError: typeof raw.lastError === "string" ? raw.lastError : "",
+        lastAttemptStatus: raw.lastAttemptStatus === "schema-error" ? "schema-error" : raw.lastAttemptStatus === "error" ? "error" : raw.lastAttemptStatus === "success" ? "success" : "idle",
+        lastAttemptError: typeof raw.lastAttemptError === "string" ? raw.lastAttemptError : "",
+        lastAttemptAt: clampNumber(raw.lastAttemptAt, 0, 0, 9999999999999),
+        lastAttemptSchemaValidation: normalizeSchemaValidation(raw.lastAttemptSchemaValidation),
+        generationMeta: normalizeLayoutGenerationMeta(raw.generationMeta, layoutJson),
+        layoutJson
+      };
+    }
+    function truncateMarkdownForPrompt(markdown = "", maxChars = 12e3) {
+      const content = String(markdown || "").trim();
+      if (!content || content.length <= maxChars)
+        return content;
+      const headLength = Math.max(2e3, Math.floor(maxChars * 0.72));
+      const tailLength = Math.max(800, maxChars - headLength);
+      const head = content.slice(0, headLength).trimEnd();
+      const tail = content.slice(-tailLength).trimStart();
+      return [
+        head,
+        "",
+        "[\u5185\u5BB9\u5DF2\u622A\u65AD\uFF0C\u4E3A\u4E86\u63A7\u5236\u8BF7\u6C42\u89C4\u6A21\uFF0C\u8FD9\u91CC\u7701\u7565\u4E86\u4E2D\u95F4\u90E8\u5206\u6B63\u6587\u3002]",
+        "",
+        tail
+      ].join("\n");
+    }
+    function normalizeAiSettings2(raw = {}) {
+      const defaults = createDefaultAiSettings2();
+      const providers = Array.isArray(raw.providers) ? raw.providers.map(normalizeAiProvider2) : defaults.providers;
+      const articleLayoutsByPath = {};
+      if (raw.articleLayoutsByPath && typeof raw.articleLayoutsByPath === "object") {
+        for (const [path, value] of Object.entries(raw.articleLayoutsByPath)) {
+          if (!path || typeof path !== "string")
+            continue;
+          const normalized = normalizeArticleLayoutState(value);
+          if (normalized) {
+            articleLayoutsByPath[path] = normalized;
+          }
+        }
+      }
+      let defaultProviderId = typeof raw.defaultProviderId === "string" ? raw.defaultProviderId : defaults.defaultProviderId;
+      if (defaultProviderId && !providers.some((provider) => provider.id === defaultProviderId && provider.enabled !== false)) {
+        defaultProviderId = "";
+      }
+      return {
+        enabled: raw.enabled === true,
+        defaultProviderId,
+        defaultStylePack: AI_STYLE_PACKS[raw.defaultStylePack] ? raw.defaultStylePack : defaults.defaultStylePack,
+        includeImagesInLayout: raw.includeImagesInLayout !== false,
+        requestTimeoutMs: clampNumber(raw.requestTimeoutMs, defaults.requestTimeoutMs, 5e3, 18e4),
+        providers,
+        articleLayoutsByPath
+      };
+    }
+    function getStylePackList2() {
+      return Object.values(AI_STYLE_PACKS).map((pack) => ({
+        value: pack.id,
+        label: pack.label,
+        description: pack.description
+      }));
+    }
+    function getStylePackById(id) {
+      return AI_STYLE_PACKS[id] || AI_STYLE_PACKS["tech-green"];
+    }
+    function listEnabledAiProviders(aiSettings = {}) {
+      return Array.isArray(aiSettings.providers) ? aiSettings.providers.filter((provider) => provider.enabled !== false && isAiProviderRunnable2(provider)) : [];
+    }
+    function resolveAiProvider2(aiSettings = {}, providerId = "") {
+      const providers = listEnabledAiProviders(aiSettings);
+      if (providerId) {
+        const matched = providers.find((provider) => provider.id === providerId);
+        if (matched)
+          return matched;
+      }
+      if (aiSettings.defaultProviderId) {
+        const matched = providers.find((provider) => provider.id === aiSettings.defaultProviderId);
+        if (matched)
+          return matched;
+      }
+      return providers[0] || null;
+    }
+    function extractJsonPayload(text) {
+      const content = String(text || "").trim();
+      if (!content)
+        throw new Error("AI \u672A\u8FD4\u56DE\u5185\u5BB9");
+      const fencedMatch = content.match(/```json\s*([\s\S]*?)```/i) || content.match(/```\s*([\s\S]*?)```/i);
+      const candidate = fencedMatch ? fencedMatch[1].trim() : content;
+      const firstBrace = candidate.indexOf("{");
+      const lastBrace = candidate.lastIndexOf("}");
+      if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+        throw new Error("AI \u8FD4\u56DE\u7ED3\u679C\u4E0D\u662F\u6709\u6548 JSON");
+      }
+      return candidate.slice(firstBrace, lastBrace + 1);
+    }
+    function coerceString(value, fallback = "") {
+      return typeof value === "string" ? value.trim() : fallback;
+    }
+    function toTextArray(value, limit = 6) {
+      if (!Array.isArray(value))
+        return [];
+      return value.map((item) => coerceString(item)).filter(Boolean).slice(0, limit);
+    }
+    function toImageIdArray(value, imageIds, limit = 4) {
+      if (!Array.isArray(value))
+        return [];
+      return value.map((item) => coerceString(item)).filter((item) => imageIds.has(item)).slice(0, limit);
+    }
+    function normalizeLayoutBlock(block, imageIds, index) {
+      if (!block || typeof block !== "object")
+        return null;
+      const type = coerceString(block.type);
+      if (!type)
+        return null;
+      if (type === "hero") {
+        return {
+          type,
+          eyebrow: coerceString(block.eyebrow),
+          title: coerceString(block.title),
+          subtitle: coerceString(block.subtitle),
+          coverImageId: imageIds.has(coerceString(block.coverImageId)) ? coerceString(block.coverImageId) : "",
+          variant: ["cover-right", "cover-left"].includes(block.variant) ? block.variant : "cover-right"
+        };
+      }
+      if (type === "part-nav") {
+        const items = Array.isArray(block.items) ? block.items.map((item, itemIndex) => ({
+          label: coerceString((item == null ? void 0 : item.label) || `PART ${String(itemIndex + 1).padStart(2, "0")}`),
+          text: coerceString((item == null ? void 0 : item.text) || (item == null ? void 0 : item.title))
+        })).filter((item) => item.text).slice(0, 4) : [];
+        return items.length ? { type, items } : null;
+      }
+      if (type === "lead-quote") {
+        const text = coerceString(block.text || block.quote);
+        if (!text)
+          return null;
+        return {
+          type,
+          text,
+          note: coerceString(block.note)
+        };
+      }
+      if (type === "case-block") {
+        const title = coerceString(block.title);
+        const summary = coerceString(block.summary);
+        if (!title && !summary)
+          return null;
+        return {
+          type,
+          caseLabel: coerceString(block.caseLabel || `CASE ${String(index + 1).padStart(2, "0")}`),
+          title,
+          summary,
+          bullets: toTextArray(block.bullets, 5),
+          imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+          highlight: coerceString(block.highlight)
+        };
+      }
+      if (type === "phone-frame") {
+        const imageId = coerceString(block.imageId);
+        if (!imageIds.has(imageId))
+          return null;
+        return {
+          type,
+          imageId,
+          caption: coerceString(block.caption)
+        };
+      }
+      if (type === "cta-card") {
+        const title = coerceString(block.title);
+        const body = coerceString(block.body);
+        if (!title && !body)
+          return null;
+        return {
+          type,
+          title,
+          body,
+          buttonText: coerceString(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB"),
+          note: coerceString(block.note)
+        };
+      }
+      return null;
+    }
+    function summarizeText(value, maxLength = 80) {
+      const text = coerceString(value).replace(/\s+/g, " ");
+      if (!text)
+        return "";
+      return text.length > maxLength ? `${text.slice(0, maxLength - 1)}\u2026` : text;
+    }
+    function stripMarkdown(value) {
+      return String(value || "").replace(/```[\s\S]*?```/g, " ").replace(/`([^`]+)`/g, "$1").replace(/!\[[^\]]*]\([^)]+\)/g, " ").replace(/\[[^\]]+]\([^)]+\)/g, "$1").replace(/^\s{0,3}>\s?/gm, "").replace(/[*_~#>-]/g, " ").replace(/\s+/g, " ").trim();
+    }
+    function extractMarkdownSignals(markdown = "") {
+      const lines = String(markdown || "").split(/\r?\n/);
+      const headings = [];
+      const bulletGroups = [];
+      const paragraphs = [];
+      let currentParagraph = [];
+      let currentBullets = [];
+      const flushParagraph = () => {
+        const text = stripMarkdown(currentParagraph.join(" ").trim());
+        if (text)
+          paragraphs.push(text);
+        currentParagraph = [];
+      };
+      const flushBullets = () => {
+        if (currentBullets.length)
+          bulletGroups.push(currentBullets);
+        currentBullets = [];
+      };
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) {
+          flushParagraph();
+          flushBullets();
+          continue;
+        }
+        const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+        if (headingMatch) {
+          flushParagraph();
+          flushBullets();
+          headings.push({
+            level: headingMatch[1].length,
+            text: stripMarkdown(headingMatch[2])
+          });
+          continue;
+        }
+        const bulletMatch = line.match(/^[-*+]\s+(.+)$/) || line.match(/^\d+\.\s+(.+)$/);
+        if (bulletMatch) {
+          flushParagraph();
+          currentBullets.push(stripMarkdown(bulletMatch[1]));
+          continue;
+        }
+        currentParagraph.push(line);
+      }
+      flushParagraph();
+      flushBullets();
+      const leadParagraphs = paragraphs.slice(0, 3);
+      const lastParagraph = paragraphs[paragraphs.length - 1] || "";
+      const sectionTitles = headings.filter((item) => item.level <= 3).map((item) => item.text).slice(0, 6);
+      return {
+        headings,
+        sectionTitles,
+        paragraphs,
+        leadParagraphs,
+        bulletGroups,
+        lastParagraph
+      };
+    }
+    function buildFallbackLayout(context = {}) {
+      var _a, _b, _c, _d;
+      const title = coerceString(context.title || "\u672A\u547D\u540D\u6587\u7AE0");
+      const stylePack = coerceString(context.stylePack || "tech-green");
+      const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
+      const signals = extractMarkdownSignals(context.markdown || "");
+      const firstImageId = ((_a = imageRefs[0]) == null ? void 0 : _a.id) || "";
+      const secondImageId = ((_b = imageRefs[1]) == null ? void 0 : _b.id) || "";
+      const leadText = summarizeText(signals.leadParagraphs[0] || signals.paragraphs[0] || "");
+      const leadNote = summarizeText(signals.leadParagraphs[1] || "");
+      const partItems = signals.sectionTitles.slice(0, 3).map((text, index) => ({
+        label: `PART ${String(index + 1).padStart(2, "0")}`,
+        text
+      }));
+      const headBlocks = [];
+      const bodyBlocks = [];
+      headBlocks.push({
+        type: "hero",
+        eyebrow: signals.sectionTitles[0] ? "AI Layout Draft" : "AI Article Layout",
+        title,
+        subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
+        coverImageId: firstImageId,
+        variant: "cover-right"
+      });
+      if (partItems.length >= 2) {
+        headBlocks.push({ type: "part-nav", items: partItems });
+      }
+      if (leadText) {
+        headBlocks.push({
+          type: "lead-quote",
+          text: leadText,
+          note: leadNote
+        });
+      }
+      const sectionTitles = signals.sectionTitles.length ? signals.sectionTitles : ["\u6838\u5FC3\u5185\u5BB9"];
+      sectionTitles.slice(0, 2).forEach((heading, index) => {
+        const bullets = signals.bulletGroups[index] || [];
+        const paragraph = signals.paragraphs[index + 1] || signals.paragraphs[index] || "";
+        bodyBlocks.push({
+          type: "case-block",
+          caseLabel: `CASE ${String(index + 1).padStart(2, "0")}`,
+          title: heading,
+          summary: summarizeText(paragraph, 96),
+          bullets: bullets.slice(0, 4),
+          imageIds: index === 0 && firstImageId ? [firstImageId] : index === 1 && secondImageId ? [secondImageId] : [],
+          highlight: bullets[0] ? summarizeText(bullets[0], 48) : ""
+        });
+      });
+      if (firstImageId) {
+        bodyBlocks.push({
+          type: "phone-frame",
+          imageId: secondImageId || firstImageId,
+          caption: ((_c = imageRefs[1]) == null ? void 0 : _c.caption) || ((_d = imageRefs[0]) == null ? void 0 : _d.caption) || "\u793A\u610F\u622A\u56FE"
+        });
+      }
+      const ctaBlock = {
+        type: "cta-card",
+        title: signals.sectionTitles[0] ? `\u7EE7\u7EED\u9605\u8BFB\uFF1A${signals.sectionTitles[0]}` : "\u7EE7\u7EED\u9605\u8BFB",
+        body: summarizeText(signals.lastParagraph || leadText || title, 88),
+        buttonText: "\u6574\u7406\u540E\u53D1\u5E03",
+        note: "\u672C\u7248\u5F0F\u4E3A AI \u8F85\u52A9\u751F\u6210\uFF0C\u53EF\u7EE7\u7EED\u8C03\u6574\u540E\u590D\u5236\u6216\u540C\u6B65\u5230\u516C\u4F17\u53F7\u3002"
+      };
+      const blocks = [...headBlocks, ...bodyBlocks].slice(0, 5);
+      blocks.push(ctaBlock);
+      return {
+        version: AI_LAYOUT_SCHEMA_VERSION2,
+        articleType: signals.sectionTitles.length >= 2 ? "tutorial" : "article",
+        stylePack,
+        title,
+        summary: summarizeText(leadText || signals.lastParagraph || title, 90),
+        blocks: blocks.filter(Boolean).slice(0, 6)
+      };
+    }
+    function mergeBlocksWithFallback(aiBlocks = [], fallbackBlocks = []) {
+      return mergeBlocksWithFallbackDetailed(aiBlocks, fallbackBlocks).map((entry) => entry.block);
+    }
+    function mergeBlocksWithFallbackDetailed(aiBlocks = [], fallbackBlocks = []) {
+      const merged = [];
+      const seenKeys = /* @__PURE__ */ new Set();
+      const fallbackCta = fallbackBlocks.find((block) => (block == null ? void 0 : block.type) === "cta-card") || null;
+      const addBlock = (block, source) => {
+        if (!block || !block.type)
+          return;
+        const dedupeKey = getLayoutBlockKey(block);
+        if (seenKeys.has(dedupeKey))
+          return;
+        seenKeys.add(dedupeKey);
+        merged.push({ block, source });
+      };
+      aiBlocks.forEach((block) => addBlock(block, "ai"));
+      fallbackBlocks.filter((block) => (block == null ? void 0 : block.type) !== "cta-card").forEach((block) => addBlock(block, "fallback"));
+      const limited = merged.slice(0, 5);
+      const limitedKeys = new Set(limited.map((entry) => getLayoutBlockKey(entry.block)));
+      if (fallbackCta) {
+        const ctaKey = getLayoutBlockKey(fallbackCta);
+        if (!limitedKeys.has(ctaKey)) {
+          limited.push({ block: fallbackCta, source: "fallback" });
+        }
+      }
+      return limited.slice(0, 6);
+    }
+    function normalizeArticleLayout(rawLayout = {}, context = {}) {
+      const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
+      const requestedStylePack = coerceString(rawLayout.stylePack || context.stylePack || "tech-green");
+      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, index)).filter(Boolean) : [];
+      const fallbackLayout = buildFallbackLayout({
+        title: rawLayout.title || context.title,
+        markdown: context.markdown,
+        stylePack: requestedStylePack,
+        imageRefs: context.imageRefs
+      });
+      const blocks = mergeBlocksWithFallback(normalizedAiBlocks, fallbackLayout.blocks);
+      return {
+        version: AI_LAYOUT_SCHEMA_VERSION2,
+        articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || "article"),
+        stylePack: AI_STYLE_PACKS[requestedStylePack] ? requestedStylePack : "tech-green",
+        title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
+        summary: coerceString(rawLayout.summary || fallbackLayout.summary),
+        blocks
+      };
+    }
+    function createLayoutGenerationMeta({
+      provider,
+      stylePack,
+      signals,
+      imageRefs = [],
+      normalizedAiBlocks = [],
+      mergedEntries = [],
+      schemaValidation = null
+    }) {
+      const stylePackInfo = getStylePackById(stylePack);
+      const fallbackEntries = mergedEntries.filter((entry) => entry.source === "fallback");
+      return {
+        providerName: coerceString(provider == null ? void 0 : provider.name),
+        providerModel: coerceString(provider == null ? void 0 : provider.model),
+        stylePackLabel: (stylePackInfo == null ? void 0 : stylePackInfo.label) || "",
+        headingCount: signals.headings.length,
+        sectionCount: signals.sectionTitles.length,
+        leadParagraphCount: signals.leadParagraphs.length,
+        bulletGroupCount: signals.bulletGroups.length,
+        imageCount: Array.isArray(imageRefs) ? imageRefs.length : 0,
+        aiBlockCount: normalizedAiBlocks.length,
+        finalBlockCount: mergedEntries.length,
+        fallbackUsed: fallbackEntries.length > 0,
+        fallbackBlockCount: fallbackEntries.length,
+        fallbackBlockTypes: Array.from(new Set(fallbackEntries.map((entry) => {
+          var _a;
+          return (_a = entry.block) == null ? void 0 : _a.type;
+        }).filter(Boolean))).slice(0, 6),
+        schemaValidation: normalizeSchemaValidation(schemaValidation),
+        blockOrigins: mergedEntries.map((entry, index) => {
+          var _a;
+          return {
+            index,
+            type: coerceString((_a = entry.block) == null ? void 0 : _a.type),
+            source: entry.source === "fallback" ? "fallback" : "ai",
+            label: getLayoutBlockLabel(entry.block)
+          };
+        })
+      };
+    }
+    function buildLayoutResult(rawLayout = {}, context = {}) {
+      const validation = validateAiLayoutPayload(rawLayout);
+      const requestedStylePack = coerceString(rawLayout.stylePack || context.stylePack || "tech-green");
+      if (validation.fatal) {
+        const generationMeta = createLayoutGenerationMeta({
+          provider: context.provider,
+          stylePack: requestedStylePack,
+          signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+          imageRefs: context.imageRefs,
+          normalizedAiBlocks: [],
+          mergedEntries: [],
+          schemaValidation: validation
+        });
+        throw new AiLayoutSchemaError(`AI \u8FD4\u56DE\u7684\u5E03\u5C40\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF08${validation.issueCount} \u9879\uFF09`, validation, generationMeta);
+      }
+      const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
+      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, index)).filter(Boolean) : [];
+      const fallbackLayout = buildFallbackLayout({
+        title: rawLayout.title || context.title,
+        markdown: context.markdown,
+        stylePack: requestedStylePack,
+        imageRefs: context.imageRefs
+      });
+      const mergedEntries = mergeBlocksWithFallbackDetailed(normalizedAiBlocks, fallbackLayout.blocks);
+      const layoutJson = {
+        version: AI_LAYOUT_SCHEMA_VERSION2,
+        articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || "article"),
+        stylePack: AI_STYLE_PACKS[requestedStylePack] ? requestedStylePack : "tech-green",
+        title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
+        summary: coerceString(rawLayout.summary || fallbackLayout.summary),
+        blocks: mergedEntries.map((entry) => entry.block)
+      };
+      return {
+        layoutJson,
+        generationMeta: createLayoutGenerationMeta({
+          provider: context.provider,
+          stylePack: layoutJson.stylePack,
+          signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+          imageRefs: context.imageRefs,
+          normalizedAiBlocks,
+          mergedEntries,
+          schemaValidation: validation
+        })
+      };
+    }
+    function extractImageRefsFromHtml2(html) {
+      if (typeof document === "undefined" || !html)
+        return [];
+      const container = document.createElement("div");
+      container.innerHTML = html;
+      const figures = Array.from(container.querySelectorAll("figure"));
+      const refs = [];
+      figures.forEach((figure, index) => {
+        var _a, _b;
+        const img = figure.querySelector("img");
+        if (!img || !img.src || img.alt === "logo")
+          return;
+        const caption = ((_b = (_a = figure.querySelector("figcaption")) == null ? void 0 : _a.textContent) == null ? void 0 : _b.trim()) || img.alt || `\u914D\u56FE ${index + 1}`;
+        refs.push({
+          id: `image-${index + 1}`,
+          src: img.src,
+          alt: img.alt || caption,
+          caption
+        });
+      });
+      return refs;
+    }
+    function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
+      const stylePackInfo = getStylePackById(stylePack);
+      const signals = extractMarkdownSignals(markdown);
+      const promptMarkdown = truncateMarkdownForPrompt(markdown);
+      const imageSummary = imageRefs.length ? imageRefs.map((image) => `- ${image.id}: ${image.caption}`).join("\n") : "- \u65E0\u53EF\u7528\u56FE\u7247";
+      const headingSummary = signals.sectionTitles.length ? signals.sectionTitles.map((item, index) => `${index + 1}. ${item}`).join("\n") : "- \u65E0\u660E\u663E\u6807\u9898\u7ED3\u6784";
+      const leadSummary = signals.leadParagraphs.length ? signals.leadParagraphs.map((item, index) => `${index + 1}. ${summarizeText(item, 90)}`).join("\n") : "- \u65E0\u53EF\u63D0\u53D6\u5BFC\u8BED";
+      const bulletSummary = signals.bulletGroups.length ? signals.bulletGroups.slice(0, 2).map((group, groupIndex) => `\u7EC4 ${groupIndex + 1}: ${group.slice(0, 4).join(" / ")}`).join("\n") : "- \u65E0\u660E\u663E\u5217\u8868\u4FE1\u606F";
+      return [
+        {
+          role: "system",
+          content: AI_LAYOUT_SKILL_SYSTEM_LINES.join("\n")
+        },
+        {
+          role: "user",
+          content: [
+            `\u6587\u7AE0\u6807\u9898\uFF1A${title || "\u672A\u547D\u540D\u6587\u7AE0"}`,
+            `\u98CE\u683C\u5305\uFF1A${stylePackInfo.label}`,
+            `\u98CE\u683C\u8BF4\u660E\uFF1A${stylePackInfo.description}`,
+            "",
+            "\u53EF\u7528\u56FE\u7247\uFF1A",
+            imageSummary,
+            "",
+            "\u6587\u7AE0\u7ED3\u6784\u6458\u8981\uFF1A",
+            "\u6807\u9898\u5927\u7EB2\uFF1A",
+            headingSummary,
+            "\u5BFC\u8BED\u5019\u9009\uFF1A",
+            leadSummary,
+            "\u5217\u8868\u4FE1\u606F\uFF1A",
+            bulletSummary,
+            "",
+            "\u8BF7\u8F93\u51FA\u4E00\u4E2A JSON \u5BF9\u8C61\uFF0C\u5305\u542B\uFF1A",
+            ...AI_LAYOUT_OUTPUT_FIELDS.map((field) => `- ${field}`),
+            "",
+            "block \u7EA6\u675F\uFF1A",
+            ...getAiLayoutBlockConstraintLines(),
+            "",
+            "\u4F18\u5148\u751F\u6210 4 \u5230 6 \u4E2A block\uFF0C\u9002\u5408\u6559\u7A0B/\u6848\u4F8B\u7C7B\u516C\u4F17\u53F7\u6587\u7AE0\u3002",
+            "",
+            "\u539F\u6587\u5982\u4E0B\uFF1A",
+            promptMarkdown
+          ].join("\n")
+        }
+      ];
+    }
+    function readChatCompletionContent(data) {
+      var _a, _b;
+      const message = (_b = (_a = data == null ? void 0 : data.choices) == null ? void 0 : _a[0]) == null ? void 0 : _b.message;
+      if (!message)
+        throw new Error("AI \u54CD\u5E94\u7F3A\u5C11 message");
+      const content = message.content;
+      if (typeof content === "string")
+        return content;
+      if (Array.isArray(content)) {
+        return content.map((item) => typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
+      }
+      throw new Error("AI \u54CD\u5E94\u683C\u5F0F\u65E0\u6CD5\u8BC6\u522B");
+    }
+    async function requestOpenAICompatibleLayout({
+      provider,
+      title,
+      markdown,
+      stylePack,
+      imageRefs,
+      timeoutMs,
+      fetchImpl
+    }) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetchImpl(`${provider.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${provider.apiKey}`
+          },
+          body: JSON.stringify({
+            model: provider.model,
+            temperature: 0.2,
+            messages: buildLayoutMessages({ title, markdown, stylePack, imageRefs })
+          }),
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`AI \u8BF7\u6C42\u5931\u8D25 (${response.status}): ${text || response.statusText}`);
+        }
+        const data = await response.json();
+        const content = readChatCompletionContent(data);
+        const jsonPayload = extractJsonPayload(content);
+        return JSON.parse(jsonPayload);
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    async function generateArticleLayout2({
+      provider,
+      title,
+      markdown,
+      stylePack = "tech-green",
+      imageRefs = [],
+      timeoutMs = 45e3,
+      fetchImpl = globalThis.fetch
+    }) {
+      if (!provider)
+        throw new Error("\u672A\u627E\u5230\u53EF\u7528\u7684 AI Provider");
+      if (typeof fetchImpl !== "function")
+        throw new Error("\u5F53\u524D\u73AF\u5883\u4E0D\u652F\u6301 AI \u7F51\u7EDC\u8BF7\u6C42");
+      if (!markdown || !String(markdown).trim())
+        throw new Error("\u6587\u7AE0\u5185\u5BB9\u4E3A\u7A7A\uFF0C\u65E0\u6CD5\u8FDB\u884C AI \u7F16\u6392");
+      const signals = extractMarkdownSignals(markdown);
+      let rawLayout;
+      switch (provider.kind) {
+        case AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE:
+          rawLayout = await requestOpenAICompatibleLayout({
+            provider,
+            title,
+            markdown,
+            stylePack,
+            imageRefs,
+            timeoutMs,
+            fetchImpl
+          });
+          break;
+        default:
+          throw new Error(`\u6682\u4E0D\u652F\u6301\u7684 AI Provider \u7C7B\u578B: ${provider.kind}`);
+      }
+      return buildLayoutResult(rawLayout, {
+        title,
+        stylePack,
+        imageRefs,
+        markdown,
+        provider,
+        signals
+      });
+    }
+    async function testAiProviderConnection2(provider, fetchImpl = globalThis.fetch) {
+      var _a, _b;
+      const result = await generateArticleLayout2({
+        provider,
+        title: "\u8FDE\u63A5\u6D4B\u8BD5",
+        markdown: "\u8FD9\u662F\u4E00\u4E2A\u8FDE\u63A5\u6D4B\u8BD5\u3002\u8BF7\u8F93\u51FA\u6700\u5C0F\u53EF\u7528\u7684\u6559\u7A0B\u6392\u7248 JSON\u3002",
+        stylePack: "tech-green",
+        imageRefs: [],
+        timeoutMs: 15e3,
+        fetchImpl
+      });
+      return !!((_b = (_a = result == null ? void 0 : result.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length);
+    }
+    function escapeHtml(text) {
+      return String(text || "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+    function renderArticleLayoutHtml2(layout, { imageRefs = [] } = {}) {
+      const stylePack = getStylePackById(layout == null ? void 0 : layout.stylePack);
+      const tokens = stylePack.tokens;
+      const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
+      const wrapperStyle = [
+        'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif',
+        `color:${tokens.text}`,
+        "font-size:16px",
+        "line-height:1.8",
+        "padding:24px 18px",
+        `background:${tokens.surface}`
+      ].join(";");
+      const cardStyle = [
+        `background:${tokens.surface}`,
+        `border:1px solid ${tokens.border}`,
+        "border-radius:18px",
+        "padding:18px",
+        "margin:18px 0",
+        "box-shadow:0 10px 30px -24px rgba(0,0,0,0.18)"
+      ].join(";");
+      const renderImage = (imageId, extraStyle = "") => {
+        const image = imageMap.get(imageId);
+        if (!image)
+          return "";
+        const style = [
+          "display:block",
+          "width:100%",
+          "height:auto",
+          "border-radius:14px",
+          extraStyle
+        ].filter(Boolean).join(";");
+        return `<img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || image.caption)}" style="${style}">`;
+      };
+      const blocksHtml = (layout.blocks || []).map((block, index) => {
+        if (block.type === "hero") {
+          const imageHtml = block.coverImageId ? renderImage(block.coverImageId, "max-width:116px;flex:0 0 116px;") : "";
+          const contentHtml = [
+            block.eyebrow ? `<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:10px;">${escapeHtml(block.eyebrow)}</div>` : "",
+            block.title ? `<h1 style="margin:0 0 10px;font-size:28px;line-height:1.2;color:${tokens.text};">${escapeHtml(block.title)}</h1>` : "",
+            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:14px;line-height:1.7;">${escapeHtml(block.subtitle)}</p>` : ""
+          ].join("");
+          const flexDirection = block.variant === "cover-left" ? "row-reverse" : "row";
+          return `<section style="${cardStyle};padding:22px;">
+        <div style="display:flex;flex-direction:${flexDirection};gap:16px;align-items:center;">
+          <div style="flex:1 1 auto;min-width:0;">${contentHtml}</div>
+          ${imageHtml}
+        </div>
+        <div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>
+      </section>`;
+        }
+        if (block.type === "part-nav") {
+          const itemsHtml = block.items.map((item) => `
+        <div style="flex:1 1 0;min-width:0;padding:12px 10px;border:1px solid ${tokens.border};border-radius:14px;background:${tokens.surfaceSoft};">
+          <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:0.8px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
+          <div style="margin-top:8px;font-size:13px;font-weight:600;color:${tokens.text};line-height:1.45;">${escapeHtml(item.text)}</div>
+        </div>
+      `).join("");
+          return `<section style="margin:16px 0 8px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">${itemsHtml}</div>
+      </section>`;
+        }
+        if (block.type === "lead-quote") {
+          return `<section style="margin:18px 0;padding:18px;border-radius:16px;background:${tokens.quoteBg};border:1px solid ${tokens.border};">
+        <div style="font-size:18px;font-weight:700;line-height:1.7;color:${tokens.text};">${escapeHtml(block.text)}</div>
+        ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ""}
+      </section>`;
+        }
+        if (block.type === "case-block") {
+          const imagesHtml = block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("");
+          const bulletsHtml = block.bullets.length ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>` : "";
+          return `<section style="margin:26px 0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(index + 1).padStart(2, "0")}</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
+        </div>
+        ${block.title ? `<h2 style="margin:0 0 8px;font-size:22px;line-height:1.35;color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ""}
+        ${block.summary ? `<p style="margin:0;color:${tokens.muted};">${escapeHtml(block.summary)}</p>` : ""}
+        ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;">${escapeHtml(block.highlight)}</div>` : ""}
+        ${bulletsHtml}
+        ${imagesHtml}
+      </section>`;
+        }
+        if (block.type === "phone-frame") {
+          return `<section style="margin:24px auto;max-width:380px;padding:14px;border:1px solid ${tokens.border};border-radius:42px;background:#111;box-shadow:0 20px 40px -28px rgba(0,0,0,0.45);">
+        <div style="width:42%;height:18px;margin:0 auto 14px;border-radius:999px;background:#000;"></div>
+        <div style="background:#fff;border-radius:28px;padding:10px;overflow:hidden;">
+          ${renderImage(block.imageId, "border-radius:22px;")}
+        </div>
+        ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:#d7e2dd;">${escapeHtml(block.caption)}</div>` : ""}
+      </section>`;
+        }
+        if (block.type === "cta-card") {
+          return `<section style="${cardStyle};background:linear-gradient(135deg, ${tokens.accentSoft} 0%, #ffffff 100%);">
+        ${block.title ? `<h3 style="margin:0 0 8px;font-size:20px;color:${tokens.text};">${escapeHtml(block.title)}</h3>` : ""}
+        ${block.body ? `<p style="margin:0;color:${tokens.muted};">${escapeHtml(block.body)}</p>` : ""}
+        <div style="margin-top:14px;display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:999px;background:${tokens.accent};color:#fff;font-weight:700;font-size:14px;">${escapeHtml(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB")}</div>
+        ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ""}
+      </section>`;
+        }
+        return "";
+      }).join("");
+      return `<section style="${wrapperStyle}">${blocksHtml}</section>`;
+    }
+    module2.exports = {
+      AI_LAYOUT_SCHEMA_VERSION: AI_LAYOUT_SCHEMA_VERSION2,
+      AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_PROVIDER_KINDS: AI_PROVIDER_KINDS2,
+      AI_STYLE_PACKS,
+      createDefaultAiSettings: createDefaultAiSettings2,
+      normalizeAiSettings: normalizeAiSettings2,
+      normalizeAiProvider: normalizeAiProvider2,
+      getAiProviderIssues: getAiProviderIssues2,
+      isAiProviderRunnable: isAiProviderRunnable2,
+      summarizeAiProviderIssues: summarizeAiProviderIssues2,
+      normalizeArticleLayoutState,
+      normalizeSchemaValidation,
+      getStylePackList: getStylePackList2,
+      getStylePackById,
+      listEnabledAiProviders,
+      resolveAiProvider: resolveAiProvider2,
+      extractImageRefsFromHtml: extractImageRefsFromHtml2,
+      extractMarkdownSignals,
+      buildFallbackLayout,
+      normalizeArticleLayout,
+      normalizeLayoutGenerationMeta,
+      buildLayoutResult,
+      AiLayoutSchemaError,
+      generateArticleLayout: generateArticleLayout2,
+      renderArticleLayoutHtml: renderArticleLayoutHtml2,
+      testAiProviderConnection: testAiProviderConnection2
+    };
+  }
+});
+
 // services/wechat-sync.js
 var require_wechat_sync = __commonJS({
   "services/wechat-sync.js"(exports2, module2) {
@@ -3760,6 +4927,20 @@ var require_wechat_html_cleaner = __commonJS({
     function cleanHtmlForDraft(html) {
       const div = document.createElement("div");
       div.innerHTML = html;
+      const unwrapFragmentOnlyLinks = (root) => {
+        if (!root)
+          return;
+        root.querySelectorAll("a[href]").forEach((anchor) => {
+          const href = (anchor.getAttribute("href") || "").trim();
+          if (!href.startsWith("#"))
+            return;
+          const fragment = document.createDocumentFragment();
+          while (anchor.firstChild) {
+            fragment.appendChild(anchor.firstChild);
+          }
+          anchor.replaceWith(fragment);
+        });
+      };
       const getInlineLabelPrefixInfo = (container) => {
         if (!container)
           return null;
@@ -3786,6 +4967,7 @@ var require_wechat_html_cleaner = __commonJS({
         }
         return null;
       };
+      unwrapFragmentOnlyLinks(div);
       const hasInlineLabelPrefix = (container) => !!getInlineLabelPrefixInfo(container);
       const collapseLabelBreakInParagraph = (paragraph) => {
         const prefixInfo = getInlineLabelPrefixInfo(paragraph);
@@ -4292,6 +5474,23 @@ var { buildRenderRuntime } = require_dependency_loader();
 var { resolveMarkdownSource } = require_markdown_source();
 var { normalizeVaultPath, isAbsolutePathLike } = require_path_utils();
 var { renderObsidianTripletMarkdown } = require_obsidian_triplet_renderer();
+var {
+  AI_LAYOUT_SCHEMA_VERSION,
+  AI_LAYOUT_SKILL_VERSION,
+  AI_PROVIDER_KINDS,
+  createDefaultAiSettings,
+  normalizeAiSettings,
+  normalizeAiProvider,
+  getAiProviderIssues,
+  isAiProviderRunnable,
+  summarizeAiProviderIssues,
+  getStylePackList,
+  resolveAiProvider,
+  extractImageRefsFromHtml,
+  generateArticleLayout,
+  renderArticleLayoutHtml,
+  testAiProviderConnection
+} = require_ai_layout();
 var { createWechatSyncService } = require_wechat_sync();
 var { resolveSyncAccount, toSyncFriendlyMessage } = require_sync_context();
 var { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require_wechat_media();
@@ -4337,7 +5536,8 @@ var DEFAULT_SETTINGS = {
   // 发送成功后要清理的目录（支持 {{note}}）
   // 旧字段保留用于迁移检测
   wechatAppId: "",
-  wechatAppSecret: ""
+  wechatAppSecret: "",
+  ai: createDefaultAiSettings()
 };
 var MAX_ACCOUNTS = 5;
 function isMobileClient(app) {
@@ -4620,6 +5820,12 @@ var AppleStyleView = class extends ItemView {
     this.sidePaddingPreviewTimer = null;
     this.lastResolvedMarkdown = "";
     this.lastResolvedSourcePath = "";
+    this.lastResolvedSourceHash = "";
+    this.baseRenderedHtml = null;
+    this.aiPreviewApplied = false;
+    this.aiLayoutBtn = null;
+    this.settingsBtn = null;
+    this.aiLayoutDebugMode = "";
   }
   getViewType() {
     return APPLE_STYLE_VIEW;
@@ -4645,12 +5851,7 @@ var AppleStyleView = class extends ItemView {
       cls: `apple-preview-wrapper ${usePhoneFrame ? "mode-phone" : "mode-classic"}`
     });
     previewWrapper.addEventListener("click", (e) => {
-      if (this.settingsOverlay && this.settingsOverlay.classList.contains("visible")) {
-        this.settingsOverlay.classList.remove("visible");
-        const btn = container.querySelector('.apple-icon-btn[aria-label="\u6837\u5F0F\u8BBE\u7F6E"]');
-        if (btn)
-          btn.classList.remove("active");
-      }
+      this.closeTransientPanels();
     });
     if (usePhoneFrame) {
       const phoneFrame = previewWrapper.createEl("div", { cls: "apple-phone-frame" });
@@ -4885,10 +6086,10 @@ var AppleStyleView = class extends ItemView {
       btn.addEventListener("click", onClick);
       return btn;
     };
-    const settingsBtn = createIconBtn("sliders-horizontal", "\u6837\u5F0F\u8BBE\u7F6E", () => {
-      this.settingsOverlay.classList.toggle("visible");
-      settingsBtn.classList.toggle("active");
+    this.settingsBtn = createIconBtn("sliders-horizontal", "\u6837\u5F0F\u8BBE\u7F6E", () => {
+      this.togglePanel(this.settingsOverlay, this.settingsBtn);
     });
+    this.aiLayoutBtn = createIconBtn("sparkles", "AI \u7F16\u6392", () => this.onAiLayoutButtonClick());
     if (!isMobileClient(this.app)) {
       this.copyBtn = createIconBtn("copy", "\u590D\u5236\u5230\u516C\u4F17\u53F7", () => this.copyHTML());
     } else {
@@ -5092,6 +6293,9 @@ var AppleStyleView = class extends ItemView {
         toggleComp.toggleEl.style.filter = "grayscale(100%)";
       }
     }
+    this.aiLayoutOverlay = container.createEl("div", { cls: "apple-ai-layout-overlay" });
+    this.createAiLayoutPanel(this.aiLayoutOverlay);
+    this.updateAiToolbarState();
   }
   /**
    * 创建账号选择器
@@ -5377,6 +6581,812 @@ var AppleStyleView = class extends ItemView {
     section.createEl("label", { cls: "apple-setting-label", text: label });
     const content = section.createEl("div", { cls: "apple-setting-content" });
     builder(content);
+  }
+  togglePanel(overlay, button, onOpen) {
+    if (!overlay || !button)
+      return;
+    const willOpen = !overlay.classList.contains("visible");
+    this.closeTransientPanels();
+    if (willOpen) {
+      overlay.classList.add("visible");
+      button.classList.add("active");
+      if (typeof onOpen === "function")
+        onOpen();
+    }
+  }
+  closeTransientPanels() {
+    if (this.settingsOverlay)
+      this.settingsOverlay.classList.remove("visible");
+    if (this.aiLayoutOverlay)
+      this.aiLayoutOverlay.classList.remove("visible");
+    if (this.settingsBtn)
+      this.settingsBtn.classList.remove("active");
+    if (this.aiLayoutBtn)
+      this.aiLayoutBtn.classList.remove("active");
+  }
+  updateAiToolbarState() {
+    var _a, _b;
+    if (!this.aiLayoutBtn)
+      return;
+    const enabled = ((_b = (_a = this.plugin.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.enabled) === true;
+    this.aiLayoutBtn.classList.toggle("is-disabled", !enabled);
+    this.aiLayoutBtn.setAttribute("title", enabled ? "AI \u7F16\u6392" : "AI \u7F16\u6392\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528");
+  }
+  onAiLayoutButtonClick() {
+    var _a, _b;
+    if (((_b = (_a = this.plugin.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.enabled) !== true) {
+      this.closeTransientPanels();
+      this.updateAiToolbarState();
+      new Notice("AI \u7F16\u6392\u5F53\u524D\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528");
+      return;
+    }
+    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
+  }
+  createAiLayoutPanel(parent) {
+    var _a;
+    const header = parent.createDiv({ cls: "apple-ai-layout-header" });
+    header.createEl("div", { cls: "apple-ai-layout-title", text: "AI \u7F16\u6392" });
+    header.createEl("div", {
+      cls: "apple-ai-layout-subtitle",
+      text: "\u6309\u5F53\u524D\u6587\u7AE0\u5185\u5BB9\u751F\u6210\u533A\u5757\u5316\u6392\u7248\u5EFA\u8BAE"
+    });
+    this.aiLayoutStatus = parent.createDiv({ cls: "apple-ai-layout-status" });
+    this.aiLayoutStatusBadge = this.aiLayoutStatus.createEl("span", { cls: "apple-ai-layout-badge", text: "\u672A\u751F\u6210" });
+    this.aiLayoutStatusText = this.aiLayoutStatus.createEl("span", {
+      cls: "apple-ai-layout-status-text",
+      text: "\u5C1A\u672A\u751F\u6210\u5F53\u524D\u6587\u7AE0\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002"
+    });
+    const controlSection = parent.createDiv({ cls: "apple-ai-layout-section" });
+    controlSection.createEl("label", { cls: "apple-setting-label", text: "\u98CE\u683C\u5305" });
+    this.aiStylePackSelect = controlSection.createEl("select", { cls: "apple-select" });
+    const stylePacks = getStylePackList();
+    stylePacks.forEach((pack) => {
+      var _a2;
+      const option = this.aiStylePackSelect.createEl("option", {
+        value: pack.value,
+        text: pack.label
+      });
+      if (((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultStylePack) === pack.value) {
+        option.selected = true;
+      }
+    });
+    this.aiIncludeImagesNote = controlSection.createEl("div", {
+      cls: "apple-ai-layout-mini-note",
+      text: ((_a = this.plugin.settings.ai) == null ? void 0 : _a.includeImagesInLayout) === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
+    });
+    const summarySection = parent.createDiv({ cls: "apple-ai-layout-section" });
+    summarySection.createEl("label", { cls: "apple-setting-label", text: "\u7ED3\u679C\u6458\u8981" });
+    this.aiLayoutSummary = summarySection.createDiv({
+      cls: "apple-ai-layout-summary",
+      text: "\u751F\u6210\u540E\u4F1A\u5728\u8FD9\u91CC\u5C55\u793A\u6587\u7AE0\u7C7B\u578B\u3001\u533A\u5757\u6570\u91CF\u548C\u6700\u8FD1\u4E00\u6B21\u6A21\u578B\u4FE1\u606F\u3002"
+    });
+    this.aiLayoutMetaChips = summarySection.createDiv({ cls: "apple-ai-layout-meta-chips" });
+    this.aiLayoutMetaNote = summarySection.createDiv({ cls: "apple-ai-layout-mini-note" });
+    this.aiSchemaIssuePanel = summarySection.createDiv({ cls: "apple-ai-layout-issues" });
+    this.aiBlockList = parent.createDiv({ cls: "apple-ai-layout-block-list" });
+    const actionRow = parent.createDiv({ cls: "apple-ai-layout-actions" });
+    this.aiGenerateBtn = actionRow.createEl("button", { cls: "apple-btn-primary", text: "\u751F\u6210\u7F16\u6392" });
+    this.aiGenerateBtn.addEventListener("click", () => this.generateAiLayoutForCurrentArticle());
+    this.aiApplyBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u5E94\u7528\u5230\u9884\u89C8" });
+    this.aiApplyBtn.addEventListener("click", () => this.applyAiLayoutToPreview());
+    this.aiResetBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u666E\u901A\u9884\u89C8" });
+    this.aiResetBtn.addEventListener("click", () => this.restoreBasePreview());
+    const debugRow = parent.createDiv({ cls: "apple-ai-layout-debug-actions" });
+    this.aiViewJsonBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u5E03\u5C40 JSON" });
+    this.aiViewJsonBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("json"));
+    this.aiViewErrorBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5" });
+    this.aiViewErrorBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("error"));
+    this.aiDebugPanel = parent.createDiv({ cls: "apple-ai-layout-debug-panel" });
+    const debugHeader = this.aiDebugPanel.createDiv({ cls: "apple-ai-layout-debug-header" });
+    this.aiDebugPanelTitle = debugHeader.createDiv({ cls: "apple-ai-layout-debug-title", text: "\u8C03\u8BD5\u8F93\u51FA" });
+    const debugTools = debugHeader.createDiv({ cls: "apple-ai-layout-debug-tools" });
+    this.aiCopyPromptBtn = debugTools.createEl("button", {
+      cls: "apple-ai-layout-link apple-ai-layout-debug-copy",
+      text: "\u590D\u5236\u4E3A Prompt"
+    });
+    this.aiCopyPromptBtn.addEventListener("click", () => this.copyAiLayoutPromptContext());
+    this.aiCopyDebugBtn = debugTools.createEl("button", {
+      cls: "apple-ai-layout-link apple-ai-layout-debug-copy",
+      text: "\u590D\u5236\u5F53\u524D\u5FEB\u7167"
+    });
+    this.aiCopyDebugBtn.addEventListener("click", () => this.copyAiLayoutDebugSnapshot());
+    this.aiDebugPanelBody = this.aiDebugPanel.createEl("pre", { cls: "apple-ai-layout-debug-body" });
+    const footer = parent.createDiv({ cls: "apple-ai-layout-footer" });
+    this.aiPanelHint = footer.createDiv({
+      cls: "apple-ai-layout-mini-note",
+      text: "\u6A21\u578B\u914D\u7F6E\u5728\u63D2\u4EF6\u8BBE\u7F6E\u9875\u4E2D\u7EF4\u62A4\u3002\u7B2C\u4E00\u7248\u4EC5\u652F\u6301\u751F\u6210 / \u5E94\u7528 / \u91CD\u751F\u6210\u3002"
+    });
+    const settingsLink = footer.createEl("button", {
+      cls: "apple-ai-layout-link",
+      text: "\u6253\u5F00\u63D2\u4EF6\u8BBE\u7F6E"
+    });
+    settingsLink.addEventListener("click", () => {
+      this.closeTransientPanels();
+      if (!this.openPluginSettings()) {
+        new Notice("\u8BF7\u5728 Obsidian \u8BBE\u7F6E\u4E2D\u6253\u5F00\u5F53\u524D\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875");
+      }
+    });
+    this.refreshAiLayoutPanel();
+  }
+  toggleAiLayoutDebugMode(mode) {
+    this.aiLayoutDebugMode = this.aiLayoutDebugMode === mode ? "" : mode;
+    this.refreshAiLayoutPanel();
+  }
+  getCurrentLayoutContext() {
+    var _a, _b, _c, _d, _e;
+    const sourcePath = this.lastResolvedSourcePath || ((_d = (_c = (_b = (_a = this.app) == null ? void 0 : _a.workspace) == null ? void 0 : _b.getActiveFile) == null ? void 0 : _c.call(_b)) == null ? void 0 : _d.path) || "";
+    const markdown = this.lastResolvedMarkdown || "";
+    const sourceHash = markdown ? String(this.simpleHash(markdown)) : "";
+    return {
+      sourcePath,
+      markdown,
+      sourceHash,
+      title: ((_e = this.getPublishContextFile()) == null ? void 0 : _e.basename) || "\u672A\u547D\u540D\u6587\u7AE0"
+    };
+  }
+  getCurrentArticleLayoutState() {
+    var _a;
+    const { sourcePath } = this.getCurrentLayoutContext();
+    if (!sourcePath)
+      return null;
+    if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
+      return this.plugin.getArticleLayoutState(sourcePath);
+    }
+    return null;
+  }
+  getArticleLayoutProviderLabel(state, aiSettings) {
+    var _a;
+    if (!state)
+      return "";
+    const providerList = Array.isArray(aiSettings == null ? void 0 : aiSettings.providers) ? aiSettings.providers : [];
+    const matchedProvider = state.providerId ? providerList.find((item) => item.id === state.providerId) : null;
+    return ((_a = state.generationMeta) == null ? void 0 : _a.providerName) || (matchedProvider == null ? void 0 : matchedProvider.name) || "";
+  }
+  getArticleLayoutModelLabel(state, aiSettings) {
+    var _a;
+    if (!state)
+      return "";
+    const providerList = Array.isArray(aiSettings == null ? void 0 : aiSettings.providers) ? aiSettings.providers : [];
+    const matchedProvider = state.providerId ? providerList.find((item) => item.id === state.providerId) : null;
+    return ((_a = state.generationMeta) == null ? void 0 : _a.providerModel) || state.model || (matchedProvider == null ? void 0 : matchedProvider.model) || "";
+  }
+  getAiLayoutBlockLabel(block) {
+    return (block == null ? void 0 : block.title) || (block == null ? void 0 : block.caseLabel) || (block == null ? void 0 : block.text) || (block == null ? void 0 : block.caption) || (block == null ? void 0 : block.buttonText) || (block == null ? void 0 : block.type) || "\u672A\u547D\u540D\u533A\u5757";
+  }
+  renderAiLayoutMetaChips(chips = []) {
+    if (!this.aiLayoutMetaChips)
+      return;
+    this.aiLayoutMetaChips.empty();
+    chips.forEach((chip) => {
+      if (!chip)
+        return;
+      this.aiLayoutMetaChips.createEl("span", {
+        cls: "apple-ai-layout-meta-chip",
+        text: chip
+      });
+    });
+  }
+  refreshAiSchemaIssuePanel(schemaValidation = null) {
+    if (!this.aiSchemaIssuePanel)
+      return;
+    this.aiSchemaIssuePanel.empty();
+    const issues = Array.isArray(schemaValidation == null ? void 0 : schemaValidation.issues) ? schemaValidation.issues.filter(Boolean) : [];
+    if (!issues.length) {
+      this.aiSchemaIssuePanel.classList.remove("visible");
+      return;
+    }
+    this.aiSchemaIssuePanel.classList.add("visible");
+    this.aiSchemaIssuePanel.createDiv({
+      cls: "apple-ai-layout-issues-title",
+      text: (schemaValidation == null ? void 0 : schemaValidation.fatal) === true ? "Schema \u6821\u9A8C\u95EE\u9898" : "Schema \u63D0\u9192"
+    });
+    issues.slice(0, 5).forEach((issue) => {
+      const item = this.aiSchemaIssuePanel.createDiv({
+        cls: `apple-ai-layout-issue-item ${(issue == null ? void 0 : issue.fatal) === true ? "is-fatal" : ""}`
+      });
+      item.createEl("span", {
+        cls: "apple-ai-layout-issue-path",
+        text: (issue == null ? void 0 : issue.path) || "$"
+      });
+      item.createEl("span", {
+        cls: "apple-ai-layout-issue-message",
+        text: (issue == null ? void 0 : issue.message) || "\u672A\u77E5 schema \u95EE\u9898"
+      });
+    });
+    if (issues.length > 5) {
+      this.aiSchemaIssuePanel.createDiv({
+        cls: "apple-ai-layout-mini-note",
+        text: `\u5176\u4F59 ${issues.length - 5} \u9879\u8BF7\u5728\u201C\u9519\u8BEF\u8BE6\u60C5\u201D\u6216\u8C03\u8BD5\u5FEB\u7167\u4E2D\u67E5\u770B\u3002`
+      });
+    }
+  }
+  buildAiLayoutDebugJson(state) {
+    if (!state)
+      return "";
+    return JSON.stringify({
+      layoutJson: state.layoutJson || null,
+      generationMeta: state.generationMeta || null
+    }, null, 2);
+  }
+  buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }) {
+    return JSON.stringify({
+      status: (state == null ? void 0 : state.status) || "unknown",
+      lastError: (state == null ? void 0 : state.lastError) || "",
+      providerId: (state == null ? void 0 : state.providerId) || "",
+      providerName: providerLabel || "",
+      model: modelLabel || "",
+      stylePack: (state == null ? void 0 : state.stylePack) || "",
+      updatedAt: (state == null ? void 0 : state.updatedAt) ? new Date(state.updatedAt).toISOString() : "",
+      sourceHash: (state == null ? void 0 : state.sourceHash) || "",
+      isStale: isStale === true,
+      generationMeta: (state == null ? void 0 : state.generationMeta) || null
+    }, null, 2);
+  }
+  buildAiLayoutDebugSnapshot({ mode, state, providerLabel, modelLabel, isStale, sourcePath }) {
+    if (!state || !mode)
+      return "";
+    const header = [
+      `mode: ${mode}`,
+      `sourcePath: ${sourcePath || ""}`,
+      `provider: ${providerLabel || ""}`,
+      `model: ${modelLabel || ""}`,
+      `updatedAt: ${(state == null ? void 0 : state.updatedAt) ? new Date(state.updatedAt).toISOString() : ""}`,
+      ""
+    ].join("\n");
+    if (mode === "json") {
+      return `${header}${this.buildAiLayoutDebugJson(state)}`;
+    }
+    return `${header}${this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale })}`;
+  }
+  truncateAiPromptMarkdown(markdown, maxLength = 1600) {
+    const normalized = String(markdown || "").trim();
+    if (!normalized)
+      return "";
+    return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}\u2026` : normalized;
+  }
+  buildAiLayoutPromptContext({ state, context, providerLabel, modelLabel, isStale }) {
+    var _a, _b;
+    if (!(state == null ? void 0 : state.layoutJson))
+      return "";
+    const blockLines = Array.isArray(state.layoutJson.blocks) ? state.layoutJson.blocks.map((block, index) => {
+      var _a2, _b2, _c;
+      const origin = ((_c = (_b2 = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b2[index]) == null ? void 0 : _c.source) === "fallback" ? "\u8865\u5168" : "AI";
+      return `${index + 1}. [${origin}] ${block.type} - ${this.getAiLayoutBlockLabel(block)}`;
+    }).join("\n") : "- \u65E0\u533A\u5757";
+    const markdownExcerpt = this.truncateAiPromptMarkdown((context == null ? void 0 : context.markdown) || "");
+    const snapshot = this.aiLayoutDebugMode ? this.buildAiLayoutDebugSnapshot({
+      mode: this.aiLayoutDebugMode,
+      state,
+      providerLabel,
+      modelLabel,
+      isStale,
+      sourcePath: context == null ? void 0 : context.sourcePath
+    }) : this.buildAiLayoutDebugSnapshot({
+      mode: "json",
+      state,
+      providerLabel,
+      modelLabel,
+      isStale,
+      sourcePath: context == null ? void 0 : context.sourcePath
+    });
+    return [
+      "# \u516C\u4F17\u53F7 AI \u7F16\u6392\u8C03\u8BD5\u4E0A\u4E0B\u6587",
+      "",
+      "\u8BF7\u57FA\u4E8E\u4E0B\u9762\u7684\u4FE1\u606F\uFF0C\u5E2E\u6211\u5206\u6790\u5F53\u524D Obsidian \u5FAE\u4FE1\u516C\u4F17\u53F7 AI \u7F16\u6392\u7ED3\u679C\uFF0C\u5E76\u7ED9\u51FA\uFF1A",
+      "1. \u5F53\u524D block \u7EC4\u5408\u548C\u987A\u5E8F\u662F\u5426\u5408\u7406",
+      "2. \u54EA\u4E9B\u533A\u5757\u9002\u5408\u4FDD\u7559\u3001\u66FF\u6362\u6216\u91CD\u6392",
+      "3. \u5982\u679C\u5B58\u5728\u5931\u8D25\u6216 fallback \u4ECB\u5165\uFF0C\u6700\u53EF\u80FD\u7684\u539F\u56E0\u662F\u4EC0\u4E48",
+      "4. \u4E0B\u4E00\u6B65\u6700\u503C\u5F97\u8C03\u6574\u7684 prompt / schema / block \u7B56\u7565",
+      "",
+      "## \u6587\u7AE0\u4FE1\u606F",
+      `- \u6807\u9898\uFF1A${(context == null ? void 0 : context.title) || "\u672A\u547D\u540D\u6587\u7AE0"}`,
+      `- \u8DEF\u5F84\uFF1A${(context == null ? void 0 : context.sourcePath) || ""}`,
+      `- \u6E90\u54C8\u5E0C\uFF1A${(context == null ? void 0 : context.sourceHash) || ""}`,
+      `- AI \u72B6\u6001\uFF1A${state.status || "ready"}`,
+      `- \u5DF2\u8FC7\u671F\uFF1A${isStale ? "\u662F" : "\u5426"}`,
+      `- \u98CE\u683C\u5305\uFF1A${state.stylePack || ""}`,
+      `- Provider\uFF1A${providerLabel || ""}`,
+      `- Model\uFF1A${modelLabel || ""}`,
+      "",
+      "## \u5F53\u524D\u5E03\u5C40\u6458\u8981",
+      `- articleType: ${state.layoutJson.articleType || "article"}`,
+      `- blockCount: ${((_a = state.layoutJson.blocks) == null ? void 0 : _a.length) || 0}`,
+      blockLines,
+      "",
+      "## \u751F\u6210\u5143\u4FE1\u606F",
+      "```json",
+      JSON.stringify(state.generationMeta || null, null, 2),
+      "```",
+      "",
+      "## Schema \u95EE\u9898",
+      "```json",
+      JSON.stringify(((_b = state.generationMeta) == null ? void 0 : _b.schemaValidation) || null, null, 2),
+      "```",
+      "",
+      "## \u5F53\u524D\u8C03\u8BD5\u5FEB\u7167",
+      "```text",
+      snapshot,
+      "```",
+      "",
+      "## \u6587\u7AE0\u6B63\u6587\u6458\u5F55",
+      "```md",
+      markdownExcerpt || "(\u65E0\u53EF\u7528\u6B63\u6587)",
+      "```"
+    ].join("\n");
+  }
+  copyPlainTextBySelection(text) {
+    var _a;
+    if (typeof (document == null ? void 0 : document.execCommand) !== "function")
+      return false;
+    const selection = (_a = window.getSelection) == null ? void 0 : _a.call(window);
+    if (!selection)
+      return false;
+    const previousRanges = [];
+    for (let i = 0; i < selection.rangeCount; i += 1) {
+      previousRanges.push(selection.getRangeAt(i).cloneRange());
+    }
+    const activeElement = document.activeElement;
+    const tempEl = document.createElement("textarea");
+    tempEl.value = text;
+    tempEl.setAttribute("readonly", "readonly");
+    tempEl.style.position = "fixed";
+    tempEl.style.left = "-9999px";
+    tempEl.style.top = "0";
+    document.body.appendChild(tempEl);
+    tempEl.select();
+    let success = false;
+    try {
+      success = document.execCommand("copy");
+    } catch (error) {
+      success = false;
+    } finally {
+      tempEl.remove();
+      selection.removeAllRanges();
+      for (const prevRange of previousRanges) {
+        try {
+          selection.addRange(prevRange);
+        } catch (restoreError) {
+        }
+      }
+      if (activeElement && typeof activeElement.focus === "function") {
+        try {
+          activeElement.focus({ preventScroll: true });
+        } catch (focusError) {
+          activeElement.focus();
+        }
+      }
+    }
+    return success;
+  }
+  async copyPlainTextSnapshot(text) {
+    if (!text)
+      return false;
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return this.copyPlainTextBySelection(text);
+  }
+  async copyAiLayoutDebugSnapshot() {
+    const state = this.getCurrentArticleLayoutState();
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const context = this.getCurrentLayoutContext();
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const payload = this.buildAiLayoutDebugSnapshot({
+      mode: this.aiLayoutDebugMode,
+      state,
+      providerLabel,
+      modelLabel,
+      isStale,
+      sourcePath: context.sourcePath
+    });
+    if (!payload) {
+      new Notice("\u8BF7\u5148\u5C55\u5F00\u5E03\u5C40 JSON \u6216\u9519\u8BEF\u8BE6\u60C5\uFF0C\u518D\u590D\u5236\u8C03\u8BD5\u5FEB\u7167");
+      return;
+    }
+    try {
+      const copied = await this.copyPlainTextSnapshot(payload);
+      if (!copied)
+        throw new Error("clipboard unavailable");
+      new Notice("\u2705 \u8C03\u8BD5\u5FEB\u7167\u5DF2\u590D\u5236");
+    } catch (error) {
+      new Notice("\u274C \u8C03\u8BD5\u5FEB\u7167\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u526A\u8D34\u677F\u6743\u9650");
+    }
+  }
+  async copyAiLayoutPromptContext() {
+    const state = this.getCurrentArticleLayoutState();
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const context = this.getCurrentLayoutContext();
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const payload = this.buildAiLayoutPromptContext({
+      state,
+      context,
+      providerLabel,
+      modelLabel,
+      isStale
+    });
+    if (!payload) {
+      new Notice("\u5F53\u524D\u8FD8\u6CA1\u6709\u53EF\u7528\u7684 AI \u7F16\u6392\u7ED3\u679C\uFF0C\u6682\u65F6\u65E0\u6CD5\u751F\u6210 Prompt \u4E0A\u4E0B\u6587");
+      return;
+    }
+    try {
+      const copied = await this.copyPlainTextSnapshot(payload);
+      if (!copied)
+        throw new Error("clipboard unavailable");
+      new Notice("\u2705 Prompt \u4E0A\u4E0B\u6587\u5DF2\u590D\u5236");
+    } catch (error) {
+      new Notice("\u274C Prompt \u4E0A\u4E0B\u6587\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u526A\u8D34\u677F\u6743\u9650");
+    }
+  }
+  refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale }) {
+    if (!this.aiDebugPanel || !this.aiDebugPanelBody || !this.aiDebugPanelTitle)
+      return;
+    const canShowJson = !!(state == null ? void 0 : state.layoutJson);
+    const canShowError = !!((state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || (state == null ? void 0 : state.lastError));
+    if (this.aiViewJsonBtn) {
+      this.aiViewJsonBtn.disabled = !canShowJson;
+      this.aiViewJsonBtn.classList.toggle("is-active", this.aiLayoutDebugMode === "json");
+    }
+    if (this.aiViewErrorBtn) {
+      this.aiViewErrorBtn.disabled = !canShowError;
+      this.aiViewErrorBtn.classList.toggle("is-active", this.aiLayoutDebugMode === "error");
+    }
+    if (this.aiCopyDebugBtn) {
+      this.aiCopyDebugBtn.disabled = !this.aiLayoutDebugMode;
+    }
+    if (this.aiCopyPromptBtn) {
+      this.aiCopyPromptBtn.disabled = !(state == null ? void 0 : state.layoutJson);
+    }
+    if (this.aiLayoutDebugMode === "json" && !canShowJson || this.aiLayoutDebugMode === "error" && !canShowError) {
+      this.aiLayoutDebugMode = "";
+    }
+    if (!this.aiLayoutDebugMode) {
+      this.aiDebugPanel.classList.remove("visible");
+      this.aiDebugPanelTitle.setText("\u8C03\u8BD5\u8F93\u51FA");
+      this.aiDebugPanelBody.setText("");
+      if (this.aiCopyDebugBtn)
+        this.aiCopyDebugBtn.disabled = true;
+      return;
+    }
+    this.aiDebugPanel.classList.add("visible");
+    if (this.aiCopyDebugBtn)
+      this.aiCopyDebugBtn.disabled = false;
+    if (this.aiLayoutDebugMode === "json") {
+      this.aiDebugPanelTitle.setText("\u5E03\u5C40 JSON");
+      this.aiDebugPanelBody.setText(this.buildAiLayoutDebugJson(state));
+      return;
+    }
+    this.aiDebugPanelTitle.setText("\u9519\u8BEF\u8BE6\u60C5");
+    this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
+  }
+  refreshAiLayoutPanel() {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+    if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
+      return;
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const provider = resolveAiProvider(aiSettings);
+    const configuredProviders = Array.isArray(aiSettings.providers) ? aiSettings.providers.length : 0;
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    const generationMeta = (state == null ? void 0 : state.generationMeta) || null;
+    const schemaValidation = (state == null ? void 0 : state.lastAttemptStatus) === "schema-error" && ((_a = state == null ? void 0 : state.lastAttemptSchemaValidation) == null ? void 0 : _a.issueCount) ? state.lastAttemptSchemaValidation : (generationMeta == null ? void 0 : generationMeta.schemaValidation) || null;
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const aiFeatureEnabled = aiSettings.enabled === true;
+    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length));
+    const hasLastAttemptFailure = (state == null ? void 0 : state.lastAttemptStatus) === "error" || (state == null ? void 0 : state.lastAttemptStatus) === "schema-error";
+    const hasDoc = !!context.sourcePath;
+    const hasProvider = !!provider;
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const hasApplied = this.aiPreviewApplied === true && !!state && !isStale;
+    let badge = "\u672A\u751F\u6210";
+    let statusText = hasDoc ? "\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709 AI \u7F16\u6392\u7ED3\u679C\u3002" : "\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u3002";
+    if (!aiFeatureEnabled) {
+      badge = "\u5DF2\u5173\u95ED";
+      statusText = "AI \u7F16\u6392\u5DF2\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u5173\u95ED\u3002\u542F\u7528\u540E\u53EF\u5BF9\u5F53\u524D\u6587\u7AE0\u751F\u6210\u6392\u7248\u5EFA\u8BAE\u3002";
+    } else if (!hasProvider) {
+      badge = "\u5F85\u914D\u7F6E";
+      statusText = configuredProviders > 0 ? "\u5F53\u524D\u5DF2\u6709 AI Provider\uFF0C\u4F46\u6CA1\u6709\u53EF\u76F4\u63A5\u8FD0\u884C\u7684\u914D\u7F6E\u3002\u8BF7\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\uFF0C\u6216\u542F\u7528\u53EF\u7528 Provider\u3002" : "\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u53EF\u7528\u7684 AI Provider\u3002";
+    } else if ((state == null ? void 0 : state.status) === "schema-error") {
+      badge = "\u6821\u9A8C\u5931\u8D25";
+      statusText = (schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0 ? `AI \u8FD4\u56DE\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u5171\u53D1\u73B0 ${schemaValidation.issueCount} \u9879\u95EE\u9898\u3002` : "AI \u8FD4\u56DE\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u8BF7\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002";
+    } else if ((state == null ? void 0 : state.status) === "error") {
+      badge = "\u5931\u8D25";
+      statusText = state.lastError ? `\u4E0A\u6B21\u751F\u6210\u5931\u8D25\uFF1A${state.lastError}` : "\u4E0A\u6B21\u751F\u6210\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5 Provider \u914D\u7F6E\u540E\u91CD\u8BD5\u3002";
+    } else if (state && isStale) {
+      badge = "\u5DF2\u8FC7\u671F";
+      statusText = "\u6587\u7AE0\u5185\u5BB9\u5DF2\u53D8\u5316\uFF0C\u5EFA\u8BAE\u91CD\u65B0\u751F\u6210\u7F16\u6392\u3002";
+    } else if (hasReusableLayout && hasLastAttemptFailure) {
+      badge = "\u53EF\u56DE\u9000";
+      statusText = state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u91CD\u65B0\u751F\u6210\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u6210\u529F\u7ED3\u679C\u3002" : "\u6700\u8FD1\u4E00\u6B21\u91CD\u65B0\u751F\u6210\u5931\u8D25\uFF0C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u6210\u529F\u7ED3\u679C\u3002";
+    } else if (state) {
+      badge = hasApplied ? "\u5DF2\u5E94\u7528" : "\u5DF2\u751F\u6210";
+      if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
+        statusText = `\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u4F7F\u7528 ${modelLabel || provider.model}\uFF0C\u5E76\u8865\u5168\u4E86 ${generationMeta.fallbackBlockCount} \u4E2A\u533A\u5757\u3002`;
+      } else {
+        statusText = `\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u4F7F\u7528 ${modelLabel || provider.model}\uFF0C\u53EF\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\u3002`;
+      }
+    }
+    this.aiLayoutStatusBadge.setText(badge);
+    this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
+    this.aiLayoutStatusText.setText(statusText);
+    this.aiStylePackSelect.value = (state == null ? void 0 : state.stylePack) || aiSettings.defaultStylePack || "tech-green";
+    this.aiStylePackSelect.disabled = !aiFeatureEnabled;
+    this.aiIncludeImagesNote.setText(
+      aiSettings.includeImagesInLayout === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
+    );
+    if (!aiFeatureEnabled) {
+      this.aiLayoutSummary.setText("\u4F60\u53EF\u4EE5\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E Provider\uFF0C\u5E76\u542F\u7528 AI \u7F16\u6392\u540E\u518D\u56DE\u5230\u8FD9\u91CC\u64CD\u4F5C\u3002");
+      (_d = this.aiLayoutMetaNote) == null ? void 0 : _d.setText("AI \u8F93\u51FA\u53EA\u8D1F\u8D23\u7ED3\u6784\u5316\u7F16\u6392\uFF0C\u6700\u7EC8\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
+      this.renderAiLayoutMetaChips([]);
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (!hasDoc) {
+      this.aiLayoutSummary.setText("\u6253\u5F00\u6587\u7AE0\u540E\uFF0C\u53EF\u4EE5\u9488\u5BF9\u5F53\u524D\u6587\u6863\u751F\u6210\u4E13\u5C5E\u6392\u7248\u3002");
+      (_e = this.aiLayoutMetaNote) == null ? void 0 : _e.setText("\u7B2C\u4E00\u7248\u4F1A\u4F18\u5148\u751F\u6210\u6559\u7A0B/\u6848\u4F8B\u98CE\u683C\u7684\u533A\u5757\u987A\u5E8F\u3002");
+      this.renderAiLayoutMetaChips([]);
+      this.refreshAiSchemaIssuePanel(null);
+    } else if ((state == null ? void 0 : state.status) === "schema-error") {
+      this.aiLayoutSummary.setText(
+        (schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0 ? `\u672C\u6B21 AI \u8F93\u51FA\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF1A${schemaValidation.issueCount} \u9879\u3002` : "\u672C\u6B21 AI \u8F93\u51FA\u672A\u901A\u8FC7 schema \u6821\u9A8C\u3002"
+      );
+      const errorChips = [];
+      if (providerLabel)
+        errorChips.push(`Provider ${providerLabel}`);
+      if (modelLabel)
+        errorChips.push(`\u6A21\u578B ${modelLabel}`);
+      if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
+        errorChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
+      this.renderAiLayoutMetaChips(errorChips);
+      (_f = this.aiLayoutMetaNote) == null ? void 0 : _f.setText("\u8FD9\u901A\u5E38\u8868\u793A\u6A21\u578B\u8F93\u51FA\u5B57\u6BB5\u4E0D\u5408\u89C4\u3001block type \u4E0D\u652F\u6301\uFF0C\u6216\u9876\u5C42\u7ED3\u6784\u7F3A\u5931\u3002");
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
+      this.aiLayoutSummary.setText(`\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25\uFF1A${state.lastError}`);
+      const errorChips = [];
+      if (providerLabel)
+        errorChips.push(`Provider ${providerLabel}`);
+      if (modelLabel)
+        errorChips.push(`\u6A21\u578B ${modelLabel}`);
+      this.renderAiLayoutMetaChips(errorChips);
+      (_g = this.aiLayoutMetaNote) == null ? void 0 : _g.setText("\u4FEE\u6B63\u914D\u7F6E\u540E\u53EF\u4EE5\u76F4\u63A5\u91CD\u751F\u6210\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u666E\u901A\u9884\u89C8\u3002");
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    } else if (!state) {
+      this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u6559\u7A0B/\u6848\u4F8B\u98CE\u683C\u7684\u7248\u5F0F JSON\u3002`);
+      this.renderAiLayoutMetaChips([
+        aiSettings.includeImagesInLayout === false ? "\u4EC5\u6B63\u6587\u7ED3\u6784" : "\u4F18\u5148\u53C2\u8003\u56FE\u7247",
+        `\u98CE\u683C ${((_j = (_i = (_h = this.aiStylePackSelect) == null ? void 0 : _h.selectedOptions) == null ? void 0 : _i[0]) == null ? void 0 : _j.textContent) || "\u79D1\u6280\u7EFF"}`
+      ]);
+      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u751F\u6210\u540E\u4F1A\u5C55\u793A\u8FD9\u6B21\u8BC6\u522B\u5230\u7684\u7ED3\u6784\u3001\u7D20\u6750\u548C\u8865\u5168\u60C5\u51B5\u3002");
+      this.refreshAiSchemaIssuePanel(null);
+    } else {
+      const summaryBits = [
+        `\u6587\u7AE0\u7C7B\u578B\uFF1A${state.layoutJson.articleType || "article"}`,
+        `\u533A\u5757\u6570\uFF1A${((_l = state.layoutJson.blocks) == null ? void 0 : _l.length) || 0}`
+      ];
+      if (generationMeta == null ? void 0 : generationMeta.sectionCount) {
+        summaryBits.push(`\u7AE0\u8282\uFF1A${generationMeta.sectionCount}`);
+      } else if (generationMeta == null ? void 0 : generationMeta.headingCount) {
+        summaryBits.push(`\u6807\u9898\uFF1A${generationMeta.headingCount}`);
+      }
+      if ((generationMeta == null ? void 0 : generationMeta.imageCount) > 0) {
+        summaryBits.push(`\u56FE\u7247\uFF1A${generationMeta.imageCount}`);
+      }
+      this.aiLayoutSummary.setText(summaryBits.join(" \xB7 "));
+      const metaChips = [];
+      if (providerLabel)
+        metaChips.push(`Provider ${providerLabel}`);
+      if (modelLabel)
+        metaChips.push(`\u6A21\u578B ${modelLabel}`);
+      if (generationMeta == null ? void 0 : generationMeta.stylePackLabel)
+        metaChips.push(`\u98CE\u683C ${generationMeta.stylePackLabel}`);
+      if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
+        metaChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
+      if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
+        metaChips.push(`\u8865\u5168 ${generationMeta.fallbackBlockCount} \u5757`);
+      } else if (generationMeta == null ? void 0 : generationMeta.finalBlockCount) {
+        metaChips.push("\u7EAF AI \u8F93\u51FA");
+      }
+      if (hasLastAttemptFailure) {
+        metaChips.push(state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u6821\u9A8C\u5931\u8D25" : "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25");
+      }
+      this.renderAiLayoutMetaChips(metaChips);
+      const updateText = new Date(state.updatedAt).toLocaleString();
+      const baseNote = (generationMeta == null ? void 0 : generationMeta.fallbackUsed) ? `\u5DF2\u8BC6\u522B ${generationMeta.sectionCount || generationMeta.headingCount || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${generationMeta.imageCount || 0} \u5F20\uFF1B\u5176\u4E2D ${generationMeta.fallbackBlockCount} \u4E2A\u533A\u5757\u7531\u672C\u5730\u89C4\u5219\u8865\u5168\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002` : `\u5DF2\u8BC6\u522B ${(generationMeta == null ? void 0 : generationMeta.sectionCount) || (generationMeta == null ? void 0 : generationMeta.headingCount) || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${(generationMeta == null ? void 0 : generationMeta.imageCount) || 0} \u5F20\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002`;
+      if (hasLastAttemptFailure && state.lastAttemptError) {
+        const lastAttemptText = state.lastAttemptAt ? `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u4E8E ${new Date(state.lastAttemptAt).toLocaleString()} \u5931\u8D25\uFF1A${state.lastAttemptError}` : `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u5931\u8D25\uFF1A${state.lastAttemptError}`;
+        (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(`${baseNote} ${lastAttemptText}`);
+      } else {
+        (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(baseNote);
+      }
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    }
+    this.aiBlockList.empty();
+    if ((_p = (_o = state == null ? void 0 : state.layoutJson) == null ? void 0 : _o.blocks) == null ? void 0 : _p.length) {
+      state.layoutJson.blocks.forEach((block, index) => {
+        var _a2;
+        const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
+        const origin = ((_a2 = generationMeta == null ? void 0 : generationMeta.blockOrigins) == null ? void 0 : _a2[index]) || null;
+        item.createEl("span", { cls: "apple-ai-layout-block-index", text: String(index + 1).padStart(2, "0") });
+        const content = item.createDiv({ cls: "apple-ai-layout-block-main" });
+        content.createEl("span", {
+          cls: "apple-ai-layout-block-name",
+          text: this.getAiLayoutBlockLabel(block)
+        });
+        content.createEl("span", {
+          cls: "apple-ai-layout-block-type",
+          text: block.type
+        });
+        if (origin == null ? void 0 : origin.source) {
+          item.createEl("span", {
+            cls: `apple-ai-layout-block-origin ${origin.source === "fallback" ? "is-fallback" : "is-ai"}`,
+            text: origin.source === "fallback" ? "\u8865\u5168" : "AI"
+          });
+        }
+      });
+    } else {
+      this.aiBlockList.createDiv({
+        cls: "apple-ai-layout-empty",
+        text: aiFeatureEnabled ? "\u751F\u6210\u540E\u4F1A\u5C55\u793A\u533A\u5757\u6E05\u5355\u3002" : "\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u5C55\u793A\u5F53\u524D\u6587\u7AE0\u7684\u533A\u5757\u6E05\u5355\u3002"
+      });
+    }
+    this.aiGenerateBtn.disabled = !hasDoc || !hasProvider || !aiFeatureEnabled;
+    this.aiApplyBtn.disabled = !state || isStale || (state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || !aiFeatureEnabled;
+    this.aiResetBtn.disabled = !this.aiPreviewApplied;
+    this.aiPanelHint.setText(
+      aiFeatureEnabled ? "\u6A21\u578B\u914D\u7F6E\u5728\u63D2\u4EF6\u8BBE\u7F6E\u9875\u4E2D\u7EF4\u62A4\u3002\u7B2C\u4E00\u7248\u4EC5\u652F\u6301\u751F\u6210 / \u5E94\u7528 / \u91CD\u751F\u6210\u3002" : "\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u91CC\u5F00\u542F AI \u7F16\u6392\uFF0C\u518D\u56DE\u5230\u8FD9\u91CC\u4E3A\u5F53\u524D\u6587\u7AE0\u751F\u6210\u6392\u7248\u5EFA\u8BAE\u3002"
+    );
+    this.refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale });
+    this.updateAiToolbarState();
+  }
+  async ensureCurrentArticleContext() {
+    var _a;
+    const source = await resolveMarkdownSource({
+      app: this.app,
+      lastActiveFile: this.lastActiveFile,
+      MarkdownViewType: MarkdownView
+    });
+    if (!source.ok || !String(source.markdown || "").trim()) {
+      return null;
+    }
+    const markdown = source.markdown || "";
+    const sourcePath = source.sourcePath || "";
+    this.lastResolvedMarkdown = markdown;
+    this.lastResolvedSourcePath = sourcePath;
+    this.lastResolvedSourceHash = String(this.simpleHash(markdown));
+    return {
+      markdown,
+      sourcePath,
+      sourceHash: this.lastResolvedSourceHash,
+      title: ((_a = this.getPublishContextFile()) == null ? void 0 : _a.basename) || "\u672A\u547D\u540D\u6587\u7AE0"
+    };
+  }
+  async generateAiLayoutForCurrentArticle() {
+    var _a, _b, _c, _d, _e;
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const provider = resolveAiProvider(aiSettings);
+    if (!provider) {
+      new Notice("\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u5E76\u542F\u7528 AI Provider");
+      return;
+    }
+    const context = await this.ensureCurrentArticleContext();
+    if (!context) {
+      new Notice("\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6709\u5185\u5BB9\u7684 Markdown \u6587\u7AE0");
+      return;
+    }
+    if (!this.baseRenderedHtml) {
+      await this.convertCurrent(true, { showLoading: true, loadingText: "\u6B63\u5728\u51C6\u5907\u6587\u7AE0\u4E0A\u4E0B\u6587..." });
+    }
+    const imageRefs = aiSettings.includeImagesInLayout === false ? [] : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+    const stylePack = ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || aiSettings.defaultStylePack || "tech-green";
+    const originalText = (_b = this.aiGenerateBtn) == null ? void 0 : _b.textContent;
+    try {
+      if (this.aiGenerateBtn) {
+        this.aiGenerateBtn.disabled = true;
+        this.aiGenerateBtn.setText("\u751F\u6210\u4E2D...");
+      }
+      const result = await generateArticleLayout({
+        provider,
+        title: context.title,
+        markdown: context.markdown,
+        stylePack,
+        imageRefs,
+        timeoutMs: aiSettings.requestTimeoutMs
+      });
+      const layoutJson = result.layoutJson;
+      await this.plugin.saveArticleLayoutState(context.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: Date.now(),
+        sourceHash: context.sourceHash,
+        providerId: provider.id,
+        model: provider.model,
+        stylePack: layoutJson.stylePack,
+        status: "ready",
+        lastError: "",
+        lastAttemptStatus: "success",
+        lastAttemptError: "",
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: null,
+        generationMeta: result.generationMeta,
+        layoutJson
+      });
+      new Notice("\u2705 AI \u7F16\u6392\u5DF2\u751F\u6210\uFF0C\u53EF\u5E94\u7528\u5230\u9884\u89C8\u67E5\u770B\u6548\u679C");
+    } catch (error) {
+      console.error("AI \u7F16\u6392\u751F\u6210\u5931\u8D25:", error);
+      const previousState = this.getCurrentArticleLayoutState();
+      const isSchemaError = (error == null ? void 0 : error.code) === "ai-layout-schema-invalid";
+      const hasReusablePreviousLayout = !!((previousState == null ? void 0 : previousState.status) === "ready" && ((_d = (_c = previousState == null ? void 0 : previousState.layoutJson) == null ? void 0 : _c.blocks) == null ? void 0 : _d.length));
+      await this.plugin.saveArticleLayoutState(context.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: hasReusablePreviousLayout ? previousState.updatedAt : Date.now(),
+        sourceHash: hasReusablePreviousLayout ? previousState.sourceHash : context.sourceHash,
+        providerId: provider.id,
+        model: provider.model,
+        stylePack: hasReusablePreviousLayout ? previousState.stylePack : stylePack,
+        status: hasReusablePreviousLayout ? previousState.status : isSchemaError ? "schema-error" : "error",
+        lastError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
+        lastAttemptStatus: isSchemaError ? "schema-error" : "error",
+        lastAttemptError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: (error == null ? void 0 : error.schemaValidation) || ((_e = error == null ? void 0 : error.generationMeta) == null ? void 0 : _e.schemaValidation) || null,
+        generationMeta: hasReusablePreviousLayout ? previousState.generationMeta : (error == null ? void 0 : error.generationMeta) || (previousState == null ? void 0 : previousState.generationMeta) || null,
+        layoutJson: hasReusablePreviousLayout ? previousState.layoutJson : (previousState == null ? void 0 : previousState.layoutJson) || {
+          version: AI_LAYOUT_SCHEMA_VERSION,
+          articleType: "article",
+          stylePack,
+          title: context.title,
+          summary: "",
+          blocks: []
+        }
+      });
+      new Notice(
+        isSchemaError ? `\u274C AI \u7F16\u6392\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF1A${error.message}` : `\u274C AI \u7F16\u6392\u5931\u8D25\uFF1A${error.message}`
+      );
+    } finally {
+      if (this.aiGenerateBtn) {
+        this.aiGenerateBtn.disabled = false;
+        this.aiGenerateBtn.setText(originalText || "\u751F\u6210\u7F16\u6392");
+      }
+      this.refreshAiLayoutPanel();
+    }
+  }
+  applyAiLayoutToPreview() {
+    var _a, _b, _c;
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    if (!state || !((_b = (_a = state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
+      new Notice("\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709\u53EF\u7528\u7684 AI \u7F16\u6392\u7ED3\u679C");
+      return;
+    }
+    if (context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+      new Notice("\u5F53\u524D\u6587\u7AE0\u5185\u5BB9\u5DF2\u53D8\u5316\uFF0C\u8BF7\u5148\u91CD\u65B0\u751F\u6210 AI \u7F16\u6392");
+      this.refreshAiLayoutPanel();
+      return;
+    }
+    const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+    const html = renderArticleLayoutHtml(state.layoutJson, { imageRefs });
+    const scrollTop = ((_c = this.previewContainer) == null ? void 0 : _c.scrollTop) || 0;
+    this.currentHtml = html;
+    this.aiPreviewApplied = true;
+    if (this.previewContainer) {
+      this.previewContainer.innerHTML = html;
+      this.previewContainer.scrollTop = scrollTop;
+      this.previewContainer.addClass("apple-has-content");
+    }
+    this.refreshAiLayoutPanel();
+  }
+  restoreBasePreview() {
+    if (!this.baseRenderedHtml || !this.previewContainer)
+      return;
+    const scrollTop = this.previewContainer.scrollTop;
+    this.currentHtml = this.baseRenderedHtml;
+    this.aiPreviewApplied = false;
+    this.previewContainer.innerHTML = this.baseRenderedHtml;
+    this.previewContainer.scrollTop = scrollTop;
+    this.previewContainer.addClass("apple-has-content");
+    this.refreshAiLayoutPanel();
   }
   openPluginSettings() {
     var _a, _b, _c;
@@ -5952,6 +7962,7 @@ var AppleStyleView = class extends ItemView {
    * 转换当前文档
    */
   async convertCurrent(silent = false, options = {}) {
+    var _a, _b, _c;
     const {
       showLoading = false,
       loadingText = "\u6B63\u5728\u6E32\u67D3\u9884\u89C8...",
@@ -5988,6 +7999,7 @@ var AppleStyleView = class extends ItemView {
       if (markdown.trim()) {
         this.lastResolvedMarkdown = markdown;
         this.lastResolvedSourcePath = sourcePath;
+        this.lastResolvedSourceHash = String(this.simpleHash(markdown));
       }
     } else if (this.lastResolvedMarkdown.trim()) {
       markdown = this.lastResolvedMarkdown;
@@ -6022,6 +8034,7 @@ var AppleStyleView = class extends ItemView {
       const html = await this.renderMarkdownForPreview(markdown, sourcePath);
       if (generation !== this.renderGeneration)
         return;
+      this.baseRenderedHtml = html;
       this.currentHtml = html;
       this.lastRenderError = "";
       this.lastRenderFailureNoticeKey = "";
@@ -6031,6 +8044,14 @@ var AppleStyleView = class extends ItemView {
       this.previewContainer.scrollTop = scrollTop;
       this.previewContainer.addClass("apple-has-content");
       this.updateCurrentDoc();
+      const layoutState = sourcePath && typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function" ? this.plugin.getArticleLayoutState(sourcePath) : null;
+      const canReuseAiLayout = !!(this.aiPreviewApplied && ((_c = (_b = layoutState == null ? void 0 : layoutState.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length) && this.lastResolvedSourceHash && layoutState.sourceHash === this.lastResolvedSourceHash);
+      if (canReuseAiLayout) {
+        this.applyAiLayoutToPreview();
+      } else if (this.aiPreviewApplied) {
+        this.aiPreviewApplied = false;
+      }
+      this.refreshAiLayoutPanel();
       if (!silent)
         new Notice("\u2705 \u8F6C\u6362\u6210\u529F\uFF01");
     } catch (error) {
@@ -6038,9 +8059,12 @@ var AppleStyleView = class extends ItemView {
       if (generation !== this.renderGeneration)
         return;
       this.currentHtml = null;
+      this.baseRenderedHtml = null;
+      this.aiPreviewApplied = false;
       this.lastRenderError = (error == null ? void 0 : error.message) || "\u672A\u77E5\u6E32\u67D3\u9519\u8BEF";
       this.showRenderFailurePlaceholder(this.lastRenderError);
       this.updateCurrentDoc();
+      this.refreshAiLayoutPanel();
       const noticeKey = `${sourcePath || ""}:${this.lastRenderError}`;
       if (!silent || this.lastRenderFailureNoticeKey !== noticeKey) {
         new Notice("\u274C \u8F6C\u6362\u5931\u8D25: " + this.lastRenderError);
@@ -6311,6 +8335,9 @@ var AppleStyleView = class extends ItemView {
       this.previewContainer.removeEventListener("scroll", this.previewScrollListener);
     }
     (_a = this.previewContainer) == null ? void 0 : _a.empty();
+    this.closeTransientPanels();
+    this.aiLayoutBtn = null;
+    this.settingsBtn = null;
     if (this.articleStates) {
       this.articleStates.clear();
     }
@@ -6344,6 +8371,13 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
   isAbsolutePathLike(vaultPath) {
     return isAbsolutePathLike(vaultPath);
   }
+  refreshOpenConverterAiState() {
+    var _a, _b;
+    const view = (_b = (_a = this.plugin).getConverterView) == null ? void 0 : _b.call(_a);
+    if (view && typeof view.refreshAiLayoutPanel === "function") {
+      view.refreshAiLayoutPanel();
+    }
+  }
   display() {
     const { containerEl } = this;
     containerEl.empty();
@@ -6354,6 +8388,149 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       await this.plugin.saveSettings();
       new Notice("\u8BBE\u7F6E\u5DF2\u4FDD\u5B58\uFF0C\u8BF7\u5173\u95ED\u5E76\u91CD\u65B0\u6253\u5F00\u8F6C\u6362\u5668\u9762\u677F\u4EE5\u751F\u6548");
     }));
+    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u914D\u7F6E\u6A21\u578B\u4E0E\u9ED8\u8BA4\u884C\u4E3A\u3002\u5177\u4F53\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
+    new Setting(containerEl).setName("\u5185\u7F6E\u534F\u8BAE\u7248\u672C").setDesc(`\u5F53\u524D\u5185\u7F6E layout skill v${AI_LAYOUT_SKILL_VERSION}\uFF0Cschema v${AI_LAYOUT_SCHEMA_VERSION}\u3002`);
+    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7F13\u5B58\u7684\u6587\u7AE0\u5E03\u5C40\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
+      this.plugin.settings.ai.enabled = value;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    const stylePackOptions = getStylePackList();
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u98CE\u683C\u5305").setDesc("\u7528\u4E8E AI \u7F16\u6392\u65F6\u7684\u9ED8\u8BA4\u7248\u5F0F\u98CE\u683C\u3002").addDropdown((dropdown) => {
+      stylePackOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(this.plugin.settings.ai.defaultStylePack || "tech-green");
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultStylePack = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    new Setting(containerEl).setName("\u7F16\u6392\u65F6\u53C2\u8003\u56FE\u7247").setDesc("\u5F00\u542F\u540E\uFF0CAI \u4F1A\u4F18\u5148\u4F7F\u7528\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u4F5C\u4E3A\u6392\u7248\u7D20\u6750\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.includeImagesInLayout !== false).onChange(async (value) => {
+      this.plugin.settings.ai.includeImagesInLayout = value;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    new Setting(containerEl).setName("AI \u8BF7\u6C42\u8D85\u65F6\uFF08\u79D2\uFF09").setDesc("\u5EFA\u8BAE\u5728 15 \u5230 60 \u79D2\u4E4B\u95F4\u3002").addText((text) => text.setPlaceholder("45").setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45e3) / 1e3))).onChange(async (value) => {
+      const seconds = Math.min(180, Math.max(5, parseInt(value || "45", 10) || 45));
+      this.plugin.settings.ai.requestTimeoutMs = seconds * 1e3;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    const providers = this.plugin.settings.ai.providers || [];
+    const defaultProviderId = this.plugin.settings.ai.defaultProviderId;
+    const runnableProviders = providers.filter((provider) => isAiProviderRunnable(provider) && provider.enabled !== false);
+    new Setting(containerEl).setName("\u9ED8\u8BA4 AI Provider").setDesc(runnableProviders.length > 0 ? "\u5F53\u524D AI \u7F16\u6392\u4F1A\u4F18\u5148\u4F7F\u7528\u8FD9\u91CC\u9009\u4E2D\u7684 Provider\u3002" : "\u8FD8\u6CA1\u6709\u53EF\u76F4\u63A5\u7528\u4E8E AI \u7F16\u6392\u7684 Provider\uFF0C\u8BF7\u5148\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\u3002").addDropdown((dropdown) => {
+      dropdown.addOption("", "\u81EA\u52A8\u9009\u62E9");
+      providers.forEach((provider) => {
+        const statusText = summarizeAiProviderIssues(provider);
+        dropdown.addOption(provider.id, `${provider.name} (${statusText})`);
+      });
+      dropdown.setValue(defaultProviderId || "");
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultProviderId = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    if (providers.length === 0) {
+      containerEl.createEl("p", {
+        text: "\u6682\u65E0 AI Provider\uFF0C\u8BF7\u70B9\u51FB\u4E0B\u65B9\u6309\u94AE\u6DFB\u52A0",
+        cls: "setting-item-description",
+        attr: { style: "color: var(--text-muted); font-style: italic;" }
+      });
+    } else {
+      const providerList = containerEl.createDiv({ cls: "wechat-account-list" });
+      for (const provider of providers) {
+        const isDefault = provider.id === defaultProviderId;
+        const providerIssues = getAiProviderIssues(provider);
+        const isRunnable = isAiProviderRunnable(provider) && provider.enabled !== false;
+        const providerCard = providerList.createDiv({ cls: "wechat-account-card" });
+        const info = providerCard.createDiv({ cls: "wechat-account-info" });
+        const nameRow = info.createDiv({ cls: "wechat-account-name-row" });
+        nameRow.createEl("span", { text: provider.name, cls: "wechat-account-name" });
+        if (isDefault) {
+          nameRow.createEl("span", { text: "\u9ED8\u8BA4", cls: "wechat-account-badge" });
+        }
+        if (provider.enabled === false) {
+          nameRow.createEl("span", { text: "\u5DF2\u505C\u7528", cls: "wechat-account-badge", attr: { style: "background: var(--text-faint);" } });
+        } else if (isRunnable) {
+          nameRow.createEl("span", { text: "\u53EF\u7528", cls: "wechat-account-badge", attr: { style: "background: #0f8f64;" } });
+        } else {
+          nameRow.createEl("span", { text: "\u5F85\u8865\u5168", cls: "wechat-account-badge", attr: { style: "background: #d97706;" } });
+        }
+        info.createDiv({
+          text: `${provider.kind} \xB7 ${provider.model || "\u672A\u8BBE\u7F6E\u6A21\u578B"}`,
+          cls: "wechat-account-appid"
+        });
+        info.createDiv({
+          text: summarizeAiProviderIssues(provider),
+          cls: "wechat-account-appid"
+        });
+        const actions = providerCard.createDiv({ cls: "wechat-account-actions" });
+        if (!isDefault) {
+          const defaultBtn = actions.createEl("button", { text: "\u8BBE\u4E3A\u9ED8\u8BA4", cls: "wechat-btn-small" });
+          defaultBtn.onclick = async () => {
+            this.plugin.settings.ai.defaultProviderId = provider.id;
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          };
+        }
+        const editBtn = actions.createEl("button", { text: "\u7F16\u8F91", cls: "wechat-btn-small" });
+        editBtn.onclick = () => this.showEditAiProviderModal(provider);
+        const testBtn = actions.createEl("button", { text: "\u6D4B\u8BD5", cls: "wechat-btn-small wechat-btn-test" });
+        if (!isRunnable) {
+          testBtn.disabled = true;
+          testBtn.title = providerIssues.includes("disabled") ? "\u8BF7\u5148\u542F\u7528\u8BE5 Provider" : `\u5F53\u524D\u65E0\u6CD5\u6D4B\u8BD5\uFF1A${summarizeAiProviderIssues(provider)}`;
+        }
+        testBtn.onclick = async () => {
+          if (!isRunnable)
+            return;
+          testBtn.disabled = true;
+          testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
+          try {
+            await testAiProviderConnection(provider);
+            new Notice(`\u2705 ${provider.name} \u8FDE\u63A5\u6210\u529F\uFF01`);
+          } catch (error) {
+            new Notice(`\u274C ${provider.name} \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
+          }
+          testBtn.disabled = false;
+          testBtn.textContent = "\u6D4B\u8BD5";
+        };
+        const deleteBtn = actions.createEl("button", { text: "\u5220\u9664", cls: "wechat-btn-small wechat-btn-danger" });
+        deleteBtn.onclick = async () => {
+          if (confirm(`\u786E\u5B9A\u8981\u5220\u9664 AI Provider "${provider.name}" \u5417\uFF1F`)) {
+            this.plugin.settings.ai.providers = providers.filter((item) => item.id !== provider.id);
+            if (provider.id === defaultProviderId) {
+              const nextRunnableProvider = this.plugin.settings.ai.providers.find((item) => item.enabled !== false && isAiProviderRunnable(item));
+              this.plugin.settings.ai.defaultProviderId = (nextRunnableProvider == null ? void 0 : nextRunnableProvider.id) || "";
+            }
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          }
+        };
+      }
+    }
+    const addProviderContainer = containerEl.createDiv({ cls: "wechat-add-account-container" });
+    const addProviderBtn = addProviderContainer.createEl("button", {
+      text: "+ \u6DFB\u52A0 AI Provider",
+      cls: "wechat-btn-add"
+    });
+    addProviderBtn.onclick = () => this.showEditAiProviderModal(null);
+    const cachedLayoutCount = Object.keys(this.plugin.settings.ai.articleLayoutsByPath || {}).length;
+    const cacheSetting = new Setting(containerEl).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedLayoutCount} \u7BC7\u6587\u7AE0\u7684\u7F16\u6392\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684\u6587\u7AE0\u7F16\u6392\u7ED3\u679C\u3002");
+    if (cachedLayoutCount > 0) {
+      cacheSetting.addButton((button) => button.setButtonText("\u6E05\u7A7A\u7F13\u5B58").setWarning().onClick(async () => {
+        if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedLayoutCount} \u7BC7\u6587\u7AE0\u7684 AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
+          return;
+        this.plugin.settings.ai.articleLayoutsByPath = {};
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+        new Notice("\u5DF2\u6E05\u7A7A AI \u7F16\u6392\u7F13\u5B58");
+        this.display();
+      }));
+    }
     new Setting(containerEl).setName("\u56FE\u7247\u6C34\u5370").setHeading();
     new Setting(containerEl).setName("\u542F\u7528\u56FE\u7247\u6C34\u5370").setDesc("\u5728\u6BCF\u5F20\u56FE\u7247\u4E0A\u65B9\u663E\u793A\u5934\u50CF\uFF08\u9700\u91CD\u542F\u63D2\u4EF6\u9762\u677F\u751F\u6548\uFF09").addToggle((toggle) => toggle.setValue(this.plugin.settings.enableWatermark).onChange(async (value) => {
       this.plugin.settings.enableWatermark = value;
@@ -6533,6 +8710,129 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
   /**
    * 显示添加/编辑账号的模态框
    */
+  showEditAiProviderModal(provider) {
+    const { Modal } = require("obsidian");
+    const modal = new Modal(this.app);
+    modal.titleEl.setText(provider ? "\u7F16\u8F91 AI Provider" : "\u6DFB\u52A0 AI Provider");
+    const form = modal.contentEl.createDiv();
+    const nameGroup = form.createDiv({ cls: "wechat-form-group" });
+    nameGroup.createEl("label", { text: "\u540D\u79F0" });
+    const nameInput = nameGroup.createEl("input", {
+      type: "text",
+      placeholder: "\u4F8B\u5982\uFF1AOpenAI / OpenRouter / \u81EA\u5EFA\u7F51\u5173",
+      value: (provider == null ? void 0 : provider.name) || ""
+    });
+    const kindGroup = form.createDiv({ cls: "wechat-form-group" });
+    kindGroup.createEl("label", { text: "\u7C7B\u578B" });
+    const kindSelect = kindGroup.createEl("select");
+    const providerKinds = [
+      { value: AI_PROVIDER_KINDS.OPENAI_COMPATIBLE, label: "OpenAI \u517C\u5BB9\u63A5\u53E3" }
+    ];
+    providerKinds.forEach((kind) => {
+      const option = kindSelect.createEl("option", { value: kind.value, text: kind.label });
+      if (((provider == null ? void 0 : provider.kind) || AI_PROVIDER_KINDS.OPENAI_COMPATIBLE) === kind.value) {
+        option.selected = true;
+      }
+    });
+    const baseUrlGroup = form.createDiv({ cls: "wechat-form-group" });
+    baseUrlGroup.createEl("label", { text: "Base URL" });
+    const baseUrlInput = baseUrlGroup.createEl("input", {
+      type: "text",
+      placeholder: "https://api.openai.com/v1",
+      value: (provider == null ? void 0 : provider.baseUrl) || "https://api.openai.com/v1"
+    });
+    const apiKeyGroup = form.createDiv({ cls: "wechat-form-group" });
+    apiKeyGroup.createEl("label", { text: "API Key" });
+    const apiKeyInput = apiKeyGroup.createEl("input", {
+      type: "password",
+      placeholder: "sk-...",
+      value: (provider == null ? void 0 : provider.apiKey) || ""
+    });
+    const modelGroup = form.createDiv({ cls: "wechat-form-group" });
+    modelGroup.createEl("label", { text: "\u6A21\u578B" });
+    const modelInput = modelGroup.createEl("input", {
+      type: "text",
+      placeholder: "gpt-4.1-mini",
+      value: (provider == null ? void 0 : provider.model) || "gpt-4.1-mini"
+    });
+    const enabledGroup = form.createDiv({ cls: "wechat-form-group" });
+    enabledGroup.createEl("label", { text: "\u72B6\u6001" });
+    const enabledWrap = enabledGroup.createDiv({ attr: { style: "display:flex;align-items:center;gap:10px;" } });
+    const enabledToggle = enabledWrap.createEl("input", {
+      type: "checkbox",
+      checked: (provider == null ? void 0 : provider.enabled) !== false ? true : void 0
+    });
+    enabledToggle.checked = (provider == null ? void 0 : provider.enabled) !== false;
+    enabledWrap.createEl("span", { text: "\u542F\u7528\u8BE5 Provider" });
+    const btnRow = form.createDiv({ cls: "wechat-modal-buttons" });
+    const cancelBtn = btnRow.createEl("button", { text: "\u53D6\u6D88" });
+    cancelBtn.onclick = () => modal.close();
+    const testBtn = btnRow.createEl("button", { text: "\u6D4B\u8BD5\u8FDE\u63A5", cls: "wechat-btn-test" });
+    testBtn.onclick = async () => {
+      const candidate = normalizeAiProvider({
+        id: provider == null ? void 0 : provider.id,
+        name: nameInput.value.trim() || "\u672A\u547D\u540D Provider",
+        kind: kindSelect.value,
+        baseUrl: baseUrlInput.value.trim(),
+        apiKey: apiKeyInput.value.trim(),
+        model: modelInput.value.trim(),
+        enabled: enabledToggle.checked
+      });
+      const issueSummary = summarizeAiProviderIssues(candidate);
+      if (!isAiProviderRunnable(candidate)) {
+        new Notice(`\u8BF7\u5148\u8865\u5168 Provider \u914D\u7F6E\uFF1A${issueSummary}`);
+        return;
+      }
+      testBtn.disabled = true;
+      testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
+      try {
+        await testAiProviderConnection(candidate);
+        new Notice("\u2705 AI Provider \u8FDE\u63A5\u6210\u529F\uFF01");
+      } catch (error) {
+        new Notice(`\u274C \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
+      }
+      testBtn.disabled = false;
+      testBtn.textContent = "\u6D4B\u8BD5\u8FDE\u63A5";
+    };
+    const saveBtn = btnRow.createEl("button", { text: "\u4FDD\u5B58", cls: "mod-cta" });
+    saveBtn.onclick = async () => {
+      const nextProvider = normalizeAiProvider({
+        id: provider == null ? void 0 : provider.id,
+        name: nameInput.value.trim() || "\u672A\u547D\u540D Provider",
+        kind: kindSelect.value,
+        baseUrl: baseUrlInput.value.trim(),
+        apiKey: apiKeyInput.value.trim(),
+        model: modelInput.value.trim(),
+        enabled: enabledToggle.checked
+      });
+      const issues = getAiProviderIssues(nextProvider).filter((issue) => issue !== "disabled");
+      if (issues.length > 0) {
+        new Notice(`\u8BF7\u8865\u5168 Provider \u914D\u7F6E\uFF1A${summarizeAiProviderIssues(nextProvider)}`);
+        return;
+      }
+      const providers = this.plugin.settings.ai.providers || [];
+      if (provider) {
+        this.plugin.settings.ai.providers = providers.map((item) => item.id === provider.id ? nextProvider : item);
+      } else {
+        this.plugin.settings.ai.providers.push(nextProvider);
+        if (!this.plugin.settings.ai.defaultProviderId) {
+          this.plugin.settings.ai.defaultProviderId = nextProvider.id;
+        }
+      }
+      if (!this.plugin.settings.ai.defaultProviderId && nextProvider.enabled !== false && isAiProviderRunnable(nextProvider)) {
+        this.plugin.settings.ai.defaultProviderId = nextProvider.id;
+      }
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+      modal.close();
+      this.display();
+      new Notice(provider ? "\u2705 AI Provider \u5DF2\u66F4\u65B0" : "\u2705 AI Provider \u5DF2\u6DFB\u52A0");
+    };
+    modal.open();
+  }
+  /**
+   * 显示添加/编辑账号的模态框
+   */
   showEditAccountModal(account) {
     const { Modal } = require("obsidian");
     const modal = new Modal(this.app);
@@ -6701,6 +9001,14 @@ var AppleStylePlugin = class extends Plugin {
     const loadedData = await this.loadData() || {};
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
     let didMigrate = false;
+    const rawAiSettings = loadedData.ai;
+    this.settings.ai = normalizeAiSettings(rawAiSettings || this.settings.ai || {});
+    if (rawAiSettings !== void 0) {
+      const normalizedRawAi = normalizeAiSettings(rawAiSettings);
+      if (JSON.stringify(normalizedRawAi) !== JSON.stringify(rawAiSettings)) {
+        didMigrate = true;
+      }
+    }
     if (this.settings.wechatAppId && this.settings.wechatAccounts.length === 0) {
       const migratedAccount = {
         id: generateId(),
@@ -6751,6 +9059,30 @@ var AppleStylePlugin = class extends Plugin {
     if (didMigrate) {
       await this.saveSettings();
     }
+  }
+  getArticleLayoutState(sourcePath = "") {
+    var _a, _b, _c;
+    const normalizedPath = normalizeVaultPath(sourcePath || "");
+    if (!normalizedPath)
+      return null;
+    return ((_c = (_b = (_a = this.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.articleLayoutsByPath) == null ? void 0 : _c[normalizedPath]) || null;
+  }
+  async saveArticleLayoutState(sourcePath = "", nextState = null) {
+    const normalizedPath = normalizeVaultPath(sourcePath || "");
+    if (!normalizedPath)
+      return false;
+    if (!this.settings.ai) {
+      this.settings.ai = createDefaultAiSettings();
+    }
+    if (!this.settings.ai.articleLayoutsByPath || typeof this.settings.ai.articleLayoutsByPath !== "object") {
+      this.settings.ai.articleLayoutsByPath = {};
+    }
+    if (!nextState) {
+      delete this.settings.ai.articleLayoutsByPath[normalizedPath];
+    } else {
+      this.settings.ai.articleLayoutsByPath[normalizedPath] = nextState;
+    }
+    return this.saveSettings();
   }
   async saveSettings() {
     try {

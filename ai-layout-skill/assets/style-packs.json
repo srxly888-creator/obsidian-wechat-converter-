@@ -1,0 +1,10 @@
+{
+  "stylePacks": [
+    {
+      "id": "tech-green",
+      "label": "科技绿",
+      "description": "信息卡与案例教程风格，适合产品介绍、操作指南和案例拆解。",
+      "recommendedFor": ["tutorial", "case-study", "product-intro"]
+    }
+  ]
+}
