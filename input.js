@@ -3802,16 +3802,16 @@ class AppleStyleSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('AI 编排')
-      .setDesc('配置模型与默认行为。具体生成与应用入口在转换器顶部工具栏的「AI 编排」按钮中。')
+      .setDesc('管理模型、默认风格和缓存策略。实际生成与应用入口在转换器顶部工具栏的「AI 编排」按钮中。')
       .setHeading();
 
     new Setting(containerEl)
       .setName('内置协议版本')
-      .setDesc(`当前内置 layout skill v${AI_LAYOUT_SKILL_VERSION}，schema v${AI_LAYOUT_SCHEMA_VERSION}。`);
+      .setDesc(`当前内置排版协议为 skill v${AI_LAYOUT_SKILL_VERSION}、schema v${AI_LAYOUT_SCHEMA_VERSION}，用于约束 AI 输出结构。`);
 
     new Setting(containerEl)
       .setName('启用 AI 编排')
-      .setDesc('关闭后会隐藏 AI 编排入口，但不会删除已缓存的文章布局结果。')
+      .setDesc('关闭后会隐藏 AI 编排入口，但不会删除已经为文章和风格包生成过的缓存结果。')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.ai.enabled === true)
         .onChange(async (value) => {
@@ -3823,7 +3823,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
     const stylePackOptions = getStylePackList();
     new Setting(containerEl)
       .setName('默认风格包')
-      .setDesc('用于 AI 编排时的默认版式风格。')
+      .setDesc('打开 AI 编排面板时默认选中的风格包。同一篇文章可以为不同风格包分别保留一份结果。')
       .addDropdown((dropdown) => {
         stylePackOptions.forEach((option) => dropdown.addOption(option.value, option.label));
         dropdown.setValue(this.plugin.settings.ai.defaultStylePack || 'tech-green');
@@ -3836,7 +3836,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('编排时参考图片')
-      .setDesc('开启后，AI 会优先使用当前文章里的配图与截图作为排版素材。')
+      .setDesc('开启后，AI 会把文中的配图和截图作为排版素材参考，但不会直接改写你的正文。')
       .addToggle(toggle => toggle
         .setValue(this.plugin.settings.ai.includeImagesInLayout !== false)
         .onChange(async (value) => {
@@ -3847,7 +3847,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('AI 请求超时（秒）')
-      .setDesc('建议在 15 到 60 秒之间。')
+      .setDesc('较快模型可设 15 到 45 秒；较慢模型建议设 60 到 120 秒。')
       .addText(text => text
         .setPlaceholder('45')
         .setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45000) / 1000)))
@@ -3865,7 +3865,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('默认 AI Provider')
       .setDesc(runnableProviders.length > 0
-        ? '当前 AI 编排会优先使用这里选中的 Provider。'
+        ? '生成 AI 编排时会优先使用这里选中的 Provider。'
         : '还没有可直接用于 AI 编排的 Provider，请先补全 Base URL、API Key 和模型。')
       .addDropdown((dropdown) => {
         dropdown.addOption('', '自动选择');
@@ -3974,19 +3974,25 @@ class AppleStyleSettingTab extends PluginSettingTab {
     });
     addProviderBtn.onclick = () => this.showEditAiProviderModal(null);
 
-    const cachedLayoutCount = Object.keys(this.plugin.settings.ai.articleLayoutsByPath || {}).length;
+    const layoutCacheEntries = Object.values(this.plugin.settings.ai.articleLayoutsByPath || {});
+    const cachedDocCount = layoutCacheEntries.length;
+    const cachedLayoutCount = layoutCacheEntries.reduce((count, entry) => {
+      const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+      if (!normalizedEntry) return count;
+      return count + Object.keys(normalizedEntry.stylePackStates || {}).length;
+    }, 0);
     const cacheSetting = new Setting(containerEl)
       .setName('AI 编排缓存')
       .setDesc(cachedLayoutCount > 0
-        ? `当前已缓存 ${cachedLayoutCount} 篇文章的编排结果。`
-        : '当前还没有缓存的文章编排结果。');
+        ? `当前已缓存 ${cachedDocCount} 篇文章、共 ${cachedLayoutCount} 份风格包编排结果。`
+        : '当前还没有缓存的 AI 编排结果。');
 
     if (cachedLayoutCount > 0) {
       cacheSetting.addButton((button) => button
         .setButtonText('清空缓存')
         .setWarning()
         .onClick(async () => {
-          if (!confirm(`确定要清空 ${cachedLayoutCount} 篇文章的 AI 编排缓存吗？`)) return;
+          if (!confirm(`确定要清空 ${cachedDocCount} 篇文章、共 ${cachedLayoutCount} 份 AI 编排缓存吗？`)) return;
           this.plugin.settings.ai.articleLayoutsByPath = {};
           await this.plugin.saveSettings();
           this.refreshOpenConverterAiState();

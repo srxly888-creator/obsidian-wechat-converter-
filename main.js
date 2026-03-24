@@ -9068,15 +9068,15 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       await this.plugin.saveSettings();
       new Notice("\u8BBE\u7F6E\u5DF2\u4FDD\u5B58\uFF0C\u8BF7\u5173\u95ED\u5E76\u91CD\u65B0\u6253\u5F00\u8F6C\u6362\u5668\u9762\u677F\u4EE5\u751F\u6548");
     }));
-    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u914D\u7F6E\u6A21\u578B\u4E0E\u9ED8\u8BA4\u884C\u4E3A\u3002\u5177\u4F53\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
-    new Setting(containerEl).setName("\u5185\u7F6E\u534F\u8BAE\u7248\u672C").setDesc(`\u5F53\u524D\u5185\u7F6E layout skill v${AI_LAYOUT_SKILL_VERSION}\uFF0Cschema v${AI_LAYOUT_SCHEMA_VERSION}\u3002`);
-    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7F13\u5B58\u7684\u6587\u7AE0\u5E03\u5C40\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
+    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u7BA1\u7406\u6A21\u578B\u3001\u9ED8\u8BA4\u98CE\u683C\u548C\u7F13\u5B58\u7B56\u7565\u3002\u5B9E\u9645\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
+    new Setting(containerEl).setName("\u5185\u7F6E\u534F\u8BAE\u7248\u672C").setDesc(`\u5F53\u524D\u5185\u7F6E\u6392\u7248\u534F\u8BAE\u4E3A skill v${AI_LAYOUT_SKILL_VERSION}\u3001schema v${AI_LAYOUT_SCHEMA_VERSION}\uFF0C\u7528\u4E8E\u7EA6\u675F AI \u8F93\u51FA\u7ED3\u6784\u3002`);
+    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7ECF\u4E3A\u6587\u7AE0\u548C\u98CE\u683C\u5305\u751F\u6210\u8FC7\u7684\u7F13\u5B58\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
       this.plugin.settings.ai.enabled = value;
       await this.plugin.saveSettings();
       this.refreshOpenConverterAiState();
     }));
     const stylePackOptions = getStylePackList();
-    new Setting(containerEl).setName("\u9ED8\u8BA4\u98CE\u683C\u5305").setDesc("\u7528\u4E8E AI \u7F16\u6392\u65F6\u7684\u9ED8\u8BA4\u7248\u5F0F\u98CE\u683C\u3002").addDropdown((dropdown) => {
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u98CE\u683C\u5305").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u98CE\u683C\u5305\u3002\u540C\u4E00\u7BC7\u6587\u7AE0\u53EF\u4EE5\u4E3A\u4E0D\u540C\u98CE\u683C\u5305\u5206\u522B\u4FDD\u7559\u4E00\u4EFD\u7ED3\u679C\u3002").addDropdown((dropdown) => {
       stylePackOptions.forEach((option) => dropdown.addOption(option.value, option.label));
       dropdown.setValue(this.plugin.settings.ai.defaultStylePack || "tech-green");
       dropdown.onChange(async (value) => {
@@ -9085,12 +9085,12 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
         this.refreshOpenConverterAiState();
       });
     });
-    new Setting(containerEl).setName("\u7F16\u6392\u65F6\u53C2\u8003\u56FE\u7247").setDesc("\u5F00\u542F\u540E\uFF0CAI \u4F1A\u4F18\u5148\u4F7F\u7528\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u4F5C\u4E3A\u6392\u7248\u7D20\u6750\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.includeImagesInLayout !== false).onChange(async (value) => {
+    new Setting(containerEl).setName("\u7F16\u6392\u65F6\u53C2\u8003\u56FE\u7247").setDesc("\u5F00\u542F\u540E\uFF0CAI \u4F1A\u628A\u6587\u4E2D\u7684\u914D\u56FE\u548C\u622A\u56FE\u4F5C\u4E3A\u6392\u7248\u7D20\u6750\u53C2\u8003\uFF0C\u4F46\u4E0D\u4F1A\u76F4\u63A5\u6539\u5199\u4F60\u7684\u6B63\u6587\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.includeImagesInLayout !== false).onChange(async (value) => {
       this.plugin.settings.ai.includeImagesInLayout = value;
       await this.plugin.saveSettings();
       this.refreshOpenConverterAiState();
     }));
-    new Setting(containerEl).setName("AI \u8BF7\u6C42\u8D85\u65F6\uFF08\u79D2\uFF09").setDesc("\u5EFA\u8BAE\u5728 15 \u5230 60 \u79D2\u4E4B\u95F4\u3002").addText((text) => text.setPlaceholder("45").setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45e3) / 1e3))).onChange(async (value) => {
+    new Setting(containerEl).setName("AI \u8BF7\u6C42\u8D85\u65F6\uFF08\u79D2\uFF09").setDesc("\u8F83\u5FEB\u6A21\u578B\u53EF\u8BBE 15 \u5230 45 \u79D2\uFF1B\u8F83\u6162\u6A21\u578B\u5EFA\u8BAE\u8BBE 60 \u5230 120 \u79D2\u3002").addText((text) => text.setPlaceholder("45").setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45e3) / 1e3))).onChange(async (value) => {
       const seconds = Math.min(180, Math.max(5, parseInt(value || "45", 10) || 45));
       this.plugin.settings.ai.requestTimeoutMs = seconds * 1e3;
       await this.plugin.saveSettings();
@@ -9099,7 +9099,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
     const providers = this.plugin.settings.ai.providers || [];
     const defaultProviderId = this.plugin.settings.ai.defaultProviderId;
     const runnableProviders = providers.filter((provider) => isAiProviderRunnable(provider) && provider.enabled !== false);
-    new Setting(containerEl).setName("\u9ED8\u8BA4 AI Provider").setDesc(runnableProviders.length > 0 ? "\u5F53\u524D AI \u7F16\u6392\u4F1A\u4F18\u5148\u4F7F\u7528\u8FD9\u91CC\u9009\u4E2D\u7684 Provider\u3002" : "\u8FD8\u6CA1\u6709\u53EF\u76F4\u63A5\u7528\u4E8E AI \u7F16\u6392\u7684 Provider\uFF0C\u8BF7\u5148\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\u3002").addDropdown((dropdown) => {
+    new Setting(containerEl).setName("\u9ED8\u8BA4 AI Provider").setDesc(runnableProviders.length > 0 ? "\u751F\u6210 AI \u7F16\u6392\u65F6\u4F1A\u4F18\u5148\u4F7F\u7528\u8FD9\u91CC\u9009\u4E2D\u7684 Provider\u3002" : "\u8FD8\u6CA1\u6709\u53EF\u76F4\u63A5\u7528\u4E8E AI \u7F16\u6392\u7684 Provider\uFF0C\u8BF7\u5148\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\u3002").addDropdown((dropdown) => {
       dropdown.addOption("", "\u81EA\u52A8\u9009\u62E9");
       providers.forEach((provider) => {
         const statusText = summarizeAiProviderIssues(provider);
@@ -9198,11 +9198,18 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       cls: "wechat-btn-add"
     });
     addProviderBtn.onclick = () => this.showEditAiProviderModal(null);
-    const cachedLayoutCount = Object.keys(this.plugin.settings.ai.articleLayoutsByPath || {}).length;
-    const cacheSetting = new Setting(containerEl).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedLayoutCount} \u7BC7\u6587\u7AE0\u7684\u7F16\u6392\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684\u6587\u7AE0\u7F16\u6392\u7ED3\u679C\u3002");
+    const layoutCacheEntries = Object.values(this.plugin.settings.ai.articleLayoutsByPath || {});
+    const cachedDocCount = layoutCacheEntries.length;
+    const cachedLayoutCount = layoutCacheEntries.reduce((count, entry) => {
+      const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+      if (!normalizedEntry)
+        return count;
+      return count + Object.keys(normalizedEntry.stylePackStates || {}).length;
+    }, 0);
+    const cacheSetting = new Setting(containerEl).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u98CE\u683C\u5305\u7F16\u6392\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
     if (cachedLayoutCount > 0) {
       cacheSetting.addButton((button) => button.setButtonText("\u6E05\u7A7A\u7F13\u5B58").setWarning().onClick(async () => {
-        if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedLayoutCount} \u7BC7\u6587\u7AE0\u7684 AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
+        if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
           return;
         this.plugin.settings.ai.articleLayoutsByPath = {};
         await this.plugin.saveSettings();
