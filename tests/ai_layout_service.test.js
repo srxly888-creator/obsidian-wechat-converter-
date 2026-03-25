@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+const { cleanHtmlForDraft } = require('../services/wechat-html-cleaner');
 
 const {
   normalizeAiSettings,
@@ -141,6 +142,31 @@ title: 示例
     expect(html).toContain('重点高亮');
   });
 
+  it('should keep core ai layout structure after wechat draft cleaning', () => {
+    const html = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      stylePack: 'ocean-blue',
+      title: '测试文章',
+      blocks: [
+        { type: 'hero', eyebrow: 'AI Layout Draft', title: '测试标题', subtitle: '测试副标题', coverImageId: 'image-1', variant: 'cover-right' },
+        { type: 'lead-quote', text: '一句重点摘要', note: '附加说明' },
+        { type: 'section-block', sectionIndex: 0, title: '第一部分', paragraphs: ['这里是正文。'], imageIds: ['image-1'] },
+      ],
+    }, {
+      imageRefs: [{ id: 'image-1', src: 'https://example.com/cover.png', alt: 'cover', caption: '封面' }],
+    });
+
+    const cleaned = cleanHtmlForDraft(html);
+
+    expect(cleaned).toContain('测试标题');
+    expect(cleaned).toContain('一句重点摘要');
+    expect(cleaned).toContain('第一部分');
+    expect(cleaned).toContain('https://example.com/cover.png');
+  });
+
   it('should extract markdown structure signals for prompt building', () => {
     const signals = extractMarkdownSignals(`
 # AI 编排实践
@@ -205,6 +231,31 @@ title: 示例
     expect(layout.blocks.some((block) => block.type === 'hero')).toBe(false);
     expect(layout.blocks.some((block) => block.type === 'part-nav')).toBe(false);
     expect(layout.blocks[0]?.type).toBe('lead-quote');
+  });
+
+  it('should allow source-first to generate local fallback blocks without provider', async () => {
+    const result = await generateArticleLayout({
+      provider: null,
+      title: '知识整理',
+      markdown: `
+## 第一部分
+这是一段导语。
+
+## 第二部分
+这里是补充说明。
+      `,
+      selection: {
+        layoutFamily: 'source-first',
+        colorPalette: 'auto',
+      },
+      imageRefs: [],
+      timeoutMs: 1000,
+    });
+
+    expect(result.layoutJson.layoutFamily).toBe('source-first');
+    expect(result.layoutJson.blocks.some((block) => block.type === 'section-block')).toBe(true);
+    expect(result.generationMeta.executionMode).toBe('local-fallback');
+    expect(result.generationMeta.skillVersion).toBeTruthy();
   });
 
   it('should preserve at least one image for source-first image-only notes', () => {
@@ -1012,6 +1063,59 @@ title: 示例
       title: '测试标题',
       markdown: '## 第一部分\n这里是正文。',
       selection: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'auto',
+      },
+      imageRefs: [],
+      fetchImpl,
+      timeoutMs: 2000,
+    });
+
+    const quoteBlock = result.layoutJson.blocks.find((block) => block.type === 'lead-quote');
+    expect(quoteBlock).toBeTruthy();
+    expect(quoteBlock.text).toContain('第一行');
+    expect(quoteBlock.text).toContain('第二行');
+  });
+
+  it('should fall back to local source-first layout when ai json stays malformed', async () => {
+    const provider = {
+      id: 'p1',
+      name: '测试 Provider',
+      kind: 'openai-compatible',
+      baseUrl: 'https://api.example.com/v1',
+      apiKey: 'secret',
+      model: 'test-model',
+      enabled: true,
+    };
+    const brokenJson = `{
+  "articleType": "article",
+  "selection": { "layoutFamily": "source-first", "colorPalette": "auto" },
+  "resolved": { "layoutFamily": "source-first", "colorPalette": "tech-green" },
+  "recommendedLayoutFamily": "source-first",
+  "recommendedColorPalette": "tech-green",
+  "title": "测试标题",
+  "summary": "一句摘要",
+  "blocks": [
+    { "type": "lead-quote", "text": "第一行\x00第二行" }
+  ]`;
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: `\`\`\`json\n${brokenJson}\n\`\`\``,
+            },
+          },
+        ],
+      }),
+    });
+
+    const result = await generateArticleLayout({
+      provider,
+      title: '测试标题',
+      markdown: '# 标题\n\n## 第一部分\n这里是正文。\n\n## 第二部分\n继续补充内容。',
+      selection: {
         layoutFamily: 'source-first',
         colorPalette: 'auto',
       },
@@ -1020,9 +1124,9 @@ title: 示例
       timeoutMs: 2000,
     });
 
-    expect(result.layoutJson.blocks[0].type).toBe('lead-quote');
-    expect(result.layoutJson.blocks[0].text).toContain('第一行');
-    expect(result.layoutJson.blocks[0].text).toContain('第二行');
+    expect(result.layoutJson.layoutFamily).toBe('source-first');
+    expect(result.generationMeta.fallbackUsed).toBe(true);
+    expect(result.layoutJson.blocks.some((block) => block.type === 'section-block')).toBe(true);
   });
 
   it('should support gemini provider format', async () => {

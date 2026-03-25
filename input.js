@@ -1818,6 +1818,76 @@ class AppleStyleView extends ItemView {
     return null;
   }
 
+  async recoverSourceFirstLayoutState(currentState = null, selection = null, context = null) {
+    const requestedSelection = normalizeLayoutSelection(selection || this.getCurrentAiLayoutSelection(), {
+      layoutFamily: this.plugin.settings.ai?.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: this.plugin.settings.ai?.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO,
+    });
+    if (requestedSelection.layoutFamily !== 'source-first') return null;
+
+    const sourceContext = context?.sourcePath ? context : await this.ensureCurrentArticleContext();
+    if (!sourceContext?.sourcePath || !sourceContext?.markdown) return null;
+    if (currentState?.status === 'ready' && currentState?.layoutJson?.blocks?.length) return currentState;
+
+    const recoveryKey = `${sourceContext.sourcePath}::${requestedSelection.layoutFamily}::${requestedSelection.colorPalette}::${sourceContext.sourceHash}`;
+    if (this._sourceFirstRecoveryKey === recoveryKey) return null;
+    this._sourceFirstRecoveryKey = recoveryKey;
+
+    try {
+      if (!this.baseRenderedHtml) {
+        await this.convertCurrent(true, { showLoading: false });
+      }
+      const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+      const provider = resolveAiProvider(aiSettings);
+      const imageRefs = aiSettings.includeImagesInLayout === false
+        ? []
+        : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
+      const result = await generateArticleLayout({
+        provider,
+        title: sourceContext.title,
+        markdown: sourceContext.markdown,
+        selection: requestedSelection,
+        imageRefs,
+        timeoutMs: aiSettings.requestTimeoutMs,
+      });
+      const layoutJson = result.layoutJson;
+      if (!Array.isArray(layoutJson?.blocks) || !layoutJson.blocks.length) return null;
+      await this.plugin.saveArticleLayoutState(sourceContext.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: Date.now(),
+        sourceHash: sourceContext.sourceHash,
+        providerId: provider?.id || '',
+        model: provider?.model || '',
+        selection: layoutJson.selection,
+        resolved: layoutJson.resolved,
+        recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+        recommendedColorPalette: layoutJson.recommendedColorPalette,
+        stylePack: layoutJson.stylePack,
+        status: 'ready',
+        lastError: '',
+        lastAttemptStatus: 'success',
+        lastAttemptError: '',
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: null,
+        dismissedBlockKeys: [],
+        generationMeta: result.generationMeta,
+        layoutJson,
+      }, layoutJson.selection);
+      this.pendingAiLayoutFamily = layoutJson.selection?.layoutFamily || requestedSelection.layoutFamily;
+      this.pendingAiColorPalette = layoutJson.selection?.colorPalette || requestedSelection.colorPalette;
+      this.pendingAiStylePack = this.pendingAiColorPalette;
+      this.refreshAiLayoutPanel();
+      return layoutJson;
+    } catch (error) {
+      console.error('原文增强型本地恢复失败:', error);
+      return null;
+    } finally {
+      if (this._sourceFirstRecoveryKey === recoveryKey) {
+        this._sourceFirstRecoveryKey = '';
+      }
+    }
+  }
+
   async ensureAiLayoutSelectionState(baseState = null, selection = null) {
     const context = this.getCurrentLayoutContext();
     if (!context.sourcePath || typeof this.plugin?.getArticleLayoutState !== 'function') return null;
@@ -2252,6 +2322,13 @@ class AppleStyleView extends ItemView {
       colorPalette: currentSelection.colorPalette || storedState?.selection?.colorPalette || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO,
     };
     const state = storedState;
+    if (
+      effectiveSelection.layoutFamily === 'source-first'
+      && context.sourcePath
+      && (!state || ((state.status === 'error' || state.status === 'schema-error') && !(state.layoutJson?.blocks?.length)))
+    ) {
+      this.recoverSourceFirstLayoutState(state, effectiveSelection, context);
+    }
     const generationMeta = state?.generationMeta || null;
     const schemaValidation = this.getVisibleAiSchemaValidation(state);
     const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
@@ -2306,7 +2383,9 @@ class AppleStyleView extends ItemView {
         : '最近一次重新生成失败，仍可继续使用上一版成功结果。';
     } else if (state) {
       badge = hasApplied ? '已应用' : '已生成';
-      if (generationMeta?.fallbackUsed) {
+      if (generationMeta?.executionMode === 'local-fallback') {
+        statusText = '最近一次生成已切换为本地兜底，正文结构仍按当前文章保真输出。';
+      } else if (generationMeta?.fallbackUsed) {
         statusText = `最近一次生成使用 ${modelLabel || provider.model}，并补全了 ${generationMeta.fallbackBlockCount} 个区块。`;
       } else {
         statusText = `最近一次生成使用 ${modelLabel || provider.model}，可直接应用到预览。`;
@@ -2419,10 +2498,14 @@ class AppleStyleView extends ItemView {
       const metaChips = [];
       if (providerLabel) metaChips.push(`Provider ${providerLabel}`);
       if (modelLabel) metaChips.push(`模型 ${modelLabel}`);
+      if (generationMeta?.skillLabel) metaChips.push(`技能 ${generationMeta.skillLabel}`);
+      if (generationMeta?.skillVersion) metaChips.push(`版本 ${generationMeta.skillVersion}`);
       if (generationMeta?.layoutFamilyLabel) metaChips.push(`布局 ${generationMeta.layoutFamilyLabel}`);
       if (generationMeta?.colorPaletteLabel) metaChips.push(`颜色 ${generationMeta.colorPaletteLabel}`);
       if (schemaValidation?.issueCount > 0) metaChips.push(`Schema ${schemaValidation.issueCount} 项`);
-      if (generationMeta?.fallbackUsed) {
+      if (generationMeta?.executionMode === 'local-fallback') {
+        metaChips.push('本地兜底');
+      } else if (generationMeta?.fallbackUsed) {
         metaChips.push(`补全 ${generationMeta.fallbackBlockCount} 块`);
       } else if (generationMeta?.finalBlockCount) {
         metaChips.push('纯 AI 输出');
@@ -2433,7 +2516,9 @@ class AppleStyleView extends ItemView {
       }
       this.renderAiLayoutMetaChips(metaChips);
       const updateText = new Date(state.updatedAt).toLocaleString();
-      const baseNote = generationMeta?.fallbackUsed
+      const baseNote = generationMeta?.executionMode === 'local-fallback'
+        ? `当前使用 ${generationMeta?.skillLabel || '原文增强型'} 的本地兜底结果；已识别 ${generationMeta.sectionCount || generationMeta.headingCount || 0} 段结构，图片 ${generationMeta.imageCount || 0} 张。最近更新于 ${updateText}。`
+        : generationMeta?.fallbackUsed
         ? `已识别 ${generationMeta.sectionCount || generationMeta.headingCount || 0} 段结构，图片 ${generationMeta.imageCount || 0} 张；其中 ${generationMeta.fallbackBlockCount} 个区块由本地规则补全。最近更新于 ${updateText}。`
         : `已识别 ${generationMeta?.sectionCount || generationMeta?.headingCount || 0} 段结构，图片 ${generationMeta?.imageCount || 0} 张。最近更新于 ${updateText}。`;
       if (hasLastAttemptFailure && state.lastAttemptError) {
@@ -2537,12 +2622,6 @@ class AppleStyleView extends ItemView {
 
   async generateAiLayoutForCurrentArticle() {
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
-    const provider = resolveAiProvider(aiSettings);
-    if (!provider) {
-      new Notice('请先在插件设置中配置并启用 AI Provider');
-      return;
-    }
-
     const context = await this.ensureCurrentArticleContext();
     if (!context) {
       new Notice('请先打开一篇有内容的 Markdown 文章');
@@ -2558,6 +2637,11 @@ class AppleStyleView extends ItemView {
       : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
 
     const selection = this.getCurrentAiLayoutSelection();
+    const provider = resolveAiProvider(aiSettings);
+    if (selection.layoutFamily !== 'source-first' && !provider) {
+      new Notice('请先在插件设置中配置并启用 AI Provider');
+      return;
+    }
     const originalText = this.aiGenerateBtn?.textContent;
     try {
       this.aiLayoutLoading = true;
@@ -2583,8 +2667,8 @@ class AppleStyleView extends ItemView {
         version: AI_LAYOUT_SCHEMA_VERSION,
         updatedAt: Date.now(),
         sourceHash: context.sourceHash,
-        providerId: provider.id,
-        model: provider.model,
+        providerId: provider?.id || '',
+        model: provider?.model || '',
         selection: layoutJson.selection,
         resolved: layoutJson.resolved,
         recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
@@ -2602,7 +2686,11 @@ class AppleStyleView extends ItemView {
       }, layoutJson.selection);
       this.pendingAiLayoutFamily = layoutJson.selection?.layoutFamily || selection.layoutFamily;
       this.pendingAiColorPalette = layoutJson.selection?.colorPalette || selection.colorPalette;
-      new Notice('✅ AI 编排已生成，可应用到预览查看效果');
+      new Notice(
+        result.generationMeta?.executionMode === 'local-fallback'
+          ? '✅ 已生成原文增强型本地兜底编排，可应用到预览查看效果'
+          : '✅ AI 编排已生成，可应用到预览查看效果'
+      );
     } catch (error) {
       console.error('AI 编排生成失败:', error);
       const previousState = this.getCurrentArticleLayoutState();
@@ -2612,8 +2700,8 @@ class AppleStyleView extends ItemView {
         version: AI_LAYOUT_SCHEMA_VERSION,
         updatedAt: hasReusablePreviousLayout ? previousState.updatedAt : Date.now(),
         sourceHash: hasReusablePreviousLayout ? previousState.sourceHash : context.sourceHash,
-        providerId: provider.id,
-        model: provider.model,
+        providerId: provider?.id || '',
+        model: provider?.model || '',
         selection: hasReusablePreviousLayout ? previousState.selection : selection,
         resolved: hasReusablePreviousLayout ? previousState.resolved : {
           layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? 'source-first' : selection.layoutFamily,
@@ -4975,8 +5063,18 @@ class AppleStylePlugin extends Plugin {
         delete this.settings.ai.articleLayoutsByPath[normalizedPath];
       }
     } else {
+      const inferredSkillId = nextState?.skillId
+        || nextState?.resolved?.layoutFamily
+        || nextState?.layoutFamily
+        || requestedSelection.layoutFamily;
+      const inferredSkillVersion = nextState?.skillVersion
+        || nextState?.generationMeta?.skillVersion
+        || getLayoutFamilyById(inferredSkillId)?.version
+        || '';
       existingEntry.selectionStates[effectiveSelectionKey] = {
         ...nextState,
+        skillId: inferredSkillId,
+        skillVersion: inferredSkillVersion,
         selection: requestedSelection,
         stylePack: nextState?.stylePack || nextState?.resolved?.colorPalette || 'tech-green',
       };

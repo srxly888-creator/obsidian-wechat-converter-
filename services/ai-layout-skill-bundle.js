@@ -1,45 +1,30 @@
-const AI_LAYOUT_SKILL_VERSION = '2026.03.24-alpha.2';
-const AI_LAYOUT_SELECTION_AUTO = 'auto';
-const AI_LAYOUT_FAMILIES = ['source-first', 'tutorial-cards', 'editorial-lite'];
-const AI_LAYOUT_COLOR_PALETTES = ['tech-green', 'ocean-blue', 'sunset-amber', 'graphite-rose'];
+const {
+  loadAiLayoutSkillRegistry,
+  getAiLayoutSkillById,
+  getAiLayoutSkillList,
+  getAiLayoutSharedResources,
+} = require('./ai-layout-runtime/registry');
 
-const AI_LAYOUT_ALLOWED_BLOCKS = [
-  {
-    type: 'hero',
-    fields: ['eyebrow', 'title', 'subtitle', 'coverImageId', 'variant'],
-    description: '文章封面卡，适合标题、导语和封面图。',
-  },
-  {
-    type: 'part-nav',
-    fields: ['items[{label,text}]'],
-    description: '章节导航卡，适合目录或分段导读。',
-  },
-  {
-    type: 'lead-quote',
-    fields: ['text', 'note'],
-    description: '导语摘要卡，适合金句、总结或开场重点。',
-  },
-  {
-    type: 'case-block',
-    fields: ['caseLabel', 'title', 'summary', 'bullets', 'imageIds', 'highlight'],
-    description: '案例/教程主体区块，适合分章节承载正文。',
-  },
-  {
-    type: 'section-block',
-    fields: ['sectionIndex', 'imageIds'],
-    description: '正文保真区块，按 sectionIndex 引用原文章节内容，不改写正文。',
-  },
-  {
-    type: 'phone-frame',
-    fields: ['imageId', 'caption'],
-    description: '手机截图展示块，适合 App 界面或聊天截图。',
-  },
-  {
-    type: 'cta-card',
-    fields: ['title', 'body', 'buttonText', 'note'],
-    description: '收尾 CTA 区块，适合总结、引导或后续动作。',
-  },
-];
+const AI_LAYOUT_SELECTION_AUTO = 'auto';
+const registry = loadAiLayoutSkillRegistry();
+const shared = getAiLayoutSharedResources();
+
+const AI_LAYOUT_SKILL_VERSION = shared.version || '2026.03.25-alpha.1';
+const AI_LAYOUT_FAMILIES = getAiLayoutSkillList().map((skill) => skill.id);
+const AI_LAYOUT_COLOR_PALETTES = (shared.colorPalettes?.colorPalettes || []).map((item) => item.id);
+const AI_LAYOUT_ALLOWED_BLOCKS = (shared.blockCatalog?.blocks || []).map((block) => ({ ...block }));
+const AI_LAYOUT_OUTPUT_FIELDS = Array.isArray(shared.blockCatalog?.outputFields)
+  ? shared.blockCatalog.outputFields.slice()
+  : [
+    'articleType',
+    'selection',
+    'resolved',
+    'recommendedLayoutFamily',
+    'recommendedColorPalette',
+    'title',
+    'summary',
+    'blocks',
+  ];
 
 const AI_LAYOUT_SKILL_SYSTEM_LINES = [
   '你是微信公众号排版助手。',
@@ -51,24 +36,10 @@ const AI_LAYOUT_SKILL_SYSTEM_LINES = [
   'block 内不要杜撰图片 URL，只能使用提供的 image id。',
   '尽量保留原文信息，不要改写作者观点，不要编造数据。',
   '优先覆盖全文主要章节，保真优先于花哨编排。',
-  '优先做教程/案例型公众号编排：封面概览 -> 导语摘要 -> 分章节正文 -> 可选截图块 -> 可选收尾总结。',
-  '如果原文存在明显章节标题，正文主体优先转成 section-block。',
-  '如果有图片，优先挑 1 到 2 张最像封面/截图的图进入 hero 或 phone-frame；普通配图不要强行套手机壳。',
-  '不要默认追加 CTA；只有原文本身适合收尾引导时才使用 cta-card。',
   'selection 表示用户当前选择；resolved 表示本次最终采用的布局和颜色。',
   '如果 selection 为 auto，请根据内容推荐 recommendedLayoutFamily 和 recommendedColorPalette，并写入 resolved。',
   '如果 selection 已指定具体布局或颜色，resolved 必须尊重该选择。',
-];
-
-const AI_LAYOUT_OUTPUT_FIELDS = [
-  'articleType',
-  'selection',
-  'resolved',
-  'recommendedLayoutFamily',
-  'recommendedColorPalette',
-  'title',
-  'summary',
-  'blocks',
+  'AI 编排最终会被渲染为微信安全 HTML，不能依赖额外 style 标签或 class 选择器。',
 ];
 
 function getAiLayoutBlockConstraintLines() {
@@ -245,41 +216,7 @@ function validateAiLayoutPayload(rawLayout) {
 }
 
 function getAiLayoutTemplate() {
-  return {
-    articleType: 'tutorial',
-    selection: {
-      layoutFamily: 'auto',
-      colorPalette: 'auto',
-    },
-    resolved: {
-      layoutFamily: 'tutorial-cards',
-      colorPalette: 'tech-green',
-    },
-    recommendedLayoutFamily: 'tutorial-cards',
-    recommendedColorPalette: 'tech-green',
-    title: '文章标题',
-    summary: '一句摘要',
-    blocks: [
-      {
-        type: 'hero',
-        eyebrow: 'AI Layout Draft',
-        title: '文章标题',
-        subtitle: '封面导语',
-        coverImageId: 'image-1',
-        variant: 'cover-right',
-      },
-      {
-        type: 'lead-quote',
-        text: '一段适合做导语的重点摘要。',
-        note: '补充说明或上下文。',
-      },
-      {
-        type: 'section-block',
-        sectionIndex: 0,
-        imageIds: ['image-1'],
-      },
-    ],
-  };
+  return JSON.parse(JSON.stringify(shared.template));
 }
 
 module.exports = {
@@ -293,4 +230,8 @@ module.exports = {
   getAiLayoutBlockConstraintLines,
   getAiLayoutTemplate,
   validateAiLayoutPayload,
+  getAiLayoutSkillRegistry: loadAiLayoutSkillRegistry,
+  getAiLayoutSkillById,
+  getAiLayoutSkillList,
+  getAiLayoutSharedResources,
 };

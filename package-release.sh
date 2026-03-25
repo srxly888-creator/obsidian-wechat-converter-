@@ -18,6 +18,7 @@ zip -r "$ZIP_FILE" \
     styles.css \
     README.md \
     LICENSE \
+    ai-layout-skills \
     -x "*.DS_Store*"
 
 echo "✅ 打包完成: $ZIP_FILE"

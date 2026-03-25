@@ -5,6 +5,9 @@ const {
   AI_LAYOUT_ALLOWED_BLOCKS,
   AI_LAYOUT_SKILL_SYSTEM_LINES,
   AI_LAYOUT_OUTPUT_FIELDS,
+  getAiLayoutSkillList,
+  getAiLayoutSkillById,
+  getAiLayoutSharedResources,
   getAiLayoutBlockConstraintLines,
   getAiLayoutTemplate,
   validateAiLayoutPayload,
@@ -40,6 +43,22 @@ describe('ai-layout skill bundle', () => {
     expect(getAiLayoutBlockConstraintLines()).toContain('- hero: eyebrow, title, subtitle, coverImageId, variant');
     expect(getAiLayoutBlockConstraintLines()).toContain('- section-block: sectionIndex, imageIds');
     expect(getAiLayoutBlockConstraintLines()).toContain('- cta-card: title, body, buttonText, note');
+  });
+
+  it('should load skills and shared resources from the skill registry', () => {
+    const skills = getAiLayoutSkillList();
+    const sourceFirst = getAiLayoutSkillById('source-first');
+    const shared = getAiLayoutSharedResources();
+
+    expect(skills.map((item) => item.id)).toEqual([
+      'source-first',
+      'tutorial-cards',
+      'editorial-lite',
+    ]);
+    expect(sourceFirst?.manifest?.providerStrategy).toBe('prefer-ai-fallback-local');
+    expect(sourceFirst?.prompt).toContain('原文增强型');
+    expect(shared.wechatSafeStylePrimitives?.profiles?.['tutorial-cards']).toBeTruthy();
+    expect(shared.colorPalettes?.colorPalettes?.length).toBe(4);
   });
 
   it('should provide a reusable layout template', () => {

@@ -7,6 +7,9 @@ const {
   AI_LAYOUT_SKILL_SYSTEM_LINES,
   AI_LAYOUT_OUTPUT_FIELDS,
   getAiLayoutBlockConstraintLines,
+  getAiLayoutSkillById,
+  getAiLayoutSkillList,
+  getAiLayoutSharedResources,
   validateAiLayoutPayload,
 } = require('./ai-layout-skill-bundle');
 
@@ -24,92 +27,40 @@ const MAX_CASE_BLOCK_BULLETS = 6;
 const MAX_CASE_BLOCK_IMAGE_IDS = 4;
 const AI_LAYOUT_DEFAULT_FAMILY = 'source-first';
 const AI_LAYOUT_DEFAULT_COLOR_PALETTE = 'tech-green';
-const AI_LAYOUT_IMPLEMENTED_FAMILIES = new Set(['source-first', 'tutorial-cards', 'editorial-lite']);
+const AI_LAYOUT_IMPLEMENTED_FAMILIES = new Set(AI_LAYOUT_FAMILIES);
 const AI_LAYOUT_RESERVED_FAMILY_FALLBACKS = {};
+const AI_LAYOUT_SHARED_RESOURCES = getAiLayoutSharedResources();
+const AI_LAYOUT_SKILL_LIST = getAiLayoutSkillList();
+const AI_LAYOUT_FAMILY_DEFS = AI_LAYOUT_SKILL_LIST.reduce((acc, skill) => {
+  acc[skill.id] = {
+    id: skill.id,
+    label: skill.manifest.label,
+    description: skill.manifest.description || '',
+    version: skill.manifest.version,
+    manifest: skill.manifest,
+    prompt: skill.prompt,
+    blocks: skill.blocks,
+    fallback: skill.fallback,
+  };
+  return acc;
+}, {});
 
-const AI_LAYOUT_FAMILY_DEFS = {
-  'source-first': {
-    id: 'source-first',
-    label: '原文增强型',
-    description: '最接近普通预览，正文连续流动，只做轻量结构增强。',
-  },
-  'tutorial-cards': {
-    id: 'tutorial-cards',
-    label: '教程卡片型',
-    description: '更强调章节编号、信息卡和截图展示，适合教程与案例拆解。',
-  },
-  'editorial-lite': {
-    id: 'editorial-lite',
-    label: '轻杂志型',
-    description: '偏编辑感的留白与图文节奏，适合观点、经验与品牌表达类内容。',
-  },
-};
+const AI_COLOR_PALETTES = (AI_LAYOUT_SHARED_RESOURCES.colorPalettes?.colorPalettes || []).reduce((acc, palette) => {
+  acc[palette.id] = {
+    id: palette.id,
+    label: palette.label,
+    description: palette.description || '',
+    recommendedFor: Array.isArray(palette.recommendedFor) ? palette.recommendedFor.slice() : [],
+    tokens: { ...(palette.tokens || {}) },
+  };
+  return acc;
+}, {});
 
-const AI_COLOR_PALETTES = {
-  'tech-green': {
-    id: 'tech-green',
-    label: '科技绿',
-    description: '信息卡与案例教程风格，适合产品介绍、操作指南和案例拆解。',
-    tokens: {
-      accent: '#14b37d',
-      accentDeep: '#0f8f64',
-      accentSoft: '#e8faf4',
-      text: '#24323d',
-      muted: '#66737f',
-      border: '#dbe7e1',
-      surface: '#ffffff',
-      surfaceSoft: '#f5f8f7',
-      quoteBg: '#f4f7f6',
-    },
-  },
-  'ocean-blue': {
-    id: 'ocean-blue',
-    label: '深海蓝',
-    description: '更冷静的科技信息风格，适合教程、知识卡片和产品更新。',
-    tokens: {
-      accent: '#2c6bed',
-      accentDeep: '#1f4fb2',
-      accentSoft: '#edf4ff',
-      text: '#223047',
-      muted: '#5e718f',
-      border: '#d8e2f2',
-      surface: '#ffffff',
-      surfaceSoft: '#f6f9fd',
-      quoteBg: '#f2f6fc',
-    },
-  },
-  'sunset-amber': {
-    id: 'sunset-amber',
-    label: '暖砂金',
-    description: '更偏内容杂志感的暖色风格，适合观点、清单和经验分享。',
-    tokens: {
-      accent: '#d8892b',
-      accentDeep: '#a66218',
-      accentSoft: '#fff5e8',
-      text: '#3a2b1f',
-      muted: '#7b6756',
-      border: '#eadfce',
-      surface: '#fffdf9',
-      surfaceSoft: '#faf6f0',
-      quoteBg: '#f8f2ea',
-    },
-  },
-  'graphite-rose': {
-    id: 'graphite-rose',
-    label: '石墨玫瑰',
-    description: '偏编辑感的灰粉中性色，适合案例拆解和品牌内容。',
-    tokens: {
-      accent: '#cc5f82',
-      accentDeep: '#9f4764',
-      accentSoft: '#fff0f5',
-      text: '#2e2c33',
-      muted: '#6f6874',
-      border: '#e7dce3',
-      surface: '#fffefe',
-      surfaceSoft: '#faf7f9',
-      quoteBg: '#f8f2f5',
-    },
-  },
+const AI_WECHAT_SAFE_STYLE_PRIMITIVES = AI_LAYOUT_SHARED_RESOURCES.wechatSafeStylePrimitives || {
+  typography: {},
+  image: {},
+  profiles: {},
+  sectionLabels: {},
 };
 
 const AI_STYLE_PACKS = AI_COLOR_PALETTES;
@@ -240,6 +191,18 @@ function getLayoutFamilyList({ includeAuto = true, includeReserved = false } = {
 function getLayoutFamilyById(id) {
   const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
   return AI_LAYOUT_FAMILY_DEFS[normalizedId] || AI_LAYOUT_FAMILY_DEFS[AI_LAYOUT_DEFAULT_FAMILY];
+}
+
+function getLayoutSkillById(id) {
+  const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
+  return getAiLayoutSkillById(normalizedId) || getAiLayoutSkillById(AI_LAYOUT_DEFAULT_FAMILY);
+}
+
+function getWechatSafeRenderProfile(layoutFamilyId) {
+  const normalizedId = normalizeResolvedLayoutFamily(layoutFamilyId, AI_LAYOUT_DEFAULT_FAMILY);
+  return AI_WECHAT_SAFE_STYLE_PRIMITIVES.profiles?.[normalizedId]
+    || AI_WECHAT_SAFE_STYLE_PRIMITIVES.profiles?.[AI_LAYOUT_DEFAULT_FAMILY]
+    || {};
 }
 
 function getColorPaletteList({ includeAuto = true } = {}) {
@@ -410,6 +373,10 @@ function normalizeLayoutGenerationMeta(raw = {}, layoutJson = null) {
   return {
     providerName: coerceString(raw?.providerName),
     providerModel: coerceString(raw?.providerModel),
+    skillId: coerceString(raw?.skillId),
+    skillLabel: coerceString(raw?.skillLabel),
+    skillVersion: coerceString(raw?.skillVersion),
+    executionMode: coerceString(raw?.executionMode),
     layoutFamilyLabel: coerceString(raw?.layoutFamilyLabel),
     colorPaletteLabel: coerceString(raw?.colorPaletteLabel),
     stylePackLabel: coerceString(raw?.stylePackLabel),
@@ -506,6 +473,8 @@ function normalizeArticleLayoutState(raw = {}) {
     sourceHash: typeof raw.sourceHash === 'string' ? raw.sourceHash : '',
     providerId: typeof raw.providerId === 'string' ? raw.providerId : '',
     model: typeof raw.model === 'string' ? raw.model : '',
+    skillId: coerceString(raw.skillId || raw.layoutFamily || resolved.layoutFamily),
+    skillVersion: coerceString(raw.skillVersion || raw.generationMeta?.skillVersion || getLayoutFamilyById(resolved.layoutFamily)?.version),
     selection,
     resolved,
     recommendedLayoutFamily: normalizeResolvedLayoutFamily(
@@ -1333,6 +1302,8 @@ function buildFallbackLayout(context = {}) {
     imageRefs: context.imageRefs,
   });
   const resolved = selectionResolution.resolved;
+  const skill = getLayoutSkillById(resolved.layoutFamily);
+  const fallbackConfig = skill?.fallback || {};
   const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
   const signals = context.signals || extractMarkdownSignals(context.markdown || '');
   const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || '').sections;
@@ -1346,51 +1317,27 @@ function buildFallbackLayout(context = {}) {
 
   const headBlocks = [];
   const bodyBlocks = [];
-  if (resolved.layoutFamily === 'tutorial-cards') {
+  if (fallbackConfig.includeHero) {
     headBlocks.push({
       type: 'hero',
-      eyebrow: signals.sectionTitles[0] ? 'AI Layout Draft' : 'AI Article Layout',
+      eyebrow: signals.sectionTitles[0] ? (fallbackConfig.heroEyebrow || 'AI Layout Draft') : (fallbackConfig.heroEyebrow || 'AI Article Layout'),
       title,
       subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
       coverImageId: firstImageId,
-      variant: 'cover-right',
+      variant: fallbackConfig.heroVariant || 'cover-right',
     });
+  }
 
-    if (partItems.length >= 2) {
-      headBlocks.push({ type: 'part-nav', items: partItems });
-    }
+  if (fallbackConfig.includePartNav && partItems.length >= 2) {
+    headBlocks.push({ type: 'part-nav', items: partItems });
+  }
 
-    if (leadText) {
-      headBlocks.push({
-        type: 'lead-quote',
-        text: leadText,
-        note: leadNote,
-      });
-    }
-  } else if (resolved.layoutFamily === 'editorial-lite') {
+  if (fallbackConfig.includeLeadQuote && leadText) {
     headBlocks.push({
-      type: 'hero',
-      eyebrow: signals.sectionTitles[0] ? 'Editorial Layout' : 'AI Editorial Draft',
-      title,
-      subtitle: leadText || summarizeText(signals.lastParagraph || title, 72),
-      coverImageId: firstImageId,
-      variant: 'cover-left',
+      type: 'lead-quote',
+      text: leadText,
+      note: leadNote,
     });
-    if (leadText) {
-      headBlocks.push({
-        type: 'lead-quote',
-        text: leadText,
-        note: leadNote,
-      });
-    }
-  } else {
-    if (leadText) {
-      headBlocks.push({
-        type: 'lead-quote',
-        text: leadText,
-        note: leadNote,
-      });
-    }
   }
 
   const heroCoverImageId = coerceString(headBlocks.find((block) => block?.type === 'hero')?.coverImageId);
@@ -1403,7 +1350,7 @@ function buildFallbackLayout(context = {}) {
   });
 
   const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
-  if (resolved.layoutFamily === 'tutorial-cards' && screenshotImage?.id) {
+  if (fallbackConfig.includePhoneFrame && screenshotImage?.id) {
     bodyBlocks.push({
       type: 'phone-frame',
       imageId: screenshotImage.id,
@@ -1453,8 +1400,8 @@ function buildFallbackLayout(context = {}) {
     while (queue.length) {
       blocks.push({
         type: 'case-block',
-        caseLabel: familyId === 'editorial-lite' ? 'IMAGES' : 'GALLERY',
-        title: familyId === 'editorial-lite' ? '图像摘录' : '配图补充',
+        caseLabel: fallbackConfig.galleryCaseLabel || (familyId === 'editorial-lite' ? 'IMAGES' : 'GALLERY'),
+        title: fallbackConfig.galleryTitle || (familyId === 'editorial-lite' ? '图像摘录' : '配图补充'),
         summary: '',
         bullets: [],
         imageIds: queue.splice(0, MAX_CASE_BLOCK_IMAGE_IDS),
@@ -1638,9 +1585,16 @@ function createLayoutGenerationMeta({
   const layoutFamilyInfo = getLayoutFamilyById(layoutFamily);
   const colorPaletteInfo = getColorPaletteById(colorPalette);
   const fallbackEntries = mergedEntries.filter((entry) => entry.source === 'fallback');
+  const executionMode = fallbackEntries.length > 0 && normalizedAiBlocks.length === 0
+    ? 'local-fallback'
+    : 'ai-enhanced';
   return {
     providerName: coerceString(provider?.name),
     providerModel: coerceString(provider?.model),
+    skillId: layoutFamilyInfo?.id || coerceString(layoutFamily),
+    skillLabel: layoutFamilyInfo?.label || '',
+    skillVersion: layoutFamilyInfo?.version || '',
+    executionMode,
     layoutFamilyLabel: layoutFamilyInfo?.label || '',
     colorPaletteLabel: colorPaletteInfo?.label || '',
     stylePackLabel: colorPaletteInfo?.label || '',
@@ -1776,6 +1730,10 @@ function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs 
   const selectedColorPaletteInfo = selectedColorPalette === AI_LAYOUT_SELECTION_AUTO
     ? { label: '自动推荐', description: '由 AI 根据文章内容推荐颜色。' }
     : getColorPaletteById(selectedColorPalette);
+  const selectedSkill = selectedLayoutFamily === AI_LAYOUT_SELECTION_AUTO
+    ? null
+    : getLayoutSkillById(selectedLayoutFamily);
+  const recommendedSkill = getLayoutSkillById(resolvedSelection.recommendedLayoutFamily);
   const signals = extractMarkdownSignals(markdown);
   const promptMarkdown = truncateMarkdownForPrompt(markdown);
   const imageSummary = imageRefs.length
@@ -1793,6 +1751,19 @@ function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs 
   const bulletSummary = signals.bulletGroups.length
     ? signals.bulletGroups.slice(0, 2).map((group, groupIndex) => `组 ${groupIndex + 1}: ${group.slice(0, 4).join(' / ')}`).join('\n')
     : '- 无明显列表信息';
+  const skillSummary = AI_LAYOUT_SKILL_LIST.map((skill) => {
+    const manifest = skill.manifest || {};
+    return `- ${manifest.id}: ${manifest.label}（${manifest.description || '无描述'}）`;
+  }).join('\n');
+  const safeStyleNotes = Array.isArray(AI_WECHAT_SAFE_STYLE_PRIMITIVES.allowedCssNotes)
+    ? AI_WECHAT_SAFE_STYLE_PRIMITIVES.allowedCssNotes.map((item) => `- ${item}`).join('\n')
+    : '- 仅允许 inline style';
+  const selectedSkillPrompt = selectedSkill?.prompt
+    ? selectedSkill.prompt
+    : '当前 layoutFamily 为 auto，请在内置 skill 中做选择，并给出最合适的 recommendedLayoutFamily。';
+  const recommendedSkillPrompt = recommendedSkill?.prompt
+    ? recommendedSkill.prompt
+    : '';
 
   return [
     {
@@ -1809,6 +1780,16 @@ function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs 
         `颜色说明：${selectedColorPaletteInfo.description}`,
         `推荐布局：${getLayoutFamilyById(resolvedSelection.recommendedLayoutFamily).label}`,
         `推荐颜色：${getColorPaletteById(resolvedSelection.recommendedColorPalette).label}`,
+        '',
+        '内置布局 skills：',
+        skillSummary,
+        '',
+        selectedSkill ? `当前 skill：${selectedSkill.manifest.label}（${selectedSkill.manifest.version}）` : '当前 skill：自动推荐',
+        '当前 skill 目标：',
+        selectedSkillPrompt,
+        recommendedSkillPrompt ? ['', '当前推荐 skill 参考：', recommendedSkillPrompt, ''] .join('\n') : '',
+        '微信安全样式约束：',
+        safeStyleNotes,
         '',
         '可用图片：',
         imageSummary,
@@ -1845,7 +1826,7 @@ function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs 
         '',
         '原文如下：',
         promptMarkdown,
-      ].join('\n'),
+      ].filter(Boolean).join('\n'),
     },
   ];
 }
@@ -1893,6 +1874,11 @@ function toPlainPromptFromMessages(messages = []) {
     })
     .filter(Boolean)
     .join('\n\n');
+}
+
+function shouldUseLocalFallbackLayout(error, selection = {}) {
+  const requestedLayoutFamily = normalizeLayoutFamily(selection?.layoutFamily, AI_LAYOUT_SELECTION_AUTO);
+  return requestedLayoutFamily === 'source-first' && !!error;
 }
 
 async function requestOpenAICompatibleLayout({
@@ -2100,64 +2086,112 @@ async function generateArticleLayout({
   timeoutMs = 45000,
   fetchImpl = globalThis.fetch,
 }) {
-  if (!provider) throw new Error('未找到可用的 AI Provider');
-  if (typeof fetchImpl !== 'function') throw new Error('当前环境不支持 AI 网络请求');
   if (!markdown || !String(markdown).trim()) throw new Error('文章内容为空，无法进行 AI 编排');
   const signals = extractMarkdownSignals(markdown);
   const sourceSections = extractMarkdownSections(markdown).sections;
+  const requestedLayoutFamily = normalizeLayoutFamily(selection?.layoutFamily, AI_LAYOUT_SELECTION_AUTO);
 
   let rawLayout;
-  switch (provider.kind) {
-    case AI_PROVIDER_KINDS.OPENAI_COMPATIBLE:
-      rawLayout = await requestOpenAICompatibleLayout({
-        provider,
+  if (!provider) {
+    if (requestedLayoutFamily !== 'source-first') {
+      throw new Error('未找到可用的 AI Provider');
+    }
+    rawLayout = {
+      articleType: 'article',
+      title,
+      summary: '',
+      fallbackUsed: true,
+      blocks: [],
+    };
+  } else {
+    if (typeof fetchImpl !== 'function') throw new Error('当前环境不支持 AI 网络请求');
+    try {
+      switch (provider.kind) {
+        case AI_PROVIDER_KINDS.OPENAI_COMPATIBLE:
+          rawLayout = await requestOpenAICompatibleLayout({
+            provider,
+            title,
+            markdown,
+            selection,
+            stylePack,
+            imageRefs,
+            timeoutMs,
+            fetchImpl,
+          });
+          break;
+        case AI_PROVIDER_KINDS.GEMINI:
+          rawLayout = await requestGeminiLayout({
+            provider,
+            title,
+            markdown,
+            selection,
+            stylePack,
+            imageRefs,
+            timeoutMs,
+            fetchImpl,
+          });
+          break;
+        case AI_PROVIDER_KINDS.ANTHROPIC:
+          rawLayout = await requestAnthropicLayout({
+            provider,
+            title,
+            markdown,
+            selection,
+            stylePack,
+            imageRefs,
+            timeoutMs,
+            fetchImpl,
+          });
+          break;
+        default:
+          throw new Error(`暂不支持的 AI Provider 类型: ${provider.kind}`);
+      }
+    } catch (error) {
+      if (!shouldUseLocalFallbackLayout(error, selection)) {
+        throw error;
+      }
+      rawLayout = {
+        articleType: 'article',
         title,
-        markdown,
-        selection,
-        stylePack,
-        imageRefs,
-        timeoutMs,
-        fetchImpl,
-      });
-      break;
-    case AI_PROVIDER_KINDS.GEMINI:
-      rawLayout = await requestGeminiLayout({
-        provider,
-        title,
-        markdown,
-        selection,
-        stylePack,
-        imageRefs,
-        timeoutMs,
-        fetchImpl,
-      });
-      break;
-    case AI_PROVIDER_KINDS.ANTHROPIC:
-      rawLayout = await requestAnthropicLayout({
-        provider,
-        title,
-        markdown,
-        selection,
-        stylePack,
-        imageRefs,
-        timeoutMs,
-        fetchImpl,
-      });
-      break;
-    default:
-      throw new Error(`暂不支持的 AI Provider 类型: ${provider.kind}`);
+        summary: '',
+        fallbackUsed: true,
+        blocks: [],
+      };
+    }
   }
 
-  return buildLayoutResult(rawLayout, {
-    title,
-    selection,
-    stylePack,
-    imageRefs,
-    markdown,
-    provider,
-    signals,
-    sourceSections,
-  });
+  try {
+    return buildLayoutResult(rawLayout, {
+      title,
+      selection,
+      stylePack,
+      imageRefs,
+      markdown,
+      provider,
+      signals,
+      sourceSections,
+    });
+  } catch (error) {
+    if (!shouldUseLocalFallbackLayout(error, selection)) {
+      throw error;
+    }
+    return buildLayoutResult({
+      articleType: 'article',
+      title,
+      summary: '',
+      fallbackUsed: true,
+      blocks: [],
+    }, {
+      title,
+      selection,
+      stylePack,
+      imageRefs,
+      markdown,
+      provider: null,
+      signals,
+      sourceSections,
+    });
+  }
 }
 
 async function testAiProviderConnection(provider, fetchImpl = globalThis.fetch) {
@@ -2190,31 +2224,44 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
   const layoutFamily = getLayoutFamilyById(layout?.resolved?.layoutFamily || layout?.layoutFamily);
   const colorPalette = getColorPaletteById(layout?.resolved?.colorPalette || layout?.stylePack);
   const tokens = colorPalette.tokens;
+  const renderProfile = getWechatSafeRenderProfile(layoutFamily.id);
+  const typography = AI_WECHAT_SAFE_STYLE_PRIMITIVES.typography || {};
+  const sectionLabelPrefix = AI_WECHAT_SAFE_STYLE_PRIMITIVES.sectionLabels?.[layoutFamily.id] || 'SECTION';
   const isSourceFirst = layoutFamily.id === 'source-first';
   const isTutorialCards = layoutFamily.id === 'tutorial-cards';
   const isEditorialLite = layoutFamily.id === 'editorial-lite';
-  const editorialDisplayFont = 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif';
+  const editorialDisplayFont = typography.editorialDisplayFont || 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif';
   const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
-  const bodyFontSize = 16;
-  const bodyLineHeight = 1.8;
-  const bodyParagraphGap = 20;
+  const bodyFontSize = Number(typography.bodyFontSize || 16);
+  const bodyLineHeight = Number(typography.bodyLineHeight || 1.8);
+  const bodyParagraphGap = Number(typography.paragraphGap || 20);
+  const sharedImageRadius = Number(AI_WECHAT_SAFE_STYLE_PRIMITIVES.image?.borderRadius || 14);
+  const wrapperPadding = renderProfile.wrapperPadding || (isEditorialLite ? '30px 22px 40px' : (isTutorialCards ? '26px 18px 34px' : '20px 16px 28px'));
+  const cardRadius = Number(renderProfile.cardRadius ?? (isSourceFirst ? 10 : (isEditorialLite ? 0 : 18)));
+  const cardPadding = renderProfile.cardPadding ?? (isSourceFirst ? '0' : (isEditorialLite ? '0' : '18px'));
+  const cardMargin = Number(renderProfile.cardMargin ?? (isSourceFirst ? 8 : (isEditorialLite ? 30 : 18)));
+  const cardShadow = renderProfile.cardShadow ?? (isTutorialCards ? '0 10px 30px -24px rgba(0,0,0,0.18)' : 'none');
+  const heroProfile = renderProfile.hero || {};
+  const partNavProfile = renderProfile.partNav || {};
+  const leadQuoteProfile = renderProfile.leadQuote || {};
+  const caseBlockProfile = renderProfile.caseBlock || {};
   const wrapperStyle = [
-    'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif',
+    `font-family:${typography.bodyFontFamily || '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif'}`,
     `color:${tokens.text}`,
     `font-size:${bodyFontSize}px`,
     `line-height:${bodyLineHeight}`,
-    'letter-spacing:0',
-    `padding:${isEditorialLite ? '30px 22px 40px' : (isTutorialCards ? '26px 18px 34px' : '20px 16px 28px')}`,
+    `letter-spacing:${typography.letterSpacing || '0'}`,
+    `padding:${wrapperPadding}`,
     `background:${tokens.surface}`,
   ].join(';');
 
   const cardStyle = [
     `background:${tokens.surface}`,
     `border:1px solid ${tokens.border}`,
-    `border-radius:${isSourceFirst ? 10 : (isEditorialLite ? 0 : 18)}px`,
-    `padding:${isSourceFirst ? 0 : (isEditorialLite ? 0 : 18)}px`,
-    `margin:${isSourceFirst ? 8 : (isEditorialLite ? 30 : 18)}px 0`,
-    `box-shadow:${isTutorialCards ? '0 10px 30px -24px rgba(0,0,0,0.18)' : (isEditorialLite ? 'none' : 'none')}`,
+    `border-radius:${cardRadius}px`,
+    `padding:${cardPadding}`,
+    `margin:${cardMargin}px 0`,
+    `box-shadow:${cardShadow}`,
   ].join(';');
 
   const renderImage = (imageId, extraStyle = '') => {
@@ -2224,7 +2271,7 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
       'display:block',
       'width:100%',
       'height:auto',
-      'border-radius:14px',
+      `border-radius:${sharedImageRadius}px`,
       extraStyle,
     ].filter(Boolean).join(';');
     return `<img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || image.caption)}" style="${style}">`;
@@ -2233,23 +2280,23 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
   const blocksHtml = (layout.blocks || []).map((block, index) => {
     if (block.type === 'hero') {
       const heroImageStyle = isEditorialLite
-        ? 'width:100%;max-width:none;flex:none;border-radius:28px;'
+        ? `width:100%;max-width:none;flex:none;border-radius:${heroProfile.imageRadius || 28}px;`
         : (isSourceFirst
-          ? 'max-width:none;width:100%;flex:none;border-radius:18px;'
-          : 'max-width:116px;flex:0 0 116px;border-radius:18px;');
+          ? `max-width:none;width:100%;flex:none;border-radius:${heroProfile.imageRadius || 18}px;`
+          : `max-width:116px;flex:0 0 116px;border-radius:${heroProfile.imageRadius || 18}px;`);
       const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : '';
       const contentHtml = [
-        block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 2 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : '',
-        block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 6 : (isEditorialLite ? 14 : 10)}px;font-size:${isSourceFirst ? 26 : (isEditorialLite ? 36 : 28)}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h1>` : '',
-        block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : (isEditorialLite ? 17 : 14)}px;line-height:${isSourceFirst ? 1.8 : (isEditorialLite ? 1.88 : 1.7)};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : '',
+        block.eyebrow ? `<div style="font-size:${heroProfile.eyebrowSize || (isEditorialLite ? 10 : 11)}px;font-weight:700;letter-spacing:${heroProfile.eyebrowLetterSpacing || (isEditorialLite ? 2 : 1.2)}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : '',
+        block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 6 : (isEditorialLite ? 14 : 10)}px;font-size:${heroProfile.titleSize || (isSourceFirst ? 26 : (isEditorialLite ? 36 : 28))}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h1>` : '',
+        block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${heroProfile.subtitleSize || (isSourceFirst ? 16 : (isEditorialLite ? 17 : 14))}px;line-height:${heroProfile.subtitleLineHeight || (isSourceFirst ? 1.8 : (isEditorialLite ? 1.88 : 1.7))};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : '',
       ].join('');
       const flexDirection = block.variant === 'cover-left' ? 'row-reverse' : 'row';
-      const heroFooter = isEditorialLite
+      const heroFooter = heroProfile.footerMode === 'editorial-divider'
         ? `<div style="display:flex;align-items:center;gap:14px;margin-top:24px;">
             <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
             <div style="flex:1;height:1px;background:${tokens.border};"></div>
           </div>`
-        : (isSourceFirst
+        : (heroProfile.footerMode === 'divider'
           ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>`
           : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`);
       if (isEditorialLite) {
@@ -2277,19 +2324,19 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
 
     if (block.type === 'part-nav') {
       const itemsHtml = block.items.map((item) => `
-        <div style="flex:${isEditorialLite ? '1 1 100%' : '1 1 0'};min-width:0;padding:${isSourceFirst ? '0 0 0 0' : (isEditorialLite ? '14px 0' : '12px 10px')};border:${isTutorialCards ? `1px solid ${tokens.border}` : 'none'};border-radius:${isTutorialCards ? 14 : 0}px;background:${isTutorialCards ? tokens.surfaceSoft : 'transparent'};border-bottom:${isSourceFirst || isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
+        <div style="flex:${partNavProfile.direction === 'column' ? '1 1 100%' : (isEditorialLite ? '1 1 100%' : '1 1 0')};min-width:0;padding:${isSourceFirst ? '0 0 0 0' : (isEditorialLite ? '14px 0' : '12px 10px')};border:${partNavProfile.useCard ? `1px solid ${tokens.border}` : 'none'};border-radius:${partNavProfile.useCard ? 14 : 0}px;background:${partNavProfile.useCard ? tokens.surfaceSoft : 'transparent'};border-bottom:${partNavProfile.useDivider ? `1px solid ${tokens.border}` : 'none'};">
           <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
           <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : (isEditorialLite ? 17 : 13)}px;font-weight:${isSourceFirst ? 500 : (isEditorialLite ? 500 : 600)};color:${tokens.text};line-height:${isEditorialLite ? 1.72 : 1.55};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(item.text)}</div>
         </div>
       `).join('');
       return `<section style="margin:${isEditorialLite ? 20 : (isSourceFirst ? 20 : 16)}px 0 ${isSourceFirst ? 18 : 8}px;">
-        <div style="display:flex;gap:${isSourceFirst ? 16 : 10}px;flex-wrap:wrap;${isSourceFirst ? `padding:0 0 10px;border-bottom:1px solid ${tokens.border};` : ''}${isEditorialLite ? 'flex-direction:column;' : ''}">${itemsHtml}</div>
+        <div style="display:flex;gap:${partNavProfile.gap || (isSourceFirst ? 16 : 10)}px;flex-wrap:wrap;${partNavProfile.useDivider && isSourceFirst ? `padding:0 0 10px;border-bottom:1px solid ${tokens.border};` : ''}${partNavProfile.direction === 'column' ? 'flex-direction:column;' : ''}">${itemsHtml}</div>
       </section>`;
     }
 
     if (block.type === 'lead-quote') {
-      return `<section style="margin:${isSourceFirst ? 14 : (isEditorialLite ? 26 : 18)}px 0;padding:${isSourceFirst ? '0 0 0 14px' : (isEditorialLite ? '24px 0' : '18px')};border-radius:${isTutorialCards ? 16 : 0}px;background:${isTutorialCards ? tokens.quoteBg : 'transparent'};border:${isTutorialCards ? `1px solid ${tokens.border}` : 'none'};border-left:${isSourceFirst ? `3px solid ${tokens.accent}` : 'none'};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
-        <div style="font-size:${isSourceFirst ? 16 : (isEditorialLite ? 26 : 18)}px;font-weight:${isSourceFirst ? 600 : (isEditorialLite ? 600 : 700)};line-height:${isEditorialLite ? 1.7 : 1.75};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.text)}</div>
+      return `<section style="margin:${isSourceFirst ? 14 : (isEditorialLite ? 26 : 18)}px 0;padding:${isSourceFirst ? '0 0 0 14px' : (isEditorialLite ? '24px 0' : '18px')};border-radius:${isTutorialCards ? 16 : 0}px;background:${leadQuoteProfile.background === 'quoteBg' ? tokens.quoteBg : 'transparent'};border:${isTutorialCards ? `1px solid ${tokens.border}` : 'none'};border-left:${leadQuoteProfile.borderLeft ? `3px solid ${tokens.accent}` : 'none'};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
+        <div style="font-size:${leadQuoteProfile.fontSize || (isSourceFirst ? 16 : (isEditorialLite ? 26 : 18))}px;font-weight:${leadQuoteProfile.fontWeight || (isSourceFirst ? 600 : (isEditorialLite ? 600 : 700))};line-height:${isEditorialLite ? 1.7 : 1.75};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.text)}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ''}
       </section>`;
     }
@@ -2299,12 +2346,12 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
       const bulletsHtml = block.bullets.length
         ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join('')}</ul>`
         : '';
-      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 32 : 26)}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};` : ''}">
+      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 32 : 26)}px 0;${caseBlockProfile.useCard ? `padding:18px;border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};` : ''}">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:${isSourceFirst ? 22 : (isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? 'uppercase' : 'none'};">${isEditorialLite ? String(index + 1).padStart(2, '0') : String(index + 1).padStart(2, '0')}</div>
+          <div style="font-size:${caseBlockProfile.indexSize || (isSourceFirst ? 22 : (isEditorialLite ? 14 : 28))}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? 'uppercase' : 'none'};">${String(index + 1).padStart(2, '0')}</div>
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
-        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : (isEditorialLite ? 26 : 22)}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h2>` : ''}
+        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${caseBlockProfile.titleSize || (isSourceFirst ? 20 : (isEditorialLite ? 26 : 22))}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h2>` : ''}
         ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ''}
         ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ''}
         ${bulletsHtml}
@@ -2334,19 +2381,19 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
         : '';
       const sectionHead = isSourceFirst
         ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">Section ${String(sectionDisplayIndex).padStart(2, '0')}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
             <div style="height:1px;flex:1;background:${tokens.border};"></div>
           </div>`
         : isEditorialLite
           ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-              <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">Part ${String(sectionDisplayIndex).padStart(2, '0')}</div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
               <div style="width:42px;height:1px;background:${tokens.border};"></div>
             </div>`
           : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, '0')}</div>
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
           </div>`;
-      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 36 : 26)}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};box-shadow:0 10px 30px -24px rgba(0,0,0,0.14);` : ''}${isSourceFirst ? `padding-top:4px;` : ''}">
+      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 36 : 26)}px 0;${caseBlockProfile.useCard && isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};box-shadow:${cardShadow};` : ''}${isSourceFirst ? `padding-top:4px;` : ''}">
         ${sectionHead}
         ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${titleColor};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h2>` : ''}
         ${paragraphsHtml}

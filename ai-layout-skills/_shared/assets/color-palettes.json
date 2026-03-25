@@ -1,0 +1,74 @@
+{
+  "version": "2026.03.25-alpha.1",
+  "defaultColorPalette": "tech-green",
+  "colorPalettes": [
+    {
+      "id": "tech-green",
+      "label": "科技绿",
+      "description": "信息卡与案例教程风格，适合产品介绍、操作指南和案例拆解。",
+      "recommendedFor": ["tutorial", "case-study", "product-intro"],
+      "tokens": {
+        "accent": "#14b37d",
+        "accentDeep": "#0f8f64",
+        "accentSoft": "#e8faf4",
+        "text": "#24323d",
+        "muted": "#66737f",
+        "border": "#dbe7e1",
+        "surface": "#ffffff",
+        "surfaceSoft": "#f5f8f7",
+        "quoteBg": "#f4f7f6"
+      }
+    },
+    {
+      "id": "ocean-blue",
+      "label": "深海蓝",
+      "description": "更冷静的科技信息风格，适合教程、知识卡片和产品更新。",
+      "recommendedFor": ["tutorial", "knowledge-card", "release-note"],
+      "tokens": {
+        "accent": "#2c6bed",
+        "accentDeep": "#1f4fb2",
+        "accentSoft": "#edf4ff",
+        "text": "#223047",
+        "muted": "#5e718f",
+        "border": "#d8e2f2",
+        "surface": "#ffffff",
+        "surfaceSoft": "#f6f9fd",
+        "quoteBg": "#f2f6fc"
+      }
+    },
+    {
+      "id": "sunset-amber",
+      "label": "暖砂金",
+      "description": "更偏内容杂志感的暖色风格，适合观点、清单和经验分享。",
+      "recommendedFor": ["essay", "checklist", "experience"],
+      "tokens": {
+        "accent": "#d8892b",
+        "accentDeep": "#a66218",
+        "accentSoft": "#fff5e8",
+        "text": "#3a2b1f",
+        "muted": "#7b6756",
+        "border": "#eadfce",
+        "surface": "#fffdf9",
+        "surfaceSoft": "#faf6f0",
+        "quoteBg": "#f8f2ea"
+      }
+    },
+    {
+      "id": "graphite-rose",
+      "label": "石墨玫瑰",
+      "description": "偏编辑感的灰粉中性色，适合案例拆解和品牌内容。",
+      "recommendedFor": ["case-study", "brand-story", "editorial"],
+      "tokens": {
+        "accent": "#cc5f82",
+        "accentDeep": "#9f4764",
+        "accentSoft": "#fff0f5",
+        "text": "#2e2c33",
+        "muted": "#6f6874",
+        "border": "#e7dce3",
+        "surface": "#fffefe",
+        "surfaceSoft": "#faf7f9",
+        "quoteBg": "#f8f2f5"
+      }
+    }
+  ]
+}

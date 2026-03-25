@@ -75,6 +75,7 @@ function main() {
   for (const file of requiredFiles) {
     assert(entries.includes(file), `Zip missing required file: ${file}`);
   }
+  assert(hasPrefix(entries, "ai-layout-skills/"), "Zip missing ai-layout-skills runtime resources");
 
   const disallowedEntries = ["converter.js"];
   for (const file of disallowedEntries) {

@@ -3448,49 +3448,131 @@ var require_obsidian_triplet_renderer = __commonJS({
   }
 });
 
+// services/ai-layout-runtime/registry.js
+var require_registry = __commonJS({
+  "services/ai-layout-runtime/registry.js"(exports2, module2) {
+    var fs = require("fs");
+    var path = require("path");
+    var cachedRegistry = null;
+    function resolveSkillsRoot() {
+      const candidates = [
+        path.join(__dirname, "..", "..", "ai-layout-skills"),
+        path.join(__dirname, "..", "ai-layout-skills"),
+        path.join(__dirname, "ai-layout-skills")
+      ];
+      for (const candidate of candidates) {
+        if (fs.existsSync(path.join(candidate, "_shared"))) {
+          return candidate;
+        }
+      }
+      throw new Error("\u65E0\u6CD5\u5B9A\u4F4D ai-layout-skills \u76EE\u5F55");
+    }
+    function readJson(filePath) {
+      return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    }
+    function readText(filePath) {
+      return fs.readFileSync(filePath, "utf8");
+    }
+    function loadSkill(skillRoot) {
+      const manifest = readJson(path.join(skillRoot, "manifest.json"));
+      const prompt = readText(path.join(skillRoot, "prompt.md")).trim();
+      const blocks = readJson(path.join(skillRoot, "blocks.json"));
+      const fallback = readJson(path.join(skillRoot, "fallback.json"));
+      const skillDoc = readText(path.join(skillRoot, "SKILL.md")).trim();
+      const examplesDir = path.join(skillRoot, "examples");
+      const examples = fs.existsSync(examplesDir) ? fs.readdirSync(examplesDir).filter((file) => file.endsWith(".json")).sort().map((file) => ({
+        name: file,
+        value: readJson(path.join(examplesDir, file))
+      })) : [];
+      return {
+        id: manifest.id,
+        manifest,
+        prompt,
+        blocks,
+        fallback,
+        skillDoc,
+        examples
+      };
+    }
+    function loadAiLayoutSkillRegistry() {
+      if (cachedRegistry)
+        return cachedRegistry;
+      const root = resolveSkillsRoot();
+      const sharedRoot = path.join(root, "_shared");
+      const colorPaletteData = readJson(path.join(sharedRoot, "assets", "color-palettes.json"));
+      const blockCatalogData = readJson(path.join(sharedRoot, "assets", "block-catalog.json"));
+      const wechatSafeStylePrimitives = readJson(path.join(sharedRoot, "assets", "wechat-safe-style-primitives.json"));
+      const schema = readJson(path.join(sharedRoot, "schema", "article-layout.schema.json"));
+      const template = readJson(path.join(sharedRoot, "templates", "article-layout.template.json"));
+      const skills = fs.readdirSync(root).filter((name) => !name.startsWith("_")).map((name) => loadSkill(path.join(root, name))).sort((left, right) => {
+        var _a, _b, _c, _d;
+        const leftOrder = Number(((_a = left == null ? void 0 : left.manifest) == null ? void 0 : _a.order) || 999);
+        const rightOrder = Number(((_b = right == null ? void 0 : right.manifest) == null ? void 0 : _b.order) || 999);
+        if (leftOrder !== rightOrder)
+          return leftOrder - rightOrder;
+        return String(((_c = left == null ? void 0 : left.manifest) == null ? void 0 : _c.label) || (left == null ? void 0 : left.id)).localeCompare(String(((_d = right == null ? void 0 : right.manifest) == null ? void 0 : _d.label) || (right == null ? void 0 : right.id)), "zh-Hans-CN");
+      });
+      cachedRegistry = {
+        root,
+        shared: {
+          version: wechatSafeStylePrimitives.version || colorPaletteData.version || "2026.03.25-alpha.1",
+          schema,
+          template,
+          blockCatalog: blockCatalogData,
+          colorPalettes: colorPaletteData,
+          wechatSafeStylePrimitives
+        },
+        skills
+      };
+      return cachedRegistry;
+    }
+    function getAiLayoutSkillById(id) {
+      const registry = loadAiLayoutSkillRegistry();
+      return registry.skills.find((skill) => skill.id === id) || null;
+    }
+    function getAiLayoutSkillList() {
+      return loadAiLayoutSkillRegistry().skills.slice();
+    }
+    function getAiLayoutSharedResources() {
+      return loadAiLayoutSkillRegistry().shared;
+    }
+    module2.exports = {
+      loadAiLayoutSkillRegistry,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources
+    };
+  }
+});
+
 // services/ai-layout-skill-bundle.js
 var require_ai_layout_skill_bundle = __commonJS({
   "services/ai-layout-skill-bundle.js"(exports2, module2) {
-    var AI_LAYOUT_SKILL_VERSION = "2026.03.24-alpha.2";
+    var {
+      loadAiLayoutSkillRegistry,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources
+    } = require_registry();
     var AI_LAYOUT_SELECTION_AUTO2 = "auto";
-    var AI_LAYOUT_FAMILIES = ["source-first", "tutorial-cards", "editorial-lite"];
-    var AI_LAYOUT_COLOR_PALETTES = ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose"];
-    var AI_LAYOUT_ALLOWED_BLOCKS = [
-      {
-        type: "hero",
-        fields: ["eyebrow", "title", "subtitle", "coverImageId", "variant"],
-        description: "\u6587\u7AE0\u5C01\u9762\u5361\uFF0C\u9002\u5408\u6807\u9898\u3001\u5BFC\u8BED\u548C\u5C01\u9762\u56FE\u3002"
-      },
-      {
-        type: "part-nav",
-        fields: ["items[{label,text}]"],
-        description: "\u7AE0\u8282\u5BFC\u822A\u5361\uFF0C\u9002\u5408\u76EE\u5F55\u6216\u5206\u6BB5\u5BFC\u8BFB\u3002"
-      },
-      {
-        type: "lead-quote",
-        fields: ["text", "note"],
-        description: "\u5BFC\u8BED\u6458\u8981\u5361\uFF0C\u9002\u5408\u91D1\u53E5\u3001\u603B\u7ED3\u6216\u5F00\u573A\u91CD\u70B9\u3002"
-      },
-      {
-        type: "case-block",
-        fields: ["caseLabel", "title", "summary", "bullets", "imageIds", "highlight"],
-        description: "\u6848\u4F8B/\u6559\u7A0B\u4E3B\u4F53\u533A\u5757\uFF0C\u9002\u5408\u5206\u7AE0\u8282\u627F\u8F7D\u6B63\u6587\u3002"
-      },
-      {
-        type: "section-block",
-        fields: ["sectionIndex", "imageIds"],
-        description: "\u6B63\u6587\u4FDD\u771F\u533A\u5757\uFF0C\u6309 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u5185\u5BB9\uFF0C\u4E0D\u6539\u5199\u6B63\u6587\u3002"
-      },
-      {
-        type: "phone-frame",
-        fields: ["imageId", "caption"],
-        description: "\u624B\u673A\u622A\u56FE\u5C55\u793A\u5757\uFF0C\u9002\u5408 App \u754C\u9762\u6216\u804A\u5929\u622A\u56FE\u3002"
-      },
-      {
-        type: "cta-card",
-        fields: ["title", "body", "buttonText", "note"],
-        description: "\u6536\u5C3E CTA \u533A\u5757\uFF0C\u9002\u5408\u603B\u7ED3\u3001\u5F15\u5BFC\u6216\u540E\u7EED\u52A8\u4F5C\u3002"
-      }
+    var registry = loadAiLayoutSkillRegistry();
+    var shared = getAiLayoutSharedResources();
+    var AI_LAYOUT_SKILL_VERSION = shared.version || "2026.03.25-alpha.1";
+    var AI_LAYOUT_FAMILIES = getAiLayoutSkillList().map((skill) => skill.id);
+    var _a;
+    var AI_LAYOUT_COLOR_PALETTES = (((_a = shared.colorPalettes) == null ? void 0 : _a.colorPalettes) || []).map((item) => item.id);
+    var _a2;
+    var AI_LAYOUT_ALLOWED_BLOCKS = (((_a2 = shared.blockCatalog) == null ? void 0 : _a2.blocks) || []).map((block) => ({ ...block }));
+    var _a3;
+    var AI_LAYOUT_OUTPUT_FIELDS = Array.isArray((_a3 = shared.blockCatalog) == null ? void 0 : _a3.outputFields) ? shared.blockCatalog.outputFields.slice() : [
+      "articleType",
+      "selection",
+      "resolved",
+      "recommendedLayoutFamily",
+      "recommendedColorPalette",
+      "title",
+      "summary",
+      "blocks"
     ];
     var AI_LAYOUT_SKILL_SYSTEM_LINES = [
       "\u4F60\u662F\u5FAE\u4FE1\u516C\u4F17\u53F7\u6392\u7248\u52A9\u624B\u3002",
@@ -3502,23 +3584,10 @@ var require_ai_layout_skill_bundle = __commonJS({
       "block \u5185\u4E0D\u8981\u675C\u64B0\u56FE\u7247 URL\uFF0C\u53EA\u80FD\u4F7F\u7528\u63D0\u4F9B\u7684 image id\u3002",
       "\u5C3D\u91CF\u4FDD\u7559\u539F\u6587\u4FE1\u606F\uFF0C\u4E0D\u8981\u6539\u5199\u4F5C\u8005\u89C2\u70B9\uFF0C\u4E0D\u8981\u7F16\u9020\u6570\u636E\u3002",
       "\u4F18\u5148\u8986\u76D6\u5168\u6587\u4E3B\u8981\u7AE0\u8282\uFF0C\u4FDD\u771F\u4F18\u5148\u4E8E\u82B1\u54E8\u7F16\u6392\u3002",
-      "\u4F18\u5148\u505A\u6559\u7A0B/\u6848\u4F8B\u578B\u516C\u4F17\u53F7\u7F16\u6392\uFF1A\u5C01\u9762\u6982\u89C8 -> \u5BFC\u8BED\u6458\u8981 -> \u5206\u7AE0\u8282\u6B63\u6587 -> \u53EF\u9009\u622A\u56FE\u5757 -> \u53EF\u9009\u6536\u5C3E\u603B\u7ED3\u3002",
-      "\u5982\u679C\u539F\u6587\u5B58\u5728\u660E\u663E\u7AE0\u8282\u6807\u9898\uFF0C\u6B63\u6587\u4E3B\u4F53\u4F18\u5148\u8F6C\u6210 section-block\u3002",
-      "\u5982\u679C\u6709\u56FE\u7247\uFF0C\u4F18\u5148\u6311 1 \u5230 2 \u5F20\u6700\u50CF\u5C01\u9762/\u622A\u56FE\u7684\u56FE\u8FDB\u5165 hero \u6216 phone-frame\uFF1B\u666E\u901A\u914D\u56FE\u4E0D\u8981\u5F3A\u884C\u5957\u624B\u673A\u58F3\u3002",
-      "\u4E0D\u8981\u9ED8\u8BA4\u8FFD\u52A0 CTA\uFF1B\u53EA\u6709\u539F\u6587\u672C\u8EAB\u9002\u5408\u6536\u5C3E\u5F15\u5BFC\u65F6\u624D\u4F7F\u7528 cta-card\u3002",
       "selection \u8868\u793A\u7528\u6237\u5F53\u524D\u9009\u62E9\uFF1Bresolved \u8868\u793A\u672C\u6B21\u6700\u7EC8\u91C7\u7528\u7684\u5E03\u5C40\u548C\u989C\u8272\u3002",
       "\u5982\u679C selection \u4E3A auto\uFF0C\u8BF7\u6839\u636E\u5185\u5BB9\u63A8\u8350 recommendedLayoutFamily \u548C recommendedColorPalette\uFF0C\u5E76\u5199\u5165 resolved\u3002",
-      "\u5982\u679C selection \u5DF2\u6307\u5B9A\u5177\u4F53\u5E03\u5C40\u6216\u989C\u8272\uFF0Cresolved \u5FC5\u987B\u5C0A\u91CD\u8BE5\u9009\u62E9\u3002"
-    ];
-    var AI_LAYOUT_OUTPUT_FIELDS = [
-      "articleType",
-      "selection",
-      "resolved",
-      "recommendedLayoutFamily",
-      "recommendedColorPalette",
-      "title",
-      "summary",
-      "blocks"
+      "\u5982\u679C selection \u5DF2\u6307\u5B9A\u5177\u4F53\u5E03\u5C40\u6216\u989C\u8272\uFF0Cresolved \u5FC5\u987B\u5C0A\u91CD\u8BE5\u9009\u62E9\u3002",
+      "AI \u7F16\u6392\u6700\u7EC8\u4F1A\u88AB\u6E32\u67D3\u4E3A\u5FAE\u4FE1\u5B89\u5168 HTML\uFF0C\u4E0D\u80FD\u4F9D\u8D56\u989D\u5916 style \u6807\u7B7E\u6216 class \u9009\u62E9\u5668\u3002"
     ];
     function getAiLayoutBlockConstraintLines() {
       return AI_LAYOUT_ALLOWED_BLOCKS.map((block) => `- ${block.type}: ${block.fields.join(", ")}`);
@@ -3681,41 +3750,7 @@ var require_ai_layout_skill_bundle = __commonJS({
       };
     }
     function getAiLayoutTemplate() {
-      return {
-        articleType: "tutorial",
-        selection: {
-          layoutFamily: "auto",
-          colorPalette: "auto"
-        },
-        resolved: {
-          layoutFamily: "tutorial-cards",
-          colorPalette: "tech-green"
-        },
-        recommendedLayoutFamily: "tutorial-cards",
-        recommendedColorPalette: "tech-green",
-        title: "\u6587\u7AE0\u6807\u9898",
-        summary: "\u4E00\u53E5\u6458\u8981",
-        blocks: [
-          {
-            type: "hero",
-            eyebrow: "AI Layout Draft",
-            title: "\u6587\u7AE0\u6807\u9898",
-            subtitle: "\u5C01\u9762\u5BFC\u8BED",
-            coverImageId: "image-1",
-            variant: "cover-right"
-          },
-          {
-            type: "lead-quote",
-            text: "\u4E00\u6BB5\u9002\u5408\u505A\u5BFC\u8BED\u7684\u91CD\u70B9\u6458\u8981\u3002",
-            note: "\u8865\u5145\u8BF4\u660E\u6216\u4E0A\u4E0B\u6587\u3002"
-          },
-          {
-            type: "section-block",
-            sectionIndex: 0,
-            imageIds: ["image-1"]
-          }
-        ]
-      };
+      return JSON.parse(JSON.stringify(shared.template));
     }
     module2.exports = {
       AI_LAYOUT_SKILL_VERSION,
@@ -3727,7 +3762,11 @@ var require_ai_layout_skill_bundle = __commonJS({
       AI_LAYOUT_OUTPUT_FIELDS,
       getAiLayoutBlockConstraintLines,
       getAiLayoutTemplate,
-      validateAiLayoutPayload
+      validateAiLayoutPayload,
+      getAiLayoutSkillRegistry: loadAiLayoutSkillRegistry,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources
     };
   }
 });
@@ -3744,6 +3783,9 @@ var require_ai_layout = __commonJS({
       AI_LAYOUT_SKILL_SYSTEM_LINES,
       AI_LAYOUT_OUTPUT_FIELDS,
       getAiLayoutBlockConstraintLines,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources,
       validateAiLayoutPayload
     } = require_ai_layout_skill_bundle();
     var AI_LAYOUT_SCHEMA_VERSION2 = 1;
@@ -3758,90 +3800,39 @@ var require_ai_layout = __commonJS({
     var MAX_CASE_BLOCK_IMAGE_IDS = 4;
     var AI_LAYOUT_DEFAULT_FAMILY = "source-first";
     var AI_LAYOUT_DEFAULT_COLOR_PALETTE = "tech-green";
-    var AI_LAYOUT_IMPLEMENTED_FAMILIES = /* @__PURE__ */ new Set(["source-first", "tutorial-cards", "editorial-lite"]);
+    var AI_LAYOUT_IMPLEMENTED_FAMILIES = new Set(AI_LAYOUT_FAMILIES);
     var AI_LAYOUT_RESERVED_FAMILY_FALLBACKS = {};
-    var AI_LAYOUT_FAMILY_DEFS = {
-      "source-first": {
-        id: "source-first",
-        label: "\u539F\u6587\u589E\u5F3A\u578B",
-        description: "\u6700\u63A5\u8FD1\u666E\u901A\u9884\u89C8\uFF0C\u6B63\u6587\u8FDE\u7EED\u6D41\u52A8\uFF0C\u53EA\u505A\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\u3002"
-      },
-      "tutorial-cards": {
-        id: "tutorial-cards",
-        label: "\u6559\u7A0B\u5361\u7247\u578B",
-        description: "\u66F4\u5F3A\u8C03\u7AE0\u8282\u7F16\u53F7\u3001\u4FE1\u606F\u5361\u548C\u622A\u56FE\u5C55\u793A\uFF0C\u9002\u5408\u6559\u7A0B\u4E0E\u6848\u4F8B\u62C6\u89E3\u3002"
-      },
-      "editorial-lite": {
-        id: "editorial-lite",
-        label: "\u8F7B\u6742\u5FD7\u578B",
-        description: "\u504F\u7F16\u8F91\u611F\u7684\u7559\u767D\u4E0E\u56FE\u6587\u8282\u594F\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u7ECF\u9A8C\u4E0E\u54C1\u724C\u8868\u8FBE\u7C7B\u5185\u5BB9\u3002"
-      }
-    };
-    var AI_COLOR_PALETTES = {
-      "tech-green": {
-        id: "tech-green",
-        label: "\u79D1\u6280\u7EFF",
-        description: "\u4FE1\u606F\u5361\u4E0E\u6848\u4F8B\u6559\u7A0B\u98CE\u683C\uFF0C\u9002\u5408\u4EA7\u54C1\u4ECB\u7ECD\u3001\u64CD\u4F5C\u6307\u5357\u548C\u6848\u4F8B\u62C6\u89E3\u3002",
-        tokens: {
-          accent: "#14b37d",
-          accentDeep: "#0f8f64",
-          accentSoft: "#e8faf4",
-          text: "#24323d",
-          muted: "#66737f",
-          border: "#dbe7e1",
-          surface: "#ffffff",
-          surfaceSoft: "#f5f8f7",
-          quoteBg: "#f4f7f6"
-        }
-      },
-      "ocean-blue": {
-        id: "ocean-blue",
-        label: "\u6DF1\u6D77\u84DD",
-        description: "\u66F4\u51B7\u9759\u7684\u79D1\u6280\u4FE1\u606F\u98CE\u683C\uFF0C\u9002\u5408\u6559\u7A0B\u3001\u77E5\u8BC6\u5361\u7247\u548C\u4EA7\u54C1\u66F4\u65B0\u3002",
-        tokens: {
-          accent: "#2c6bed",
-          accentDeep: "#1f4fb2",
-          accentSoft: "#edf4ff",
-          text: "#223047",
-          muted: "#5e718f",
-          border: "#d8e2f2",
-          surface: "#ffffff",
-          surfaceSoft: "#f6f9fd",
-          quoteBg: "#f2f6fc"
-        }
-      },
-      "sunset-amber": {
-        id: "sunset-amber",
-        label: "\u6696\u7802\u91D1",
-        description: "\u66F4\u504F\u5185\u5BB9\u6742\u5FD7\u611F\u7684\u6696\u8272\u98CE\u683C\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u6E05\u5355\u548C\u7ECF\u9A8C\u5206\u4EAB\u3002",
-        tokens: {
-          accent: "#d8892b",
-          accentDeep: "#a66218",
-          accentSoft: "#fff5e8",
-          text: "#3a2b1f",
-          muted: "#7b6756",
-          border: "#eadfce",
-          surface: "#fffdf9",
-          surfaceSoft: "#faf6f0",
-          quoteBg: "#f8f2ea"
-        }
-      },
-      "graphite-rose": {
-        id: "graphite-rose",
-        label: "\u77F3\u58A8\u73AB\u7470",
-        description: "\u504F\u7F16\u8F91\u611F\u7684\u7070\u7C89\u4E2D\u6027\u8272\uFF0C\u9002\u5408\u6848\u4F8B\u62C6\u89E3\u548C\u54C1\u724C\u5185\u5BB9\u3002",
-        tokens: {
-          accent: "#cc5f82",
-          accentDeep: "#9f4764",
-          accentSoft: "#fff0f5",
-          text: "#2e2c33",
-          muted: "#6f6874",
-          border: "#e7dce3",
-          surface: "#fffefe",
-          surfaceSoft: "#faf7f9",
-          quoteBg: "#f8f2f5"
-        }
-      }
+    var AI_LAYOUT_SHARED_RESOURCES = getAiLayoutSharedResources();
+    var AI_LAYOUT_SKILL_LIST = getAiLayoutSkillList();
+    var AI_LAYOUT_FAMILY_DEFS = AI_LAYOUT_SKILL_LIST.reduce((acc, skill) => {
+      acc[skill.id] = {
+        id: skill.id,
+        label: skill.manifest.label,
+        description: skill.manifest.description || "",
+        version: skill.manifest.version,
+        manifest: skill.manifest,
+        prompt: skill.prompt,
+        blocks: skill.blocks,
+        fallback: skill.fallback
+      };
+      return acc;
+    }, {});
+    var _a;
+    var AI_COLOR_PALETTES = (((_a = AI_LAYOUT_SHARED_RESOURCES.colorPalettes) == null ? void 0 : _a.colorPalettes) || []).reduce((acc, palette) => {
+      acc[palette.id] = {
+        id: palette.id,
+        label: palette.label,
+        description: palette.description || "",
+        recommendedFor: Array.isArray(palette.recommendedFor) ? palette.recommendedFor.slice() : [],
+        tokens: { ...palette.tokens || {} }
+      };
+      return acc;
+    }, {});
+    var AI_WECHAT_SAFE_STYLE_PRIMITIVES = AI_LAYOUT_SHARED_RESOURCES.wechatSafeStylePrimitives || {
+      typography: {},
+      image: {},
+      profiles: {},
+      sectionLabels: {}
     };
     var AI_STYLE_PACKS = AI_COLOR_PALETTES;
     var AI_PROVIDER_KIND_DEFAULTS = {
@@ -3906,11 +3897,11 @@ var require_ai_layout = __commonJS({
       return AI_COLOR_PALETTES[fallback] ? fallback : AI_LAYOUT_DEFAULT_COLOR_PALETTE;
     }
     function normalizeLayoutSelection2(raw = {}, fallback = {}) {
-      var _a, _b, _c, _d, _e, _f;
+      var _a2, _b, _c, _d, _e, _f;
       const candidate = typeof raw === "string" ? AI_COLOR_PALETTES[raw] ? { colorPalette: raw } : AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {} : raw;
       return {
         layoutFamily: normalizeLayoutFamily(
-          (_c = (_b = (_a = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
+          (_c = (_b = (_a2 = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a2 : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
           normalizeLayoutFamily(fallback == null ? void 0 : fallback.layoutFamily, AI_LAYOUT_SELECTION_AUTO2)
         ),
         colorPalette: normalizeColorPalette(
@@ -3920,11 +3911,11 @@ var require_ai_layout = __commonJS({
       };
     }
     function normalizeResolvedSelection(raw = {}, fallback = {}) {
-      var _a, _b, _c, _d, _e, _f;
+      var _a2, _b, _c, _d, _e, _f;
       const candidate = typeof raw === "string" ? AI_COLOR_PALETTES[raw] ? { colorPalette: raw } : AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {} : raw;
       return {
         layoutFamily: normalizeResolvedLayoutFamily(
-          (_c = (_b = (_a = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
+          (_c = (_b = (_a2 = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a2 : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
           normalizeResolvedLayoutFamily(fallback == null ? void 0 : fallback.layoutFamily, AI_LAYOUT_DEFAULT_FAMILY)
         ),
         colorPalette: normalizeResolvedColorPalette(
@@ -3961,6 +3952,15 @@ var require_ai_layout = __commonJS({
       const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
       return AI_LAYOUT_FAMILY_DEFS[normalizedId] || AI_LAYOUT_FAMILY_DEFS[AI_LAYOUT_DEFAULT_FAMILY];
     }
+    function getLayoutSkillById(id) {
+      const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
+      return getAiLayoutSkillById(normalizedId) || getAiLayoutSkillById(AI_LAYOUT_DEFAULT_FAMILY);
+    }
+    function getWechatSafeRenderProfile(layoutFamilyId) {
+      var _a2, _b;
+      const normalizedId = normalizeResolvedLayoutFamily(layoutFamilyId, AI_LAYOUT_DEFAULT_FAMILY);
+      return ((_a2 = AI_WECHAT_SAFE_STYLE_PRIMITIVES.profiles) == null ? void 0 : _a2[normalizedId]) || ((_b = AI_WECHAT_SAFE_STYLE_PRIMITIVES.profiles) == null ? void 0 : _b[AI_LAYOUT_DEFAULT_FAMILY]) || {};
+    }
     function getColorPaletteList2({ includeAuto = true } = {}) {
       const list = [];
       if (includeAuto) {
@@ -3988,12 +3988,12 @@ var require_ai_layout = __commonJS({
       signals = null,
       imageRefs = []
     } = {}) {
-      var _a, _b;
+      var _a2, _b;
       const selection = normalizeLayoutSelection2(requestedSelection);
       const inferredLayoutFamily = recommendLayoutFamily({ rawLayout, signals, imageRefs });
       const inferredColorPalette = recommendColorPalette({ rawLayout, signals });
       const recommendedLayoutFamily = normalizeResolvedLayoutFamily(
-        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily),
+        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily),
         inferredLayoutFamily
       );
       const recommendedColorPalette = normalizeResolvedColorPalette(
@@ -4083,12 +4083,12 @@ var require_ai_layout = __commonJS({
       };
     }
     function normalizeLayoutGenerationMeta(raw = {}, layoutJson = null) {
-      var _a;
+      var _a2;
       const blockOrigins = Array.isArray(raw == null ? void 0 : raw.blockOrigins) ? raw.blockOrigins.map((item, index) => normalizeGenerationBlockOrigin(item, index)).filter(Boolean) : [];
       const derivedFallbackCount = blockOrigins.filter((item) => item.source === "fallback").length;
       const finalBlockCount = clampNumber(
         raw == null ? void 0 : raw.finalBlockCount,
-        ((_a = layoutJson == null ? void 0 : layoutJson.blocks) == null ? void 0 : _a.length) || blockOrigins.length || 0,
+        ((_a2 = layoutJson == null ? void 0 : layoutJson.blocks) == null ? void 0 : _a2.length) || blockOrigins.length || 0,
         0,
         99
       );
@@ -4101,6 +4101,10 @@ var require_ai_layout = __commonJS({
       return {
         providerName: coerceString(raw == null ? void 0 : raw.providerName),
         providerModel: coerceString(raw == null ? void 0 : raw.providerModel),
+        skillId: coerceString(raw == null ? void 0 : raw.skillId),
+        skillLabel: coerceString(raw == null ? void 0 : raw.skillLabel),
+        skillVersion: coerceString(raw == null ? void 0 : raw.skillVersion),
+        executionMode: coerceString(raw == null ? void 0 : raw.executionMode),
         layoutFamilyLabel: coerceString(raw == null ? void 0 : raw.layoutFamilyLabel),
         colorPaletteLabel: coerceString(raw == null ? void 0 : raw.colorPaletteLabel),
         stylePackLabel: coerceString(raw == null ? void 0 : raw.stylePackLabel),
@@ -4154,6 +4158,7 @@ var require_ai_layout = __commonJS({
       }
     };
     function normalizeArticleLayoutState(raw = {}) {
+      var _a2, _b;
       if (!raw || typeof raw !== "object")
         return null;
       const layoutJson = raw.layoutJson && typeof raw.layoutJson === "object" ? raw.layoutJson : null;
@@ -4186,6 +4191,8 @@ var require_ai_layout = __commonJS({
         sourceHash: typeof raw.sourceHash === "string" ? raw.sourceHash : "",
         providerId: typeof raw.providerId === "string" ? raw.providerId : "",
         model: typeof raw.model === "string" ? raw.model : "",
+        skillId: coerceString(raw.skillId || raw.layoutFamily || resolved.layoutFamily),
+        skillVersion: coerceString(raw.skillVersion || ((_a2 = raw.generationMeta) == null ? void 0 : _a2.skillVersion) || ((_b = getLayoutFamilyById2(resolved.layoutFamily)) == null ? void 0 : _b.version)),
         selection,
         resolved,
         recommendedLayoutFamily: normalizeResolvedLayoutFamily(
@@ -4217,8 +4224,8 @@ var require_ai_layout = __commonJS({
           return entry;
         const stylePackStates = {};
         Object.values(entry.selectionStates).forEach((state) => {
-          var _a;
-          const paletteId = normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a = state == null ? void 0 : state.resolved) == null ? void 0 : _a.colorPalette));
+          var _a2;
+          const paletteId = normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a2 = state == null ? void 0 : state.resolved) == null ? void 0 : _a2.colorPalette));
           if (!stylePackStates[paletteId]) {
             stylePackStates[paletteId] = state;
           }
@@ -4242,7 +4249,7 @@ var require_ai_layout = __commonJS({
       }
       const selectionStates = {};
       const ingestState = (value, fallbackSelection = {}) => {
-        var _a, _b;
+        var _a2, _b;
         const normalizedState = normalizeArticleLayoutState(value);
         if (!normalizedState)
           return;
@@ -4255,7 +4262,7 @@ var require_ai_layout = __commonJS({
             layoutFamily: normalizedState.layoutFamily || effectiveSelection.layoutFamily,
             colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette
           }),
-          stylePack: normalizeResolvedColorPalette(normalizedState.stylePack || ((_a = normalizedState.resolved) == null ? void 0 : _a.colorPalette)),
+          stylePack: normalizeResolvedColorPalette(normalizedState.stylePack || ((_a2 = normalizedState.resolved) == null ? void 0 : _a2.colorPalette)),
           layoutFamily: normalizeResolvedLayoutFamily(normalizedState.layoutFamily || ((_b = normalizedState.resolved) == null ? void 0 : _b.layoutFamily))
         };
       };
@@ -4302,7 +4309,7 @@ var require_ai_layout = __commonJS({
       ].join("\n");
     }
     function normalizeAiSettings2(raw = {}) {
-      var _a;
+      var _a2;
       const defaults = createDefaultAiSettings2();
       const providers = Array.isArray(raw.providers) ? raw.providers.map(normalizeAiProvider2) : defaults.providers;
       const articleLayoutsByPath = {};
@@ -4325,7 +4332,7 @@ var require_ai_layout = __commonJS({
         defaultProviderId,
         defaultLayoutFamily: normalizeLayoutFamily(raw.defaultLayoutFamily, AI_LAYOUT_SELECTION_AUTO2),
         defaultColorPalette: normalizeColorPalette(
-          (_a = raw.defaultColorPalette) != null ? _a : raw.defaultStylePack,
+          (_a2 = raw.defaultColorPalette) != null ? _a2 : raw.defaultStylePack,
           AI_LAYOUT_SELECTION_AUTO2
         ),
         defaultStylePack: normalizeResolvedColorPalette(raw.defaultStylePack, AI_LAYOUT_DEFAULT_COLOR_PALETTE),
@@ -4342,13 +4349,13 @@ var require_ai_layout = __commonJS({
       return getColorPaletteById2(id);
     }
     function getArticleLayoutSelectionState2(entry, selection = {}, defaults = {}) {
-      var _a, _b, _c;
+      var _a2, _b, _c;
       const normalizedEntry = normalizeArticleLayoutCacheEntry2(entry);
       if (!normalizedEntry)
         return null;
       const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
       const requestedKey = getArticleLayoutSelectionKey2(normalizedSelection);
-      const exactState = ((_a = normalizedEntry.selectionStates) == null ? void 0 : _a[requestedKey]) || null;
+      const exactState = ((_a2 = normalizedEntry.selectionStates) == null ? void 0 : _a2[requestedKey]) || null;
       if (exactState)
         return exactState;
       const lastSelectionState = ((_b = normalizedEntry.selectionStates) == null ? void 0 : _b[normalizedEntry.lastSelectionKey]) || null;
@@ -4359,12 +4366,12 @@ var require_ai_layout = __commonJS({
       const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
       const requestedResolvedLayoutFamily = requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? "" : normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
       const matchesColor = (state) => {
-        var _a2;
-        return requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2 || normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a2 = state == null ? void 0 : state.resolved) == null ? void 0 : _a2.colorPalette)) === requestedColorPalette;
+        var _a3;
+        return requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2 || normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a3 = state == null ? void 0 : state.resolved) == null ? void 0 : _a3.colorPalette)) === requestedColorPalette;
       };
       const matchesLayout = (state) => {
-        var _a2, _b2;
-        return requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 || normalizeLayoutFamily((_a2 = state == null ? void 0 : state.selection) == null ? void 0 : _a2.layoutFamily, AI_LAYOUT_SELECTION_AUTO2) === requestedLayoutFamily || normalizeResolvedLayoutFamily((state == null ? void 0 : state.layoutFamily) || ((_b2 = state == null ? void 0 : state.resolved) == null ? void 0 : _b2.layoutFamily), AI_LAYOUT_DEFAULT_FAMILY) === requestedResolvedLayoutFamily;
+        var _a3, _b2;
+        return requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 || normalizeLayoutFamily((_a3 = state == null ? void 0 : state.selection) == null ? void 0 : _a3.layoutFamily, AI_LAYOUT_SELECTION_AUTO2) === requestedLayoutFamily || normalizeResolvedLayoutFamily((state == null ? void 0 : state.layoutFamily) || ((_b2 = state == null ? void 0 : state.resolved) == null ? void 0 : _b2.layoutFamily), AI_LAYOUT_DEFAULT_FAMILY) === requestedResolvedLayoutFamily;
       };
       if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 && requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2) {
         return lastSelectionState || selectionStates[0] || null;
@@ -4380,9 +4387,9 @@ var require_ai_layout = __commonJS({
       return selectionStates.find((state) => matchesColor(state) && matchesLayout(state)) || null;
     }
     function deriveArticleLayoutStateForSelection2(state, selection = {}, defaults = {}) {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+      var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
       const normalizedState = normalizeArticleLayoutState(state);
-      if (!((_b = (_a = normalizedState == null ? void 0 : normalizedState.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length))
+      if (!((_b = (_a2 = normalizedState == null ? void 0 : normalizedState.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b.length))
         return null;
       if (normalizedState.status !== "ready")
         return null;
@@ -4457,13 +4464,13 @@ var require_ai_layout = __commonJS({
       });
     }
     function getArticleLayoutSelectionStateKey(entry, selection = {}, defaults = {}) {
-      var _a;
+      var _a2;
       const normalizedEntry = normalizeArticleLayoutCacheEntry2(entry);
       if (!normalizedEntry)
         return "";
       const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
       const requestedKey = getArticleLayoutSelectionKey2(normalizedSelection);
-      return ((_a = normalizedEntry.selectionStates) == null ? void 0 : _a[requestedKey]) ? requestedKey : normalizedEntry.lastSelectionKey || "";
+      return ((_a2 = normalizedEntry.selectionStates) == null ? void 0 : _a2[requestedKey]) ? requestedKey : normalizedEntry.lastSelectionKey || "";
     }
     function listEnabledAiProviders(aiSettings = {}) {
       return Array.isArray(aiSettings.providers) ? aiSettings.providers.filter((provider) => provider.enabled !== false && isAiProviderRunnable2(provider)) : [];
@@ -4569,13 +4576,13 @@ var require_ai_layout = __commonJS({
       return "";
     }
     function repairRawLayoutPayload(rawLayout = {}) {
-      var _a, _b, _c, _d;
+      var _a2, _b, _c, _d;
       if (!rawLayout || typeof rawLayout !== "object" || Array.isArray(rawLayout))
         return rawLayout;
       if (!Array.isArray(rawLayout.blocks))
         return rawLayout;
       const legacyColorPalette = normalizeResolvedColorPalette(
-        (rawLayout == null ? void 0 : rawLayout.stylePack) || (rawLayout == null ? void 0 : rawLayout.colorPalette) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.colorPalette),
+        (rawLayout == null ? void 0 : rawLayout.stylePack) || (rawLayout == null ? void 0 : rawLayout.colorPalette) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.colorPalette),
         AI_LAYOUT_DEFAULT_COLOR_PALETTE
       );
       const legacyLayoutFamily = normalizeResolvedLayoutFamily(
@@ -4903,9 +4910,9 @@ var require_ai_layout = __commonJS({
       };
     }
     function recommendLayoutFamily({ rawLayout = {}, signals = null, imageRefs = [] } = {}) {
-      var _a, _b, _c, _d;
+      var _a2, _b, _c, _d;
       const rawRecommended = coerceString(
-        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily)
+        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily)
       );
       if (rawRecommended && AI_LAYOUT_FAMILY_DEFS[rawRecommended])
         return normalizeResolvedLayoutFamily(rawRecommended);
@@ -4924,9 +4931,9 @@ var require_ai_layout = __commonJS({
       return "source-first";
     }
     function recommendColorPalette({ rawLayout = {}, signals = null } = {}) {
-      var _a;
+      var _a2;
       const rawRecommended = coerceString(
-        (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack)
+        (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack)
       );
       if (rawRecommended && AI_COLOR_PALETTES[rawRecommended])
         return normalizeResolvedColorPalette(rawRecommended);
@@ -4944,7 +4951,7 @@ var require_ai_layout = __commonJS({
       return "tech-green";
     }
     function buildFallbackLayout(context = {}) {
-      var _a, _b;
+      var _a2, _b;
       const title = coerceString(context.title || "\u672A\u547D\u540D\u6587\u7AE0");
       const selectionResolution = resolveLayoutSelection({
         requestedSelection: context.selection || { colorPalette: context.stylePack },
@@ -4953,10 +4960,12 @@ var require_ai_layout = __commonJS({
         imageRefs: context.imageRefs
       });
       const resolved = selectionResolution.resolved;
+      const skill = getLayoutSkillById(resolved.layoutFamily);
+      const fallbackConfig = (skill == null ? void 0 : skill.fallback) || {};
       const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
       const signals = context.signals || extractMarkdownSignals(context.markdown || "");
       const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
-      const firstImageId = ((_a = imageRefs[0]) == null ? void 0 : _a.id) || "";
+      const firstImageId = ((_a2 = imageRefs[0]) == null ? void 0 : _a2.id) || "";
       const leadText = summarizeText(signals.leadParagraphs[0] || signals.paragraphs[0] || "");
       const leadNote = summarizeText(signals.leadParagraphs[1] || "");
       const partItems = signals.sectionTitles.slice(0, MAX_PART_NAV_ITEMS).map((text, index) => ({
@@ -4965,49 +4974,25 @@ var require_ai_layout = __commonJS({
       }));
       const headBlocks = [];
       const bodyBlocks = [];
-      if (resolved.layoutFamily === "tutorial-cards") {
+      if (fallbackConfig.includeHero) {
         headBlocks.push({
           type: "hero",
-          eyebrow: signals.sectionTitles[0] ? "AI Layout Draft" : "AI Article Layout",
+          eyebrow: signals.sectionTitles[0] ? fallbackConfig.heroEyebrow || "AI Layout Draft" : fallbackConfig.heroEyebrow || "AI Article Layout",
           title,
           subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
           coverImageId: firstImageId,
-          variant: "cover-right"
+          variant: fallbackConfig.heroVariant || "cover-right"
         });
-        if (partItems.length >= 2) {
-          headBlocks.push({ type: "part-nav", items: partItems });
-        }
-        if (leadText) {
-          headBlocks.push({
-            type: "lead-quote",
-            text: leadText,
-            note: leadNote
-          });
-        }
-      } else if (resolved.layoutFamily === "editorial-lite") {
+      }
+      if (fallbackConfig.includePartNav && partItems.length >= 2) {
+        headBlocks.push({ type: "part-nav", items: partItems });
+      }
+      if (fallbackConfig.includeLeadQuote && leadText) {
         headBlocks.push({
-          type: "hero",
-          eyebrow: signals.sectionTitles[0] ? "Editorial Layout" : "AI Editorial Draft",
-          title,
-          subtitle: leadText || summarizeText(signals.lastParagraph || title, 72),
-          coverImageId: firstImageId,
-          variant: "cover-left"
+          type: "lead-quote",
+          text: leadText,
+          note: leadNote
         });
-        if (leadText) {
-          headBlocks.push({
-            type: "lead-quote",
-            text: leadText,
-            note: leadNote
-          });
-        }
-      } else {
-        if (leadText) {
-          headBlocks.push({
-            type: "lead-quote",
-            text: leadText,
-            note: leadNote
-          });
-        }
       }
       const heroCoverImageId = coerceString((_b = headBlocks.find((block) => (block == null ? void 0 : block.type) === "hero")) == null ? void 0 : _b.coverImageId);
       sourceSections.forEach((section, index) => {
@@ -5019,7 +5004,7 @@ var require_ai_layout = __commonJS({
           bodyBlocks.push(block);
       });
       const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
-      if (resolved.layoutFamily === "tutorial-cards" && (screenshotImage == null ? void 0 : screenshotImage.id)) {
+      if (fallbackConfig.includePhoneFrame && (screenshotImage == null ? void 0 : screenshotImage.id)) {
         bodyBlocks.push({
           type: "phone-frame",
           imageId: screenshotImage.id,
@@ -5068,8 +5053,8 @@ var require_ai_layout = __commonJS({
         while (queue.length) {
           blocks.push({
             type: "case-block",
-            caseLabel: familyId === "editorial-lite" ? "IMAGES" : "GALLERY",
-            title: familyId === "editorial-lite" ? "\u56FE\u50CF\u6458\u5F55" : "\u914D\u56FE\u8865\u5145",
+            caseLabel: fallbackConfig.galleryCaseLabel || (familyId === "editorial-lite" ? "IMAGES" : "GALLERY"),
+            title: fallbackConfig.galleryTitle || (familyId === "editorial-lite" ? "\u56FE\u50CF\u6458\u5F55" : "\u914D\u56FE\u8865\u5145"),
             summary: "",
             bullets: [],
             imageIds: queue.splice(0, MAX_CASE_BLOCK_IMAGE_IDS),
@@ -5232,17 +5217,22 @@ var require_ai_layout = __commonJS({
       mergedEntries = [],
       schemaValidation = null
     }) {
-      var _a, _b;
+      var _a2, _b;
       const layoutFamilyInfo = getLayoutFamilyById2(layoutFamily);
       const colorPaletteInfo = getColorPaletteById2(colorPalette);
       const fallbackEntries = mergedEntries.filter((entry) => entry.source === "fallback");
+      const executionMode = fallbackEntries.length > 0 && normalizedAiBlocks.length === 0 ? "local-fallback" : "ai-enhanced";
       return {
         providerName: coerceString(provider == null ? void 0 : provider.name),
         providerModel: coerceString(provider == null ? void 0 : provider.model),
+        skillId: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.id) || coerceString(layoutFamily),
+        skillLabel: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.label) || "",
+        skillVersion: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.version) || "",
+        executionMode,
         layoutFamilyLabel: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.label) || "",
         colorPaletteLabel: (colorPaletteInfo == null ? void 0 : colorPaletteInfo.label) || "",
         stylePackLabel: (colorPaletteInfo == null ? void 0 : colorPaletteInfo.label) || "",
-        recommendedLayoutFamilyLabel: ((_a = getLayoutFamilyById2(recommendedLayoutFamily)) == null ? void 0 : _a.label) || "",
+        recommendedLayoutFamilyLabel: ((_a2 = getLayoutFamilyById2(recommendedLayoutFamily)) == null ? void 0 : _a2.label) || "",
         recommendedColorPaletteLabel: ((_b = getColorPaletteById2(recommendedColorPalette)) == null ? void 0 : _b.label) || "",
         headingCount: signals.headings.length,
         sectionCount: signals.sectionTitles.length,
@@ -5254,15 +5244,15 @@ var require_ai_layout = __commonJS({
         fallbackUsed: fallbackEntries.length > 0,
         fallbackBlockCount: fallbackEntries.length,
         fallbackBlockTypes: Array.from(new Set(fallbackEntries.map((entry) => {
-          var _a2;
-          return (_a2 = entry.block) == null ? void 0 : _a2.type;
+          var _a3;
+          return (_a3 = entry.block) == null ? void 0 : _a3.type;
         }).filter(Boolean))).slice(0, 6),
         schemaValidation: normalizeSchemaValidation(schemaValidation),
         blockOrigins: mergedEntries.map((entry, index) => {
-          var _a2;
+          var _a3;
           return {
             index,
-            type: coerceString((_a2 = entry.block) == null ? void 0 : _a2.type),
+            type: coerceString((_a3 = entry.block) == null ? void 0 : _a3.type),
             source: entry.source === "fallback" ? "fallback" : "ai",
             label: getLayoutBlockLabel(entry.block)
           };
@@ -5343,11 +5333,11 @@ var require_ai_layout = __commonJS({
       const figures = Array.from(container.querySelectorAll("figure"));
       const refs = [];
       figures.forEach((figure, index) => {
-        var _a, _b;
+        var _a2, _b;
         const img = figure.querySelector("img");
         if (!img || !img.src || img.alt === "logo")
           return;
-        const caption = ((_b = (_a = figure.querySelector("figcaption")) == null ? void 0 : _a.textContent) == null ? void 0 : _b.trim()) || img.alt || `\u914D\u56FE ${index + 1}`;
+        const caption = ((_b = (_a2 = figure.querySelector("figcaption")) == null ? void 0 : _a2.textContent) == null ? void 0 : _b.trim()) || img.alt || `\u914D\u56FE ${index + 1}`;
         refs.push({
           id: `image-${index + 1}`,
           src: img.src,
@@ -5368,6 +5358,8 @@ var require_ai_layout = __commonJS({
       const selectedColorPalette = (selection == null ? void 0 : selection.colorPalette) || AI_LAYOUT_SELECTION_AUTO2;
       const selectedLayoutFamilyInfo = selectedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? { label: "\u81EA\u52A8\u63A8\u8350", description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u5E03\u5C40\u98CE\u683C\u3002" } : getLayoutFamilyById2(selectedLayoutFamily);
       const selectedColorPaletteInfo = selectedColorPalette === AI_LAYOUT_SELECTION_AUTO2 ? { label: "\u81EA\u52A8\u63A8\u8350", description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u989C\u8272\u3002" } : getColorPaletteById2(selectedColorPalette);
+      const selectedSkill = selectedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? null : getLayoutSkillById(selectedLayoutFamily);
+      const recommendedSkill = getLayoutSkillById(resolvedSelection.recommendedLayoutFamily);
       const signals = extractMarkdownSignals(markdown);
       const promptMarkdown = truncateMarkdownForPrompt(markdown);
       const imageSummary = imageRefs.length ? imageRefs.map((image) => `- ${image.id}: ${image.caption}`).join("\n") : "- \u65E0\u53EF\u7528\u56FE\u7247";
@@ -5375,6 +5367,13 @@ var require_ai_layout = __commonJS({
       const headingSummary = signals.sectionTitles.length ? signals.sectionTitles.map((item, index) => `${index + 1}. ${item}`).join("\n") : "- \u65E0\u660E\u663E\u6807\u9898\u7ED3\u6784";
       const leadSummary = signals.leadParagraphs.length ? signals.leadParagraphs.map((item, index) => `${index + 1}. ${summarizeText(item, 90)}`).join("\n") : "- \u65E0\u53EF\u63D0\u53D6\u5BFC\u8BED";
       const bulletSummary = signals.bulletGroups.length ? signals.bulletGroups.slice(0, 2).map((group, groupIndex) => `\u7EC4 ${groupIndex + 1}: ${group.slice(0, 4).join(" / ")}`).join("\n") : "- \u65E0\u660E\u663E\u5217\u8868\u4FE1\u606F";
+      const skillSummary = AI_LAYOUT_SKILL_LIST.map((skill) => {
+        const manifest = skill.manifest || {};
+        return `- ${manifest.id}: ${manifest.label}\uFF08${manifest.description || "\u65E0\u63CF\u8FF0"}\uFF09`;
+      }).join("\n");
+      const safeStyleNotes = Array.isArray(AI_WECHAT_SAFE_STYLE_PRIMITIVES.allowedCssNotes) ? AI_WECHAT_SAFE_STYLE_PRIMITIVES.allowedCssNotes.map((item) => `- ${item}`).join("\n") : "- \u4EC5\u5141\u8BB8 inline style";
+      const selectedSkillPrompt = (selectedSkill == null ? void 0 : selectedSkill.prompt) ? selectedSkill.prompt : "\u5F53\u524D layoutFamily \u4E3A auto\uFF0C\u8BF7\u5728\u5185\u7F6E skill \u4E2D\u505A\u9009\u62E9\uFF0C\u5E76\u7ED9\u51FA\u6700\u5408\u9002\u7684 recommendedLayoutFamily\u3002";
+      const recommendedSkillPrompt = (recommendedSkill == null ? void 0 : recommendedSkill.prompt) ? recommendedSkill.prompt : "";
       return [
         {
           role: "system",
@@ -5390,6 +5389,16 @@ var require_ai_layout = __commonJS({
             `\u989C\u8272\u8BF4\u660E\uFF1A${selectedColorPaletteInfo.description}`,
             `\u63A8\u8350\u5E03\u5C40\uFF1A${getLayoutFamilyById2(resolvedSelection.recommendedLayoutFamily).label}`,
             `\u63A8\u8350\u989C\u8272\uFF1A${getColorPaletteById2(resolvedSelection.recommendedColorPalette).label}`,
+            "",
+            "\u5185\u7F6E\u5E03\u5C40 skills\uFF1A",
+            skillSummary,
+            "",
+            selectedSkill ? `\u5F53\u524D skill\uFF1A${selectedSkill.manifest.label}\uFF08${selectedSkill.manifest.version}\uFF09` : "\u5F53\u524D skill\uFF1A\u81EA\u52A8\u63A8\u8350",
+            "\u5F53\u524D skill \u76EE\u6807\uFF1A",
+            selectedSkillPrompt,
+            recommendedSkillPrompt ? ["", "\u5F53\u524D\u63A8\u8350 skill \u53C2\u8003\uFF1A", recommendedSkillPrompt, ""].join("\n") : "",
+            "\u5FAE\u4FE1\u5B89\u5168\u6837\u5F0F\u7EA6\u675F\uFF1A",
+            safeStyleNotes,
             "",
             "\u53EF\u7528\u56FE\u7247\uFF1A",
             imageSummary,
@@ -5426,13 +5435,13 @@ var require_ai_layout = __commonJS({
             "",
             "\u539F\u6587\u5982\u4E0B\uFF1A",
             promptMarkdown
-          ].join("\n")
+          ].filter(Boolean).join("\n")
         }
       ];
     }
     function readChatCompletionContent(data) {
-      var _a, _b;
-      const message = (_b = (_a = data == null ? void 0 : data.choices) == null ? void 0 : _a[0]) == null ? void 0 : _b.message;
+      var _a2, _b;
+      const message = (_b = (_a2 = data == null ? void 0 : data.choices) == null ? void 0 : _a2[0]) == null ? void 0 : _b.message;
       if (!message)
         throw new Error("AI \u54CD\u5E94\u7F3A\u5C11 message");
       const content = message.content;
@@ -5444,9 +5453,9 @@ var require_ai_layout = __commonJS({
       throw new Error("AI \u54CD\u5E94\u683C\u5F0F\u65E0\u6CD5\u8BC6\u522B");
     }
     function readGeminiContent(data) {
-      var _a;
+      var _a2;
       const candidate = Array.isArray(data == null ? void 0 : data.candidates) ? data.candidates[0] : null;
-      const parts = Array.isArray((_a = candidate == null ? void 0 : candidate.content) == null ? void 0 : _a.parts) ? candidate.content.parts : [];
+      const parts = Array.isArray((_a2 = candidate == null ? void 0 : candidate.content) == null ? void 0 : _a2.parts) ? candidate.content.parts : [];
       const text = parts.map((item) => typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
       if (text)
         return text;
@@ -5465,6 +5474,10 @@ var require_ai_layout = __commonJS({
         return `${roleLabel}\uFF1A
 ${String((message == null ? void 0 : message.content) || "").trim()}`;
       }).filter(Boolean).join("\n\n");
+    }
+    function shouldUseLocalFallbackLayout(error, selection = {}) {
+      const requestedLayoutFamily = normalizeLayoutFamily(selection == null ? void 0 : selection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
+      return requestedLayoutFamily === "source-first" && !!error;
     }
     async function requestOpenAICompatibleLayout({
       provider,
@@ -5527,12 +5540,12 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       timeoutMs,
       fetchImpl
     }) {
-      var _a, _b;
+      var _a2, _b;
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
         const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
-        const systemInstruction = String(((_a = messages[0]) == null ? void 0 : _a.content) || "").trim();
+        const systemInstruction = String(((_a2 = messages[0]) == null ? void 0 : _a2.content) || "").trim();
         const userPrompt = String(((_b = messages[1]) == null ? void 0 : _b.content) || "").trim() || toPlainPromptFromMessages(messages);
         const endpoint = `${provider.baseUrl}/models/${encodeURIComponent(provider.model)}:generateContent`;
         const response = await fetchImpl(endpoint, {
@@ -5593,12 +5606,12 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       timeoutMs,
       fetchImpl
     }) {
-      var _a, _b;
+      var _a2, _b;
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
         const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
-        const systemInstruction = String(((_a = messages[0]) == null ? void 0 : _a.content) || "").trim();
+        const systemInstruction = String(((_a2 = messages[0]) == null ? void 0 : _a2.content) || "").trim();
         const userPrompt = String(((_b = messages[1]) == null ? void 0 : _b.content) || "").trim() || toPlainPromptFromMessages(messages);
         const response = await fetchImpl(`${provider.baseUrl}/messages`, {
           method: "POST",
@@ -5659,68 +5672,115 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       timeoutMs = 45e3,
       fetchImpl = globalThis.fetch
     }) {
-      if (!provider)
-        throw new Error("\u672A\u627E\u5230\u53EF\u7528\u7684 AI Provider");
-      if (typeof fetchImpl !== "function")
-        throw new Error("\u5F53\u524D\u73AF\u5883\u4E0D\u652F\u6301 AI \u7F51\u7EDC\u8BF7\u6C42");
       if (!markdown || !String(markdown).trim())
         throw new Error("\u6587\u7AE0\u5185\u5BB9\u4E3A\u7A7A\uFF0C\u65E0\u6CD5\u8FDB\u884C AI \u7F16\u6392");
       const signals = extractMarkdownSignals(markdown);
       const sourceSections = extractMarkdownSections(markdown).sections;
+      const requestedLayoutFamily = normalizeLayoutFamily(selection == null ? void 0 : selection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
       let rawLayout;
-      switch (provider.kind) {
-        case AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE:
-          rawLayout = await requestOpenAICompatibleLayout({
-            provider,
+      if (!provider) {
+        if (requestedLayoutFamily !== "source-first") {
+          throw new Error("\u672A\u627E\u5230\u53EF\u7528\u7684 AI Provider");
+        }
+        rawLayout = {
+          articleType: "article",
+          title,
+          summary: "",
+          fallbackUsed: true,
+          blocks: []
+        };
+      } else {
+        if (typeof fetchImpl !== "function")
+          throw new Error("\u5F53\u524D\u73AF\u5883\u4E0D\u652F\u6301 AI \u7F51\u7EDC\u8BF7\u6C42");
+        try {
+          switch (provider.kind) {
+            case AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE:
+              rawLayout = await requestOpenAICompatibleLayout({
+                provider,
+                title,
+                markdown,
+                selection,
+                stylePack,
+                imageRefs,
+                timeoutMs,
+                fetchImpl
+              });
+              break;
+            case AI_PROVIDER_KINDS2.GEMINI:
+              rawLayout = await requestGeminiLayout({
+                provider,
+                title,
+                markdown,
+                selection,
+                stylePack,
+                imageRefs,
+                timeoutMs,
+                fetchImpl
+              });
+              break;
+            case AI_PROVIDER_KINDS2.ANTHROPIC:
+              rawLayout = await requestAnthropicLayout({
+                provider,
+                title,
+                markdown,
+                selection,
+                stylePack,
+                imageRefs,
+                timeoutMs,
+                fetchImpl
+              });
+              break;
+            default:
+              throw new Error(`\u6682\u4E0D\u652F\u6301\u7684 AI Provider \u7C7B\u578B: ${provider.kind}`);
+          }
+        } catch (error) {
+          if (!shouldUseLocalFallbackLayout(error, selection)) {
+            throw error;
+          }
+          rawLayout = {
+            articleType: "article",
             title,
-            markdown,
-            selection,
-            stylePack,
-            imageRefs,
-            timeoutMs,
-            fetchImpl
-          });
-          break;
-        case AI_PROVIDER_KINDS2.GEMINI:
-          rawLayout = await requestGeminiLayout({
-            provider,
-            title,
-            markdown,
-            selection,
-            stylePack,
-            imageRefs,
-            timeoutMs,
-            fetchImpl
-          });
-          break;
-        case AI_PROVIDER_KINDS2.ANTHROPIC:
-          rawLayout = await requestAnthropicLayout({
-            provider,
-            title,
-            markdown,
-            selection,
-            stylePack,
-            imageRefs,
-            timeoutMs,
-            fetchImpl
-          });
-          break;
-        default:
-          throw new Error(`\u6682\u4E0D\u652F\u6301\u7684 AI Provider \u7C7B\u578B: ${provider.kind}`);
+            summary: "",
+            fallbackUsed: true,
+            blocks: []
+          };
+        }
       }
-      return buildLayoutResult(rawLayout, {
-        title,
-        selection,
-        stylePack,
-        imageRefs,
-        markdown,
-        provider,
-        signals,
-        sourceSections
-      });
+      try {
+        return buildLayoutResult(rawLayout, {
+          title,
+          selection,
+          stylePack,
+          imageRefs,
+          markdown,
+          provider,
+          signals,
+          sourceSections
+        });
+      } catch (error) {
+        if (!shouldUseLocalFallbackLayout(error, selection)) {
+          throw error;
+        }
+        return buildLayoutResult({
+          articleType: "article",
+          title,
+          summary: "",
+          fallbackUsed: true,
+          blocks: []
+        }, {
+          title,
+          selection,
+          stylePack,
+          imageRefs,
+          markdown,
+          provider: null,
+          signals,
+          sourceSections
+        });
+      }
     }
     async function testAiProviderConnection2(provider, fetchImpl = globalThis.fetch) {
-      var _a, _b;
+      var _a2, _b;
       const result = await generateArticleLayout2({
         provider,
         title: "\u8FDE\u63A5\u6D4B\u8BD5",
@@ -5733,7 +5793,7 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
         timeoutMs: 15e3,
         fetchImpl
       });
-      return !!((_b = (_a = result == null ? void 0 : result.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length);
+      return !!((_b = (_a2 = result == null ? void 0 : result.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b.length);
     }
     function escapeHtml(text) {
       return String(text || "").replace(/[&<>"']/g, (char) => ({
@@ -5745,34 +5805,47 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       })[char]);
     }
     function renderArticleLayoutHtml2(layout, { imageRefs = [] } = {}) {
-      var _a, _b;
-      const layoutFamily = getLayoutFamilyById2(((_a = layout == null ? void 0 : layout.resolved) == null ? void 0 : _a.layoutFamily) || (layout == null ? void 0 : layout.layoutFamily));
+      var _a2, _b, _c, _d, _e, _f, _g, _h;
+      const layoutFamily = getLayoutFamilyById2(((_a2 = layout == null ? void 0 : layout.resolved) == null ? void 0 : _a2.layoutFamily) || (layout == null ? void 0 : layout.layoutFamily));
       const colorPalette = getColorPaletteById2(((_b = layout == null ? void 0 : layout.resolved) == null ? void 0 : _b.colorPalette) || (layout == null ? void 0 : layout.stylePack));
       const tokens = colorPalette.tokens;
+      const renderProfile = getWechatSafeRenderProfile(layoutFamily.id);
+      const typography = AI_WECHAT_SAFE_STYLE_PRIMITIVES.typography || {};
+      const sectionLabelPrefix = ((_c = AI_WECHAT_SAFE_STYLE_PRIMITIVES.sectionLabels) == null ? void 0 : _c[layoutFamily.id]) || "SECTION";
       const isSourceFirst = layoutFamily.id === "source-first";
       const isTutorialCards = layoutFamily.id === "tutorial-cards";
       const isEditorialLite = layoutFamily.id === "editorial-lite";
-      const editorialDisplayFont = 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif';
+      const editorialDisplayFont = typography.editorialDisplayFont || 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif';
       const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
-      const bodyFontSize = 16;
-      const bodyLineHeight = 1.8;
-      const bodyParagraphGap = 20;
+      const bodyFontSize = Number(typography.bodyFontSize || 16);
+      const bodyLineHeight = Number(typography.bodyLineHeight || 1.8);
+      const bodyParagraphGap = Number(typography.paragraphGap || 20);
+      const sharedImageRadius = Number(((_d = AI_WECHAT_SAFE_STYLE_PRIMITIVES.image) == null ? void 0 : _d.borderRadius) || 14);
+      const wrapperPadding = renderProfile.wrapperPadding || (isEditorialLite ? "30px 22px 40px" : isTutorialCards ? "26px 18px 34px" : "20px 16px 28px");
+      const cardRadius = Number((_e = renderProfile.cardRadius) != null ? _e : isSourceFirst ? 10 : isEditorialLite ? 0 : 18);
+      const cardPadding = (_f = renderProfile.cardPadding) != null ? _f : isSourceFirst ? "0" : isEditorialLite ? "0" : "18px";
+      const cardMargin = Number((_g = renderProfile.cardMargin) != null ? _g : isSourceFirst ? 8 : isEditorialLite ? 30 : 18);
+      const cardShadow = (_h = renderProfile.cardShadow) != null ? _h : isTutorialCards ? "0 10px 30px -24px rgba(0,0,0,0.18)" : "none";
+      const heroProfile = renderProfile.hero || {};
+      const partNavProfile = renderProfile.partNav || {};
+      const leadQuoteProfile = renderProfile.leadQuote || {};
+      const caseBlockProfile = renderProfile.caseBlock || {};
       const wrapperStyle = [
-        'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif',
+        `font-family:${typography.bodyFontFamily || '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif'}`,
         `color:${tokens.text}`,
         `font-size:${bodyFontSize}px`,
         `line-height:${bodyLineHeight}`,
-        "letter-spacing:0",
-        `padding:${isEditorialLite ? "30px 22px 40px" : isTutorialCards ? "26px 18px 34px" : "20px 16px 28px"}`,
+        `letter-spacing:${typography.letterSpacing || "0"}`,
+        `padding:${wrapperPadding}`,
         `background:${tokens.surface}`
       ].join(";");
       const cardStyle = [
         `background:${tokens.surface}`,
         `border:1px solid ${tokens.border}`,
-        `border-radius:${isSourceFirst ? 10 : isEditorialLite ? 0 : 18}px`,
-        `padding:${isSourceFirst ? 0 : isEditorialLite ? 0 : 18}px`,
-        `margin:${isSourceFirst ? 8 : isEditorialLite ? 30 : 18}px 0`,
-        `box-shadow:${isTutorialCards ? "0 10px 30px -24px rgba(0,0,0,0.18)" : isEditorialLite ? "none" : "none"}`
+        `border-radius:${cardRadius}px`,
+        `padding:${cardPadding}`,
+        `margin:${cardMargin}px 0`,
+        `box-shadow:${cardShadow}`
       ].join(";");
       const renderImage = (imageId, extraStyle = "") => {
         const image = imageMap.get(imageId);
@@ -5782,25 +5855,25 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
           "display:block",
           "width:100%",
           "height:auto",
-          "border-radius:14px",
+          `border-radius:${sharedImageRadius}px`,
           extraStyle
         ].filter(Boolean).join(";");
         return `<img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || image.caption)}" style="${style}">`;
       };
       const blocksHtml = (layout.blocks || []).map((block, index) => {
         if (block.type === "hero") {
-          const heroImageStyle = isEditorialLite ? "width:100%;max-width:none;flex:none;border-radius:28px;" : isSourceFirst ? "max-width:none;width:100%;flex:none;border-radius:18px;" : "max-width:116px;flex:0 0 116px;border-radius:18px;";
+          const heroImageStyle = isEditorialLite ? `width:100%;max-width:none;flex:none;border-radius:${heroProfile.imageRadius || 28}px;` : isSourceFirst ? `max-width:none;width:100%;flex:none;border-radius:${heroProfile.imageRadius || 18}px;` : `max-width:116px;flex:0 0 116px;border-radius:${heroProfile.imageRadius || 18}px;`;
           const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : "";
           const contentHtml = [
-            block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 2 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : "",
-            block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 6 : isEditorialLite ? 14 : 10}px;font-size:${isSourceFirst ? 26 : isEditorialLite ? 36 : 28}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h1>` : "",
-            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : isEditorialLite ? 17 : 14}px;line-height:${isSourceFirst ? 1.8 : isEditorialLite ? 1.88 : 1.7};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : ""
+            block.eyebrow ? `<div style="font-size:${heroProfile.eyebrowSize || (isEditorialLite ? 10 : 11)}px;font-weight:700;letter-spacing:${heroProfile.eyebrowLetterSpacing || (isEditorialLite ? 2 : 1.2)}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : "",
+            block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 6 : isEditorialLite ? 14 : 10}px;font-size:${heroProfile.titleSize || (isSourceFirst ? 26 : isEditorialLite ? 36 : 28)}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h1>` : "",
+            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${heroProfile.subtitleSize || (isSourceFirst ? 16 : isEditorialLite ? 17 : 14)}px;line-height:${heroProfile.subtitleLineHeight || (isSourceFirst ? 1.8 : isEditorialLite ? 1.88 : 1.7)};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : ""
           ].join("");
           const flexDirection = block.variant === "cover-left" ? "row-reverse" : "row";
-          const heroFooter = isEditorialLite ? `<div style="display:flex;align-items:center;gap:14px;margin-top:24px;">
+          const heroFooter = heroProfile.footerMode === "editorial-divider" ? `<div style="display:flex;align-items:center;gap:14px;margin-top:24px;">
             <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
             <div style="flex:1;height:1px;background:${tokens.border};"></div>
-          </div>` : isSourceFirst ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>` : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`;
+          </div>` : heroProfile.footerMode === "divider" ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>` : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`;
           if (isEditorialLite) {
             return `<section style="margin:4px 0 34px;">
           <div style="max-width:680px;">${contentHtml}</div>
@@ -5825,30 +5898,30 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
         }
         if (block.type === "part-nav") {
           const itemsHtml = block.items.map((item) => `
-        <div style="flex:${isEditorialLite ? "1 1 100%" : "1 1 0"};min-width:0;padding:${isSourceFirst ? "0 0 0 0" : isEditorialLite ? "14px 0" : "12px 10px"};border:${isTutorialCards ? `1px solid ${tokens.border}` : "none"};border-radius:${isTutorialCards ? 14 : 0}px;background:${isTutorialCards ? tokens.surfaceSoft : "transparent"};border-bottom:${isSourceFirst || isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
+        <div style="flex:${partNavProfile.direction === "column" ? "1 1 100%" : isEditorialLite ? "1 1 100%" : "1 1 0"};min-width:0;padding:${isSourceFirst ? "0 0 0 0" : isEditorialLite ? "14px 0" : "12px 10px"};border:${partNavProfile.useCard ? `1px solid ${tokens.border}` : "none"};border-radius:${partNavProfile.useCard ? 14 : 0}px;background:${partNavProfile.useCard ? tokens.surfaceSoft : "transparent"};border-bottom:${partNavProfile.useDivider ? `1px solid ${tokens.border}` : "none"};">
           <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
           <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : isEditorialLite ? 17 : 13}px;font-weight:${isSourceFirst ? 500 : isEditorialLite ? 500 : 600};color:${tokens.text};line-height:${isEditorialLite ? 1.72 : 1.55};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(item.text)}</div>
         </div>
       `).join("");
           return `<section style="margin:${isEditorialLite ? 20 : isSourceFirst ? 20 : 16}px 0 ${isSourceFirst ? 18 : 8}px;">
-        <div style="display:flex;gap:${isSourceFirst ? 16 : 10}px;flex-wrap:wrap;${isSourceFirst ? `padding:0 0 10px;border-bottom:1px solid ${tokens.border};` : ""}${isEditorialLite ? "flex-direction:column;" : ""}">${itemsHtml}</div>
+        <div style="display:flex;gap:${partNavProfile.gap || (isSourceFirst ? 16 : 10)}px;flex-wrap:wrap;${partNavProfile.useDivider && isSourceFirst ? `padding:0 0 10px;border-bottom:1px solid ${tokens.border};` : ""}${partNavProfile.direction === "column" ? "flex-direction:column;" : ""}">${itemsHtml}</div>
       </section>`;
         }
         if (block.type === "lead-quote") {
-          return `<section style="margin:${isSourceFirst ? 14 : isEditorialLite ? 26 : 18}px 0;padding:${isSourceFirst ? "0 0 0 14px" : isEditorialLite ? "24px 0" : "18px"};border-radius:${isTutorialCards ? 16 : 0}px;background:${isTutorialCards ? tokens.quoteBg : "transparent"};border:${isTutorialCards ? `1px solid ${tokens.border}` : "none"};border-left:${isSourceFirst ? `3px solid ${tokens.accent}` : "none"};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
-        <div style="font-size:${isSourceFirst ? 16 : isEditorialLite ? 26 : 18}px;font-weight:${isSourceFirst ? 600 : isEditorialLite ? 600 : 700};line-height:${isEditorialLite ? 1.7 : 1.75};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.text)}</div>
+          return `<section style="margin:${isSourceFirst ? 14 : isEditorialLite ? 26 : 18}px 0;padding:${isSourceFirst ? "0 0 0 14px" : isEditorialLite ? "24px 0" : "18px"};border-radius:${isTutorialCards ? 16 : 0}px;background:${leadQuoteProfile.background === "quoteBg" ? tokens.quoteBg : "transparent"};border:${isTutorialCards ? `1px solid ${tokens.border}` : "none"};border-left:${leadQuoteProfile.borderLeft ? `3px solid ${tokens.accent}` : "none"};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
+        <div style="font-size:${leadQuoteProfile.fontSize || (isSourceFirst ? 16 : isEditorialLite ? 26 : 18)}px;font-weight:${leadQuoteProfile.fontWeight || (isSourceFirst ? 600 : isEditorialLite ? 600 : 700)};line-height:${isEditorialLite ? 1.7 : 1.75};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.text)}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ""}
       </section>`;
         }
         if (block.type === "case-block") {
           const imagesHtml = block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("");
           const bulletsHtml = block.bullets.length ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>` : "";
-          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 32 : 26}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};` : ""}">
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 32 : 26}px 0;${caseBlockProfile.useCard ? `padding:18px;border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};` : ""}">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:${isSourceFirst ? 22 : isEditorialLite ? 14 : 28}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${isEditorialLite ? String(index + 1).padStart(2, "0") : String(index + 1).padStart(2, "0")}</div>
+          <div style="font-size:${caseBlockProfile.indexSize || (isSourceFirst ? 22 : isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${String(index + 1).padStart(2, "0")}</div>
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
-        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : isEditorialLite ? 26 : 22}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h2>` : ""}
+        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${caseBlockProfile.titleSize || (isSourceFirst ? 20 : isEditorialLite ? 26 : 22)}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h2>` : ""}
         ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ""}
         ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ""}
         ${bulletsHtml}
@@ -5869,16 +5942,16 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
           }).join("") : "";
           const imagesHtml = Array.isArray(block.imageIds) ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("") : "";
           const sectionHead = isSourceFirst ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">Section ${String(sectionDisplayIndex).padStart(2, "0")}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
             <div style="height:1px;flex:1;background:${tokens.border};"></div>
           </div>` : isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-              <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">Part ${String(sectionDisplayIndex).padStart(2, "0")}</div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
               <div style="width:42px;height:1px;background:${tokens.border};"></div>
             </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
           </div>`;
-          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 36 : 26}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};box-shadow:0 10px 30px -24px rgba(0,0,0,0.14);` : ""}${isSourceFirst ? `padding-top:4px;` : ""}">
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 36 : 26}px 0;${caseBlockProfile.useCard && isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};box-shadow:${cardShadow};` : ""}${isSourceFirst ? `padding-top:4px;` : ""}">
         ${sectionHead}
         ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${titleColor};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h2>` : ""}
         ${paragraphsHtml}
@@ -8332,6 +8405,76 @@ var AppleStyleView = class extends ItemView {
     }
     return null;
   }
+  async recoverSourceFirstLayoutState(currentState = null, selection = null, context = null) {
+    var _a, _b, _c, _d, _e, _f;
+    const requestedSelection = normalizeLayoutSelection(selection || this.getCurrentAiLayoutSelection(), {
+      layoutFamily: ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    if (requestedSelection.layoutFamily !== "source-first")
+      return null;
+    const sourceContext = (context == null ? void 0 : context.sourcePath) ? context : await this.ensureCurrentArticleContext();
+    if (!(sourceContext == null ? void 0 : sourceContext.sourcePath) || !(sourceContext == null ? void 0 : sourceContext.markdown))
+      return null;
+    if ((currentState == null ? void 0 : currentState.status) === "ready" && ((_d = (_c = currentState == null ? void 0 : currentState.layoutJson) == null ? void 0 : _c.blocks) == null ? void 0 : _d.length))
+      return currentState;
+    const recoveryKey = `${sourceContext.sourcePath}::${requestedSelection.layoutFamily}::${requestedSelection.colorPalette}::${sourceContext.sourceHash}`;
+    if (this._sourceFirstRecoveryKey === recoveryKey)
+      return null;
+    this._sourceFirstRecoveryKey = recoveryKey;
+    try {
+      if (!this.baseRenderedHtml) {
+        await this.convertCurrent(true, { showLoading: false });
+      }
+      const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+      const provider = resolveAiProvider(aiSettings);
+      const imageRefs = aiSettings.includeImagesInLayout === false ? [] : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+      const result = await generateArticleLayout({
+        provider,
+        title: sourceContext.title,
+        markdown: sourceContext.markdown,
+        selection: requestedSelection,
+        imageRefs,
+        timeoutMs: aiSettings.requestTimeoutMs
+      });
+      const layoutJson = result.layoutJson;
+      if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length)
+        return null;
+      await this.plugin.saveArticleLayoutState(sourceContext.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: Date.now(),
+        sourceHash: sourceContext.sourceHash,
+        providerId: (provider == null ? void 0 : provider.id) || "",
+        model: (provider == null ? void 0 : provider.model) || "",
+        selection: layoutJson.selection,
+        resolved: layoutJson.resolved,
+        recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+        recommendedColorPalette: layoutJson.recommendedColorPalette,
+        stylePack: layoutJson.stylePack,
+        status: "ready",
+        lastError: "",
+        lastAttemptStatus: "success",
+        lastAttemptError: "",
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: null,
+        dismissedBlockKeys: [],
+        generationMeta: result.generationMeta,
+        layoutJson
+      }, layoutJson.selection);
+      this.pendingAiLayoutFamily = ((_e = layoutJson.selection) == null ? void 0 : _e.layoutFamily) || requestedSelection.layoutFamily;
+      this.pendingAiColorPalette = ((_f = layoutJson.selection) == null ? void 0 : _f.colorPalette) || requestedSelection.colorPalette;
+      this.pendingAiStylePack = this.pendingAiColorPalette;
+      this.refreshAiLayoutPanel();
+      return layoutJson;
+    } catch (error) {
+      console.error("\u539F\u6587\u589E\u5F3A\u578B\u672C\u5730\u6062\u590D\u5931\u8D25:", error);
+      return null;
+    } finally {
+      if (this._sourceFirstRecoveryKey === recoveryKey) {
+        this._sourceFirstRecoveryKey = "";
+      }
+    }
+  }
   async ensureAiLayoutSelectionState(baseState = null, selection = null) {
     var _a, _b, _c, _d, _e, _f, _g;
     const context = this.getCurrentLayoutContext();
@@ -8736,7 +8879,7 @@ var AppleStyleView = class extends ItemView {
     this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
   }
   refreshAiLayoutPanel() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r;
     if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
       return;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
@@ -8750,6 +8893,9 @@ var AppleStyleView = class extends ItemView {
       colorPalette: currentSelection.colorPalette || ((_b = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _b.colorPalette) || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
     };
     const state = storedState;
+    if (effectiveSelection.layoutFamily === "source-first" && context.sourcePath && (!state || (state.status === "error" || state.status === "schema-error") && !((_d = (_c = state.layoutJson) == null ? void 0 : _c.blocks) == null ? void 0 : _d.length))) {
+      this.recoverSourceFirstLayoutState(state, effectiveSelection, context);
+    }
     const generationMeta = (state == null ? void 0 : state.generationMeta) || null;
     const schemaValidation = this.getVisibleAiSchemaValidation(state);
     const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
@@ -8759,7 +8905,7 @@ var AppleStyleView = class extends ItemView {
     const visibleLayout = visibleSnapshot.layoutJson;
     const visibleBlockOrigins = visibleSnapshot.blockOrigins;
     const hiddenBlockCount = visibleSnapshot.hiddenCount;
-    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_c = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _c.length));
+    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_e = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _e.length));
     const hasLastAttemptFailure = (state == null ? void 0 : state.lastAttemptStatus) === "error" || (state == null ? void 0 : state.lastAttemptStatus) === "schema-error";
     const hasDoc = !!context.sourcePath;
     const hasProvider = !!provider;
@@ -8794,7 +8940,9 @@ var AppleStyleView = class extends ItemView {
       statusText = state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u91CD\u65B0\u751F\u6210\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u6210\u529F\u7ED3\u679C\u3002" : "\u6700\u8FD1\u4E00\u6B21\u91CD\u65B0\u751F\u6210\u5931\u8D25\uFF0C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u6210\u529F\u7ED3\u679C\u3002";
     } else if (state) {
       badge = hasApplied ? "\u5DF2\u5E94\u7528" : "\u5DF2\u751F\u6210";
-      if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
+      if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
+        statusText = "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5DF2\u5207\u6362\u4E3A\u672C\u5730\u515C\u5E95\uFF0C\u6B63\u6587\u7ED3\u6784\u4ECD\u6309\u5F53\u524D\u6587\u7AE0\u4FDD\u771F\u8F93\u51FA\u3002";
+      } else if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
         statusText = `\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u4F7F\u7528 ${modelLabel || provider.model}\uFF0C\u5E76\u8865\u5168\u4E86 ${generationMeta.fallbackBlockCount} \u4E2A\u533A\u5757\u3002`;
       } else {
         statusText = `\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u4F7F\u7528 ${modelLabel || provider.model}\uFF0C\u53EF\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\u3002`;
@@ -8804,7 +8952,7 @@ var AppleStyleView = class extends ItemView {
     this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
     this.aiLayoutStatusText.setText(statusText);
     this.applyAiLayoutPanelStylePack(
-      ((_d = state == null ? void 0 : state.resolved) == null ? void 0 : _d.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
+      ((_f = state == null ? void 0 : state.resolved) == null ? void 0 : _f.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
     );
     this.aiLayoutFamilySelect.value = effectiveSelection.layoutFamily;
     this.aiColorPaletteSelect.value = effectiveSelection.colorPalette;
@@ -8820,7 +8968,7 @@ var AppleStyleView = class extends ItemView {
     if (this.aiLayoutOverlay) {
       this.aiLayoutOverlay.classList.toggle("is-loading", isLoading);
     }
-    const converterContainer = (_e = this.previewContainer) == null ? void 0 : _e.closest(".apple-converter-container");
+    const converterContainer = (_g = this.previewContainer) == null ? void 0 : _g.closest(".apple-converter-container");
     if (converterContainer) {
       converterContainer.classList.toggle("apple-ai-layout-panel-loading", isLoading);
     }
@@ -8842,16 +8990,16 @@ var AppleStyleView = class extends ItemView {
         `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`,
         aiSettings.includeImagesInLayout === false ? "\u4EC5\u6B63\u6587\u7ED3\u6784" : "\u4F18\u5148\u53C2\u8003\u56FE\u7247"
       ]);
-      (_f = this.aiLayoutMetaNote) == null ? void 0 : _f.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u81EA\u52A8\u5237\u65B0\u533A\u5757\u6E05\u5355\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u6839\u636E\u7ED3\u679C\u79FB\u9664\u591A\u4F59\u533A\u5757\u3002");
+      (_h = this.aiLayoutMetaNote) == null ? void 0 : _h.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u81EA\u52A8\u5237\u65B0\u533A\u5757\u6E05\u5355\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u6839\u636E\u7ED3\u679C\u79FB\u9664\u591A\u4F59\u533A\u5757\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else if (!aiFeatureEnabled) {
       this.aiLayoutSummary.setText("\u4F60\u53EF\u4EE5\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E Provider\uFF0C\u5E76\u542F\u7528 AI \u7F16\u6392\u540E\u518D\u56DE\u5230\u8FD9\u91CC\u64CD\u4F5C\u3002");
-      (_g = this.aiLayoutMetaNote) == null ? void 0 : _g.setText("AI \u8F93\u51FA\u53EA\u8D1F\u8D23\u7ED3\u6784\u5316\u7F16\u6392\uFF0C\u6700\u7EC8\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
+      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("AI \u8F93\u51FA\u53EA\u8D1F\u8D23\u7ED3\u6784\u5316\u7F16\u6392\uFF0C\u6700\u7EC8\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (!hasDoc) {
       this.aiLayoutSummary.setText("\u6253\u5F00\u6587\u7AE0\u540E\uFF0C\u53EF\u4EE5\u9488\u5BF9\u5F53\u524D\u6587\u6863\u751F\u6210\u4E13\u5C5E\u6392\u7248\u3002");
-      (_h = this.aiLayoutMetaNote) == null ? void 0 : _h.setText("\u5F53\u524D\u652F\u6301\u201C\u539F\u6587\u589E\u5F3A\u578B\u201D\u201C\u6559\u7A0B\u5361\u7247\u578B\u201D\u201C\u8F7B\u6742\u5FD7\u578B\u201D\u4E09\u79CD\u5E03\u5C40\u3002");
+      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("\u5F53\u524D\u652F\u6301\u201C\u539F\u6587\u589E\u5F3A\u578B\u201D\u201C\u6559\u7A0B\u5361\u7247\u578B\u201D\u201C\u8F7B\u6742\u5FD7\u578B\u201D\u4E09\u79CD\u5E03\u5C40\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
@@ -8866,7 +9014,7 @@ var AppleStyleView = class extends ItemView {
       if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
         errorChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
       this.renderAiLayoutMetaChips(errorChips);
-      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("\u8FD9\u901A\u5E38\u8868\u793A\u6A21\u578B\u8F93\u51FA\u5B57\u6BB5\u4E0D\u5408\u89C4\u3001block type \u4E0D\u652F\u6301\uFF0C\u6216\u9876\u5C42\u7ED3\u6784\u7F3A\u5931\u3002");
+      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u8FD9\u901A\u5E38\u8868\u793A\u6A21\u578B\u8F93\u51FA\u5B57\u6BB5\u4E0D\u5408\u89C4\u3001block type \u4E0D\u652F\u6301\uFF0C\u6216\u9876\u5C42\u7ED3\u6784\u7F3A\u5931\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
       this.aiLayoutSummary.setText(`\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25\uFF1A${state.lastError}`);
@@ -8876,7 +9024,7 @@ var AppleStyleView = class extends ItemView {
       if (modelLabel)
         errorChips.push(`\u6A21\u578B ${modelLabel}`);
       this.renderAiLayoutMetaChips(errorChips);
-      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("\u4FEE\u6B63\u914D\u7F6E\u540E\u53EF\u4EE5\u76F4\u63A5\u91CD\u751F\u6210\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u666E\u901A\u9884\u89C8\u3002");
+      (_l = this.aiLayoutMetaNote) == null ? void 0 : _l.setText("\u4FEE\u6B63\u914D\u7F6E\u540E\u53EF\u4EE5\u76F4\u63A5\u91CD\u751F\u6210\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u666E\u901A\u9884\u89C8\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if (!state) {
       this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u65B0\u7684\u5E03\u5C40\u4E0E\u989C\u8272\u7EC4\u5408\u7ED3\u679C\u3002`);
@@ -8885,12 +9033,12 @@ var AppleStyleView = class extends ItemView {
         `\u5E03\u5C40 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
         `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`
       ]);
-      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u4F60\u5207\u6362\u5230\u4E86\u65B0\u7684\u5E03\u5C40\u6216\u989C\u8272\u7EC4\u5408\uFF1B\u91CD\u65B0\u751F\u6210\u540E\u4F1A\u5C55\u793A\u8FD9\u4E00\u4EFD\u5BF9\u5E94\u7684\u533A\u5757\u6E05\u5355\u3002");
+      (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText("\u4F60\u5207\u6362\u5230\u4E86\u65B0\u7684\u5E03\u5C40\u6216\u989C\u8272\u7EC4\u5408\uFF1B\u91CD\u65B0\u751F\u6210\u540E\u4F1A\u5C55\u793A\u8FD9\u4E00\u4EFD\u5BF9\u5E94\u7684\u533A\u5757\u6E05\u5355\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else {
       const summaryBits = [
         `\u6587\u7AE0\u7C7B\u578B\uFF1A${visibleLayout.articleType || state.layoutJson.articleType || "article"}`,
-        `\u533A\u5757\u6570\uFF1A${((_l = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _l.length) || 0}`
+        `\u533A\u5757\u6570\uFF1A${((_n = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _n.length) || 0}`
       ];
       if (generationMeta == null ? void 0 : generationMeta.sectionCount) {
         summaryBits.push(`\u7AE0\u8282\uFF1A${generationMeta.sectionCount}`);
@@ -8906,13 +9054,19 @@ var AppleStyleView = class extends ItemView {
         metaChips.push(`Provider ${providerLabel}`);
       if (modelLabel)
         metaChips.push(`\u6A21\u578B ${modelLabel}`);
+      if (generationMeta == null ? void 0 : generationMeta.skillLabel)
+        metaChips.push(`\u6280\u80FD ${generationMeta.skillLabel}`);
+      if (generationMeta == null ? void 0 : generationMeta.skillVersion)
+        metaChips.push(`\u7248\u672C ${generationMeta.skillVersion}`);
       if (generationMeta == null ? void 0 : generationMeta.layoutFamilyLabel)
         metaChips.push(`\u5E03\u5C40 ${generationMeta.layoutFamilyLabel}`);
       if (generationMeta == null ? void 0 : generationMeta.colorPaletteLabel)
         metaChips.push(`\u989C\u8272 ${generationMeta.colorPaletteLabel}`);
       if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
         metaChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
-      if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
+      if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
+        metaChips.push("\u672C\u5730\u515C\u5E95");
+      } else if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
         metaChips.push(`\u8865\u5168 ${generationMeta.fallbackBlockCount} \u5757`);
       } else if (generationMeta == null ? void 0 : generationMeta.finalBlockCount) {
         metaChips.push("\u7EAF AI \u8F93\u51FA");
@@ -8924,12 +9078,12 @@ var AppleStyleView = class extends ItemView {
       }
       this.renderAiLayoutMetaChips(metaChips);
       const updateText = new Date(state.updatedAt).toLocaleString();
-      const baseNote = (generationMeta == null ? void 0 : generationMeta.fallbackUsed) ? `\u5DF2\u8BC6\u522B ${generationMeta.sectionCount || generationMeta.headingCount || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${generationMeta.imageCount || 0} \u5F20\uFF1B\u5176\u4E2D ${generationMeta.fallbackBlockCount} \u4E2A\u533A\u5757\u7531\u672C\u5730\u89C4\u5219\u8865\u5168\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002` : `\u5DF2\u8BC6\u522B ${(generationMeta == null ? void 0 : generationMeta.sectionCount) || (generationMeta == null ? void 0 : generationMeta.headingCount) || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${(generationMeta == null ? void 0 : generationMeta.imageCount) || 0} \u5F20\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002`;
+      const baseNote = (generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback" ? `\u5F53\u524D\u4F7F\u7528 ${(generationMeta == null ? void 0 : generationMeta.skillLabel) || "\u539F\u6587\u589E\u5F3A\u578B"} \u7684\u672C\u5730\u515C\u5E95\u7ED3\u679C\uFF1B\u5DF2\u8BC6\u522B ${generationMeta.sectionCount || generationMeta.headingCount || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${generationMeta.imageCount || 0} \u5F20\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002` : (generationMeta == null ? void 0 : generationMeta.fallbackUsed) ? `\u5DF2\u8BC6\u522B ${generationMeta.sectionCount || generationMeta.headingCount || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${generationMeta.imageCount || 0} \u5F20\uFF1B\u5176\u4E2D ${generationMeta.fallbackBlockCount} \u4E2A\u533A\u5757\u7531\u672C\u5730\u89C4\u5219\u8865\u5168\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002` : `\u5DF2\u8BC6\u522B ${(generationMeta == null ? void 0 : generationMeta.sectionCount) || (generationMeta == null ? void 0 : generationMeta.headingCount) || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${(generationMeta == null ? void 0 : generationMeta.imageCount) || 0} \u5F20\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002`;
       if (hasLastAttemptFailure && state.lastAttemptError) {
         const lastAttemptText = state.lastAttemptAt ? `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u4E8E ${new Date(state.lastAttemptAt).toLocaleString()} \u5931\u8D25\uFF1A${state.lastAttemptError}` : `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u5931\u8D25\uFF1A${state.lastAttemptError}`;
-        (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(`${baseNote} ${lastAttemptText}`);
+        (_o = this.aiLayoutMetaNote) == null ? void 0 : _o.setText(`${baseNote} ${lastAttemptText}`);
       } else {
-        (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(baseNote);
+        (_p = this.aiLayoutMetaNote) == null ? void 0 : _p.setText(baseNote);
       }
       this.refreshAiSchemaIssuePanel(schemaValidation);
     }
@@ -8943,7 +9097,7 @@ var AppleStyleView = class extends ItemView {
         content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-meta" });
         item.createDiv({ cls: "apple-ai-layout-block-skeleton-badge" });
       }
-    } else if ((_o = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _o.length) {
+    } else if ((_q = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _q.length) {
       visibleLayout.blocks.forEach((block, index) => {
         const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
         const origin = (visibleBlockOrigins == null ? void 0 : visibleBlockOrigins[index]) || null;
@@ -8982,7 +9136,7 @@ var AppleStyleView = class extends ItemView {
       });
     }
     this.aiGenerateBtn.disabled = !hasDoc || !hasProvider || !aiFeatureEnabled || isLoading;
-    this.aiApplyBtn.disabled = !state || !((_p = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _p.length) || isStale || (state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || !aiFeatureEnabled || isLoading;
+    this.aiApplyBtn.disabled = !state || !((_r = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _r.length) || isStale || (state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || !aiFeatureEnabled || isLoading;
     this.aiResetBtn.disabled = !this.aiPreviewApplied || isLoading;
     if (this.aiRestoreBlocksBtn) {
       this.aiRestoreBlocksBtn.disabled = hiddenBlockCount <= 0 || isLoading;
@@ -9014,13 +9168,8 @@ var AppleStyleView = class extends ItemView {
     };
   }
   async generateAiLayoutForCurrentArticle() {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
-    const provider = resolveAiProvider(aiSettings);
-    if (!provider) {
-      new Notice("\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u5E76\u542F\u7528 AI Provider");
-      return;
-    }
     const context = await this.ensureCurrentArticleContext();
     if (!context) {
       new Notice("\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6709\u5185\u5BB9\u7684 Markdown \u6587\u7AE0");
@@ -9031,6 +9180,11 @@ var AppleStyleView = class extends ItemView {
     }
     const imageRefs = aiSettings.includeImagesInLayout === false ? [] : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
     const selection = this.getCurrentAiLayoutSelection();
+    const provider = resolveAiProvider(aiSettings);
+    if (selection.layoutFamily !== "source-first" && !provider) {
+      new Notice("\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u5E76\u542F\u7528 AI Provider");
+      return;
+    }
     const originalText = (_a = this.aiGenerateBtn) == null ? void 0 : _a.textContent;
     try {
       this.aiLayoutLoading = true;
@@ -9055,8 +9209,8 @@ var AppleStyleView = class extends ItemView {
         version: AI_LAYOUT_SCHEMA_VERSION,
         updatedAt: Date.now(),
         sourceHash: context.sourceHash,
-        providerId: provider.id,
-        model: provider.model,
+        providerId: (provider == null ? void 0 : provider.id) || "",
+        model: (provider == null ? void 0 : provider.model) || "",
         selection: layoutJson.selection,
         resolved: layoutJson.resolved,
         recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
@@ -9074,18 +9228,20 @@ var AppleStyleView = class extends ItemView {
       }, layoutJson.selection);
       this.pendingAiLayoutFamily = ((_b = layoutJson.selection) == null ? void 0 : _b.layoutFamily) || selection.layoutFamily;
       this.pendingAiColorPalette = ((_c = layoutJson.selection) == null ? void 0 : _c.colorPalette) || selection.colorPalette;
-      new Notice("\u2705 AI \u7F16\u6392\u5DF2\u751F\u6210\uFF0C\u53EF\u5E94\u7528\u5230\u9884\u89C8\u67E5\u770B\u6548\u679C");
+      new Notice(
+        ((_d = result.generationMeta) == null ? void 0 : _d.executionMode) === "local-fallback" ? "\u2705 \u5DF2\u751F\u6210\u539F\u6587\u589E\u5F3A\u578B\u672C\u5730\u515C\u5E95\u7F16\u6392\uFF0C\u53EF\u5E94\u7528\u5230\u9884\u89C8\u67E5\u770B\u6548\u679C" : "\u2705 AI \u7F16\u6392\u5DF2\u751F\u6210\uFF0C\u53EF\u5E94\u7528\u5230\u9884\u89C8\u67E5\u770B\u6548\u679C"
+      );
     } catch (error) {
       console.error("AI \u7F16\u6392\u751F\u6210\u5931\u8D25:", error);
       const previousState = this.getCurrentArticleLayoutState();
       const isSchemaError = (error == null ? void 0 : error.code) === "ai-layout-schema-invalid";
-      const hasReusablePreviousLayout = !!((previousState == null ? void 0 : previousState.status) === "ready" && ((_e = (_d = previousState == null ? void 0 : previousState.layoutJson) == null ? void 0 : _d.blocks) == null ? void 0 : _e.length));
+      const hasReusablePreviousLayout = !!((previousState == null ? void 0 : previousState.status) === "ready" && ((_f = (_e = previousState == null ? void 0 : previousState.layoutJson) == null ? void 0 : _e.blocks) == null ? void 0 : _f.length));
       await this.plugin.saveArticleLayoutState(context.sourcePath, {
         version: AI_LAYOUT_SCHEMA_VERSION,
         updatedAt: hasReusablePreviousLayout ? previousState.updatedAt : Date.now(),
         sourceHash: hasReusablePreviousLayout ? previousState.sourceHash : context.sourceHash,
-        providerId: provider.id,
-        model: provider.model,
+        providerId: (provider == null ? void 0 : provider.id) || "",
+        model: (provider == null ? void 0 : provider.model) || "",
         selection: hasReusablePreviousLayout ? previousState.selection : selection,
         resolved: hasReusablePreviousLayout ? previousState.resolved : {
           layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "source-first" : selection.layoutFamily,
@@ -9099,7 +9255,7 @@ var AppleStyleView = class extends ItemView {
         lastAttemptStatus: isSchemaError ? "schema-error" : "error",
         lastAttemptError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
         lastAttemptAt: Date.now(),
-        lastAttemptSchemaValidation: (error == null ? void 0 : error.schemaValidation) || ((_f = error == null ? void 0 : error.generationMeta) == null ? void 0 : _f.schemaValidation) || null,
+        lastAttemptSchemaValidation: (error == null ? void 0 : error.schemaValidation) || ((_g = error == null ? void 0 : error.generationMeta) == null ? void 0 : _g.schemaValidation) || null,
         dismissedBlockKeys: hasReusablePreviousLayout ? previousState.dismissedBlockKeys || [] : [],
         generationMeta: hasReusablePreviousLayout ? previousState.generationMeta : (error == null ? void 0 : error.generationMeta) || (previousState == null ? void 0 : previousState.generationMeta) || null,
         layoutJson: hasReusablePreviousLayout ? previousState.layoutJson : (previousState == null ? void 0 : previousState.layoutJson) || {
@@ -10950,7 +11106,7 @@ var AppleStylePlugin = class extends Plugin {
     });
   }
   async saveArticleLayoutState(sourcePath = "", nextState = null, selection = {}) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f, _g;
     const normalizedPath = normalizeVaultPath(sourcePath || "");
     if (!normalizedPath)
       return false;
@@ -10993,10 +11149,14 @@ var AppleStylePlugin = class extends Plugin {
         delete this.settings.ai.articleLayoutsByPath[normalizedPath];
       }
     } else {
+      const inferredSkillId = (nextState == null ? void 0 : nextState.skillId) || ((_d = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _d.layoutFamily) || (nextState == null ? void 0 : nextState.layoutFamily) || requestedSelection.layoutFamily;
+      const inferredSkillVersion = (nextState == null ? void 0 : nextState.skillVersion) || ((_e = nextState == null ? void 0 : nextState.generationMeta) == null ? void 0 : _e.skillVersion) || ((_f = getLayoutFamilyById(inferredSkillId)) == null ? void 0 : _f.version) || "";
       existingEntry.selectionStates[effectiveSelectionKey] = {
         ...nextState,
+        skillId: inferredSkillId,
+        skillVersion: inferredSkillVersion,
         selection: requestedSelection,
-        stylePack: (nextState == null ? void 0 : nextState.stylePack) || ((_d = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _d.colorPalette) || "tech-green"
+        stylePack: (nextState == null ? void 0 : nextState.stylePack) || ((_g = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _g.colorPalette) || "tech-green"
       };
       existingEntry.lastSelectionKey = effectiveSelectionKey;
       this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
