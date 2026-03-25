@@ -1,6 +1,15 @@
 {
   "articleType": "tutorial",
-  "stylePack": "tech-green",
+  "selection": {
+    "layoutFamily": "auto",
+    "colorPalette": "auto"
+  },
+  "resolved": {
+    "layoutFamily": "tutorial-cards",
+    "colorPalette": "tech-green"
+  },
+  "recommendedLayoutFamily": "tutorial-cards",
+  "recommendedColorPalette": "tech-green",
   "title": "文章标题",
   "summary": "一句摘要",
   "blocks": [
@@ -11,13 +20,6 @@
       "subtitle": "封面导语",
       "coverImageId": "image-1",
       "variant": "cover-right"
-    },
-    {
-      "type": "part-nav",
-      "items": [
-        { "label": "PART 01", "text": "第一部分" },
-        { "label": "PART 02", "text": "第二部分" }
-      ]
     },
     {
       "type": "lead-quote",

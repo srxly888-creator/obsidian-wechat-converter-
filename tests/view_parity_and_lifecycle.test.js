@@ -619,7 +619,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(originBadges).toContain('补全');
   });
 
-  it('refreshAiLayoutPanel should reset to initial state when selected style pack has no cached result', () => {
+  it('refreshAiLayoutPanel should reset to initial state when selected color palette has no cached result', () => {
     const cachedState = {
       version: 1,
       updatedAt: Date.now(),
@@ -708,13 +708,13 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.refreshAiLayoutPanel();
 
     expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('未生成');
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('当前风格包还没有生成结果');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('当前布局和颜色组合还没有生成结果');
     expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('将为');
     expect(container.querySelector('.apple-ai-layout-empty')?.textContent).toContain('生成后会展示区块清单');
     expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(0);
   });
 
-  it('refreshAiLayoutPanel should restore cached blocks when switching back to another generated style pack', () => {
+  it('refreshAiLayoutPanel should restore cached blocks when switching back to another generated color palette', () => {
     const greenState = {
       version: 1,
       updatedAt: Date.now(),
@@ -818,8 +818,108 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.pendingAiStylePack = 'tech-green';
     view.refreshAiLayoutPanel();
     expect(container.querySelector('.apple-ai-layout-block-name')?.textContent).toContain('科技绿标题');
-    expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', 'tech-green');
+    expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', expect.objectContaining({ colorPalette: 'tech-green' }));
+    expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', expect.objectContaining({ colorPalette: 'ocean-blue' }));
     expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', 'ocean-blue');
+  });
+
+  it('ensureAiLayoutSelectionState should derive and persist a new color variant from the current layout', async () => {
+    const greenState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      providerId: 'provider-1',
+      model: 'deepseek-chat',
+      selection: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'tech-green',
+      },
+      resolved: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'tech-green',
+      },
+      recommendedLayoutFamily: 'editorial-lite',
+      recommendedColorPalette: 'graphite-rose',
+      stylePack: 'tech-green',
+      status: 'ready',
+      lastError: '',
+      lastAttemptStatus: 'success',
+      generationMeta: {
+        layoutFamilyLabel: '轻杂志型',
+        colorPaletteLabel: '科技绿',
+        stylePackLabel: '科技绿',
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '经验复盘' }],
+      },
+      layoutJson: {
+        articleType: 'article',
+        selection: {
+          layoutFamily: 'editorial-lite',
+          colorPalette: 'tech-green',
+        },
+        resolved: {
+          layoutFamily: 'editorial-lite',
+          colorPalette: 'tech-green',
+        },
+        recommendedLayoutFamily: 'editorial-lite',
+        recommendedColorPalette: 'graphite-rose',
+        stylePack: 'tech-green',
+        layoutFamily: 'editorial-lite',
+        title: '经验复盘',
+        summary: '这是一句摘要。',
+        blocks: [{ type: 'hero', title: '经验复盘' }],
+      },
+    };
+
+    const getArticleLayoutState = vi.fn((_, selection) => {
+      if (selection && typeof selection === 'object' && selection.colorPalette === 'ocean-blue') return null;
+      return greenState;
+    });
+    const saveArticleLayoutState = vi.fn().mockResolvedValue(true);
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultLayoutFamily: 'editorial-lite',
+          defaultColorPalette: 'tech-green',
+          providers: [],
+          articleLayoutsByPath: {},
+        },
+      },
+      saveSettings: vi.fn(),
+      getArticleLayoutState,
+      saveArticleLayoutState,
+    });
+    view.app = {
+      isMobile: false,
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    view.lastResolvedSourceHash = '123';
+
+    const derivedState = await view.ensureAiLayoutSelectionState(greenState, {
+      layoutFamily: 'editorial-lite',
+      colorPalette: 'ocean-blue',
+    });
+
+    expect(derivedState).toBeTruthy();
+    expect(derivedState.stylePack).toBe('ocean-blue');
+    expect(derivedState.layoutJson.stylePack).toBe('ocean-blue');
+    expect(derivedState.selection.colorPalette).toBe('ocean-blue');
+    expect(saveArticleLayoutState).toHaveBeenCalledWith(
+      'notes/demo.md',
+      expect.objectContaining({
+        stylePack: 'ocean-blue',
+        selection: expect.objectContaining({ colorPalette: 'ocean-blue' }),
+      }),
+      expect.objectContaining({
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'ocean-blue',
+      })
+    );
   });
 
   it('refreshAiLayoutPanel should hide dismissed blocks and enable restore action', () => {
@@ -951,7 +1051,7 @@ describe('AppleStyleView native render + lifecycle', () => {
 
     expect(container.querySelector('.apple-ai-layout-overlay')?.classList.contains('is-loading')).toBe(true);
     expect(container.querySelector('.apple-ai-layout-loading-mask')?.classList.contains('visible')).toBe(true);
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('正在基于当前文章和风格包生成');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('正在基于当前文章、布局和颜色生成');
   });
 
   it('refreshAiLayoutPanel should toggle debug panel for layout json and error details', () => {

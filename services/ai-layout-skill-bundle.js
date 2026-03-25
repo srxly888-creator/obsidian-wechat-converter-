@@ -1,4 +1,7 @@
-const AI_LAYOUT_SKILL_VERSION = '2026.03.24-alpha.1';
+const AI_LAYOUT_SKILL_VERSION = '2026.03.24-alpha.2';
+const AI_LAYOUT_SELECTION_AUTO = 'auto';
+const AI_LAYOUT_FAMILIES = ['source-first', 'tutorial-cards', 'editorial-lite'];
+const AI_LAYOUT_COLOR_PALETTES = ['tech-green', 'ocean-blue', 'sunset-amber', 'graphite-rose'];
 
 const AI_LAYOUT_ALLOWED_BLOCKS = [
   {
@@ -43,6 +46,8 @@ const AI_LAYOUT_SKILL_SYSTEM_LINES = [
   '你的职责是把文章内容映射为结构化的排版 JSON。',
   '不要输出 Markdown，不要输出 HTML，不要解释，只输出一个 JSON 对象。',
   `只允许使用这些 block type: ${AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type).join(', ')}。`,
+  `layoutFamily 只允许使用这些值: ${AI_LAYOUT_FAMILIES.join(', ')}。`,
+  `colorPalette 只允许使用这些值: ${AI_LAYOUT_COLOR_PALETTES.join(', ')}。`,
   'block 内不要杜撰图片 URL，只能使用提供的 image id。',
   '尽量保留原文信息，不要改写作者观点，不要编造数据。',
   '优先覆盖全文主要章节，保真优先于花哨编排。',
@@ -50,9 +55,21 @@ const AI_LAYOUT_SKILL_SYSTEM_LINES = [
   '如果原文存在明显章节标题，正文主体优先转成 section-block。',
   '如果有图片，优先挑 1 到 2 张最像封面/截图的图进入 hero 或 phone-frame；普通配图不要强行套手机壳。',
   '不要默认追加 CTA；只有原文本身适合收尾引导时才使用 cta-card。',
+  'selection 表示用户当前选择；resolved 表示本次最终采用的布局和颜色。',
+  '如果 selection 为 auto，请根据内容推荐 recommendedLayoutFamily 和 recommendedColorPalette，并写入 resolved。',
+  '如果 selection 已指定具体布局或颜色，resolved 必须尊重该选择。',
 ];
 
-const AI_LAYOUT_OUTPUT_FIELDS = ['articleType', 'stylePack', 'title', 'summary', 'blocks'];
+const AI_LAYOUT_OUTPUT_FIELDS = [
+  'articleType',
+  'selection',
+  'resolved',
+  'recommendedLayoutFamily',
+  'recommendedColorPalette',
+  'title',
+  'summary',
+  'blocks',
+];
 
 function getAiLayoutBlockConstraintLines() {
   return AI_LAYOUT_ALLOWED_BLOCKS.map((block) => `- ${block.type}: ${block.fields.join(', ')}`);
@@ -69,6 +86,8 @@ function createSchemaIssue(path, message, fatal = false) {
 function validateAiLayoutPayload(rawLayout) {
   const issues = [];
   const allowedBlockTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type));
+  const allowedLayoutFamilies = new Set(AI_LAYOUT_FAMILIES);
+  const allowedColorPalettes = new Set(AI_LAYOUT_COLOR_PALETTES);
   const fieldMap = new Map(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => [block.type, new Set(['type', ...block.fields.flatMap((field) => {
     if (field === 'items[{label,text}]') return ['items'];
     return [field];
@@ -84,7 +103,7 @@ function validateAiLayoutPayload(rawLayout) {
     };
   }
 
-  const requiredTopLevelFields = ['articleType', 'stylePack', 'title', 'summary', 'blocks'];
+  const requiredTopLevelFields = ['articleType', 'selection', 'resolved', 'title', 'summary', 'blocks'];
   requiredTopLevelFields.forEach((field) => {
     if (!(field in rawLayout)) {
       issues.push(createSchemaIssue(`$.${field}`, `缺少顶层字段 ${field}。`, field === 'blocks'));
@@ -96,10 +115,50 @@ function validateAiLayoutPayload(rawLayout) {
       }
       return;
     }
-    if (typeof rawLayout[field] !== 'string') {
+    if ((field === 'selection' || field === 'resolved') && (typeof rawLayout[field] !== 'object' || !rawLayout[field] || Array.isArray(rawLayout[field]))) {
+      issues.push(createSchemaIssue(`$.${field}`, `${field} 必须是对象。`, true));
+      return;
+    }
+    if (field !== 'selection' && field !== 'resolved' && typeof rawLayout[field] !== 'string') {
       issues.push(createSchemaIssue(`$.${field}`, `${field} 必须是字符串。`, false));
     }
   });
+
+  if (rawLayout.selection && typeof rawLayout.selection === 'object' && !Array.isArray(rawLayout.selection)) {
+    const selectionLayoutFamily = String(rawLayout.selection.layoutFamily || '').trim();
+    const selectionColorPalette = String(rawLayout.selection.colorPalette || '').trim();
+    if (!selectionLayoutFamily || (selectionLayoutFamily !== AI_LAYOUT_SELECTION_AUTO && !allowedLayoutFamilies.has(selectionLayoutFamily))) {
+      issues.push(createSchemaIssue('$.selection.layoutFamily', 'selection.layoutFamily 必须是 auto 或合法的 layoutFamily。', true));
+    }
+    if (!selectionColorPalette || (selectionColorPalette !== AI_LAYOUT_SELECTION_AUTO && !allowedColorPalettes.has(selectionColorPalette))) {
+      issues.push(createSchemaIssue('$.selection.colorPalette', 'selection.colorPalette 必须是 auto 或合法的 colorPalette。', true));
+    }
+  }
+
+  if (rawLayout.resolved && typeof rawLayout.resolved === 'object' && !Array.isArray(rawLayout.resolved)) {
+    const resolvedLayoutFamily = String(rawLayout.resolved.layoutFamily || '').trim();
+    const resolvedColorPalette = String(rawLayout.resolved.colorPalette || '').trim();
+    if (!allowedLayoutFamilies.has(resolvedLayoutFamily)) {
+      issues.push(createSchemaIssue('$.resolved.layoutFamily', 'resolved.layoutFamily 必须是合法的 layoutFamily。', true));
+    }
+    if (!allowedColorPalettes.has(resolvedColorPalette)) {
+      issues.push(createSchemaIssue('$.resolved.colorPalette', 'resolved.colorPalette 必须是合法的 colorPalette。', true));
+    }
+  }
+
+  if ('recommendedLayoutFamily' in rawLayout) {
+    const recommendedLayoutFamily = String(rawLayout.recommendedLayoutFamily || '').trim();
+    if (recommendedLayoutFamily && !allowedLayoutFamilies.has(recommendedLayoutFamily)) {
+      issues.push(createSchemaIssue('$.recommendedLayoutFamily', 'recommendedLayoutFamily 必须是合法的 layoutFamily。', false));
+    }
+  }
+
+  if ('recommendedColorPalette' in rawLayout) {
+    const recommendedColorPalette = String(rawLayout.recommendedColorPalette || '').trim();
+    if (recommendedColorPalette && !allowedColorPalettes.has(recommendedColorPalette)) {
+      issues.push(createSchemaIssue('$.recommendedColorPalette', 'recommendedColorPalette 必须是合法的 colorPalette。', false));
+    }
+  }
 
   if (!Array.isArray(rawLayout.blocks)) {
     return {
@@ -188,7 +247,16 @@ function validateAiLayoutPayload(rawLayout) {
 function getAiLayoutTemplate() {
   return {
     articleType: 'tutorial',
-    stylePack: 'tech-green',
+    selection: {
+      layoutFamily: 'auto',
+      colorPalette: 'auto',
+    },
+    resolved: {
+      layoutFamily: 'tutorial-cards',
+      colorPalette: 'tech-green',
+    },
+    recommendedLayoutFamily: 'tutorial-cards',
+    recommendedColorPalette: 'tech-green',
     title: '文章标题',
     summary: '一句摘要',
     blocks: [
@@ -216,6 +284,9 @@ function getAiLayoutTemplate() {
 
 module.exports = {
   AI_LAYOUT_SKILL_VERSION,
+  AI_LAYOUT_SELECTION_AUTO,
+  AI_LAYOUT_FAMILIES,
+  AI_LAYOUT_COLOR_PALETTES,
   AI_LAYOUT_ALLOWED_BLOCKS,
   AI_LAYOUT_SKILL_SYSTEM_LINES,
   AI_LAYOUT_OUTPUT_FIELDS,

@@ -142,6 +142,41 @@ describe('AppleStylePlugin - Settings Migration', () => {
     expect(plugin.saveData).toHaveBeenCalledTimes(1);
   });
 
+  it('should let auto selection reuse migrated legacy stylePack cache', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: true,
+        providers: [],
+        articleLayoutsByPath: {
+          'notes/demo.md': {
+            updatedAt: Date.now(),
+            stylePack: 'tech-green',
+            layoutJson: {
+              articleType: 'tutorial',
+              stylePack: 'tech-green',
+              blocks: [{ type: 'hero', title: 'legacy cache' }],
+            },
+          },
+        },
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.getArticleLayoutState('notes/demo.md', {
+      layoutFamily: 'auto',
+      colorPalette: 'auto',
+    })?.layoutJson?.blocks?.[0]?.title).toBe('legacy cache');
+    expect(plugin.getArticleLayoutState('notes/demo.md', {
+      layoutFamily: 'auto',
+      colorPalette: 'tech-green',
+    })?.stylePack).toBe('tech-green');
+  });
+
   it('should keep separate cached layouts for the same note across style packs', async () => {
     const plugin = new AppleStylePlugin();
     plugin.loadData = vi.fn().mockResolvedValue({

@@ -11,6 +11,8 @@ const {
   buildFallbackLayout,
   normalizeArticleLayout,
   normalizeLayoutGenerationMeta,
+  deriveArticleLayoutStateForSelection,
+  getArticleLayoutSelectionState,
   generateArticleLayout,
   AiLayoutSchemaError,
   renderArticleLayoutHtml,
@@ -229,6 +231,181 @@ title: 示例
 
     expect(html).toContain('#2c6bed');
     expect(html).not.toContain('#14b37d');
+  });
+
+  it('should recommend editorial-lite for essay-like content signals', () => {
+    const layout = normalizeArticleLayout({
+      articleType: 'article',
+      title: '写作经验复盘',
+      blocks: [
+        { type: 'lead-quote', text: '这是开头的一句观点。' },
+      ],
+    }, {
+      title: '写作经验复盘',
+      markdown: `
+## 为什么我后来改了写法
+这里是第一段正文。
+
+## 写作中的一个误区
+这里是第二段正文。
+      `,
+      imageRefs: [],
+    });
+
+    expect(layout.resolved.layoutFamily).toBe('editorial-lite');
+  });
+
+  it('should render editorial-lite with a more magazine-like section rhythm', () => {
+    const html = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'graphite-rose',
+      },
+      stylePack: 'graphite-rose',
+      title: '经验复盘',
+      blocks: [
+        { type: 'hero', eyebrow: 'Editorial Layout', title: '经验复盘', subtitle: '更轻、更有呼吸感的版式。', variant: 'cover-left' },
+        { type: 'section-block', sectionIndex: 0, title: '第一部分', paragraphs: ['这里是正文。'] },
+      ],
+    }, {
+      imageRefs: [],
+    });
+
+    expect(html).toContain('Editorial Layout');
+    expect(html).toContain('Part 01');
+    expect(html).toContain('#cc5f82');
+    expect(html).not.toContain('SECTION 01');
+  });
+
+  it('should derive a new color variant from an existing generated layout without rerunning ai', () => {
+    const derivedState = deriveArticleLayoutStateForSelection({
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      providerId: 'provider-1',
+      model: 'deepseek-chat',
+      selection: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'tech-green',
+      },
+      resolved: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'tech-green',
+      },
+      recommendedLayoutFamily: 'editorial-lite',
+      recommendedColorPalette: 'graphite-rose',
+      stylePack: 'tech-green',
+      status: 'ready',
+      lastError: '',
+      lastAttemptStatus: 'success',
+      generationMeta: {
+        layoutFamilyLabel: '轻杂志型',
+        colorPaletteLabel: '科技绿',
+        stylePackLabel: '科技绿',
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '经验复盘' }],
+      },
+      layoutJson: {
+        articleType: 'article',
+        selection: {
+          layoutFamily: 'editorial-lite',
+          colorPalette: 'tech-green',
+        },
+        resolved: {
+          layoutFamily: 'editorial-lite',
+          colorPalette: 'tech-green',
+        },
+        recommendedLayoutFamily: 'editorial-lite',
+        recommendedColorPalette: 'graphite-rose',
+        stylePack: 'tech-green',
+        layoutFamily: 'editorial-lite',
+        title: '经验复盘',
+        summary: '这是一句摘要。',
+        blocks: [
+          { type: 'hero', title: '经验复盘' },
+          { type: 'section-block', sectionIndex: 0, title: '第一部分' },
+        ],
+      },
+    }, {
+      layoutFamily: 'editorial-lite',
+      colorPalette: 'graphite-rose',
+    });
+
+    expect(derivedState).toBeTruthy();
+    expect(derivedState.selection.colorPalette).toBe('graphite-rose');
+    expect(derivedState.resolved.colorPalette).toBe('graphite-rose');
+    expect(derivedState.stylePack).toBe('graphite-rose');
+    expect(derivedState.layoutJson.stylePack).toBe('graphite-rose');
+    expect(derivedState.layoutJson.blocks).toHaveLength(2);
+    expect(derivedState.generationMeta.colorPaletteLabel).toBe('石墨玫瑰');
+  });
+
+  it('should let auto selection reuse migrated legacy cache entries', () => {
+    const migratedEntry = {
+      lastSelectionKey: 'tutorial-cards::tech-green',
+      selectionStates: {
+        'tutorial-cards::tech-green': {
+          version: 1,
+          updatedAt: Date.now(),
+          sourceHash: '123',
+          stylePack: 'tech-green',
+          status: 'ready',
+          layoutJson: {
+            articleType: 'tutorial',
+            stylePack: 'tech-green',
+            blocks: [{ type: 'hero', title: '历史缓存' }],
+          },
+        },
+      },
+    };
+
+    expect(getArticleLayoutSelectionState(migratedEntry, {
+      layoutFamily: 'auto',
+      colorPalette: 'auto',
+    })?.layoutJson?.blocks?.[0]?.title).toBe('历史缓存');
+    expect(getArticleLayoutSelectionState(migratedEntry, {
+      layoutFamily: 'auto',
+      colorPalette: 'tech-green',
+    })?.stylePack).toBe('tech-green');
+  });
+
+  it('should keep schema-sized part nav, bullets and image ids during normalization', () => {
+    const layout = normalizeArticleLayout({
+      articleType: 'tutorial',
+      stylePack: 'tech-green',
+      blocks: [
+        {
+          type: 'part-nav',
+          items: Array.from({ length: 6 }, (_, index) => ({
+            label: `PART ${String(index + 1).padStart(2, '0')}`,
+            text: `第 ${index + 1} 节`,
+          })),
+        },
+        {
+          type: 'case-block',
+          caseLabel: 'CASE 01',
+          title: '案例标题',
+          bullets: Array.from({ length: 6 }, (_, index) => `要点 ${index + 1}`),
+          imageIds: ['image-1', 'image-2', 'image-3', 'image-4'],
+        },
+      ],
+    }, {
+      title: '长导航测试',
+      markdown: '## 第一节\n正文',
+      stylePack: 'tech-green',
+      imageRefs: [
+        { id: 'image-1', src: 'https://example.com/1.png', alt: '1', caption: '1' },
+        { id: 'image-2', src: 'https://example.com/2.png', alt: '2', caption: '2' },
+        { id: 'image-3', src: 'https://example.com/3.png', alt: '3', caption: '3' },
+        { id: 'image-4', src: 'https://example.com/4.png', alt: '4', caption: '4' },
+      ],
+    });
+
+    const partNavBlock = layout.blocks.find((block) => block.type === 'part-nav');
+    const caseBlock = layout.blocks.find((block) => block.type === 'case-block');
+
+    expect(partNavBlock?.items).toHaveLength(6);
+    expect(caseBlock?.bullets).toHaveLength(6);
+    expect(caseBlock?.imageIds).toHaveLength(4);
   });
 
   it('should preserve more sections in fallback layout and avoid phone frame for normal images', () => {

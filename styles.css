@@ -488,6 +488,12 @@
   gap: 8px;
 }
 
+.apple-ai-layout-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .apple-ai-layout-summary {
   padding: 12px 14px;
   border-radius: 14px;

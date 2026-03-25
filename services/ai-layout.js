@@ -1,5 +1,8 @@
 const {
   AI_LAYOUT_SKILL_VERSION,
+  AI_LAYOUT_SELECTION_AUTO,
+  AI_LAYOUT_FAMILIES,
+  AI_LAYOUT_COLOR_PALETTES,
   AI_LAYOUT_ALLOWED_BLOCKS,
   AI_LAYOUT_SKILL_SYSTEM_LINES,
   AI_LAYOUT_OUTPUT_FIELDS,
@@ -14,8 +17,33 @@ const AI_PROVIDER_KINDS = {
 };
 
 const MAX_LAYOUT_BLOCKS = 24;
+const MAX_PART_NAV_ITEMS = 6;
+const MAX_CASE_BLOCK_BULLETS = 6;
+const MAX_CASE_BLOCK_IMAGE_IDS = 4;
+const AI_LAYOUT_DEFAULT_FAMILY = 'source-first';
+const AI_LAYOUT_DEFAULT_COLOR_PALETTE = 'tech-green';
+const AI_LAYOUT_IMPLEMENTED_FAMILIES = new Set(['source-first', 'tutorial-cards', 'editorial-lite']);
+const AI_LAYOUT_RESERVED_FAMILY_FALLBACKS = {};
 
-const AI_STYLE_PACKS = {
+const AI_LAYOUT_FAMILY_DEFS = {
+  'source-first': {
+    id: 'source-first',
+    label: '原文增强型',
+    description: '最接近普通预览，正文连续流动，只做轻量结构增强。',
+  },
+  'tutorial-cards': {
+    id: 'tutorial-cards',
+    label: '教程卡片型',
+    description: '更强调章节编号、信息卡和截图展示，适合教程与案例拆解。',
+  },
+  'editorial-lite': {
+    id: 'editorial-lite',
+    label: '轻杂志型',
+    description: '偏编辑感的留白与图文节奏，适合观点、经验与品牌表达类内容。',
+  },
+};
+
+const AI_COLOR_PALETTES = {
   'tech-green': {
     id: 'tech-green',
     label: '科技绿',
@@ -82,11 +110,14 @@ const AI_STYLE_PACKS = {
   },
 };
 
+const AI_STYLE_PACKS = AI_COLOR_PALETTES;
+
 function createDefaultAiSettings() {
   return {
     enabled: false,
     defaultProviderId: '',
-    defaultStylePack: 'tech-green',
+    defaultLayoutFamily: AI_LAYOUT_SELECTION_AUTO,
+    defaultColorPalette: AI_LAYOUT_SELECTION_AUTO,
     includeImagesInLayout: true,
     requestTimeoutMs: 45000,
     providers: [],
@@ -98,6 +129,157 @@ function clampNumber(value, fallback, min, max) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.min(max, Math.max(min, Math.round(parsed)));
+}
+
+function normalizeLayoutFamily(value, fallback = AI_LAYOUT_SELECTION_AUTO) {
+  const normalized = coerceString(value);
+  if (normalized === AI_LAYOUT_SELECTION_AUTO) return AI_LAYOUT_SELECTION_AUTO;
+  return AI_LAYOUT_FAMILY_DEFS[normalized] ? normalized : fallback;
+}
+
+function normalizeColorPalette(value, fallback = AI_LAYOUT_SELECTION_AUTO) {
+  const normalized = coerceString(value);
+  if (normalized === AI_LAYOUT_SELECTION_AUTO) return AI_LAYOUT_SELECTION_AUTO;
+  return AI_COLOR_PALETTES[normalized] ? normalized : fallback;
+}
+
+function normalizeResolvedLayoutFamily(value, fallback = AI_LAYOUT_DEFAULT_FAMILY) {
+  const normalized = coerceString(value);
+  if (!normalized) return fallback;
+  if (AI_LAYOUT_IMPLEMENTED_FAMILIES.has(normalized)) return normalized;
+  if (AI_LAYOUT_RESERVED_FAMILY_FALLBACKS[normalized]) {
+    return AI_LAYOUT_RESERVED_FAMILY_FALLBACKS[normalized];
+  }
+  return AI_LAYOUT_IMPLEMENTED_FAMILIES.has(fallback) ? fallback : AI_LAYOUT_DEFAULT_FAMILY;
+}
+
+function normalizeResolvedColorPalette(value, fallback = AI_LAYOUT_DEFAULT_COLOR_PALETTE) {
+  const normalized = coerceString(value);
+  if (AI_COLOR_PALETTES[normalized]) return normalized;
+  return AI_COLOR_PALETTES[fallback] ? fallback : AI_LAYOUT_DEFAULT_COLOR_PALETTE;
+}
+
+function normalizeLayoutSelection(raw = {}, fallback = {}) {
+  const candidate = (typeof raw === 'string')
+    ? (AI_COLOR_PALETTES[raw]
+      ? { colorPalette: raw }
+      : (AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {}))
+    : raw;
+  return {
+    layoutFamily: normalizeLayoutFamily(
+      candidate?.layoutFamily ?? candidate?.layout ?? candidate?.family ?? fallback?.layoutFamily,
+      normalizeLayoutFamily(fallback?.layoutFamily, AI_LAYOUT_SELECTION_AUTO)
+    ),
+    colorPalette: normalizeColorPalette(
+      candidate?.colorPalette ?? candidate?.palette ?? candidate?.stylePack ?? fallback?.colorPalette,
+      normalizeColorPalette(fallback?.colorPalette, AI_LAYOUT_SELECTION_AUTO)
+    ),
+  };
+}
+
+function normalizeResolvedSelection(raw = {}, fallback = {}) {
+  const candidate = (typeof raw === 'string')
+    ? (AI_COLOR_PALETTES[raw]
+      ? { colorPalette: raw }
+      : (AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {}))
+    : raw;
+  return {
+    layoutFamily: normalizeResolvedLayoutFamily(
+      candidate?.layoutFamily ?? candidate?.layout ?? candidate?.family ?? fallback?.layoutFamily,
+      normalizeResolvedLayoutFamily(fallback?.layoutFamily, AI_LAYOUT_DEFAULT_FAMILY)
+    ),
+    colorPalette: normalizeResolvedColorPalette(
+      candidate?.colorPalette ?? candidate?.palette ?? candidate?.stylePack ?? fallback?.colorPalette,
+      normalizeResolvedColorPalette(fallback?.colorPalette, AI_LAYOUT_DEFAULT_COLOR_PALETTE)
+    ),
+  };
+}
+
+function getArticleLayoutSelectionKey(selection = {}) {
+  const normalized = normalizeLayoutSelection(selection);
+  return `${normalized.layoutFamily || AI_LAYOUT_SELECTION_AUTO}::${normalized.colorPalette || AI_LAYOUT_SELECTION_AUTO}`;
+}
+
+function getLayoutFamilyList({ includeAuto = true, includeReserved = false } = {}) {
+  const list = [];
+  if (includeAuto) {
+    list.push({
+      value: AI_LAYOUT_SELECTION_AUTO,
+      label: '自动推荐',
+      description: '由 AI 根据文章内容自动推荐布局。',
+    });
+  }
+  Object.values(AI_LAYOUT_FAMILY_DEFS).forEach((family) => {
+    if (!includeReserved && !AI_LAYOUT_IMPLEMENTED_FAMILIES.has(family.id)) return;
+    list.push({
+      value: family.id,
+      label: family.label,
+      description: family.description,
+    });
+  });
+  return list;
+}
+
+function getLayoutFamilyById(id) {
+  const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
+  return AI_LAYOUT_FAMILY_DEFS[normalizedId] || AI_LAYOUT_FAMILY_DEFS[AI_LAYOUT_DEFAULT_FAMILY];
+}
+
+function getColorPaletteList({ includeAuto = true } = {}) {
+  const list = [];
+  if (includeAuto) {
+    list.push({
+      value: AI_LAYOUT_SELECTION_AUTO,
+      label: '自动推荐',
+      description: '由 AI 根据文章内容自动推荐颜色。',
+    });
+  }
+  Object.values(AI_COLOR_PALETTES).forEach((pack) => {
+    list.push({
+      value: pack.id,
+      label: pack.label,
+      description: pack.description,
+    });
+  });
+  return list;
+}
+
+function getColorPaletteById(id) {
+  return AI_COLOR_PALETTES[normalizeResolvedColorPalette(id)] || AI_COLOR_PALETTES[AI_LAYOUT_DEFAULT_COLOR_PALETTE];
+}
+
+function resolveLayoutSelection({
+  requestedSelection = {},
+  rawLayout = {},
+  signals = null,
+  imageRefs = [],
+} = {}) {
+  const selection = normalizeLayoutSelection(requestedSelection);
+  const inferredLayoutFamily = recommendLayoutFamily({ rawLayout, signals, imageRefs });
+  const inferredColorPalette = recommendColorPalette({ rawLayout, signals });
+  const recommendedLayoutFamily = normalizeResolvedLayoutFamily(
+    rawLayout?.recommendedLayoutFamily || rawLayout?.resolved?.layoutFamily || rawLayout?.layoutFamily,
+    inferredLayoutFamily
+  );
+  const recommendedColorPalette = normalizeResolvedColorPalette(
+    rawLayout?.recommendedColorPalette || rawLayout?.resolved?.colorPalette || rawLayout?.stylePack,
+    inferredColorPalette
+  );
+  const resolved = {
+    layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO
+      ? recommendedLayoutFamily
+      : normalizeResolvedLayoutFamily(selection.layoutFamily, recommendedLayoutFamily),
+    colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO
+      ? recommendedColorPalette
+      : normalizeResolvedColorPalette(selection.colorPalette, recommendedColorPalette),
+  };
+
+  return {
+    selection,
+    resolved,
+    recommendedLayoutFamily,
+    recommendedColorPalette,
+  };
 }
 
 function normalizeAiProvider(raw = {}) {
@@ -210,7 +392,11 @@ function normalizeLayoutGenerationMeta(raw = {}, layoutJson = null) {
   return {
     providerName: coerceString(raw?.providerName),
     providerModel: coerceString(raw?.providerModel),
+    layoutFamilyLabel: coerceString(raw?.layoutFamilyLabel),
+    colorPaletteLabel: coerceString(raw?.colorPaletteLabel),
     stylePackLabel: coerceString(raw?.stylePackLabel),
+    recommendedLayoutFamilyLabel: coerceString(raw?.recommendedLayoutFamilyLabel),
+    recommendedColorPaletteLabel: coerceString(raw?.recommendedColorPaletteLabel),
     headingCount: clampNumber(raw?.headingCount, 0, 0, 999),
     sectionCount: clampNumber(raw?.sectionCount, 0, 0, 999),
     leadParagraphCount: clampNumber(raw?.leadParagraphCount, 0, 0, 999),
@@ -273,6 +459,26 @@ function normalizeArticleLayoutState(raw = {}) {
   if (!raw || typeof raw !== 'object') return null;
   const layoutJson = raw.layoutJson && typeof raw.layoutJson === 'object' ? raw.layoutJson : null;
   if (!layoutJson) return null;
+  const selection = normalizeLayoutSelection(
+    raw.selection || layoutJson.selection || {
+      layoutFamily: raw.layoutFamily || layoutJson.layoutFamily || 'tutorial-cards',
+      colorPalette: raw.colorPalette || raw.stylePack || layoutJson.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+    },
+    {
+      layoutFamily: 'tutorial-cards',
+      colorPalette: AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+    }
+  );
+  const resolved = normalizeResolvedSelection(
+    raw.resolved || layoutJson.resolved || {
+      layoutFamily: raw.resolvedLayoutFamily || raw.layoutFamily || layoutJson.layoutFamily || 'tutorial-cards',
+      colorPalette: raw.resolvedColorPalette || raw.colorPalette || raw.stylePack || layoutJson.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+    },
+    {
+      layoutFamily: AI_LAYOUT_DEFAULT_FAMILY,
+      colorPalette: AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+    }
+  );
   const dismissedBlockKeys = Array.isArray(raw.dismissedBlockKeys)
     ? raw.dismissedBlockKeys.map((item) => coerceString(item)).filter(Boolean).slice(0, 128)
     : [];
@@ -282,7 +488,18 @@ function normalizeArticleLayoutState(raw = {}) {
     sourceHash: typeof raw.sourceHash === 'string' ? raw.sourceHash : '',
     providerId: typeof raw.providerId === 'string' ? raw.providerId : '',
     model: typeof raw.model === 'string' ? raw.model : '',
-    stylePack: typeof raw.stylePack === 'string' ? raw.stylePack : 'tech-green',
+    selection,
+    resolved,
+    recommendedLayoutFamily: normalizeResolvedLayoutFamily(
+      raw.recommendedLayoutFamily || layoutJson.recommendedLayoutFamily,
+      resolved.layoutFamily
+    ),
+    recommendedColorPalette: normalizeResolvedColorPalette(
+      raw.recommendedColorPalette || layoutJson.recommendedColorPalette || raw.stylePack || layoutJson.stylePack,
+      resolved.colorPalette
+    ),
+    stylePack: resolved.colorPalette,
+    layoutFamily: resolved.layoutFamily,
     status: raw.status === 'schema-error' ? 'schema-error' : (raw.status === 'error' ? 'error' : 'ready'),
     lastError: typeof raw.lastError === 'string' ? raw.lastError : '',
     lastAttemptStatus: raw.lastAttemptStatus === 'schema-error'
@@ -300,37 +517,78 @@ function normalizeArticleLayoutState(raw = {}) {
 function normalizeArticleLayoutCacheEntry(raw = {}) {
   if (!raw || typeof raw !== 'object') return null;
 
+  const withLegacyAliases = (entry) => {
+    if (!entry || !entry.selectionStates) return entry;
+    const stylePackStates = {};
+    Object.values(entry.selectionStates).forEach((state) => {
+      const paletteId = normalizeResolvedColorPalette(state?.stylePack || state?.resolved?.colorPalette);
+      if (!stylePackStates[paletteId]) {
+        stylePackStates[paletteId] = state;
+      }
+    });
+    const lastSelectionState = entry.selectionStates[entry.lastSelectionKey] || null;
+    return {
+      ...entry,
+      lastStylePack: lastSelectionState?.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+      stylePackStates,
+    };
+  };
+
   const legacyState = normalizeArticleLayoutState(raw);
   if (legacyState) {
-    const stylePack = legacyState.stylePack || 'tech-green';
-    return {
-      lastStylePack: stylePack,
-      stylePackStates: {
-        [stylePack]: legacyState,
+    const selectionKey = getArticleLayoutSelectionKey(legacyState.selection);
+    return withLegacyAliases({
+      lastSelectionKey: selectionKey,
+      selectionStates: {
+        [selectionKey]: legacyState,
       },
-    };
+    });
   }
 
-  const stylePackStates = {};
-  if (raw.stylePackStates && typeof raw.stylePackStates === 'object') {
-    for (const [stylePackId, value] of Object.entries(raw.stylePackStates)) {
-      const normalizedState = normalizeArticleLayoutState(value);
-      if (!normalizedState) continue;
-      const effectiveStylePack = normalizedState.stylePack || stylePackId || 'tech-green';
-      stylePackStates[effectiveStylePack] = {
-        ...normalizedState,
-        stylePack: effectiveStylePack,
-      };
+  const selectionStates = {};
+  const ingestState = (value, fallbackSelection = {}) => {
+    const normalizedState = normalizeArticleLayoutState(value);
+    if (!normalizedState) return;
+    const effectiveSelection = normalizeLayoutSelection(normalizedState.selection, fallbackSelection);
+    const effectiveKey = getArticleLayoutSelectionKey(effectiveSelection);
+    selectionStates[effectiveKey] = {
+      ...normalizedState,
+      selection: effectiveSelection,
+      resolved: normalizeResolvedSelection(normalizedState.resolved, {
+        layoutFamily: normalizedState.layoutFamily || effectiveSelection.layoutFamily,
+        colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette,
+      }),
+      stylePack: normalizeResolvedColorPalette(normalizedState.stylePack || normalizedState.resolved?.colorPalette),
+      layoutFamily: normalizeResolvedLayoutFamily(normalizedState.layoutFamily || normalizedState.resolved?.layoutFamily),
+    };
+  };
+
+  if (raw.selectionStates && typeof raw.selectionStates === 'object') {
+    for (const [selectionKey, value] of Object.entries(raw.selectionStates)) {
+      const [layoutFamilyFromKey, colorPaletteFromKey] = String(selectionKey || '').split('::');
+      ingestState(value, {
+        layoutFamily: layoutFamilyFromKey || 'tutorial-cards',
+        colorPalette: colorPaletteFromKey || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+      });
     }
   }
 
-  const stylePackIds = Object.keys(stylePackStates);
-  if (!stylePackIds.length) return null;
-  const lastStylePack = coerceString(raw.lastStylePack);
-  return {
-    lastStylePack: stylePackStates[lastStylePack] ? lastStylePack : stylePackIds[0],
-    stylePackStates,
-  };
+  if (raw.stylePackStates && typeof raw.stylePackStates === 'object') {
+    for (const [stylePackId, value] of Object.entries(raw.stylePackStates)) {
+      ingestState(value, {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: stylePackId || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+      });
+    }
+  }
+
+  const selectionKeys = Object.keys(selectionStates);
+  if (!selectionKeys.length) return null;
+  const lastSelectionKey = coerceString(raw.lastSelectionKey);
+  return withLegacyAliases({
+    lastSelectionKey: selectionStates[lastSelectionKey] ? lastSelectionKey : selectionKeys[0],
+    selectionStates,
+  });
 }
 
 function truncateMarkdownForPrompt(markdown = '', maxChars = 12000) {
@@ -371,7 +629,12 @@ function normalizeAiSettings(raw = {}) {
   return {
     enabled: raw.enabled === true,
     defaultProviderId,
-    defaultStylePack: AI_STYLE_PACKS[raw.defaultStylePack] ? raw.defaultStylePack : defaults.defaultStylePack,
+    defaultLayoutFamily: normalizeLayoutFamily(raw.defaultLayoutFamily, AI_LAYOUT_SELECTION_AUTO),
+    defaultColorPalette: normalizeColorPalette(
+      raw.defaultColorPalette ?? raw.defaultStylePack,
+      AI_LAYOUT_SELECTION_AUTO
+    ),
+    defaultStylePack: normalizeResolvedColorPalette(raw.defaultStylePack, AI_LAYOUT_DEFAULT_COLOR_PALETTE),
     includeImagesInLayout: raw.includeImagesInLayout !== false,
     requestTimeoutMs: clampNumber(raw.requestTimeoutMs, defaults.requestTimeoutMs, 5000, 180000),
     providers,
@@ -380,15 +643,149 @@ function normalizeAiSettings(raw = {}) {
 }
 
 function getStylePackList() {
-  return Object.values(AI_STYLE_PACKS).map((pack) => ({
-    value: pack.id,
-    label: pack.label,
-    description: pack.description,
-  }));
+  return getColorPaletteList({ includeAuto: false });
 }
 
 function getStylePackById(id) {
-  return AI_STYLE_PACKS[id] || AI_STYLE_PACKS['tech-green'];
+  return getColorPaletteById(id);
+}
+
+function getColorPaletteTokenPack(id) {
+  return getColorPaletteById(id);
+}
+
+function getArticleLayoutSelectionState(entry, selection = {}, defaults = {}) {
+  const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+  if (!normalizedEntry) return null;
+  const normalizedSelection = normalizeLayoutSelection(selection, defaults);
+  const requestedKey = getArticleLayoutSelectionKey(normalizedSelection);
+  const exactState = normalizedEntry.selectionStates?.[requestedKey] || null;
+  if (exactState) return exactState;
+
+  const lastSelectionState = normalizedEntry.selectionStates?.[normalizedEntry.lastSelectionKey] || null;
+  const selectionStates = Object.values(normalizedEntry.selectionStates || {});
+  if (!selectionStates.length) return null;
+
+  const requestedColorPalette = normalizeColorPalette(normalizedSelection.colorPalette, AI_LAYOUT_SELECTION_AUTO);
+  const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO);
+  const requestedResolvedLayoutFamily = requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO
+    ? ''
+    : normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+  const matchesColor = (state) => (
+    requestedColorPalette === AI_LAYOUT_SELECTION_AUTO
+    || normalizeResolvedColorPalette(state?.stylePack || state?.resolved?.colorPalette) === requestedColorPalette
+  );
+  const matchesLayout = (state) => (
+    requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO
+    || normalizeLayoutFamily(state?.selection?.layoutFamily, AI_LAYOUT_SELECTION_AUTO) === requestedLayoutFamily
+    || normalizeResolvedLayoutFamily(state?.layoutFamily || state?.resolved?.layoutFamily, AI_LAYOUT_DEFAULT_FAMILY) === requestedResolvedLayoutFamily
+  );
+
+  if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO && requestedColorPalette === AI_LAYOUT_SELECTION_AUTO) {
+    return lastSelectionState || selectionStates[0] || null;
+  }
+
+  if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO && requestedColorPalette !== AI_LAYOUT_SELECTION_AUTO) {
+    const colorMatchedState = normalizedEntry.stylePackStates?.[requestedColorPalette] || null;
+    if (colorMatchedState) return colorMatchedState;
+  }
+
+  if (lastSelectionState && matchesColor(lastSelectionState) && matchesLayout(lastSelectionState)) {
+    return lastSelectionState;
+  }
+
+  return selectionStates.find((state) => matchesColor(state) && matchesLayout(state)) || null;
+}
+
+function deriveArticleLayoutStateForSelection(state, selection = {}, defaults = {}) {
+  const normalizedState = normalizeArticleLayoutState(state);
+  if (!normalizedState?.layoutJson?.blocks?.length) return null;
+  if (normalizedState.status !== 'ready') return null;
+
+  const requestedSelection = normalizeLayoutSelection(selection, {
+    layoutFamily: normalizedState.selection?.layoutFamily || defaults?.layoutFamily || AI_LAYOUT_SELECTION_AUTO,
+    colorPalette: normalizedState.selection?.colorPalette || defaults?.colorPalette || AI_LAYOUT_SELECTION_AUTO,
+  });
+  const requestedColorPalette = normalizeColorPalette(
+    requestedSelection.colorPalette,
+    normalizedState.selection?.colorPalette || defaults?.colorPalette || AI_LAYOUT_SELECTION_AUTO
+  );
+  if (!requestedColorPalette || requestedColorPalette === AI_LAYOUT_SELECTION_AUTO) return null;
+
+  const baseResolvedLayoutFamily = normalizeResolvedLayoutFamily(
+    normalizedState.resolved?.layoutFamily || normalizedState.layoutFamily,
+    AI_LAYOUT_DEFAULT_FAMILY
+  );
+  const baseSelectedLayoutFamily = normalizeLayoutFamily(
+    normalizedState.selection?.layoutFamily,
+    AI_LAYOUT_SELECTION_AUTO
+  );
+  const requestedLayoutFamily = normalizeLayoutFamily(
+    requestedSelection.layoutFamily,
+    normalizedState.selection?.layoutFamily || defaults?.layoutFamily || AI_LAYOUT_SELECTION_AUTO
+  );
+  const isCompatibleLayout = (
+    requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO
+    || requestedLayoutFamily === baseSelectedLayoutFamily
+    || requestedLayoutFamily === baseResolvedLayoutFamily
+  );
+  if (!isCompatibleLayout) return null;
+
+  const nextResolvedColorPalette = normalizeResolvedColorPalette(
+    requestedColorPalette,
+    normalizedState.resolved?.colorPalette || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+  );
+  const nextColorPaletteLabel = getColorPaletteById(nextResolvedColorPalette)?.label || nextResolvedColorPalette;
+  const nextSelection = {
+    layoutFamily: requestedLayoutFamily || normalizedState.selection?.layoutFamily || AI_LAYOUT_SELECTION_AUTO,
+    colorPalette: requestedColorPalette,
+  };
+  const nextLayoutJson = {
+    ...normalizedState.layoutJson,
+    selection: {
+      ...(normalizedState.layoutJson.selection || {}),
+      ...nextSelection,
+    },
+    resolved: {
+      ...(normalizedState.layoutJson.resolved || {}),
+      layoutFamily: baseResolvedLayoutFamily,
+      colorPalette: nextResolvedColorPalette,
+    },
+    recommendedLayoutFamily: normalizedState.recommendedLayoutFamily,
+    recommendedColorPalette: normalizedState.recommendedColorPalette,
+    stylePack: nextResolvedColorPalette,
+    layoutFamily: baseResolvedLayoutFamily,
+  };
+  const nextGenerationMeta = normalizeLayoutGenerationMeta({
+    ...(normalizedState.generationMeta || {}),
+    colorPaletteLabel: nextColorPaletteLabel,
+    stylePackLabel: nextColorPaletteLabel,
+  }, nextLayoutJson);
+
+  return normalizeArticleLayoutState({
+    ...normalizedState,
+    selection: nextSelection,
+    resolved: {
+      layoutFamily: baseResolvedLayoutFamily,
+      colorPalette: nextResolvedColorPalette,
+    },
+    recommendedLayoutFamily: normalizedState.recommendedLayoutFamily,
+    recommendedColorPalette: normalizedState.recommendedColorPalette,
+    stylePack: nextResolvedColorPalette,
+    layoutFamily: baseResolvedLayoutFamily,
+    generationMeta: nextGenerationMeta,
+    layoutJson: nextLayoutJson,
+  });
+}
+
+function getArticleLayoutSelectionStateKey(entry, selection = {}, defaults = {}) {
+  const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+  if (!normalizedEntry) return '';
+  const normalizedSelection = normalizeLayoutSelection(selection, defaults);
+  const requestedKey = getArticleLayoutSelectionKey(normalizedSelection);
+  return normalizedEntry.selectionStates?.[requestedKey]
+    ? requestedKey
+    : (normalizedEntry.lastSelectionKey || '');
 }
 
 function listEnabledAiProviders(aiSettings = {}) {
@@ -450,8 +847,36 @@ function inferBlockType(rawBlock = {}) {
 function repairRawLayoutPayload(rawLayout = {}) {
   if (!rawLayout || typeof rawLayout !== 'object' || Array.isArray(rawLayout)) return rawLayout;
   if (!Array.isArray(rawLayout.blocks)) return rawLayout;
+  const legacyColorPalette = normalizeResolvedColorPalette(
+    rawLayout?.stylePack || rawLayout?.colorPalette || rawLayout?.resolved?.colorPalette,
+    AI_LAYOUT_DEFAULT_COLOR_PALETTE
+  );
+  const legacyLayoutFamily = normalizeResolvedLayoutFamily(
+    rawLayout?.layoutFamily || rawLayout?.resolved?.layoutFamily,
+    'tutorial-cards'
+  );
+  const selection = normalizeLayoutSelection(rawLayout.selection, {
+    layoutFamily: legacyLayoutFamily,
+    colorPalette: legacyColorPalette,
+  });
+  const resolved = normalizeResolvedSelection(rawLayout.resolved, {
+    layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? legacyLayoutFamily : selection.layoutFamily,
+    colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? legacyColorPalette : selection.colorPalette,
+  });
   return {
     ...rawLayout,
+    selection,
+    resolved,
+    recommendedLayoutFamily: normalizeResolvedLayoutFamily(
+      rawLayout.recommendedLayoutFamily || rawLayout.resolved?.layoutFamily || legacyLayoutFamily,
+      resolved.layoutFamily
+    ),
+    recommendedColorPalette: normalizeResolvedColorPalette(
+      rawLayout.recommendedColorPalette || rawLayout.resolved?.colorPalette || legacyColorPalette,
+      resolved.colorPalette
+    ),
+    stylePack: resolved.colorPalette,
+    layoutFamily: resolved.layoutFamily,
     blocks: rawLayout.blocks.map((block) => {
       if (!block || typeof block !== 'object' || Array.isArray(block)) return block;
       const inferredType = inferBlockType(block);
@@ -559,7 +984,7 @@ function normalizeLayoutBlock(block, imageIds, sourceSections, index) {
       ? block.items.map((item, itemIndex) => ({
         label: coerceString(item?.label || `PART ${String(itemIndex + 1).padStart(2, '0')}`),
         text: coerceString(item?.text || item?.title),
-      })).filter((item) => item.text).slice(0, 4)
+      })).filter((item) => item.text).slice(0, MAX_PART_NAV_ITEMS)
       : [];
     return items.length ? { type, items } : null;
   }
@@ -581,7 +1006,7 @@ function normalizeLayoutBlock(block, imageIds, sourceSections, index) {
     const matchedSection = findSourceSectionByTitle(sourceSections, title);
     if (matchedSection) {
       return buildSectionBlockFromSource(matchedSection, {
-        imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+        imageIds: toImageIdArray(block.imageIds, imageIds, MAX_CASE_BLOCK_IMAGE_IDS),
         fallbackIndex: toSectionIndex(matchedSection.index, index),
       });
     }
@@ -590,8 +1015,8 @@ function normalizeLayoutBlock(block, imageIds, sourceSections, index) {
       caseLabel: coerceString(block.caseLabel || `CASE ${String(index + 1).padStart(2, '0')}`),
       title,
       summary,
-      bullets: toTextArray(block.bullets, 5),
-      imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+      bullets: toTextArray(block.bullets, MAX_CASE_BLOCK_BULLETS),
+      imageIds: toImageIdArray(block.imageIds, imageIds, MAX_CASE_BLOCK_IMAGE_IDS),
       highlight: coerceString(block.highlight),
     };
   }
@@ -789,41 +1214,123 @@ function extractMarkdownSignals(markdown = '') {
   };
 }
 
+function recommendLayoutFamily({ rawLayout = {}, signals = null, imageRefs = [] } = {}) {
+  const rawRecommended = coerceString(
+    rawLayout?.recommendedLayoutFamily || rawLayout?.resolved?.layoutFamily || rawLayout?.layoutFamily
+  );
+  if (rawRecommended && AI_LAYOUT_FAMILY_DEFS[rawRecommended]) return normalizeResolvedLayoutFamily(rawRecommended);
+  const safeSignals = signals || extractMarkdownSignals('');
+  const headingCount = safeSignals.headings?.length || 0;
+  const sectionCount = safeSignals.sectionTitles?.length || 0;
+  const bulletGroupCount = safeSignals.bulletGroups?.length || 0;
+  const imageCount = Array.isArray(imageRefs) ? imageRefs.length : 0;
+  const hintText = `${coerceString(rawLayout?.title)} ${Array.isArray(safeSignals.sectionTitles) ? safeSignals.sectionTitles.join(' ') : ''}`.toLowerCase();
+  if (/(观点|经验|复盘|写作|表达|品牌|故事|思考|方法论|内容创作|心得|感受|editorial|essay|brand)/i.test(hintText)) {
+    return 'editorial-lite';
+  }
+  if (sectionCount >= 2 || headingCount >= 4 || bulletGroupCount >= 2 || imageCount >= 2) {
+    return 'tutorial-cards';
+  }
+  return 'source-first';
+}
+
+function recommendColorPalette({ rawLayout = {}, signals = null } = {}) {
+  const rawRecommended = coerceString(
+    rawLayout?.recommendedColorPalette || rawLayout?.resolved?.colorPalette || rawLayout?.stylePack
+  );
+  if (rawRecommended && AI_COLOR_PALETTES[rawRecommended]) return normalizeResolvedColorPalette(rawRecommended);
+  const headingTitles = Array.isArray(signals?.sectionTitles)
+    ? signals.sectionTitles.join(' ')
+    : '';
+  const titleHints = `${coerceString(rawLayout?.title)} ${headingTitles}`.toLowerCase();
+  if (/(教程|指南|入门|步骤|实践|实操|配置|接入|使用|标签|双链|知识库|workflow|guide|tutorial|how to)/i.test(titleHints)) {
+    return 'ocean-blue';
+  }
+  if (/(观点|品牌|复盘|内容|经验|编辑|写作|表达)/i.test(titleHints)) {
+    return 'graphite-rose';
+  }
+  if (/(清单|合集|推荐|总结|收藏)/i.test(titleHints)) {
+    return 'sunset-amber';
+  }
+  return 'tech-green';
+}
+
 function buildFallbackLayout(context = {}) {
   const title = coerceString(context.title || '未命名文章');
-  const stylePack = coerceString(context.stylePack || 'tech-green');
+  const selectionResolution = resolveLayoutSelection({
+    requestedSelection: context.selection || { colorPalette: context.stylePack },
+    rawLayout: context.rawLayout,
+    signals: context.signals || extractMarkdownSignals(context.markdown || ''),
+    imageRefs: context.imageRefs,
+  });
+  const resolved = selectionResolution.resolved;
   const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
-  const signals = extractMarkdownSignals(context.markdown || '');
+  const signals = context.signals || extractMarkdownSignals(context.markdown || '');
   const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || '').sections;
   const firstImageId = imageRefs[0]?.id || '';
   const leadText = summarizeText(signals.leadParagraphs[0] || signals.paragraphs[0] || '');
   const leadNote = summarizeText(signals.leadParagraphs[1] || '');
-  const partItems = signals.sectionTitles.slice(0, 5).map((text, index) => ({
+  const partItems = signals.sectionTitles.slice(0, MAX_PART_NAV_ITEMS).map((text, index) => ({
     label: `PART ${String(index + 1).padStart(2, '0')}`,
     text,
   }));
 
   const headBlocks = [];
   const bodyBlocks = [];
-  headBlocks.push({
-    type: 'hero',
-    eyebrow: signals.sectionTitles[0] ? 'AI Layout Draft' : 'AI Article Layout',
-    title,
-    subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
-    coverImageId: firstImageId,
-    variant: 'cover-right',
-  });
-
-  if (partItems.length >= 2) {
-    headBlocks.push({ type: 'part-nav', items: partItems });
-  }
-
-  if (leadText) {
+  if (resolved.layoutFamily === 'tutorial-cards') {
     headBlocks.push({
-      type: 'lead-quote',
-      text: leadText,
-      note: leadNote,
+      type: 'hero',
+      eyebrow: signals.sectionTitles[0] ? 'AI Layout Draft' : 'AI Article Layout',
+      title,
+      subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
+      coverImageId: firstImageId,
+      variant: 'cover-right',
     });
+
+    if (partItems.length >= 2) {
+      headBlocks.push({ type: 'part-nav', items: partItems });
+    }
+
+    if (leadText) {
+      headBlocks.push({
+        type: 'lead-quote',
+        text: leadText,
+        note: leadNote,
+      });
+    }
+  } else if (resolved.layoutFamily === 'editorial-lite') {
+    headBlocks.push({
+      type: 'hero',
+      eyebrow: signals.sectionTitles[0] ? 'Editorial Layout' : 'AI Editorial Draft',
+      title,
+      subtitle: leadText || summarizeText(signals.lastParagraph || title, 72),
+      coverImageId: firstImageId,
+      variant: 'cover-left',
+    });
+    if (leadText) {
+      headBlocks.push({
+        type: 'lead-quote',
+        text: leadText,
+        note: leadNote,
+      });
+    }
+    if (partItems.length >= 3) {
+      headBlocks.push({ type: 'part-nav', items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
+    }
+  } else {
+    if (firstImageId || leadText) {
+      headBlocks.push({
+        type: 'hero',
+        eyebrow: signals.sectionTitles[0] ? 'Obsidian × AI 系列' : 'AI Layout Draft',
+        title,
+        subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
+        coverImageId: firstImageId,
+        variant: 'cover-right',
+      });
+    }
+    if (partItems.length >= 3) {
+      headBlocks.push({ type: 'part-nav', items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
+    }
   }
 
   sourceSections.forEach((section, index) => {
@@ -835,7 +1342,7 @@ function buildFallbackLayout(context = {}) {
   });
 
   const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
-  if (screenshotImage?.id) {
+  if ((resolved.layoutFamily === 'tutorial-cards' || resolved.layoutFamily === 'editorial-lite') && screenshotImage?.id) {
     bodyBlocks.push({
       type: 'phone-frame',
       imageId: screenshotImage.id,
@@ -846,7 +1353,12 @@ function buildFallbackLayout(context = {}) {
   return {
     version: AI_LAYOUT_SCHEMA_VERSION,
     articleType: signals.sectionTitles.length >= 2 ? 'tutorial' : 'article',
-    stylePack,
+    selection: selectionResolution.selection,
+    resolved,
+    recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+    recommendedColorPalette: selectionResolution.recommendedColorPalette,
+    stylePack: resolved.colorPalette,
+    layoutFamily: resolved.layoutFamily,
     title,
     summary: summarizeText(leadText || signals.lastParagraph || title, 90),
     blocks: [...headBlocks, ...bodyBlocks].filter(Boolean).slice(0, MAX_LAYOUT_BLOCKS),
@@ -952,7 +1464,12 @@ function mergeBlocksWithFallbackDetailed(aiBlocks = [], fallbackBlocks = []) {
 
 function normalizeArticleLayout(rawLayout = {}, context = {}) {
   const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
-  const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || 'tech-green');
+  const selectionResolution = resolveLayoutSelection({
+    requestedSelection: context.selection || { colorPalette: context.stylePack },
+    rawLayout,
+    signals: context.signals || extractMarkdownSignals(context.markdown || ''),
+    imageRefs: context.imageRefs,
+  });
   const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || '').sections;
   const normalizedAiBlocks = Array.isArray(rawLayout.blocks)
     ? rawLayout.blocks
@@ -962,8 +1479,10 @@ function normalizeArticleLayout(rawLayout = {}, context = {}) {
   const fallbackLayout = buildFallbackLayout({
     title: rawLayout.title || context.title,
     markdown: context.markdown,
-    stylePack: requestedStylePack,
+    selection: selectionResolution.selection,
+    rawLayout,
     imageRefs: context.imageRefs,
+    signals: context.signals,
     sourceSections,
   });
   const blocks = mergeBlocksWithFallback(normalizedAiBlocks, fallbackLayout.blocks);
@@ -971,7 +1490,12 @@ function normalizeArticleLayout(rawLayout = {}, context = {}) {
   return {
     version: AI_LAYOUT_SCHEMA_VERSION,
     articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || 'article'),
-    stylePack: AI_STYLE_PACKS[requestedStylePack] ? requestedStylePack : 'tech-green',
+    selection: selectionResolution.selection,
+    resolved: selectionResolution.resolved,
+    recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+    recommendedColorPalette: selectionResolution.recommendedColorPalette,
+    stylePack: selectionResolution.resolved.colorPalette,
+    layoutFamily: selectionResolution.resolved.layoutFamily,
     title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
     summary: coerceString(rawLayout.summary || fallbackLayout.summary),
     blocks,
@@ -980,19 +1504,27 @@ function normalizeArticleLayout(rawLayout = {}, context = {}) {
 
 function createLayoutGenerationMeta({
   provider,
-  stylePack,
+  layoutFamily,
+  colorPalette,
+  recommendedLayoutFamily,
+  recommendedColorPalette,
   signals,
   imageRefs = [],
   normalizedAiBlocks = [],
   mergedEntries = [],
   schemaValidation = null,
 }) {
-  const stylePackInfo = getStylePackById(stylePack);
+  const layoutFamilyInfo = getLayoutFamilyById(layoutFamily);
+  const colorPaletteInfo = getColorPaletteById(colorPalette);
   const fallbackEntries = mergedEntries.filter((entry) => entry.source === 'fallback');
   return {
     providerName: coerceString(provider?.name),
     providerModel: coerceString(provider?.model),
-    stylePackLabel: stylePackInfo?.label || '',
+    layoutFamilyLabel: layoutFamilyInfo?.label || '',
+    colorPaletteLabel: colorPaletteInfo?.label || '',
+    stylePackLabel: colorPaletteInfo?.label || '',
+    recommendedLayoutFamilyLabel: getLayoutFamilyById(recommendedLayoutFamily)?.label || '',
+    recommendedColorPaletteLabel: getColorPaletteById(recommendedColorPalette)?.label || '',
     headingCount: signals.headings.length,
     sectionCount: signals.sectionTitles.length,
     leadParagraphCount: signals.leadParagraphs.length,
@@ -1015,12 +1547,21 @@ function createLayoutGenerationMeta({
 
 function buildLayoutResult(rawLayout = {}, context = {}) {
   const validation = validateAiLayoutPayload(rawLayout);
-  const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || 'tech-green');
+  const signals = context.signals || extractMarkdownSignals(context.markdown || '');
+  const selectionResolution = resolveLayoutSelection({
+    requestedSelection: context.selection || { colorPalette: context.stylePack },
+    rawLayout,
+    signals,
+    imageRefs: context.imageRefs,
+  });
   if (validation.fatal) {
     const generationMeta = createLayoutGenerationMeta({
       provider: context.provider,
-      stylePack: requestedStylePack,
-      signals: context.signals || extractMarkdownSignals(context.markdown || ''),
+      layoutFamily: selectionResolution.resolved.layoutFamily,
+      colorPalette: selectionResolution.resolved.colorPalette,
+      recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+      recommendedColorPalette: selectionResolution.recommendedColorPalette,
+      signals,
       imageRefs: context.imageRefs,
       normalizedAiBlocks: [],
       mergedEntries: [],
@@ -1039,15 +1580,22 @@ function buildLayoutResult(rawLayout = {}, context = {}) {
   const fallbackLayout = buildFallbackLayout({
     title: rawLayout.title || context.title,
     markdown: context.markdown,
-    stylePack: requestedStylePack,
+    selection: selectionResolution.selection,
+    rawLayout,
     imageRefs: context.imageRefs,
+    signals,
     sourceSections,
   });
   const mergedEntries = mergeBlocksWithFallbackDetailed(normalizedAiBlocks, fallbackLayout.blocks);
   const layoutJson = {
     version: AI_LAYOUT_SCHEMA_VERSION,
     articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || 'article'),
-    stylePack: AI_STYLE_PACKS[requestedStylePack] ? requestedStylePack : 'tech-green',
+    selection: selectionResolution.selection,
+    resolved: selectionResolution.resolved,
+    recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+    recommendedColorPalette: selectionResolution.recommendedColorPalette,
+    stylePack: selectionResolution.resolved.colorPalette,
+    layoutFamily: selectionResolution.resolved.layoutFamily,
     title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
     summary: coerceString(rawLayout.summary || fallbackLayout.summary),
     blocks: mergedEntries.map((entry) => entry.block),
@@ -1057,8 +1605,11 @@ function buildLayoutResult(rawLayout = {}, context = {}) {
     layoutJson,
     generationMeta: createLayoutGenerationMeta({
       provider: context.provider,
-      stylePack: layoutJson.stylePack,
-      signals: context.signals || extractMarkdownSignals(context.markdown || ''),
+      layoutFamily: layoutJson.resolved.layoutFamily,
+      colorPalette: layoutJson.resolved.colorPalette,
+      recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+      recommendedColorPalette: layoutJson.recommendedColorPalette,
+      signals,
       imageRefs: context.imageRefs,
       normalizedAiBlocks,
       mergedEntries,
@@ -1089,8 +1640,21 @@ function extractImageRefsFromHtml(html) {
   return refs;
 }
 
-function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
-  const stylePackInfo = getStylePackById(stylePack);
+function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs = [] }) {
+  const resolvedSelection = resolveLayoutSelection({
+    requestedSelection: selection || { colorPalette: stylePack },
+    rawLayout: { title },
+    signals: extractMarkdownSignals(markdown),
+    imageRefs,
+  });
+  const selectedLayoutFamily = selection?.layoutFamily || AI_LAYOUT_SELECTION_AUTO;
+  const selectedColorPalette = selection?.colorPalette || AI_LAYOUT_SELECTION_AUTO;
+  const selectedLayoutFamilyInfo = selectedLayoutFamily === AI_LAYOUT_SELECTION_AUTO
+    ? { label: '自动推荐', description: '由 AI 根据文章内容推荐布局风格。' }
+    : getLayoutFamilyById(selectedLayoutFamily);
+  const selectedColorPaletteInfo = selectedColorPalette === AI_LAYOUT_SELECTION_AUTO
+    ? { label: '自动推荐', description: '由 AI 根据文章内容推荐颜色。' }
+    : getColorPaletteById(selectedColorPalette);
   const signals = extractMarkdownSignals(markdown);
   const promptMarkdown = truncateMarkdownForPrompt(markdown);
   const imageSummary = imageRefs.length
@@ -1118,8 +1682,12 @@ function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
       role: 'user',
       content: [
         `文章标题：${title || '未命名文章'}`,
-        `风格包：${stylePackInfo.label}`,
-        `风格说明：${stylePackInfo.description}`,
+        `布局选择：${selectedLayoutFamilyInfo.label}`,
+        `布局说明：${selectedLayoutFamilyInfo.description}`,
+        `颜色选择：${selectedColorPaletteInfo.label}`,
+        `颜色说明：${selectedColorPaletteInfo.description}`,
+        `推荐布局：${getLayoutFamilyById(resolvedSelection.recommendedLayoutFamily).label}`,
+        `推荐颜色：${getColorPaletteById(resolvedSelection.recommendedColorPalette).label}`,
         '',
         '可用图片：',
         imageSummary,
@@ -1137,6 +1705,13 @@ function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
         '',
         '请输出一个 JSON 对象，包含：',
         ...AI_LAYOUT_OUTPUT_FIELDS.map((field) => `- ${field}`),
+        '',
+        'selection 规则：',
+        `- layoutFamily 只能是 ${AI_LAYOUT_SELECTION_AUTO} / ${AI_LAYOUT_FAMILIES.join(' / ')}`,
+        `- colorPalette 只能是 ${AI_LAYOUT_SELECTION_AUTO} / ${AI_LAYOUT_COLOR_PALETTES.join(' / ')}`,
+        `- 当前 selection.layoutFamily = ${selectedLayoutFamily}`,
+        `- 当前 selection.colorPalette = ${selectedColorPalette}`,
+        '如果 selection 为 auto，请你给出 recommended* 并写入 resolved；如果不是 auto，请尊重用户选择。',
         '',
         'block 约束：',
         ...getAiLayoutBlockConstraintLines(),
@@ -1172,6 +1747,7 @@ async function requestOpenAICompatibleLayout({
   provider,
   title,
   markdown,
+  selection,
   stylePack,
   imageRefs,
   timeoutMs,
@@ -1190,7 +1766,7 @@ async function requestOpenAICompatibleLayout({
       body: JSON.stringify({
         model: provider.model,
         temperature: 0.2,
-        messages: buildLayoutMessages({ title, markdown, stylePack, imageRefs }),
+        messages: buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs }),
       }),
       signal: controller.signal,
     });
@@ -1218,7 +1794,11 @@ async function generateArticleLayout({
   provider,
   title,
   markdown,
-  stylePack = 'tech-green',
+  stylePack = '',
+  selection = {
+    layoutFamily: AI_LAYOUT_SELECTION_AUTO,
+    colorPalette: AI_LAYOUT_SELECTION_AUTO,
+  },
   imageRefs = [],
   timeoutMs = 45000,
   fetchImpl = globalThis.fetch,
@@ -1236,6 +1816,7 @@ async function generateArticleLayout({
         provider,
         title,
         markdown,
+        selection,
         stylePack,
         imageRefs,
         timeoutMs,
@@ -1248,6 +1829,7 @@ async function generateArticleLayout({
 
   return buildLayoutResult(rawLayout, {
     title,
+    selection,
     stylePack,
     imageRefs,
     markdown,
@@ -1262,7 +1844,10 @@ async function testAiProviderConnection(provider, fetchImpl = globalThis.fetch) 
     provider,
     title: '连接测试',
     markdown: '这是一个连接测试。请输出最小可用的教程排版 JSON。',
-    stylePack: 'tech-green',
+    selection: {
+      layoutFamily: 'tutorial-cards',
+      colorPalette: 'tech-green',
+    },
     imageRefs: [],
     timeoutMs: 15000,
     fetchImpl,
@@ -1281,8 +1866,11 @@ function escapeHtml(text) {
 }
 
 function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
-  const stylePack = getStylePackById(layout?.stylePack);
-  const tokens = stylePack.tokens;
+  const layoutFamily = getLayoutFamilyById(layout?.resolved?.layoutFamily || layout?.layoutFamily);
+  const colorPalette = getColorPaletteById(layout?.resolved?.colorPalette || layout?.stylePack);
+  const tokens = colorPalette.tokens;
+  const isSourceFirst = layoutFamily.id === 'source-first';
+  const isEditorialLite = layoutFamily.id === 'editorial-lite';
   const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
   const bodyFontSize = 16;
   const bodyLineHeight = 1.8;
@@ -1300,10 +1888,10 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
   const cardStyle = [
     `background:${tokens.surface}`,
     `border:1px solid ${tokens.border}`,
-    'border-radius:18px',
-    'padding:18px',
-    'margin:18px 0',
-    'box-shadow:0 10px 30px -24px rgba(0,0,0,0.18)',
+    `border-radius:${isSourceFirst ? 14 : (isEditorialLite ? 16 : 18)}px`,
+    `padding:${isSourceFirst ? 16 : (isEditorialLite ? 20 : 18)}px`,
+    `margin:${isSourceFirst ? 16 : (isEditorialLite ? 22 : 18)}px 0`,
+    `box-shadow:${isEditorialLite ? '0 18px 32px -30px rgba(36,50,61,0.16)' : '0 10px 30px -24px rgba(0,0,0,0.18)'}`,
   ].join(';');
 
   const renderImage = (imageId, extraStyle = '') => {
@@ -1321,37 +1909,46 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
 
   const blocksHtml = (layout.blocks || []).map((block, index) => {
     if (block.type === 'hero') {
-      const imageHtml = block.coverImageId ? renderImage(block.coverImageId, 'max-width:116px;flex:0 0 116px;') : '';
+      const heroImageStyle = isEditorialLite
+        ? 'max-width:148px;flex:0 0 148px;border-radius:22px;'
+        : 'max-width:116px;flex:0 0 116px;';
+      const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : '';
       const contentHtml = [
-        block.eyebrow ? `<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:10px;">${escapeHtml(block.eyebrow)}</div>` : '',
-        block.title ? `<h1 style="margin:0 0 10px;font-size:28px;line-height:1.2;color:${tokens.text};">${escapeHtml(block.title)}</h1>` : '',
-        block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:14px;line-height:1.7;">${escapeHtml(block.subtitle)}</p>` : '',
+        block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 1.8 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:10px;">${escapeHtml(block.eyebrow)}</div>` : '',
+        block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 8 : (isEditorialLite ? 12 : 10)}px;font-size:${isSourceFirst ? 24 : (isEditorialLite ? 30 : 28)}px;line-height:${isEditorialLite ? 1.18 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 800 : 700};">${escapeHtml(block.title)}</h1>` : '',
+        block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : (isEditorialLite ? 16 : 14)}px;line-height:${isSourceFirst ? 1.8 : (isEditorialLite ? 1.82 : 1.7)};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : '',
       ].join('');
       const flexDirection = block.variant === 'cover-left' ? 'row-reverse' : 'row';
-      return `<section style="${cardStyle};padding:22px;">
-        <div style="display:flex;flex-direction:${flexDirection};gap:16px;align-items:center;">
+      const heroFooter = isEditorialLite
+        ? `<div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+            <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
+            <div style="flex:1;height:1px;background:${tokens.border};"></div>
+          </div>`
+        : `<div style="height:${isSourceFirst ? 6 : 10}px;margin-top:${isSourceFirst ? 14 : 18}px;background:${tokens.accent};border-radius:999px;"></div>`;
+      return `<section style="${cardStyle};padding:${isSourceFirst ? 18 : (isEditorialLite ? 24 : 22)}px;">
+        <div style="display:flex;flex-direction:${flexDirection};gap:${isEditorialLite ? 20 : 16}px;align-items:center;">
           <div style="flex:1 1 auto;min-width:0;">${contentHtml}</div>
           ${imageHtml}
         </div>
-        <div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>
+        ${heroFooter}
       </section>`;
     }
 
     if (block.type === 'part-nav') {
       const itemsHtml = block.items.map((item) => `
-        <div style="flex:1 1 0;min-width:0;padding:12px 10px;border:1px solid ${tokens.border};border-radius:14px;background:${tokens.surfaceSoft};">
-          <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:0.8px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
-          <div style="margin-top:8px;font-size:13px;font-weight:600;color:${tokens.text};line-height:1.45;">${escapeHtml(item.text)}</div>
+        <div style="flex:1 1 0;min-width:0;padding:${isSourceFirst ? '10px 12px' : (isEditorialLite ? '12px 0 12px 0' : '12px 10px')};border:${isEditorialLite ? 'none' : `1px solid ${tokens.border}`};border-radius:${isSourceFirst ? 12 : (isEditorialLite ? 0 : 14)}px;background:${isEditorialLite ? 'transparent' : tokens.surfaceSoft};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
+          <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
+          <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : (isEditorialLite ? 15 : 13)}px;font-weight:${isSourceFirst ? 500 : (isEditorialLite ? 500 : 600)};color:${tokens.text};line-height:${isEditorialLite ? 1.65 : 1.55};">${escapeHtml(item.text)}</div>
         </div>
       `).join('');
-      return `<section style="margin:16px 0 8px;">
+      return `<section style="margin:${isEditorialLite ? 18 : 16}px 0 8px;">
         <div style="display:flex;gap:10px;flex-wrap:wrap;">${itemsHtml}</div>
       </section>`;
     }
 
     if (block.type === 'lead-quote') {
-      return `<section style="margin:18px 0;padding:18px;border-radius:16px;background:${tokens.quoteBg};border:1px solid ${tokens.border};">
-        <div style="font-size:18px;font-weight:700;line-height:1.7;color:${tokens.text};">${escapeHtml(block.text)}</div>
+      return `<section style="margin:${isSourceFirst ? 16 : (isEditorialLite ? 22 : 18)}px 0;padding:${isSourceFirst ? 16 : (isEditorialLite ? 20 : 18)}px;border-radius:${isSourceFirst ? 14 : (isEditorialLite ? 0 : 16)}px;background:${isEditorialLite ? 'transparent' : tokens.quoteBg};border:${isEditorialLite ? 'none' : `1px solid ${tokens.border}`};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
+        <div style="font-size:${isSourceFirst ? 17 : (isEditorialLite ? 22 : 18)}px;font-weight:${isSourceFirst ? 600 : (isEditorialLite ? 600 : 700)};line-height:${isEditorialLite ? 1.72 : 1.75};color:${tokens.text};">${escapeHtml(block.text)}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ''}
       </section>`;
     }
@@ -1361,12 +1958,12 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
       const bulletsHtml = block.bullets.length
         ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join('')}</ul>`
         : '';
-      return `<section style="margin:26px 0;">
+      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 28 : 26)}px 0;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(index + 1).padStart(2, '0')}</div>
+          <div style="font-size:${isSourceFirst ? 22 : (isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? 'uppercase' : 'none'};">${isEditorialLite ? String(index + 1).padStart(2, '0') : String(index + 1).padStart(2, '0')}</div>
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
-        ${block.title ? `<h2 style="margin:0 0 8px;font-size:22px;line-height:1.35;color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ''}
+        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : (isEditorialLite ? 24 : 22)}px;line-height:${isEditorialLite ? 1.32 : 1.4};color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ''}
         ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ''}
         ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ''}
         ${bulletsHtml}
@@ -1379,8 +1976,8 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
         ? block.sectionIndex + 1
         : index + 1;
       const headingLevel = Number.isInteger(block.headingLevel) ? block.headingLevel : 2;
-      const titleFontSize = headingLevel >= 3 ? 18 : 22;
-      const titleMarginBottom = headingLevel >= 3 ? 10 : 12;
+      const titleFontSize = headingLevel >= 3 ? (isSourceFirst ? 17 : (isEditorialLite ? 18 : 18)) : (isSourceFirst ? 20 : (isEditorialLite ? 26 : 22));
+      const titleMarginBottom = headingLevel >= 3 ? 10 : (isEditorialLite ? 14 : 12);
       const titleColor = headingLevel >= 3 ? tokens.accentDeep : tokens.text;
       const paragraphsHtml = Array.isArray(block.paragraphs)
         ? block.paragraphs.map((paragraph) => `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(paragraph)}</p>`).join('')
@@ -1394,11 +1991,22 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
       const imagesHtml = Array.isArray(block.imageIds)
         ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join('')
         : '';
-      return `<section style="margin:26px 0;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, '0')}</div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
-        </div>
+      const sectionHead = isSourceFirst
+        ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:${tokens.accentDeep};text-transform:uppercase;">${String(sectionDisplayIndex).padStart(2, '0')}</div>
+            <div style="height:1px;flex:1;background:${tokens.border};"></div>
+          </div>`
+        : isEditorialLite
+          ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">Part ${String(sectionDisplayIndex).padStart(2, '0')}</div>
+              <div style="height:1px;flex:1;background:${tokens.border};"></div>
+            </div>`
+          : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, '0')}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
+          </div>`;
+      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 30 : 26)}px 0;">
+        ${sectionHead}
         ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:1.4;color:${titleColor};">${escapeHtml(block.title)}</h2>` : ''}
         ${paragraphsHtml}
         ${bulletGroupsHtml}
@@ -1407,10 +2015,10 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
     }
 
     if (block.type === 'phone-frame') {
-      return `<section style="margin:24px auto;max-width:380px;padding:14px;border:1px solid ${tokens.border};border-radius:42px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);">
-        <div style="width:42%;height:18px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
-        <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:28px;padding:10px;overflow:hidden;">
-          ${renderImage(block.imageId, 'border-radius:22px;')}
+      return `<section style="margin:24px auto;max-width:${isSourceFirst ? 420 : (isEditorialLite ? 460 : 380)}px;padding:${isSourceFirst ? 10 : (isEditorialLite ? 12 : 14)}px;border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 24 : (isEditorialLite ? 18 : 42)}px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);">
+        <div style="width:${isEditorialLite ? 28 : 42}%;height:${isEditorialLite ? 2 : 18}px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
+        <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 16 : (isEditorialLite ? 14 : 28)}px;padding:10px;overflow:hidden;">
+          ${renderImage(block.imageId, `border-radius:${isSourceFirst ? 12 : (isEditorialLite ? 12 : 22)}px;`)}
         </div>
         ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:${tokens.muted};">${escapeHtml(block.caption)}</div>` : ''}
       </section>`;
@@ -1418,9 +2026,9 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
 
     if (block.type === 'cta-card') {
       return `<section style="${cardStyle};background:linear-gradient(135deg, ${tokens.accentSoft} 0%, #ffffff 100%);">
-        ${block.title ? `<h3 style="margin:0 0 8px;font-size:20px;color:${tokens.text};">${escapeHtml(block.title)}</h3>` : ''}
+        ${block.title ? `<h3 style="margin:0 0 8px;font-size:${isEditorialLite ? 22 : 20}px;color:${tokens.text};">${escapeHtml(block.title)}</h3>` : ''}
         ${block.body ? `<p style="margin:0;color:${tokens.muted};">${escapeHtml(block.body)}</p>` : ''}
-        <div style="margin-top:14px;display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:999px;background:${tokens.accent};color:#fff;font-weight:700;font-size:14px;">${escapeHtml(block.buttonText || '继续阅读')}</div>
+        <div style="margin-top:14px;display:inline-flex;align-items:center;justify-content:center;padding:${isEditorialLite ? '9px 18px' : '10px 16px'};border-radius:999px;background:${tokens.accent};color:#fff;font-weight:700;font-size:14px;">${escapeHtml(block.buttonText || '继续阅读')}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ''}
       </section>`;
     }
@@ -1434,7 +2042,10 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
 module.exports = {
   AI_LAYOUT_SCHEMA_VERSION,
   AI_LAYOUT_SKILL_VERSION,
+  AI_LAYOUT_SELECTION_AUTO,
+  AI_LAYOUT_FAMILY_DEFS,
   AI_PROVIDER_KINDS,
+  AI_COLOR_PALETTES,
   AI_STYLE_PACKS,
   createDefaultAiSettings,
   normalizeAiSettings,
@@ -1445,10 +2056,22 @@ module.exports = {
   normalizeArticleLayoutState,
   normalizeArticleLayoutCacheEntry,
   normalizeSchemaValidation,
+  normalizeLayoutFamily,
+  normalizeColorPalette,
+  normalizeLayoutSelection,
+  normalizeResolvedSelection,
+  getArticleLayoutSelectionKey,
+  getArticleLayoutSelectionState,
+  getArticleLayoutSelectionStateKey,
+  getLayoutFamilyList,
+  getLayoutFamilyById,
+  getColorPaletteList,
+  getColorPaletteById,
   getStylePackList,
   getStylePackById,
   listEnabledAiProviders,
   resolveAiProvider,
+  deriveArticleLayoutStateForSelection,
   extractImageRefsFromHtml,
   extractMarkdownSections,
   extractMarkdownSignals,

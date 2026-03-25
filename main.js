@@ -3451,7 +3451,10 @@ var require_obsidian_triplet_renderer = __commonJS({
 // services/ai-layout-skill-bundle.js
 var require_ai_layout_skill_bundle = __commonJS({
   "services/ai-layout-skill-bundle.js"(exports2, module2) {
-    var AI_LAYOUT_SKILL_VERSION2 = "2026.03.24-alpha.1";
+    var AI_LAYOUT_SKILL_VERSION2 = "2026.03.24-alpha.2";
+    var AI_LAYOUT_SELECTION_AUTO2 = "auto";
+    var AI_LAYOUT_FAMILIES = ["source-first", "tutorial-cards", "editorial-lite"];
+    var AI_LAYOUT_COLOR_PALETTES = ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose"];
     var AI_LAYOUT_ALLOWED_BLOCKS = [
       {
         type: "hero",
@@ -3494,15 +3497,29 @@ var require_ai_layout_skill_bundle = __commonJS({
       "\u4F60\u7684\u804C\u8D23\u662F\u628A\u6587\u7AE0\u5185\u5BB9\u6620\u5C04\u4E3A\u7ED3\u6784\u5316\u7684\u6392\u7248 JSON\u3002",
       "\u4E0D\u8981\u8F93\u51FA Markdown\uFF0C\u4E0D\u8981\u8F93\u51FA HTML\uFF0C\u4E0D\u8981\u89E3\u91CA\uFF0C\u53EA\u8F93\u51FA\u4E00\u4E2A JSON \u5BF9\u8C61\u3002",
       `\u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B block type: ${AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type).join(", ")}\u3002`,
+      `layoutFamily \u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B\u503C: ${AI_LAYOUT_FAMILIES.join(", ")}\u3002`,
+      `colorPalette \u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B\u503C: ${AI_LAYOUT_COLOR_PALETTES.join(", ")}\u3002`,
       "block \u5185\u4E0D\u8981\u675C\u64B0\u56FE\u7247 URL\uFF0C\u53EA\u80FD\u4F7F\u7528\u63D0\u4F9B\u7684 image id\u3002",
       "\u5C3D\u91CF\u4FDD\u7559\u539F\u6587\u4FE1\u606F\uFF0C\u4E0D\u8981\u6539\u5199\u4F5C\u8005\u89C2\u70B9\uFF0C\u4E0D\u8981\u7F16\u9020\u6570\u636E\u3002",
       "\u4F18\u5148\u8986\u76D6\u5168\u6587\u4E3B\u8981\u7AE0\u8282\uFF0C\u4FDD\u771F\u4F18\u5148\u4E8E\u82B1\u54E8\u7F16\u6392\u3002",
       "\u4F18\u5148\u505A\u6559\u7A0B/\u6848\u4F8B\u578B\u516C\u4F17\u53F7\u7F16\u6392\uFF1A\u5C01\u9762\u6982\u89C8 -> \u5BFC\u8BED\u6458\u8981 -> \u5206\u7AE0\u8282\u6B63\u6587 -> \u53EF\u9009\u622A\u56FE\u5757 -> \u53EF\u9009\u6536\u5C3E\u603B\u7ED3\u3002",
       "\u5982\u679C\u539F\u6587\u5B58\u5728\u660E\u663E\u7AE0\u8282\u6807\u9898\uFF0C\u6B63\u6587\u4E3B\u4F53\u4F18\u5148\u8F6C\u6210 section-block\u3002",
       "\u5982\u679C\u6709\u56FE\u7247\uFF0C\u4F18\u5148\u6311 1 \u5230 2 \u5F20\u6700\u50CF\u5C01\u9762/\u622A\u56FE\u7684\u56FE\u8FDB\u5165 hero \u6216 phone-frame\uFF1B\u666E\u901A\u914D\u56FE\u4E0D\u8981\u5F3A\u884C\u5957\u624B\u673A\u58F3\u3002",
-      "\u4E0D\u8981\u9ED8\u8BA4\u8FFD\u52A0 CTA\uFF1B\u53EA\u6709\u539F\u6587\u672C\u8EAB\u9002\u5408\u6536\u5C3E\u5F15\u5BFC\u65F6\u624D\u4F7F\u7528 cta-card\u3002"
+      "\u4E0D\u8981\u9ED8\u8BA4\u8FFD\u52A0 CTA\uFF1B\u53EA\u6709\u539F\u6587\u672C\u8EAB\u9002\u5408\u6536\u5C3E\u5F15\u5BFC\u65F6\u624D\u4F7F\u7528 cta-card\u3002",
+      "selection \u8868\u793A\u7528\u6237\u5F53\u524D\u9009\u62E9\uFF1Bresolved \u8868\u793A\u672C\u6B21\u6700\u7EC8\u91C7\u7528\u7684\u5E03\u5C40\u548C\u989C\u8272\u3002",
+      "\u5982\u679C selection \u4E3A auto\uFF0C\u8BF7\u6839\u636E\u5185\u5BB9\u63A8\u8350 recommendedLayoutFamily \u548C recommendedColorPalette\uFF0C\u5E76\u5199\u5165 resolved\u3002",
+      "\u5982\u679C selection \u5DF2\u6307\u5B9A\u5177\u4F53\u5E03\u5C40\u6216\u989C\u8272\uFF0Cresolved \u5FC5\u987B\u5C0A\u91CD\u8BE5\u9009\u62E9\u3002"
     ];
-    var AI_LAYOUT_OUTPUT_FIELDS = ["articleType", "stylePack", "title", "summary", "blocks"];
+    var AI_LAYOUT_OUTPUT_FIELDS = [
+      "articleType",
+      "selection",
+      "resolved",
+      "recommendedLayoutFamily",
+      "recommendedColorPalette",
+      "title",
+      "summary",
+      "blocks"
+    ];
     function getAiLayoutBlockConstraintLines() {
       return AI_LAYOUT_ALLOWED_BLOCKS.map((block) => `- ${block.type}: ${block.fields.join(", ")}`);
     }
@@ -3516,6 +3533,8 @@ var require_ai_layout_skill_bundle = __commonJS({
     function validateAiLayoutPayload(rawLayout) {
       const issues = [];
       const allowedBlockTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type));
+      const allowedLayoutFamilies = new Set(AI_LAYOUT_FAMILIES);
+      const allowedColorPalettes = new Set(AI_LAYOUT_COLOR_PALETTES);
       const fieldMap = new Map(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => [block.type, /* @__PURE__ */ new Set(["type", ...block.fields.flatMap((field) => {
         if (field === "items[{label,text}]")
           return ["items"];
@@ -3530,7 +3549,7 @@ var require_ai_layout_skill_bundle = __commonJS({
           issues
         };
       }
-      const requiredTopLevelFields = ["articleType", "stylePack", "title", "summary", "blocks"];
+      const requiredTopLevelFields = ["articleType", "selection", "resolved", "title", "summary", "blocks"];
       requiredTopLevelFields.forEach((field) => {
         if (!(field in rawLayout)) {
           issues.push(createSchemaIssue(`$.${field}`, `\u7F3A\u5C11\u9876\u5C42\u5B57\u6BB5 ${field}\u3002`, field === "blocks"));
@@ -3542,10 +3561,46 @@ var require_ai_layout_skill_bundle = __commonJS({
           }
           return;
         }
-        if (typeof rawLayout[field] !== "string") {
+        if ((field === "selection" || field === "resolved") && (typeof rawLayout[field] !== "object" || !rawLayout[field] || Array.isArray(rawLayout[field]))) {
+          issues.push(createSchemaIssue(`$.${field}`, `${field} \u5FC5\u987B\u662F\u5BF9\u8C61\u3002`, true));
+          return;
+        }
+        if (field !== "selection" && field !== "resolved" && typeof rawLayout[field] !== "string") {
           issues.push(createSchemaIssue(`$.${field}`, `${field} \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002`, false));
         }
       });
+      if (rawLayout.selection && typeof rawLayout.selection === "object" && !Array.isArray(rawLayout.selection)) {
+        const selectionLayoutFamily = String(rawLayout.selection.layoutFamily || "").trim();
+        const selectionColorPalette = String(rawLayout.selection.colorPalette || "").trim();
+        if (!selectionLayoutFamily || selectionLayoutFamily !== AI_LAYOUT_SELECTION_AUTO2 && !allowedLayoutFamilies.has(selectionLayoutFamily)) {
+          issues.push(createSchemaIssue("$.selection.layoutFamily", "selection.layoutFamily \u5FC5\u987B\u662F auto \u6216\u5408\u6CD5\u7684 layoutFamily\u3002", true));
+        }
+        if (!selectionColorPalette || selectionColorPalette !== AI_LAYOUT_SELECTION_AUTO2 && !allowedColorPalettes.has(selectionColorPalette)) {
+          issues.push(createSchemaIssue("$.selection.colorPalette", "selection.colorPalette \u5FC5\u987B\u662F auto \u6216\u5408\u6CD5\u7684 colorPalette\u3002", true));
+        }
+      }
+      if (rawLayout.resolved && typeof rawLayout.resolved === "object" && !Array.isArray(rawLayout.resolved)) {
+        const resolvedLayoutFamily = String(rawLayout.resolved.layoutFamily || "").trim();
+        const resolvedColorPalette = String(rawLayout.resolved.colorPalette || "").trim();
+        if (!allowedLayoutFamilies.has(resolvedLayoutFamily)) {
+          issues.push(createSchemaIssue("$.resolved.layoutFamily", "resolved.layoutFamily \u5FC5\u987B\u662F\u5408\u6CD5\u7684 layoutFamily\u3002", true));
+        }
+        if (!allowedColorPalettes.has(resolvedColorPalette)) {
+          issues.push(createSchemaIssue("$.resolved.colorPalette", "resolved.colorPalette \u5FC5\u987B\u662F\u5408\u6CD5\u7684 colorPalette\u3002", true));
+        }
+      }
+      if ("recommendedLayoutFamily" in rawLayout) {
+        const recommendedLayoutFamily = String(rawLayout.recommendedLayoutFamily || "").trim();
+        if (recommendedLayoutFamily && !allowedLayoutFamilies.has(recommendedLayoutFamily)) {
+          issues.push(createSchemaIssue("$.recommendedLayoutFamily", "recommendedLayoutFamily \u5FC5\u987B\u662F\u5408\u6CD5\u7684 layoutFamily\u3002", false));
+        }
+      }
+      if ("recommendedColorPalette" in rawLayout) {
+        const recommendedColorPalette = String(rawLayout.recommendedColorPalette || "").trim();
+        if (recommendedColorPalette && !allowedColorPalettes.has(recommendedColorPalette)) {
+          issues.push(createSchemaIssue("$.recommendedColorPalette", "recommendedColorPalette \u5FC5\u987B\u662F\u5408\u6CD5\u7684 colorPalette\u3002", false));
+        }
+      }
       if (!Array.isArray(rawLayout.blocks)) {
         return {
           isValid: issues.length === 0,
@@ -3628,7 +3683,16 @@ var require_ai_layout_skill_bundle = __commonJS({
     function getAiLayoutTemplate() {
       return {
         articleType: "tutorial",
-        stylePack: "tech-green",
+        selection: {
+          layoutFamily: "auto",
+          colorPalette: "auto"
+        },
+        resolved: {
+          layoutFamily: "tutorial-cards",
+          colorPalette: "tech-green"
+        },
+        recommendedLayoutFamily: "tutorial-cards",
+        recommendedColorPalette: "tech-green",
         title: "\u6587\u7AE0\u6807\u9898",
         summary: "\u4E00\u53E5\u6458\u8981",
         blocks: [
@@ -3655,6 +3719,9 @@ var require_ai_layout_skill_bundle = __commonJS({
     }
     module2.exports = {
       AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
+      AI_LAYOUT_FAMILIES,
+      AI_LAYOUT_COLOR_PALETTES,
       AI_LAYOUT_ALLOWED_BLOCKS,
       AI_LAYOUT_SKILL_SYSTEM_LINES,
       AI_LAYOUT_OUTPUT_FIELDS,
@@ -3670,6 +3737,9 @@ var require_ai_layout = __commonJS({
   "services/ai-layout.js"(exports2, module2) {
     var {
       AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
+      AI_LAYOUT_FAMILIES,
+      AI_LAYOUT_COLOR_PALETTES,
       AI_LAYOUT_ALLOWED_BLOCKS,
       AI_LAYOUT_SKILL_SYSTEM_LINES,
       AI_LAYOUT_OUTPUT_FIELDS,
@@ -3681,7 +3751,31 @@ var require_ai_layout = __commonJS({
       OPENAI_COMPATIBLE: "openai-compatible"
     };
     var MAX_LAYOUT_BLOCKS = 24;
-    var AI_STYLE_PACKS = {
+    var MAX_PART_NAV_ITEMS = 6;
+    var MAX_CASE_BLOCK_BULLETS = 6;
+    var MAX_CASE_BLOCK_IMAGE_IDS = 4;
+    var AI_LAYOUT_DEFAULT_FAMILY = "source-first";
+    var AI_LAYOUT_DEFAULT_COLOR_PALETTE = "tech-green";
+    var AI_LAYOUT_IMPLEMENTED_FAMILIES = /* @__PURE__ */ new Set(["source-first", "tutorial-cards", "editorial-lite"]);
+    var AI_LAYOUT_RESERVED_FAMILY_FALLBACKS = {};
+    var AI_LAYOUT_FAMILY_DEFS = {
+      "source-first": {
+        id: "source-first",
+        label: "\u539F\u6587\u589E\u5F3A\u578B",
+        description: "\u6700\u63A5\u8FD1\u666E\u901A\u9884\u89C8\uFF0C\u6B63\u6587\u8FDE\u7EED\u6D41\u52A8\uFF0C\u53EA\u505A\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\u3002"
+      },
+      "tutorial-cards": {
+        id: "tutorial-cards",
+        label: "\u6559\u7A0B\u5361\u7247\u578B",
+        description: "\u66F4\u5F3A\u8C03\u7AE0\u8282\u7F16\u53F7\u3001\u4FE1\u606F\u5361\u548C\u622A\u56FE\u5C55\u793A\uFF0C\u9002\u5408\u6559\u7A0B\u4E0E\u6848\u4F8B\u62C6\u89E3\u3002"
+      },
+      "editorial-lite": {
+        id: "editorial-lite",
+        label: "\u8F7B\u6742\u5FD7\u578B",
+        description: "\u504F\u7F16\u8F91\u611F\u7684\u7559\u767D\u4E0E\u56FE\u6587\u8282\u594F\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u7ECF\u9A8C\u4E0E\u54C1\u724C\u8868\u8FBE\u7C7B\u5185\u5BB9\u3002"
+      }
+    };
+    var AI_COLOR_PALETTES = {
       "tech-green": {
         id: "tech-green",
         label: "\u79D1\u6280\u7EFF",
@@ -3747,11 +3841,13 @@ var require_ai_layout = __commonJS({
         }
       }
     };
+    var AI_STYLE_PACKS = AI_COLOR_PALETTES;
     function createDefaultAiSettings2() {
       return {
         enabled: false,
         defaultProviderId: "",
-        defaultStylePack: "tech-green",
+        defaultLayoutFamily: AI_LAYOUT_SELECTION_AUTO2,
+        defaultColorPalette: AI_LAYOUT_SELECTION_AUTO2,
         includeImagesInLayout: true,
         requestTimeoutMs: 45e3,
         providers: [],
@@ -3763,6 +3859,141 @@ var require_ai_layout = __commonJS({
       if (!Number.isFinite(parsed))
         return fallback;
       return Math.min(max, Math.max(min, Math.round(parsed)));
+    }
+    function normalizeLayoutFamily(value, fallback = AI_LAYOUT_SELECTION_AUTO2) {
+      const normalized = coerceString(value);
+      if (normalized === AI_LAYOUT_SELECTION_AUTO2)
+        return AI_LAYOUT_SELECTION_AUTO2;
+      return AI_LAYOUT_FAMILY_DEFS[normalized] ? normalized : fallback;
+    }
+    function normalizeColorPalette(value, fallback = AI_LAYOUT_SELECTION_AUTO2) {
+      const normalized = coerceString(value);
+      if (normalized === AI_LAYOUT_SELECTION_AUTO2)
+        return AI_LAYOUT_SELECTION_AUTO2;
+      return AI_COLOR_PALETTES[normalized] ? normalized : fallback;
+    }
+    function normalizeResolvedLayoutFamily(value, fallback = AI_LAYOUT_DEFAULT_FAMILY) {
+      const normalized = coerceString(value);
+      if (!normalized)
+        return fallback;
+      if (AI_LAYOUT_IMPLEMENTED_FAMILIES.has(normalized))
+        return normalized;
+      if (AI_LAYOUT_RESERVED_FAMILY_FALLBACKS[normalized]) {
+        return AI_LAYOUT_RESERVED_FAMILY_FALLBACKS[normalized];
+      }
+      return AI_LAYOUT_IMPLEMENTED_FAMILIES.has(fallback) ? fallback : AI_LAYOUT_DEFAULT_FAMILY;
+    }
+    function normalizeResolvedColorPalette(value, fallback = AI_LAYOUT_DEFAULT_COLOR_PALETTE) {
+      const normalized = coerceString(value);
+      if (AI_COLOR_PALETTES[normalized])
+        return normalized;
+      return AI_COLOR_PALETTES[fallback] ? fallback : AI_LAYOUT_DEFAULT_COLOR_PALETTE;
+    }
+    function normalizeLayoutSelection2(raw = {}, fallback = {}) {
+      var _a, _b, _c, _d, _e, _f;
+      const candidate = typeof raw === "string" ? AI_COLOR_PALETTES[raw] ? { colorPalette: raw } : AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {} : raw;
+      return {
+        layoutFamily: normalizeLayoutFamily(
+          (_c = (_b = (_a = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
+          normalizeLayoutFamily(fallback == null ? void 0 : fallback.layoutFamily, AI_LAYOUT_SELECTION_AUTO2)
+        ),
+        colorPalette: normalizeColorPalette(
+          (_f = (_e = (_d = candidate == null ? void 0 : candidate.colorPalette) != null ? _d : candidate == null ? void 0 : candidate.palette) != null ? _e : candidate == null ? void 0 : candidate.stylePack) != null ? _f : fallback == null ? void 0 : fallback.colorPalette,
+          normalizeColorPalette(fallback == null ? void 0 : fallback.colorPalette, AI_LAYOUT_SELECTION_AUTO2)
+        )
+      };
+    }
+    function normalizeResolvedSelection(raw = {}, fallback = {}) {
+      var _a, _b, _c, _d, _e, _f;
+      const candidate = typeof raw === "string" ? AI_COLOR_PALETTES[raw] ? { colorPalette: raw } : AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {} : raw;
+      return {
+        layoutFamily: normalizeResolvedLayoutFamily(
+          (_c = (_b = (_a = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
+          normalizeResolvedLayoutFamily(fallback == null ? void 0 : fallback.layoutFamily, AI_LAYOUT_DEFAULT_FAMILY)
+        ),
+        colorPalette: normalizeResolvedColorPalette(
+          (_f = (_e = (_d = candidate == null ? void 0 : candidate.colorPalette) != null ? _d : candidate == null ? void 0 : candidate.palette) != null ? _e : candidate == null ? void 0 : candidate.stylePack) != null ? _f : fallback == null ? void 0 : fallback.colorPalette,
+          normalizeResolvedColorPalette(fallback == null ? void 0 : fallback.colorPalette, AI_LAYOUT_DEFAULT_COLOR_PALETTE)
+        )
+      };
+    }
+    function getArticleLayoutSelectionKey2(selection = {}) {
+      const normalized = normalizeLayoutSelection2(selection);
+      return `${normalized.layoutFamily || AI_LAYOUT_SELECTION_AUTO2}::${normalized.colorPalette || AI_LAYOUT_SELECTION_AUTO2}`;
+    }
+    function getLayoutFamilyList2({ includeAuto = true, includeReserved = false } = {}) {
+      const list = [];
+      if (includeAuto) {
+        list.push({
+          value: AI_LAYOUT_SELECTION_AUTO2,
+          label: "\u81EA\u52A8\u63A8\u8350",
+          description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u81EA\u52A8\u63A8\u8350\u5E03\u5C40\u3002"
+        });
+      }
+      Object.values(AI_LAYOUT_FAMILY_DEFS).forEach((family) => {
+        if (!includeReserved && !AI_LAYOUT_IMPLEMENTED_FAMILIES.has(family.id))
+          return;
+        list.push({
+          value: family.id,
+          label: family.label,
+          description: family.description
+        });
+      });
+      return list;
+    }
+    function getLayoutFamilyById2(id) {
+      const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
+      return AI_LAYOUT_FAMILY_DEFS[normalizedId] || AI_LAYOUT_FAMILY_DEFS[AI_LAYOUT_DEFAULT_FAMILY];
+    }
+    function getColorPaletteList2({ includeAuto = true } = {}) {
+      const list = [];
+      if (includeAuto) {
+        list.push({
+          value: AI_LAYOUT_SELECTION_AUTO2,
+          label: "\u81EA\u52A8\u63A8\u8350",
+          description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u81EA\u52A8\u63A8\u8350\u989C\u8272\u3002"
+        });
+      }
+      Object.values(AI_COLOR_PALETTES).forEach((pack) => {
+        list.push({
+          value: pack.id,
+          label: pack.label,
+          description: pack.description
+        });
+      });
+      return list;
+    }
+    function getColorPaletteById2(id) {
+      return AI_COLOR_PALETTES[normalizeResolvedColorPalette(id)] || AI_COLOR_PALETTES[AI_LAYOUT_DEFAULT_COLOR_PALETTE];
+    }
+    function resolveLayoutSelection({
+      requestedSelection = {},
+      rawLayout = {},
+      signals = null,
+      imageRefs = []
+    } = {}) {
+      var _a, _b;
+      const selection = normalizeLayoutSelection2(requestedSelection);
+      const inferredLayoutFamily = recommendLayoutFamily({ rawLayout, signals, imageRefs });
+      const inferredColorPalette = recommendColorPalette({ rawLayout, signals });
+      const recommendedLayoutFamily = normalizeResolvedLayoutFamily(
+        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily),
+        inferredLayoutFamily
+      );
+      const recommendedColorPalette = normalizeResolvedColorPalette(
+        (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_b = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _b.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack),
+        inferredColorPalette
+      );
+      const resolved = {
+        layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? recommendedLayoutFamily : normalizeResolvedLayoutFamily(selection.layoutFamily, recommendedLayoutFamily),
+        colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO2 ? recommendedColorPalette : normalizeResolvedColorPalette(selection.colorPalette, recommendedColorPalette)
+      };
+      return {
+        selection,
+        resolved,
+        recommendedLayoutFamily,
+        recommendedColorPalette
+      };
     }
     function normalizeAiProvider2(raw = {}) {
       const id = typeof raw.id === "string" && raw.id.trim() ? raw.id.trim() : `ai_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -3853,7 +4084,11 @@ var require_ai_layout = __commonJS({
       return {
         providerName: coerceString(raw == null ? void 0 : raw.providerName),
         providerModel: coerceString(raw == null ? void 0 : raw.providerModel),
+        layoutFamilyLabel: coerceString(raw == null ? void 0 : raw.layoutFamilyLabel),
+        colorPaletteLabel: coerceString(raw == null ? void 0 : raw.colorPaletteLabel),
         stylePackLabel: coerceString(raw == null ? void 0 : raw.stylePackLabel),
+        recommendedLayoutFamilyLabel: coerceString(raw == null ? void 0 : raw.recommendedLayoutFamilyLabel),
+        recommendedColorPaletteLabel: coerceString(raw == null ? void 0 : raw.recommendedColorPaletteLabel),
         headingCount: clampNumber(raw == null ? void 0 : raw.headingCount, 0, 0, 999),
         sectionCount: clampNumber(raw == null ? void 0 : raw.sectionCount, 0, 0, 999),
         leadParagraphCount: clampNumber(raw == null ? void 0 : raw.leadParagraphCount, 0, 0, 999),
@@ -3907,6 +4142,26 @@ var require_ai_layout = __commonJS({
       const layoutJson = raw.layoutJson && typeof raw.layoutJson === "object" ? raw.layoutJson : null;
       if (!layoutJson)
         return null;
+      const selection = normalizeLayoutSelection2(
+        raw.selection || layoutJson.selection || {
+          layoutFamily: raw.layoutFamily || layoutJson.layoutFamily || "tutorial-cards",
+          colorPalette: raw.colorPalette || raw.stylePack || layoutJson.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        },
+        {
+          layoutFamily: "tutorial-cards",
+          colorPalette: AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        }
+      );
+      const resolved = normalizeResolvedSelection(
+        raw.resolved || layoutJson.resolved || {
+          layoutFamily: raw.resolvedLayoutFamily || raw.layoutFamily || layoutJson.layoutFamily || "tutorial-cards",
+          colorPalette: raw.resolvedColorPalette || raw.colorPalette || raw.stylePack || layoutJson.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        },
+        {
+          layoutFamily: AI_LAYOUT_DEFAULT_FAMILY,
+          colorPalette: AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        }
+      );
       const dismissedBlockKeys = Array.isArray(raw.dismissedBlockKeys) ? raw.dismissedBlockKeys.map((item) => coerceString(item)).filter(Boolean).slice(0, 128) : [];
       return {
         version: clampNumber(raw.version, AI_LAYOUT_SCHEMA_VERSION2, 1, 999),
@@ -3914,7 +4169,18 @@ var require_ai_layout = __commonJS({
         sourceHash: typeof raw.sourceHash === "string" ? raw.sourceHash : "",
         providerId: typeof raw.providerId === "string" ? raw.providerId : "",
         model: typeof raw.model === "string" ? raw.model : "",
-        stylePack: typeof raw.stylePack === "string" ? raw.stylePack : "tech-green",
+        selection,
+        resolved,
+        recommendedLayoutFamily: normalizeResolvedLayoutFamily(
+          raw.recommendedLayoutFamily || layoutJson.recommendedLayoutFamily,
+          resolved.layoutFamily
+        ),
+        recommendedColorPalette: normalizeResolvedColorPalette(
+          raw.recommendedColorPalette || layoutJson.recommendedColorPalette || raw.stylePack || layoutJson.stylePack,
+          resolved.colorPalette
+        ),
+        stylePack: resolved.colorPalette,
+        layoutFamily: resolved.layoutFamily,
         status: raw.status === "schema-error" ? "schema-error" : raw.status === "error" ? "error" : "ready",
         lastError: typeof raw.lastError === "string" ? raw.lastError : "",
         lastAttemptStatus: raw.lastAttemptStatus === "schema-error" ? "schema-error" : raw.lastAttemptStatus === "error" ? "error" : raw.lastAttemptStatus === "success" ? "success" : "idle",
@@ -3929,37 +4195,78 @@ var require_ai_layout = __commonJS({
     function normalizeArticleLayoutCacheEntry2(raw = {}) {
       if (!raw || typeof raw !== "object")
         return null;
+      const withLegacyAliases = (entry) => {
+        if (!entry || !entry.selectionStates)
+          return entry;
+        const stylePackStates = {};
+        Object.values(entry.selectionStates).forEach((state) => {
+          var _a;
+          const paletteId = normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a = state == null ? void 0 : state.resolved) == null ? void 0 : _a.colorPalette));
+          if (!stylePackStates[paletteId]) {
+            stylePackStates[paletteId] = state;
+          }
+        });
+        const lastSelectionState = entry.selectionStates[entry.lastSelectionKey] || null;
+        return {
+          ...entry,
+          lastStylePack: (lastSelectionState == null ? void 0 : lastSelectionState.stylePack) || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+          stylePackStates
+        };
+      };
       const legacyState = normalizeArticleLayoutState(raw);
       if (legacyState) {
-        const stylePack = legacyState.stylePack || "tech-green";
-        return {
-          lastStylePack: stylePack,
-          stylePackStates: {
-            [stylePack]: legacyState
+        const selectionKey = getArticleLayoutSelectionKey2(legacyState.selection);
+        return withLegacyAliases({
+          lastSelectionKey: selectionKey,
+          selectionStates: {
+            [selectionKey]: legacyState
           }
-        };
+        });
       }
-      const stylePackStates = {};
-      if (raw.stylePackStates && typeof raw.stylePackStates === "object") {
-        for (const [stylePackId, value] of Object.entries(raw.stylePackStates)) {
-          const normalizedState = normalizeArticleLayoutState(value);
-          if (!normalizedState)
-            continue;
-          const effectiveStylePack = normalizedState.stylePack || stylePackId || "tech-green";
-          stylePackStates[effectiveStylePack] = {
-            ...normalizedState,
-            stylePack: effectiveStylePack
-          };
+      const selectionStates = {};
+      const ingestState = (value, fallbackSelection = {}) => {
+        var _a, _b;
+        const normalizedState = normalizeArticleLayoutState(value);
+        if (!normalizedState)
+          return;
+        const effectiveSelection = normalizeLayoutSelection2(normalizedState.selection, fallbackSelection);
+        const effectiveKey = getArticleLayoutSelectionKey2(effectiveSelection);
+        selectionStates[effectiveKey] = {
+          ...normalizedState,
+          selection: effectiveSelection,
+          resolved: normalizeResolvedSelection(normalizedState.resolved, {
+            layoutFamily: normalizedState.layoutFamily || effectiveSelection.layoutFamily,
+            colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette
+          }),
+          stylePack: normalizeResolvedColorPalette(normalizedState.stylePack || ((_a = normalizedState.resolved) == null ? void 0 : _a.colorPalette)),
+          layoutFamily: normalizeResolvedLayoutFamily(normalizedState.layoutFamily || ((_b = normalizedState.resolved) == null ? void 0 : _b.layoutFamily))
+        };
+      };
+      if (raw.selectionStates && typeof raw.selectionStates === "object") {
+        for (const [selectionKey, value] of Object.entries(raw.selectionStates)) {
+          const [layoutFamilyFromKey, colorPaletteFromKey] = String(selectionKey || "").split("::");
+          ingestState(value, {
+            layoutFamily: layoutFamilyFromKey || "tutorial-cards",
+            colorPalette: colorPaletteFromKey || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+          });
         }
       }
-      const stylePackIds = Object.keys(stylePackStates);
-      if (!stylePackIds.length)
+      if (raw.stylePackStates && typeof raw.stylePackStates === "object") {
+        for (const [stylePackId, value] of Object.entries(raw.stylePackStates)) {
+          ingestState(value, {
+            layoutFamily: "tutorial-cards",
+            colorPalette: stylePackId || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+          });
+        }
+      }
+      const selectionKeys = Object.keys(selectionStates);
+      if (!selectionKeys.length)
         return null;
-      const lastStylePack = coerceString(raw.lastStylePack);
-      return {
-        lastStylePack: stylePackStates[lastStylePack] ? lastStylePack : stylePackIds[0],
-        stylePackStates
-      };
+      const lastSelectionKey = coerceString(raw.lastSelectionKey);
+      return withLegacyAliases({
+        lastSelectionKey: selectionStates[lastSelectionKey] ? lastSelectionKey : selectionKeys[0],
+        selectionStates
+      });
     }
     function truncateMarkdownForPrompt(markdown = "", maxChars = 12e3) {
       const content = String(markdown || "").trim();
@@ -3978,6 +4285,7 @@ var require_ai_layout = __commonJS({
       ].join("\n");
     }
     function normalizeAiSettings2(raw = {}) {
+      var _a;
       const defaults = createDefaultAiSettings2();
       const providers = Array.isArray(raw.providers) ? raw.providers.map(normalizeAiProvider2) : defaults.providers;
       const articleLayoutsByPath = {};
@@ -3998,22 +4306,147 @@ var require_ai_layout = __commonJS({
       return {
         enabled: raw.enabled === true,
         defaultProviderId,
-        defaultStylePack: AI_STYLE_PACKS[raw.defaultStylePack] ? raw.defaultStylePack : defaults.defaultStylePack,
+        defaultLayoutFamily: normalizeLayoutFamily(raw.defaultLayoutFamily, AI_LAYOUT_SELECTION_AUTO2),
+        defaultColorPalette: normalizeColorPalette(
+          (_a = raw.defaultColorPalette) != null ? _a : raw.defaultStylePack,
+          AI_LAYOUT_SELECTION_AUTO2
+        ),
+        defaultStylePack: normalizeResolvedColorPalette(raw.defaultStylePack, AI_LAYOUT_DEFAULT_COLOR_PALETTE),
         includeImagesInLayout: raw.includeImagesInLayout !== false,
         requestTimeoutMs: clampNumber(raw.requestTimeoutMs, defaults.requestTimeoutMs, 5e3, 18e4),
         providers,
         articleLayoutsByPath
       };
     }
-    function getStylePackList2() {
-      return Object.values(AI_STYLE_PACKS).map((pack) => ({
-        value: pack.id,
-        label: pack.label,
-        description: pack.description
-      }));
+    function getStylePackList() {
+      return getColorPaletteList2({ includeAuto: false });
     }
-    function getStylePackById2(id) {
-      return AI_STYLE_PACKS[id] || AI_STYLE_PACKS["tech-green"];
+    function getStylePackById(id) {
+      return getColorPaletteById2(id);
+    }
+    function getArticleLayoutSelectionState2(entry, selection = {}, defaults = {}) {
+      var _a, _b, _c;
+      const normalizedEntry = normalizeArticleLayoutCacheEntry2(entry);
+      if (!normalizedEntry)
+        return null;
+      const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
+      const requestedKey = getArticleLayoutSelectionKey2(normalizedSelection);
+      const exactState = ((_a = normalizedEntry.selectionStates) == null ? void 0 : _a[requestedKey]) || null;
+      if (exactState)
+        return exactState;
+      const lastSelectionState = ((_b = normalizedEntry.selectionStates) == null ? void 0 : _b[normalizedEntry.lastSelectionKey]) || null;
+      const selectionStates = Object.values(normalizedEntry.selectionStates || {});
+      if (!selectionStates.length)
+        return null;
+      const requestedColorPalette = normalizeColorPalette(normalizedSelection.colorPalette, AI_LAYOUT_SELECTION_AUTO2);
+      const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
+      const requestedResolvedLayoutFamily = requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? "" : normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+      const matchesColor = (state) => {
+        var _a2;
+        return requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2 || normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a2 = state == null ? void 0 : state.resolved) == null ? void 0 : _a2.colorPalette)) === requestedColorPalette;
+      };
+      const matchesLayout = (state) => {
+        var _a2, _b2;
+        return requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 || normalizeLayoutFamily((_a2 = state == null ? void 0 : state.selection) == null ? void 0 : _a2.layoutFamily, AI_LAYOUT_SELECTION_AUTO2) === requestedLayoutFamily || normalizeResolvedLayoutFamily((state == null ? void 0 : state.layoutFamily) || ((_b2 = state == null ? void 0 : state.resolved) == null ? void 0 : _b2.layoutFamily), AI_LAYOUT_DEFAULT_FAMILY) === requestedResolvedLayoutFamily;
+      };
+      if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 && requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2) {
+        return lastSelectionState || selectionStates[0] || null;
+      }
+      if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 && requestedColorPalette !== AI_LAYOUT_SELECTION_AUTO2) {
+        const colorMatchedState = ((_c = normalizedEntry.stylePackStates) == null ? void 0 : _c[requestedColorPalette]) || null;
+        if (colorMatchedState)
+          return colorMatchedState;
+      }
+      if (lastSelectionState && matchesColor(lastSelectionState) && matchesLayout(lastSelectionState)) {
+        return lastSelectionState;
+      }
+      return selectionStates.find((state) => matchesColor(state) && matchesLayout(state)) || null;
+    }
+    function deriveArticleLayoutStateForSelection2(state, selection = {}, defaults = {}) {
+      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+      const normalizedState = normalizeArticleLayoutState(state);
+      if (!((_b = (_a = normalizedState == null ? void 0 : normalizedState.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length))
+        return null;
+      if (normalizedState.status !== "ready")
+        return null;
+      const requestedSelection = normalizeLayoutSelection2(selection, {
+        layoutFamily: ((_c = normalizedState.selection) == null ? void 0 : _c.layoutFamily) || (defaults == null ? void 0 : defaults.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2,
+        colorPalette: ((_d = normalizedState.selection) == null ? void 0 : _d.colorPalette) || (defaults == null ? void 0 : defaults.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+      });
+      const requestedColorPalette = normalizeColorPalette(
+        requestedSelection.colorPalette,
+        ((_e = normalizedState.selection) == null ? void 0 : _e.colorPalette) || (defaults == null ? void 0 : defaults.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+      );
+      if (!requestedColorPalette || requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2)
+        return null;
+      const baseResolvedLayoutFamily = normalizeResolvedLayoutFamily(
+        ((_f = normalizedState.resolved) == null ? void 0 : _f.layoutFamily) || normalizedState.layoutFamily,
+        AI_LAYOUT_DEFAULT_FAMILY
+      );
+      const baseSelectedLayoutFamily = normalizeLayoutFamily(
+        (_g = normalizedState.selection) == null ? void 0 : _g.layoutFamily,
+        AI_LAYOUT_SELECTION_AUTO2
+      );
+      const requestedLayoutFamily = normalizeLayoutFamily(
+        requestedSelection.layoutFamily,
+        ((_h = normalizedState.selection) == null ? void 0 : _h.layoutFamily) || (defaults == null ? void 0 : defaults.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2
+      );
+      const isCompatibleLayout = requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 || requestedLayoutFamily === baseSelectedLayoutFamily || requestedLayoutFamily === baseResolvedLayoutFamily;
+      if (!isCompatibleLayout)
+        return null;
+      const nextResolvedColorPalette = normalizeResolvedColorPalette(
+        requestedColorPalette,
+        ((_i = normalizedState.resolved) == null ? void 0 : _i.colorPalette) || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+      );
+      const nextColorPaletteLabel = ((_j = getColorPaletteById2(nextResolvedColorPalette)) == null ? void 0 : _j.label) || nextResolvedColorPalette;
+      const nextSelection = {
+        layoutFamily: requestedLayoutFamily || ((_k = normalizedState.selection) == null ? void 0 : _k.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2,
+        colorPalette: requestedColorPalette
+      };
+      const nextLayoutJson = {
+        ...normalizedState.layoutJson,
+        selection: {
+          ...normalizedState.layoutJson.selection || {},
+          ...nextSelection
+        },
+        resolved: {
+          ...normalizedState.layoutJson.resolved || {},
+          layoutFamily: baseResolvedLayoutFamily,
+          colorPalette: nextResolvedColorPalette
+        },
+        recommendedLayoutFamily: normalizedState.recommendedLayoutFamily,
+        recommendedColorPalette: normalizedState.recommendedColorPalette,
+        stylePack: nextResolvedColorPalette,
+        layoutFamily: baseResolvedLayoutFamily
+      };
+      const nextGenerationMeta = normalizeLayoutGenerationMeta({
+        ...normalizedState.generationMeta || {},
+        colorPaletteLabel: nextColorPaletteLabel,
+        stylePackLabel: nextColorPaletteLabel
+      }, nextLayoutJson);
+      return normalizeArticleLayoutState({
+        ...normalizedState,
+        selection: nextSelection,
+        resolved: {
+          layoutFamily: baseResolvedLayoutFamily,
+          colorPalette: nextResolvedColorPalette
+        },
+        recommendedLayoutFamily: normalizedState.recommendedLayoutFamily,
+        recommendedColorPalette: normalizedState.recommendedColorPalette,
+        stylePack: nextResolvedColorPalette,
+        layoutFamily: baseResolvedLayoutFamily,
+        generationMeta: nextGenerationMeta,
+        layoutJson: nextLayoutJson
+      });
+    }
+    function getArticleLayoutSelectionStateKey(entry, selection = {}, defaults = {}) {
+      var _a;
+      const normalizedEntry = normalizeArticleLayoutCacheEntry2(entry);
+      if (!normalizedEntry)
+        return "";
+      const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
+      const requestedKey = getArticleLayoutSelectionKey2(normalizedSelection);
+      return ((_a = normalizedEntry.selectionStates) == null ? void 0 : _a[requestedKey]) ? requestedKey : normalizedEntry.lastSelectionKey || "";
     }
     function listEnabledAiProviders(aiSettings = {}) {
       return Array.isArray(aiSettings.providers) ? aiSettings.providers.filter((provider) => provider.enabled !== false && isAiProviderRunnable2(provider)) : [];
@@ -4073,12 +4506,41 @@ var require_ai_layout = __commonJS({
       return "";
     }
     function repairRawLayoutPayload(rawLayout = {}) {
+      var _a, _b, _c, _d;
       if (!rawLayout || typeof rawLayout !== "object" || Array.isArray(rawLayout))
         return rawLayout;
       if (!Array.isArray(rawLayout.blocks))
         return rawLayout;
+      const legacyColorPalette = normalizeResolvedColorPalette(
+        (rawLayout == null ? void 0 : rawLayout.stylePack) || (rawLayout == null ? void 0 : rawLayout.colorPalette) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.colorPalette),
+        AI_LAYOUT_DEFAULT_COLOR_PALETTE
+      );
+      const legacyLayoutFamily = normalizeResolvedLayoutFamily(
+        (rawLayout == null ? void 0 : rawLayout.layoutFamily) || ((_b = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _b.layoutFamily),
+        "tutorial-cards"
+      );
+      const selection = normalizeLayoutSelection2(rawLayout.selection, {
+        layoutFamily: legacyLayoutFamily,
+        colorPalette: legacyColorPalette
+      });
+      const resolved = normalizeResolvedSelection(rawLayout.resolved, {
+        layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? legacyLayoutFamily : selection.layoutFamily,
+        colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO2 ? legacyColorPalette : selection.colorPalette
+      });
       return {
         ...rawLayout,
+        selection,
+        resolved,
+        recommendedLayoutFamily: normalizeResolvedLayoutFamily(
+          rawLayout.recommendedLayoutFamily || ((_c = rawLayout.resolved) == null ? void 0 : _c.layoutFamily) || legacyLayoutFamily,
+          resolved.layoutFamily
+        ),
+        recommendedColorPalette: normalizeResolvedColorPalette(
+          rawLayout.recommendedColorPalette || ((_d = rawLayout.resolved) == null ? void 0 : _d.colorPalette) || legacyColorPalette,
+          resolved.colorPalette
+        ),
+        stylePack: resolved.colorPalette,
+        layoutFamily: resolved.layoutFamily,
         blocks: rawLayout.blocks.map((block) => {
           if (!block || typeof block !== "object" || Array.isArray(block))
             return block;
@@ -4171,7 +4633,7 @@ var require_ai_layout = __commonJS({
         const items = Array.isArray(block.items) ? block.items.map((item, itemIndex) => ({
           label: coerceString((item == null ? void 0 : item.label) || `PART ${String(itemIndex + 1).padStart(2, "0")}`),
           text: coerceString((item == null ? void 0 : item.text) || (item == null ? void 0 : item.title))
-        })).filter((item) => item.text).slice(0, 4) : [];
+        })).filter((item) => item.text).slice(0, MAX_PART_NAV_ITEMS) : [];
         return items.length ? { type, items } : null;
       }
       if (type === "lead-quote") {
@@ -4192,7 +4654,7 @@ var require_ai_layout = __commonJS({
         const matchedSection = findSourceSectionByTitle(sourceSections, title);
         if (matchedSection) {
           return buildSectionBlockFromSource(matchedSection, {
-            imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+            imageIds: toImageIdArray(block.imageIds, imageIds, MAX_CASE_BLOCK_IMAGE_IDS),
             fallbackIndex: toSectionIndex(matchedSection.index, index)
           });
         }
@@ -4201,8 +4663,8 @@ var require_ai_layout = __commonJS({
           caseLabel: coerceString(block.caseLabel || `CASE ${String(index + 1).padStart(2, "0")}`),
           title,
           summary,
-          bullets: toTextArray(block.bullets, 5),
-          imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+          bullets: toTextArray(block.bullets, MAX_CASE_BLOCK_BULLETS),
+          imageIds: toImageIdArray(block.imageIds, imageIds, MAX_CASE_BLOCK_IMAGE_IDS),
           highlight: coerceString(block.highlight)
         };
       }
@@ -4377,39 +4839,121 @@ var require_ai_layout = __commonJS({
         lastParagraph
       };
     }
+    function recommendLayoutFamily({ rawLayout = {}, signals = null, imageRefs = [] } = {}) {
+      var _a, _b, _c, _d;
+      const rawRecommended = coerceString(
+        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily)
+      );
+      if (rawRecommended && AI_LAYOUT_FAMILY_DEFS[rawRecommended])
+        return normalizeResolvedLayoutFamily(rawRecommended);
+      const safeSignals = signals || extractMarkdownSignals("");
+      const headingCount = ((_b = safeSignals.headings) == null ? void 0 : _b.length) || 0;
+      const sectionCount = ((_c = safeSignals.sectionTitles) == null ? void 0 : _c.length) || 0;
+      const bulletGroupCount = ((_d = safeSignals.bulletGroups) == null ? void 0 : _d.length) || 0;
+      const imageCount = Array.isArray(imageRefs) ? imageRefs.length : 0;
+      const hintText = `${coerceString(rawLayout == null ? void 0 : rawLayout.title)} ${Array.isArray(safeSignals.sectionTitles) ? safeSignals.sectionTitles.join(" ") : ""}`.toLowerCase();
+      if (/(观点|经验|复盘|写作|表达|品牌|故事|思考|方法论|内容创作|心得|感受|editorial|essay|brand)/i.test(hintText)) {
+        return "editorial-lite";
+      }
+      if (sectionCount >= 2 || headingCount >= 4 || bulletGroupCount >= 2 || imageCount >= 2) {
+        return "tutorial-cards";
+      }
+      return "source-first";
+    }
+    function recommendColorPalette({ rawLayout = {}, signals = null } = {}) {
+      var _a;
+      const rawRecommended = coerceString(
+        (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_a = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack)
+      );
+      if (rawRecommended && AI_COLOR_PALETTES[rawRecommended])
+        return normalizeResolvedColorPalette(rawRecommended);
+      const headingTitles = Array.isArray(signals == null ? void 0 : signals.sectionTitles) ? signals.sectionTitles.join(" ") : "";
+      const titleHints = `${coerceString(rawLayout == null ? void 0 : rawLayout.title)} ${headingTitles}`.toLowerCase();
+      if (/(教程|指南|入门|步骤|实践|实操|配置|接入|使用|标签|双链|知识库|workflow|guide|tutorial|how to)/i.test(titleHints)) {
+        return "ocean-blue";
+      }
+      if (/(观点|品牌|复盘|内容|经验|编辑|写作|表达)/i.test(titleHints)) {
+        return "graphite-rose";
+      }
+      if (/(清单|合集|推荐|总结|收藏)/i.test(titleHints)) {
+        return "sunset-amber";
+      }
+      return "tech-green";
+    }
     function buildFallbackLayout(context = {}) {
       var _a;
       const title = coerceString(context.title || "\u672A\u547D\u540D\u6587\u7AE0");
-      const stylePack = coerceString(context.stylePack || "tech-green");
+      const selectionResolution = resolveLayoutSelection({
+        requestedSelection: context.selection || { colorPalette: context.stylePack },
+        rawLayout: context.rawLayout,
+        signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+        imageRefs: context.imageRefs
+      });
+      const resolved = selectionResolution.resolved;
       const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
-      const signals = extractMarkdownSignals(context.markdown || "");
+      const signals = context.signals || extractMarkdownSignals(context.markdown || "");
       const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
       const firstImageId = ((_a = imageRefs[0]) == null ? void 0 : _a.id) || "";
       const leadText = summarizeText(signals.leadParagraphs[0] || signals.paragraphs[0] || "");
       const leadNote = summarizeText(signals.leadParagraphs[1] || "");
-      const partItems = signals.sectionTitles.slice(0, 5).map((text, index) => ({
+      const partItems = signals.sectionTitles.slice(0, MAX_PART_NAV_ITEMS).map((text, index) => ({
         label: `PART ${String(index + 1).padStart(2, "0")}`,
         text
       }));
       const headBlocks = [];
       const bodyBlocks = [];
-      headBlocks.push({
-        type: "hero",
-        eyebrow: signals.sectionTitles[0] ? "AI Layout Draft" : "AI Article Layout",
-        title,
-        subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
-        coverImageId: firstImageId,
-        variant: "cover-right"
-      });
-      if (partItems.length >= 2) {
-        headBlocks.push({ type: "part-nav", items: partItems });
-      }
-      if (leadText) {
+      if (resolved.layoutFamily === "tutorial-cards") {
         headBlocks.push({
-          type: "lead-quote",
-          text: leadText,
-          note: leadNote
+          type: "hero",
+          eyebrow: signals.sectionTitles[0] ? "AI Layout Draft" : "AI Article Layout",
+          title,
+          subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
+          coverImageId: firstImageId,
+          variant: "cover-right"
         });
+        if (partItems.length >= 2) {
+          headBlocks.push({ type: "part-nav", items: partItems });
+        }
+        if (leadText) {
+          headBlocks.push({
+            type: "lead-quote",
+            text: leadText,
+            note: leadNote
+          });
+        }
+      } else if (resolved.layoutFamily === "editorial-lite") {
+        headBlocks.push({
+          type: "hero",
+          eyebrow: signals.sectionTitles[0] ? "Editorial Layout" : "AI Editorial Draft",
+          title,
+          subtitle: leadText || summarizeText(signals.lastParagraph || title, 72),
+          coverImageId: firstImageId,
+          variant: "cover-left"
+        });
+        if (leadText) {
+          headBlocks.push({
+            type: "lead-quote",
+            text: leadText,
+            note: leadNote
+          });
+        }
+        if (partItems.length >= 3) {
+          headBlocks.push({ type: "part-nav", items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
+        }
+      } else {
+        if (firstImageId || leadText) {
+          headBlocks.push({
+            type: "hero",
+            eyebrow: signals.sectionTitles[0] ? "Obsidian \xD7 AI \u7CFB\u5217" : "AI Layout Draft",
+            title,
+            subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
+            coverImageId: firstImageId,
+            variant: "cover-right"
+          });
+        }
+        if (partItems.length >= 3) {
+          headBlocks.push({ type: "part-nav", items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
+        }
       }
       sourceSections.forEach((section, index) => {
         const block = buildSectionBlockFromSource(section, {
@@ -4420,7 +4964,7 @@ var require_ai_layout = __commonJS({
           bodyBlocks.push(block);
       });
       const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
-      if (screenshotImage == null ? void 0 : screenshotImage.id) {
+      if ((resolved.layoutFamily === "tutorial-cards" || resolved.layoutFamily === "editorial-lite") && (screenshotImage == null ? void 0 : screenshotImage.id)) {
         bodyBlocks.push({
           type: "phone-frame",
           imageId: screenshotImage.id,
@@ -4430,7 +4974,12 @@ var require_ai_layout = __commonJS({
       return {
         version: AI_LAYOUT_SCHEMA_VERSION2,
         articleType: signals.sectionTitles.length >= 2 ? "tutorial" : "article",
-        stylePack,
+        selection: selectionResolution.selection,
+        resolved,
+        recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+        recommendedColorPalette: selectionResolution.recommendedColorPalette,
+        stylePack: resolved.colorPalette,
+        layoutFamily: resolved.layoutFamily,
         title,
         summary: summarizeText(leadText || signals.lastParagraph || title, 90),
         blocks: [...headBlocks, ...bodyBlocks].filter(Boolean).slice(0, MAX_LAYOUT_BLOCKS)
@@ -4529,21 +5078,33 @@ var require_ai_layout = __commonJS({
     }
     function normalizeArticleLayout(rawLayout = {}, context = {}) {
       const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
-      const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || "tech-green");
+      const selectionResolution = resolveLayoutSelection({
+        requestedSelection: context.selection || { colorPalette: context.stylePack },
+        rawLayout,
+        signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+        imageRefs: context.imageRefs
+      });
       const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
       const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, sourceSections, index)).filter(Boolean) : [];
       const fallbackLayout = buildFallbackLayout({
         title: rawLayout.title || context.title,
         markdown: context.markdown,
-        stylePack: requestedStylePack,
+        selection: selectionResolution.selection,
+        rawLayout,
         imageRefs: context.imageRefs,
+        signals: context.signals,
         sourceSections
       });
       const blocks = mergeBlocksWithFallback(normalizedAiBlocks, fallbackLayout.blocks);
       return {
         version: AI_LAYOUT_SCHEMA_VERSION2,
         articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || "article"),
-        stylePack: AI_STYLE_PACKS[requestedStylePack] ? requestedStylePack : "tech-green",
+        selection: selectionResolution.selection,
+        resolved: selectionResolution.resolved,
+        recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+        recommendedColorPalette: selectionResolution.recommendedColorPalette,
+        stylePack: selectionResolution.resolved.colorPalette,
+        layoutFamily: selectionResolution.resolved.layoutFamily,
         title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
         summary: coerceString(rawLayout.summary || fallbackLayout.summary),
         blocks
@@ -4551,19 +5112,28 @@ var require_ai_layout = __commonJS({
     }
     function createLayoutGenerationMeta({
       provider,
-      stylePack,
+      layoutFamily,
+      colorPalette,
+      recommendedLayoutFamily,
+      recommendedColorPalette,
       signals,
       imageRefs = [],
       normalizedAiBlocks = [],
       mergedEntries = [],
       schemaValidation = null
     }) {
-      const stylePackInfo = getStylePackById2(stylePack);
+      var _a, _b;
+      const layoutFamilyInfo = getLayoutFamilyById2(layoutFamily);
+      const colorPaletteInfo = getColorPaletteById2(colorPalette);
       const fallbackEntries = mergedEntries.filter((entry) => entry.source === "fallback");
       return {
         providerName: coerceString(provider == null ? void 0 : provider.name),
         providerModel: coerceString(provider == null ? void 0 : provider.model),
-        stylePackLabel: (stylePackInfo == null ? void 0 : stylePackInfo.label) || "",
+        layoutFamilyLabel: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.label) || "",
+        colorPaletteLabel: (colorPaletteInfo == null ? void 0 : colorPaletteInfo.label) || "",
+        stylePackLabel: (colorPaletteInfo == null ? void 0 : colorPaletteInfo.label) || "",
+        recommendedLayoutFamilyLabel: ((_a = getLayoutFamilyById2(recommendedLayoutFamily)) == null ? void 0 : _a.label) || "",
+        recommendedColorPaletteLabel: ((_b = getColorPaletteById2(recommendedColorPalette)) == null ? void 0 : _b.label) || "",
         headingCount: signals.headings.length,
         sectionCount: signals.sectionTitles.length,
         leadParagraphCount: signals.leadParagraphs.length,
@@ -4574,15 +5144,15 @@ var require_ai_layout = __commonJS({
         fallbackUsed: fallbackEntries.length > 0,
         fallbackBlockCount: fallbackEntries.length,
         fallbackBlockTypes: Array.from(new Set(fallbackEntries.map((entry) => {
-          var _a;
-          return (_a = entry.block) == null ? void 0 : _a.type;
+          var _a2;
+          return (_a2 = entry.block) == null ? void 0 : _a2.type;
         }).filter(Boolean))).slice(0, 6),
         schemaValidation: normalizeSchemaValidation(schemaValidation),
         blockOrigins: mergedEntries.map((entry, index) => {
-          var _a;
+          var _a2;
           return {
             index,
-            type: coerceString((_a = entry.block) == null ? void 0 : _a.type),
+            type: coerceString((_a2 = entry.block) == null ? void 0 : _a2.type),
             source: entry.source === "fallback" ? "fallback" : "ai",
             label: getLayoutBlockLabel(entry.block)
           };
@@ -4591,12 +5161,21 @@ var require_ai_layout = __commonJS({
     }
     function buildLayoutResult(rawLayout = {}, context = {}) {
       const validation = validateAiLayoutPayload(rawLayout);
-      const requestedStylePack = coerceString(context.stylePack || rawLayout.stylePack || "tech-green");
+      const signals = context.signals || extractMarkdownSignals(context.markdown || "");
+      const selectionResolution = resolveLayoutSelection({
+        requestedSelection: context.selection || { colorPalette: context.stylePack },
+        rawLayout,
+        signals,
+        imageRefs: context.imageRefs
+      });
       if (validation.fatal) {
         const generationMeta = createLayoutGenerationMeta({
           provider: context.provider,
-          stylePack: requestedStylePack,
-          signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+          layoutFamily: selectionResolution.resolved.layoutFamily,
+          colorPalette: selectionResolution.resolved.colorPalette,
+          recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+          recommendedColorPalette: selectionResolution.recommendedColorPalette,
+          signals,
           imageRefs: context.imageRefs,
           normalizedAiBlocks: [],
           mergedEntries: [],
@@ -4610,15 +5189,22 @@ var require_ai_layout = __commonJS({
       const fallbackLayout = buildFallbackLayout({
         title: rawLayout.title || context.title,
         markdown: context.markdown,
-        stylePack: requestedStylePack,
+        selection: selectionResolution.selection,
+        rawLayout,
         imageRefs: context.imageRefs,
+        signals,
         sourceSections
       });
       const mergedEntries = mergeBlocksWithFallbackDetailed(normalizedAiBlocks, fallbackLayout.blocks);
       const layoutJson = {
         version: AI_LAYOUT_SCHEMA_VERSION2,
         articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || "article"),
-        stylePack: AI_STYLE_PACKS[requestedStylePack] ? requestedStylePack : "tech-green",
+        selection: selectionResolution.selection,
+        resolved: selectionResolution.resolved,
+        recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+        recommendedColorPalette: selectionResolution.recommendedColorPalette,
+        stylePack: selectionResolution.resolved.colorPalette,
+        layoutFamily: selectionResolution.resolved.layoutFamily,
         title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
         summary: coerceString(rawLayout.summary || fallbackLayout.summary),
         blocks: mergedEntries.map((entry) => entry.block)
@@ -4627,8 +5213,11 @@ var require_ai_layout = __commonJS({
         layoutJson,
         generationMeta: createLayoutGenerationMeta({
           provider: context.provider,
-          stylePack: layoutJson.stylePack,
-          signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+          layoutFamily: layoutJson.resolved.layoutFamily,
+          colorPalette: layoutJson.resolved.colorPalette,
+          recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+          recommendedColorPalette: layoutJson.recommendedColorPalette,
+          signals,
           imageRefs: context.imageRefs,
           normalizedAiBlocks,
           mergedEntries,
@@ -4658,8 +5247,17 @@ var require_ai_layout = __commonJS({
       });
       return refs;
     }
-    function buildLayoutMessages({ title, markdown, stylePack, imageRefs = [] }) {
-      const stylePackInfo = getStylePackById2(stylePack);
+    function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs = [] }) {
+      const resolvedSelection = resolveLayoutSelection({
+        requestedSelection: selection || { colorPalette: stylePack },
+        rawLayout: { title },
+        signals: extractMarkdownSignals(markdown),
+        imageRefs
+      });
+      const selectedLayoutFamily = (selection == null ? void 0 : selection.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2;
+      const selectedColorPalette = (selection == null ? void 0 : selection.colorPalette) || AI_LAYOUT_SELECTION_AUTO2;
+      const selectedLayoutFamilyInfo = selectedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? { label: "\u81EA\u52A8\u63A8\u8350", description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u5E03\u5C40\u98CE\u683C\u3002" } : getLayoutFamilyById2(selectedLayoutFamily);
+      const selectedColorPaletteInfo = selectedColorPalette === AI_LAYOUT_SELECTION_AUTO2 ? { label: "\u81EA\u52A8\u63A8\u8350", description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u989C\u8272\u3002" } : getColorPaletteById2(selectedColorPalette);
       const signals = extractMarkdownSignals(markdown);
       const promptMarkdown = truncateMarkdownForPrompt(markdown);
       const imageSummary = imageRefs.length ? imageRefs.map((image) => `- ${image.id}: ${image.caption}`).join("\n") : "- \u65E0\u53EF\u7528\u56FE\u7247";
@@ -4676,8 +5274,12 @@ var require_ai_layout = __commonJS({
           role: "user",
           content: [
             `\u6587\u7AE0\u6807\u9898\uFF1A${title || "\u672A\u547D\u540D\u6587\u7AE0"}`,
-            `\u98CE\u683C\u5305\uFF1A${stylePackInfo.label}`,
-            `\u98CE\u683C\u8BF4\u660E\uFF1A${stylePackInfo.description}`,
+            `\u5E03\u5C40\u9009\u62E9\uFF1A${selectedLayoutFamilyInfo.label}`,
+            `\u5E03\u5C40\u8BF4\u660E\uFF1A${selectedLayoutFamilyInfo.description}`,
+            `\u989C\u8272\u9009\u62E9\uFF1A${selectedColorPaletteInfo.label}`,
+            `\u989C\u8272\u8BF4\u660E\uFF1A${selectedColorPaletteInfo.description}`,
+            `\u63A8\u8350\u5E03\u5C40\uFF1A${getLayoutFamilyById2(resolvedSelection.recommendedLayoutFamily).label}`,
+            `\u63A8\u8350\u989C\u8272\uFF1A${getColorPaletteById2(resolvedSelection.recommendedColorPalette).label}`,
             "",
             "\u53EF\u7528\u56FE\u7247\uFF1A",
             imageSummary,
@@ -4695,6 +5297,13 @@ var require_ai_layout = __commonJS({
             "",
             "\u8BF7\u8F93\u51FA\u4E00\u4E2A JSON \u5BF9\u8C61\uFF0C\u5305\u542B\uFF1A",
             ...AI_LAYOUT_OUTPUT_FIELDS.map((field) => `- ${field}`),
+            "",
+            "selection \u89C4\u5219\uFF1A",
+            `- layoutFamily \u53EA\u80FD\u662F ${AI_LAYOUT_SELECTION_AUTO2} / ${AI_LAYOUT_FAMILIES.join(" / ")}`,
+            `- colorPalette \u53EA\u80FD\u662F ${AI_LAYOUT_SELECTION_AUTO2} / ${AI_LAYOUT_COLOR_PALETTES.join(" / ")}`,
+            `- \u5F53\u524D selection.layoutFamily = ${selectedLayoutFamily}`,
+            `- \u5F53\u524D selection.colorPalette = ${selectedColorPalette}`,
+            "\u5982\u679C selection \u4E3A auto\uFF0C\u8BF7\u4F60\u7ED9\u51FA recommended* \u5E76\u5199\u5165 resolved\uFF1B\u5982\u679C\u4E0D\u662F auto\uFF0C\u8BF7\u5C0A\u91CD\u7528\u6237\u9009\u62E9\u3002",
             "",
             "block \u7EA6\u675F\uFF1A",
             ...getAiLayoutBlockConstraintLines(),
@@ -4728,6 +5337,7 @@ var require_ai_layout = __commonJS({
       provider,
       title,
       markdown,
+      selection,
       stylePack,
       imageRefs,
       timeoutMs,
@@ -4745,7 +5355,7 @@ var require_ai_layout = __commonJS({
           body: JSON.stringify({
             model: provider.model,
             temperature: 0.2,
-            messages: buildLayoutMessages({ title, markdown, stylePack, imageRefs })
+            messages: buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs })
           }),
           signal: controller.signal
         });
@@ -4770,7 +5380,11 @@ var require_ai_layout = __commonJS({
       provider,
       title,
       markdown,
-      stylePack = "tech-green",
+      stylePack = "",
+      selection = {
+        layoutFamily: AI_LAYOUT_SELECTION_AUTO2,
+        colorPalette: AI_LAYOUT_SELECTION_AUTO2
+      },
       imageRefs = [],
       timeoutMs = 45e3,
       fetchImpl = globalThis.fetch
@@ -4790,6 +5404,7 @@ var require_ai_layout = __commonJS({
             provider,
             title,
             markdown,
+            selection,
             stylePack,
             imageRefs,
             timeoutMs,
@@ -4801,6 +5416,7 @@ var require_ai_layout = __commonJS({
       }
       return buildLayoutResult(rawLayout, {
         title,
+        selection,
         stylePack,
         imageRefs,
         markdown,
@@ -4815,7 +5431,10 @@ var require_ai_layout = __commonJS({
         provider,
         title: "\u8FDE\u63A5\u6D4B\u8BD5",
         markdown: "\u8FD9\u662F\u4E00\u4E2A\u8FDE\u63A5\u6D4B\u8BD5\u3002\u8BF7\u8F93\u51FA\u6700\u5C0F\u53EF\u7528\u7684\u6559\u7A0B\u6392\u7248 JSON\u3002",
-        stylePack: "tech-green",
+        selection: {
+          layoutFamily: "tutorial-cards",
+          colorPalette: "tech-green"
+        },
         imageRefs: [],
         timeoutMs: 15e3,
         fetchImpl
@@ -4832,8 +5451,12 @@ var require_ai_layout = __commonJS({
       })[char]);
     }
     function renderArticleLayoutHtml2(layout, { imageRefs = [] } = {}) {
-      const stylePack = getStylePackById2(layout == null ? void 0 : layout.stylePack);
-      const tokens = stylePack.tokens;
+      var _a, _b;
+      const layoutFamily = getLayoutFamilyById2(((_a = layout == null ? void 0 : layout.resolved) == null ? void 0 : _a.layoutFamily) || (layout == null ? void 0 : layout.layoutFamily));
+      const colorPalette = getColorPaletteById2(((_b = layout == null ? void 0 : layout.resolved) == null ? void 0 : _b.colorPalette) || (layout == null ? void 0 : layout.stylePack));
+      const tokens = colorPalette.tokens;
+      const isSourceFirst = layoutFamily.id === "source-first";
+      const isEditorialLite = layoutFamily.id === "editorial-lite";
       const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
       const bodyFontSize = 16;
       const bodyLineHeight = 1.8;
@@ -4850,10 +5473,10 @@ var require_ai_layout = __commonJS({
       const cardStyle = [
         `background:${tokens.surface}`,
         `border:1px solid ${tokens.border}`,
-        "border-radius:18px",
-        "padding:18px",
-        "margin:18px 0",
-        "box-shadow:0 10px 30px -24px rgba(0,0,0,0.18)"
+        `border-radius:${isSourceFirst ? 14 : isEditorialLite ? 16 : 18}px`,
+        `padding:${isSourceFirst ? 16 : isEditorialLite ? 20 : 18}px`,
+        `margin:${isSourceFirst ? 16 : isEditorialLite ? 22 : 18}px 0`,
+        `box-shadow:${isEditorialLite ? "0 18px 32px -30px rgba(36,50,61,0.16)" : "0 10px 30px -24px rgba(0,0,0,0.18)"}`
       ].join(";");
       const renderImage = (imageId, extraStyle = "") => {
         const image = imageMap.get(imageId);
@@ -4870,47 +5493,52 @@ var require_ai_layout = __commonJS({
       };
       const blocksHtml = (layout.blocks || []).map((block, index) => {
         if (block.type === "hero") {
-          const imageHtml = block.coverImageId ? renderImage(block.coverImageId, "max-width:116px;flex:0 0 116px;") : "";
+          const heroImageStyle = isEditorialLite ? "max-width:148px;flex:0 0 148px;border-radius:22px;" : "max-width:116px;flex:0 0 116px;";
+          const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : "";
           const contentHtml = [
-            block.eyebrow ? `<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:10px;">${escapeHtml(block.eyebrow)}</div>` : "",
-            block.title ? `<h1 style="margin:0 0 10px;font-size:28px;line-height:1.2;color:${tokens.text};">${escapeHtml(block.title)}</h1>` : "",
-            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:14px;line-height:1.7;">${escapeHtml(block.subtitle)}</p>` : ""
+            block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 1.8 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:10px;">${escapeHtml(block.eyebrow)}</div>` : "",
+            block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 8 : isEditorialLite ? 12 : 10}px;font-size:${isSourceFirst ? 24 : isEditorialLite ? 30 : 28}px;line-height:${isEditorialLite ? 1.18 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 800 : 700};">${escapeHtml(block.title)}</h1>` : "",
+            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : isEditorialLite ? 16 : 14}px;line-height:${isSourceFirst ? 1.8 : isEditorialLite ? 1.82 : 1.7};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : ""
           ].join("");
           const flexDirection = block.variant === "cover-left" ? "row-reverse" : "row";
-          return `<section style="${cardStyle};padding:22px;">
-        <div style="display:flex;flex-direction:${flexDirection};gap:16px;align-items:center;">
+          const heroFooter = isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+            <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
+            <div style="flex:1;height:1px;background:${tokens.border};"></div>
+          </div>` : `<div style="height:${isSourceFirst ? 6 : 10}px;margin-top:${isSourceFirst ? 14 : 18}px;background:${tokens.accent};border-radius:999px;"></div>`;
+          return `<section style="${cardStyle};padding:${isSourceFirst ? 18 : isEditorialLite ? 24 : 22}px;">
+        <div style="display:flex;flex-direction:${flexDirection};gap:${isEditorialLite ? 20 : 16}px;align-items:center;">
           <div style="flex:1 1 auto;min-width:0;">${contentHtml}</div>
           ${imageHtml}
         </div>
-        <div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>
+        ${heroFooter}
       </section>`;
         }
         if (block.type === "part-nav") {
           const itemsHtml = block.items.map((item) => `
-        <div style="flex:1 1 0;min-width:0;padding:12px 10px;border:1px solid ${tokens.border};border-radius:14px;background:${tokens.surfaceSoft};">
-          <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:0.8px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
-          <div style="margin-top:8px;font-size:13px;font-weight:600;color:${tokens.text};line-height:1.45;">${escapeHtml(item.text)}</div>
+        <div style="flex:1 1 0;min-width:0;padding:${isSourceFirst ? "10px 12px" : isEditorialLite ? "12px 0 12px 0" : "12px 10px"};border:${isEditorialLite ? "none" : `1px solid ${tokens.border}`};border-radius:${isSourceFirst ? 12 : isEditorialLite ? 0 : 14}px;background:${isEditorialLite ? "transparent" : tokens.surfaceSoft};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
+          <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
+          <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : isEditorialLite ? 15 : 13}px;font-weight:${isSourceFirst ? 500 : isEditorialLite ? 500 : 600};color:${tokens.text};line-height:${isEditorialLite ? 1.65 : 1.55};">${escapeHtml(item.text)}</div>
         </div>
       `).join("");
-          return `<section style="margin:16px 0 8px;">
+          return `<section style="margin:${isEditorialLite ? 18 : 16}px 0 8px;">
         <div style="display:flex;gap:10px;flex-wrap:wrap;">${itemsHtml}</div>
       </section>`;
         }
         if (block.type === "lead-quote") {
-          return `<section style="margin:18px 0;padding:18px;border-radius:16px;background:${tokens.quoteBg};border:1px solid ${tokens.border};">
-        <div style="font-size:18px;font-weight:700;line-height:1.7;color:${tokens.text};">${escapeHtml(block.text)}</div>
+          return `<section style="margin:${isSourceFirst ? 16 : isEditorialLite ? 22 : 18}px 0;padding:${isSourceFirst ? 16 : isEditorialLite ? 20 : 18}px;border-radius:${isSourceFirst ? 14 : isEditorialLite ? 0 : 16}px;background:${isEditorialLite ? "transparent" : tokens.quoteBg};border:${isEditorialLite ? "none" : `1px solid ${tokens.border}`};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
+        <div style="font-size:${isSourceFirst ? 17 : isEditorialLite ? 22 : 18}px;font-weight:${isSourceFirst ? 600 : isEditorialLite ? 600 : 700};line-height:${isEditorialLite ? 1.72 : 1.75};color:${tokens.text};">${escapeHtml(block.text)}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ""}
       </section>`;
         }
         if (block.type === "case-block") {
           const imagesHtml = block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("");
           const bulletsHtml = block.bullets.length ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>` : "";
-          return `<section style="margin:26px 0;">
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 28 : 26}px 0;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(index + 1).padStart(2, "0")}</div>
+          <div style="font-size:${isSourceFirst ? 22 : isEditorialLite ? 14 : 28}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${isEditorialLite ? String(index + 1).padStart(2, "0") : String(index + 1).padStart(2, "0")}</div>
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
-        ${block.title ? `<h2 style="margin:0 0 8px;font-size:22px;line-height:1.35;color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ""}
+        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : isEditorialLite ? 24 : 22}px;line-height:${isEditorialLite ? 1.32 : 1.4};color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ""}
         ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ""}
         ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ""}
         ${bulletsHtml}
@@ -4920,8 +5548,8 @@ var require_ai_layout = __commonJS({
         if (block.type === "section-block") {
           const sectionDisplayIndex = Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0 ? block.sectionIndex + 1 : index + 1;
           const headingLevel = Number.isInteger(block.headingLevel) ? block.headingLevel : 2;
-          const titleFontSize = headingLevel >= 3 ? 18 : 22;
-          const titleMarginBottom = headingLevel >= 3 ? 10 : 12;
+          const titleFontSize = headingLevel >= 3 ? isSourceFirst ? 17 : isEditorialLite ? 18 : 18 : isSourceFirst ? 20 : isEditorialLite ? 26 : 22;
+          const titleMarginBottom = headingLevel >= 3 ? 10 : isEditorialLite ? 14 : 12;
           const titleColor = headingLevel >= 3 ? tokens.accentDeep : tokens.text;
           const paragraphsHtml = Array.isArray(block.paragraphs) ? block.paragraphs.map((paragraph) => `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(paragraph)}</p>`).join("") : "";
           const bulletGroupsHtml = Array.isArray(block.bulletGroups) ? block.bulletGroups.map((group) => {
@@ -4930,11 +5558,18 @@ var require_ai_layout = __commonJS({
             return `<ul style="margin:12px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>`;
           }).join("") : "";
           const imagesHtml = Array.isArray(block.imageIds) ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("") : "";
-          return `<section style="margin:26px 0;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
-        </div>
+          const sectionHead = isSourceFirst ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:${tokens.accentDeep};text-transform:uppercase;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
+            <div style="height:1px;flex:1;background:${tokens.border};"></div>
+          </div>` : isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">Part ${String(sectionDisplayIndex).padStart(2, "0")}</div>
+              <div style="height:1px;flex:1;background:${tokens.border};"></div>
+            </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+          </div>`;
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 30 : 26}px 0;">
+        ${sectionHead}
         ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:1.4;color:${titleColor};">${escapeHtml(block.title)}</h2>` : ""}
         ${paragraphsHtml}
         ${bulletGroupsHtml}
@@ -4942,19 +5577,19 @@ var require_ai_layout = __commonJS({
       </section>`;
         }
         if (block.type === "phone-frame") {
-          return `<section style="margin:24px auto;max-width:380px;padding:14px;border:1px solid ${tokens.border};border-radius:42px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);">
-        <div style="width:42%;height:18px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
-        <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:28px;padding:10px;overflow:hidden;">
-          ${renderImage(block.imageId, "border-radius:22px;")}
+          return `<section style="margin:24px auto;max-width:${isSourceFirst ? 420 : isEditorialLite ? 460 : 380}px;padding:${isSourceFirst ? 10 : isEditorialLite ? 12 : 14}px;border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 24 : isEditorialLite ? 18 : 42}px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);">
+        <div style="width:${isEditorialLite ? 28 : 42}%;height:${isEditorialLite ? 2 : 18}px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
+        <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 16 : isEditorialLite ? 14 : 28}px;padding:10px;overflow:hidden;">
+          ${renderImage(block.imageId, `border-radius:${isSourceFirst ? 12 : isEditorialLite ? 12 : 22}px;`)}
         </div>
         ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:${tokens.muted};">${escapeHtml(block.caption)}</div>` : ""}
       </section>`;
         }
         if (block.type === "cta-card") {
           return `<section style="${cardStyle};background:linear-gradient(135deg, ${tokens.accentSoft} 0%, #ffffff 100%);">
-        ${block.title ? `<h3 style="margin:0 0 8px;font-size:20px;color:${tokens.text};">${escapeHtml(block.title)}</h3>` : ""}
+        ${block.title ? `<h3 style="margin:0 0 8px;font-size:${isEditorialLite ? 22 : 20}px;color:${tokens.text};">${escapeHtml(block.title)}</h3>` : ""}
         ${block.body ? `<p style="margin:0;color:${tokens.muted};">${escapeHtml(block.body)}</p>` : ""}
-        <div style="margin-top:14px;display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:999px;background:${tokens.accent};color:#fff;font-weight:700;font-size:14px;">${escapeHtml(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB")}</div>
+        <div style="margin-top:14px;display:inline-flex;align-items:center;justify-content:center;padding:${isEditorialLite ? "9px 18px" : "10px 16px"};border-radius:999px;background:${tokens.accent};color:#fff;font-weight:700;font-size:14px;">${escapeHtml(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB")}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ""}
       </section>`;
         }
@@ -4965,7 +5600,10 @@ var require_ai_layout = __commonJS({
     module2.exports = {
       AI_LAYOUT_SCHEMA_VERSION: AI_LAYOUT_SCHEMA_VERSION2,
       AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
+      AI_LAYOUT_FAMILY_DEFS,
       AI_PROVIDER_KINDS: AI_PROVIDER_KINDS2,
+      AI_COLOR_PALETTES,
       AI_STYLE_PACKS,
       createDefaultAiSettings: createDefaultAiSettings2,
       normalizeAiSettings: normalizeAiSettings2,
@@ -4976,10 +5614,22 @@ var require_ai_layout = __commonJS({
       normalizeArticleLayoutState,
       normalizeArticleLayoutCacheEntry: normalizeArticleLayoutCacheEntry2,
       normalizeSchemaValidation,
-      getStylePackList: getStylePackList2,
-      getStylePackById: getStylePackById2,
+      normalizeLayoutFamily,
+      normalizeColorPalette,
+      normalizeLayoutSelection: normalizeLayoutSelection2,
+      normalizeResolvedSelection,
+      getArticleLayoutSelectionKey: getArticleLayoutSelectionKey2,
+      getArticleLayoutSelectionState: getArticleLayoutSelectionState2,
+      getArticleLayoutSelectionStateKey,
+      getLayoutFamilyList: getLayoutFamilyList2,
+      getLayoutFamilyById: getLayoutFamilyById2,
+      getColorPaletteList: getColorPaletteList2,
+      getColorPaletteById: getColorPaletteById2,
+      getStylePackList,
+      getStylePackById,
       listEnabledAiProviders,
       resolveAiProvider: resolveAiProvider2,
+      deriveArticleLayoutStateForSelection: deriveArticleLayoutStateForSelection2,
       extractImageRefsFromHtml: extractImageRefsFromHtml2,
       extractMarkdownSections,
       extractMarkdownSignals,
@@ -5858,6 +6508,7 @@ var { renderObsidianTripletMarkdown } = require_obsidian_triplet_renderer();
 var {
   AI_LAYOUT_SCHEMA_VERSION,
   AI_LAYOUT_SKILL_VERSION,
+  AI_LAYOUT_SELECTION_AUTO,
   AI_PROVIDER_KINDS,
   createDefaultAiSettings,
   normalizeAiSettings,
@@ -5865,9 +6516,15 @@ var {
   getAiProviderIssues,
   isAiProviderRunnable,
   summarizeAiProviderIssues,
-  getStylePackList,
-  getStylePackById,
+  getLayoutFamilyList,
+  getLayoutFamilyById,
+  getColorPaletteList,
+  getColorPaletteById,
+  normalizeLayoutSelection,
+  getArticleLayoutSelectionKey,
+  getArticleLayoutSelectionState,
   resolveAiProvider,
+  deriveArticleLayoutStateForSelection,
   normalizeArticleLayoutCacheEntry,
   extractImageRefsFromHtml,
   generateArticleLayout,
@@ -7053,7 +7710,7 @@ var AppleStyleView = class extends ItemView {
     this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
   }
   createAiLayoutPanel(parent) {
-    var _a, _b;
+    var _a, _b, _c;
     this.attachOverlayScrollGuard(parent, [".apple-ai-layout-debug-body"]);
     const area = parent.createDiv({ cls: "apple-ai-layout-area" });
     const header = area.createDiv({ cls: "apple-ai-layout-header" });
@@ -7069,29 +7726,61 @@ var AppleStyleView = class extends ItemView {
       text: "\u5C1A\u672A\u751F\u6210\u5F53\u524D\u6587\u7AE0\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002"
     });
     const controlSection = area.createDiv({ cls: "apple-ai-layout-section" });
-    controlSection.createEl("label", { cls: "apple-setting-label", text: "\u98CE\u683C\u5305" });
-    this.aiStylePackSelect = controlSection.createEl("select", { cls: "apple-select" });
-    const stylePacks = getStylePackList();
-    stylePacks.forEach((pack) => {
+    const layoutControl = controlSection.createDiv({ cls: "apple-ai-layout-control" });
+    layoutControl.createEl("label", { cls: "apple-setting-label", text: "\u5E03\u5C40" });
+    this.aiLayoutFamilySelect = layoutControl.createEl("select", { cls: "apple-select" });
+    getLayoutFamilyList({ includeAuto: true, includeReserved: false }).forEach((family) => {
       var _a2;
-      const option = this.aiStylePackSelect.createEl("option", {
-        value: pack.value,
-        text: pack.label
+      const option = this.aiLayoutFamilySelect.createEl("option", {
+        value: family.value,
+        text: family.label
       });
-      if (((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultStylePack) === pack.value) {
+      if ((((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO) === family.value) {
         option.selected = true;
       }
     });
-    this.pendingAiStylePack = this.pendingAiStylePack || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultStylePack) || "tech-green";
-    this.aiStylePackSelect.value = this.pendingAiStylePack;
-    this.aiStylePackSelect.addEventListener("change", () => {
+    const paletteControl = controlSection.createDiv({ cls: "apple-ai-layout-control" });
+    paletteControl.createEl("label", { cls: "apple-setting-label", text: "\u989C\u8272" });
+    this.aiColorPaletteSelect = paletteControl.createEl("select", { cls: "apple-select" });
+    getColorPaletteList({ includeAuto: true }).forEach((palette) => {
       var _a2;
-      this.pendingAiStylePack = this.aiStylePackSelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultStylePack) || "tech-green";
+      const option = this.aiColorPaletteSelect.createEl("option", {
+        value: palette.value,
+        text: palette.label
+      });
+      if ((((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO) === palette.value) {
+        option.selected = true;
+      }
+    });
+    this.pendingAiLayoutFamily = this.pendingAiLayoutFamily || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO;
+    this.pendingAiColorPalette = this.pendingAiColorPalette || ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
+    this.pendingAiStylePack = this.pendingAiColorPalette;
+    this.aiLayoutFamilySelect.value = this.pendingAiLayoutFamily;
+    this.aiColorPaletteSelect.value = this.pendingAiColorPalette;
+    this.aiStylePackSelect = this.aiColorPaletteSelect;
+    this.aiLayoutFamilySelect.addEventListener("change", () => {
+      var _a2;
+      this.pendingAiLayoutFamily = this.aiLayoutFamilySelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO;
+      this.refreshAiLayoutPanel();
+    });
+    this.aiColorPaletteSelect.addEventListener("change", async () => {
+      var _a2, _b2, _c2;
+      const previousState = this.getCurrentArticleLayoutState();
+      this.pendingAiColorPalette = this.aiColorPaletteSelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
+      this.pendingAiStylePack = this.pendingAiColorPalette;
+      await this.ensureAiLayoutSelectionState(previousState, {
+        layoutFamily: this.pendingAiLayoutFamily || ((_b2 = this.aiLayoutFamilySelect) == null ? void 0 : _b2.value) || ((_c2 = previousState == null ? void 0 : previousState.selection) == null ? void 0 : _c2.layoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+        colorPalette: this.pendingAiColorPalette
+      });
+      if (this.aiPreviewApplied) {
+        this.applyAiLayoutToPreview();
+        return;
+      }
       this.refreshAiLayoutPanel();
     });
     this.aiIncludeImagesNote = controlSection.createEl("div", {
       cls: "apple-ai-layout-mini-note",
-      text: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.includeImagesInLayout) === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
+      text: ((_c = this.plugin.settings.ai) == null ? void 0 : _c.includeImagesInLayout) === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
     });
     const actionRow = area.createDiv({ cls: "apple-ai-layout-actions" });
     this.aiGenerateBtn = actionRow.createEl("button", { cls: "apple-btn-primary", text: "\u751F\u6210\u7F16\u6392" });
@@ -7142,10 +7831,10 @@ var AppleStyleView = class extends ItemView {
     });
     this.refreshAiLayoutPanel();
   }
-  applyAiLayoutPanelStylePack(stylePackId) {
+  applyAiLayoutPanelStylePack(colorPaletteId) {
     if (!this.aiLayoutOverlay)
       return;
-    const pack = getStylePackById(stylePackId || "tech-green");
+    const pack = getColorPaletteById(colorPaletteId || "tech-green");
     const tokens = (pack == null ? void 0 : pack.tokens) || {};
     this.aiLayoutOverlay.style.setProperty("--ai-layout-accent", tokens.accent || "#0a84ff");
     this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-deep", tokens.accentDeep || tokens.accent || "#0a84ff");
@@ -7294,16 +7983,64 @@ var AppleStyleView = class extends ItemView {
       title: ((_e = this.getPublishContextFile()) == null ? void 0 : _e.basename) || "\u672A\u547D\u540D\u6587\u7AE0"
     };
   }
-  getCurrentArticleLayoutState() {
+  getCurrentAiLayoutSelection() {
     var _a, _b, _c, _d, _e;
+    const aiSettings = ((_b = (_a = this.plugin) == null ? void 0 : _a.settings) == null ? void 0 : _b.ai) || createDefaultAiSettings();
+    return normalizeLayoutSelection({
+      layoutFamily: this.pendingAiLayoutFamily || ((_c = this.aiLayoutFamilySelect) == null ? void 0 : _c.value) || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: this.pendingAiStylePack || this.pendingAiColorPalette || ((_d = this.aiColorPaletteSelect) == null ? void 0 : _d.value) || ((_e = this.aiStylePackSelect) == null ? void 0 : _e.value) || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    }, {
+      layoutFamily: aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    });
+  }
+  getCurrentArticleLayoutState() {
+    var _a;
     const { sourcePath } = this.getCurrentLayoutContext();
     if (!sourcePath)
       return null;
-    const stylePack = this.pendingAiStylePack || ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || ((_d = (_c = (_b = this.plugin) == null ? void 0 : _b.settings) == null ? void 0 : _c.ai) == null ? void 0 : _d.defaultStylePack) || "tech-green";
-    if (typeof ((_e = this.plugin) == null ? void 0 : _e.getArticleLayoutState) === "function") {
-      return this.plugin.getArticleLayoutState(sourcePath, stylePack);
+    const selection = this.getCurrentAiLayoutSelection();
+    if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
+      const state = this.plugin.getArticleLayoutState(sourcePath, selection);
+      if (state && (!(selection == null ? void 0 : selection.colorPalette) || selection.colorPalette === AI_LAYOUT_SELECTION_AUTO || state.stylePack === selection.colorPalette)) {
+        return state;
+      }
+      if (selection == null ? void 0 : selection.colorPalette) {
+        const legacyState = this.plugin.getArticleLayoutState(sourcePath, selection.colorPalette);
+        if (!legacyState)
+          return null;
+        if (selection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && legacyState.stylePack !== selection.colorPalette) {
+          return null;
+        }
+        return legacyState;
+      }
     }
     return null;
+  }
+  async ensureAiLayoutSelectionState(baseState = null, selection = null) {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const context = this.getCurrentLayoutContext();
+    if (!context.sourcePath || typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) !== "function")
+      return null;
+    const requestedSelection = normalizeLayoutSelection(selection || this.getCurrentAiLayoutSelection(), {
+      layoutFamily: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_c = this.plugin.settings.ai) == null ? void 0 : _c.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    const existingState = this.plugin.getArticleLayoutState(context.sourcePath, requestedSelection);
+    if ((_e = (_d = existingState == null ? void 0 : existingState.layoutJson) == null ? void 0 : _d.blocks) == null ? void 0 : _e.length) {
+      return existingState;
+    }
+    const derivedState = deriveArticleLayoutStateForSelection(baseState, requestedSelection, {
+      layoutFamily: ((_f = this.plugin.settings.ai) == null ? void 0 : _f.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_g = this.plugin.settings.ai) == null ? void 0 : _g.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    if (!derivedState)
+      return null;
+    await this.plugin.saveArticleLayoutState(context.sourcePath, {
+      ...derivedState,
+      updatedAt: Date.now()
+    }, requestedSelection);
+    return derivedState;
   }
   isAiLayoutPanelVisible() {
     var _a;
@@ -7330,6 +8067,18 @@ var AppleStyleView = class extends ItemView {
   }
   getAiLayoutBlockLabel(block) {
     return (block == null ? void 0 : block.title) || (block == null ? void 0 : block.caseLabel) || (block == null ? void 0 : block.text) || (block == null ? void 0 : block.caption) || (block == null ? void 0 : block.buttonText) || (block == null ? void 0 : block.type) || "\u672A\u547D\u540D\u533A\u5757";
+  }
+  getAiLayoutFamilyLabel(value) {
+    var _a;
+    if (value === AI_LAYOUT_SELECTION_AUTO)
+      return "\u81EA\u52A8\u63A8\u8350";
+    return ((_a = getLayoutFamilyById(value)) == null ? void 0 : _a.label) || value || "\u81EA\u52A8\u63A8\u8350";
+  }
+  getAiColorPaletteLabel(value) {
+    var _a;
+    if (value === AI_LAYOUT_SELECTION_AUTO)
+      return "\u81EA\u52A8\u63A8\u8350";
+    return ((_a = getColorPaletteById(value)) == null ? void 0 : _a.label) || value || "\u81EA\u52A8\u63A8\u8350";
   }
   getVisibleAiSchemaValidation(state) {
     var _a, _b;
@@ -7411,7 +8160,8 @@ var AppleStyleView = class extends ItemView {
       providerId: (state == null ? void 0 : state.providerId) || "",
       providerName: providerLabel || "",
       model: modelLabel || "",
-      stylePack: (state == null ? void 0 : state.stylePack) || "",
+      selection: (state == null ? void 0 : state.selection) || null,
+      resolved: (state == null ? void 0 : state.resolved) || null,
       updatedAt: (state == null ? void 0 : state.updatedAt) ? new Date(state.updatedAt).toISOString() : "",
       sourceHash: (state == null ? void 0 : state.sourceHash) || "",
       isStale: isStale === true,
@@ -7447,13 +8197,13 @@ var AppleStyleView = class extends ItemView {
     return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}\u2026` : normalized;
   }
   buildAiLayoutPromptContext({ state, context, providerLabel, modelLabel, isStale }) {
-    var _a;
+    var _a, _b, _c, _d, _e;
     if (!(state == null ? void 0 : state.layoutJson))
       return "";
     const visibleSchemaValidation = this.getVisibleAiSchemaValidation(state);
     const blockLines = Array.isArray(state.layoutJson.blocks) ? state.layoutJson.blocks.map((block, index) => {
-      var _a2, _b, _c;
-      const origin = ((_c = (_b = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b[index]) == null ? void 0 : _c.source) === "fallback" ? "\u8865\u5168" : "AI";
+      var _a2, _b2, _c2;
+      const origin = ((_c2 = (_b2 = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b2[index]) == null ? void 0 : _c2.source) === "fallback" ? "\u8865\u5168" : "AI";
       return `${index + 1}. [${origin}] ${block.type} - ${this.getAiLayoutBlockLabel(block)}`;
     }).join("\n") : "- \u65E0\u533A\u5757";
     const markdownExcerpt = this.truncateAiPromptMarkdown((context == null ? void 0 : context.markdown) || "");
@@ -7487,13 +8237,16 @@ var AppleStyleView = class extends ItemView {
       `- \u6E90\u54C8\u5E0C\uFF1A${(context == null ? void 0 : context.sourceHash) || ""}`,
       `- AI \u72B6\u6001\uFF1A${state.status || "ready"}`,
       `- \u5DF2\u8FC7\u671F\uFF1A${isStale ? "\u662F" : "\u5426"}`,
-      `- \u98CE\u683C\u5305\uFF1A${state.stylePack || ""}`,
+      `- \u5E03\u5C40\u9009\u62E9\uFF1A${((_a = state.selection) == null ? void 0 : _a.layoutFamily) || ""}`,
+      `- \u989C\u8272\u9009\u62E9\uFF1A${((_b = state.selection) == null ? void 0 : _b.colorPalette) || ""}`,
+      `- \u6700\u7EC8\u5E03\u5C40\uFF1A${((_c = state.resolved) == null ? void 0 : _c.layoutFamily) || ""}`,
+      `- \u6700\u7EC8\u989C\u8272\uFF1A${((_d = state.resolved) == null ? void 0 : _d.colorPalette) || ""}`,
       `- Provider\uFF1A${providerLabel || ""}`,
       `- Model\uFF1A${modelLabel || ""}`,
       "",
       "## \u5F53\u524D\u5E03\u5C40\u6458\u8981",
       `- articleType: ${state.layoutJson.articleType || "article"}`,
-      `- blockCount: ${((_a = state.layoutJson.blocks) == null ? void 0 : _a.length) || 0}`,
+      `- blockCount: ${((_e = state.layoutJson.blocks) == null ? void 0 : _e.length) || 0}`,
       blockLines,
       "",
       "## \u751F\u6210\u5143\u4FE1\u606F",
@@ -7668,7 +8421,7 @@ var AppleStyleView = class extends ItemView {
     this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
   }
   refreshAiLayoutPanel() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
     if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
       return;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
@@ -7676,9 +8429,12 @@ var AppleStyleView = class extends ItemView {
     const configuredProviders = Array.isArray(aiSettings.providers) ? aiSettings.providers.length : 0;
     const context = this.getCurrentLayoutContext();
     const storedState = this.getCurrentArticleLayoutState();
-    const effectiveStylePack = this.pendingAiStylePack || (storedState == null ? void 0 : storedState.stylePack) || aiSettings.defaultStylePack || "tech-green";
-    const hasStylePackMismatch = !!((storedState == null ? void 0 : storedState.stylePack) && storedState.stylePack !== effectiveStylePack);
-    const state = hasStylePackMismatch ? null : storedState;
+    const currentSelection = this.getCurrentAiLayoutSelection();
+    const effectiveSelection = {
+      layoutFamily: currentSelection.layoutFamily || ((_a = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _a.layoutFamily) || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: currentSelection.colorPalette || ((_b = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _b.colorPalette) || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    };
+    const state = storedState;
     const generationMeta = (state == null ? void 0 : state.generationMeta) || null;
     const schemaValidation = this.getVisibleAiSchemaValidation(state);
     const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
@@ -7688,7 +8444,7 @@ var AppleStyleView = class extends ItemView {
     const visibleLayout = visibleSnapshot.layoutJson;
     const visibleBlockOrigins = visibleSnapshot.blockOrigins;
     const hiddenBlockCount = visibleSnapshot.hiddenCount;
-    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length));
+    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_c = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _c.length));
     const hasLastAttemptFailure = (state == null ? void 0 : state.lastAttemptStatus) === "error" || (state == null ? void 0 : state.lastAttemptStatus) === "schema-error";
     const hasDoc = !!context.sourcePath;
     const hasProvider = !!provider;
@@ -7699,16 +8455,16 @@ var AppleStyleView = class extends ItemView {
     let statusText = hasDoc ? "\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709 AI \u7F16\u6392\u7ED3\u679C\u3002" : "\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u3002";
     if (isLoading) {
       badge = "\u751F\u6210\u4E2D";
-      statusText = "\u6B63\u5728\u57FA\u4E8E\u5F53\u524D\u6587\u7AE0\u548C\u98CE\u683C\u5305\u751F\u6210\u533A\u5757\u5316\u6392\u7248\uFF0C\u8BF7\u7A0D\u5019\u3002";
+      statusText = "\u6B63\u5728\u57FA\u4E8E\u5F53\u524D\u6587\u7AE0\u3001\u5E03\u5C40\u548C\u989C\u8272\u751F\u6210\u533A\u5757\u5316\u6392\u7248\uFF0C\u8BF7\u7A0D\u5019\u3002";
     } else if (!aiFeatureEnabled) {
       badge = "\u5DF2\u5173\u95ED";
       statusText = "AI \u7F16\u6392\u5DF2\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u5173\u95ED\u3002\u542F\u7528\u540E\u53EF\u5BF9\u5F53\u524D\u6587\u7AE0\u751F\u6210\u6392\u7248\u5EFA\u8BAE\u3002";
     } else if (!hasProvider) {
       badge = "\u5F85\u914D\u7F6E";
       statusText = configuredProviders > 0 ? "\u5F53\u524D\u5DF2\u6709 AI Provider\uFF0C\u4F46\u6CA1\u6709\u53EF\u76F4\u63A5\u8FD0\u884C\u7684\u914D\u7F6E\u3002\u8BF7\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\uFF0C\u6216\u542F\u7528\u53EF\u7528 Provider\u3002" : "\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u53EF\u7528\u7684 AI Provider\u3002";
-    } else if (hasStylePackMismatch) {
+    } else if (!state) {
       badge = "\u672A\u751F\u6210";
-      statusText = "\u5F53\u524D\u98CE\u683C\u5305\u8FD8\u6CA1\u6709\u751F\u6210\u7ED3\u679C\uFF0C\u8BF7\u91CD\u65B0\u751F\u6210\u7F16\u6392\u3002";
+      statusText = "\u5F53\u524D\u5E03\u5C40\u548C\u989C\u8272\u7EC4\u5408\u8FD8\u6CA1\u6709\u751F\u6210\u7ED3\u679C\uFF0C\u8BF7\u91CD\u65B0\u751F\u6210\u7F16\u6392\u3002";
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
       badge = "\u6821\u9A8C\u5931\u8D25";
       statusText = (schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0 ? `AI \u8FD4\u56DE\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u5171\u53D1\u73B0 ${schemaValidation.issueCount} \u9879\u95EE\u9898\u3002` : "AI \u8FD4\u56DE\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF0C\u8BF7\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002";
@@ -7732,13 +8488,24 @@ var AppleStyleView = class extends ItemView {
     this.aiLayoutStatusBadge.setText(badge);
     this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
     this.aiLayoutStatusText.setText(statusText);
-    this.applyAiLayoutPanelStylePack(effectiveStylePack);
-    this.aiStylePackSelect.value = effectiveStylePack;
-    this.aiStylePackSelect.disabled = !aiFeatureEnabled || isLoading;
+    this.applyAiLayoutPanelStylePack(
+      ((_d = state == null ? void 0 : state.resolved) == null ? void 0 : _d.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
+    );
+    this.aiLayoutFamilySelect.value = effectiveSelection.layoutFamily;
+    this.aiColorPaletteSelect.value = effectiveSelection.colorPalette;
+    if (this.aiStylePackSelect)
+      this.aiStylePackSelect.value = effectiveSelection.colorPalette;
+    this.pendingAiLayoutFamily = effectiveSelection.layoutFamily;
+    this.pendingAiColorPalette = effectiveSelection.colorPalette;
+    this.pendingAiStylePack = effectiveSelection.colorPalette;
+    this.aiLayoutFamilySelect.disabled = !aiFeatureEnabled || isLoading;
+    this.aiColorPaletteSelect.disabled = !aiFeatureEnabled || isLoading;
+    if (this.aiStylePackSelect)
+      this.aiStylePackSelect.disabled = !aiFeatureEnabled || isLoading;
     if (this.aiLayoutOverlay) {
       this.aiLayoutOverlay.classList.toggle("is-loading", isLoading);
     }
-    const converterContainer = (_b = this.previewContainer) == null ? void 0 : _b.closest(".apple-converter-container");
+    const converterContainer = (_e = this.previewContainer) == null ? void 0 : _e.closest(".apple-converter-container");
     if (converterContainer) {
       converterContainer.classList.toggle("apple-ai-layout-panel-loading", isLoading);
     }
@@ -7746,8 +8513,9 @@ var AppleStyleView = class extends ItemView {
       this.aiLayoutLoadingMask.classList.toggle("visible", isLoading);
     }
     if (this.aiLayoutLoadingMaskText) {
-      const stylePackLabel = ((_e = (_d = (_c = this.aiStylePackSelect) == null ? void 0 : _c.selectedOptions) == null ? void 0 : _d[0]) == null ? void 0 : _e.textContent) || "\u5F53\u524D\u98CE\u683C\u5305";
-      this.aiLayoutLoadingMaskText.setText(`\u6B63\u5728\u751F\u6210\u300C${stylePackLabel}\u300D\u7F16\u6392...`);
+      const layoutLabel = this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily);
+      const colorLabel = this.getAiColorPaletteLabel(effectiveSelection.colorPalette);
+      this.aiLayoutLoadingMaskText.setText(`\u6B63\u5728\u751F\u6210\u300C${layoutLabel} \xB7 ${colorLabel}\u300D\u7F16\u6392...`);
     }
     this.aiIncludeImagesNote.setText(
       aiSettings.includeImagesInLayout === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
@@ -7755,19 +8523,20 @@ var AppleStyleView = class extends ItemView {
     if (isLoading) {
       this.aiLayoutSummary.setText(`\u6B63\u5728\u4E3A\u300C${context.title || "\u5F53\u524D\u6587\u7AE0"}\u300D\u751F\u6210\u65B0\u7684\u533A\u5757\u7ED3\u679C\u3002`);
       this.renderAiLayoutMetaChips([
-        `\u98CE\u683C ${((_h = (_g = (_f = this.aiStylePackSelect) == null ? void 0 : _f.selectedOptions) == null ? void 0 : _g[0]) == null ? void 0 : _h.textContent) || "\u79D1\u6280\u7EFF"}`,
+        `\u5E03\u5C40 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
+        `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`,
         aiSettings.includeImagesInLayout === false ? "\u4EC5\u6B63\u6587\u7ED3\u6784" : "\u4F18\u5148\u53C2\u8003\u56FE\u7247"
       ]);
-      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u81EA\u52A8\u5237\u65B0\u533A\u5757\u6E05\u5355\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u6839\u636E\u7ED3\u679C\u79FB\u9664\u591A\u4F59\u533A\u5757\u3002");
+      (_f = this.aiLayoutMetaNote) == null ? void 0 : _f.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u81EA\u52A8\u5237\u65B0\u533A\u5757\u6E05\u5355\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u6839\u636E\u7ED3\u679C\u79FB\u9664\u591A\u4F59\u533A\u5757\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else if (!aiFeatureEnabled) {
       this.aiLayoutSummary.setText("\u4F60\u53EF\u4EE5\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E Provider\uFF0C\u5E76\u542F\u7528 AI \u7F16\u6392\u540E\u518D\u56DE\u5230\u8FD9\u91CC\u64CD\u4F5C\u3002");
-      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("AI \u8F93\u51FA\u53EA\u8D1F\u8D23\u7ED3\u6784\u5316\u7F16\u6392\uFF0C\u6700\u7EC8\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
+      (_g = this.aiLayoutMetaNote) == null ? void 0 : _g.setText("AI \u8F93\u51FA\u53EA\u8D1F\u8D23\u7ED3\u6784\u5316\u7F16\u6392\uFF0C\u6700\u7EC8\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (!hasDoc) {
       this.aiLayoutSummary.setText("\u6253\u5F00\u6587\u7AE0\u540E\uFF0C\u53EF\u4EE5\u9488\u5BF9\u5F53\u524D\u6587\u6863\u751F\u6210\u4E13\u5C5E\u6392\u7248\u3002");
-      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u7B2C\u4E00\u7248\u4F1A\u4F18\u5148\u751F\u6210\u6559\u7A0B/\u6848\u4F8B\u98CE\u683C\u7684\u533A\u5757\u987A\u5E8F\u3002");
+      (_h = this.aiLayoutMetaNote) == null ? void 0 : _h.setText("\u5F53\u524D\u652F\u6301\u201C\u539F\u6587\u589E\u5F3A\u578B\u201D\u201C\u6559\u7A0B\u5361\u7247\u578B\u201D\u201C\u8F7B\u6742\u5FD7\u578B\u201D\u4E09\u79CD\u5E03\u5C40\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
@@ -7782,7 +8551,7 @@ var AppleStyleView = class extends ItemView {
       if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
         errorChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
       this.renderAiLayoutMetaChips(errorChips);
-      (_l = this.aiLayoutMetaNote) == null ? void 0 : _l.setText("\u8FD9\u901A\u5E38\u8868\u793A\u6A21\u578B\u8F93\u51FA\u5B57\u6BB5\u4E0D\u5408\u89C4\u3001block type \u4E0D\u652F\u6301\uFF0C\u6216\u9876\u5C42\u7ED3\u6784\u7F3A\u5931\u3002");
+      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("\u8FD9\u901A\u5E38\u8868\u793A\u6A21\u578B\u8F93\u51FA\u5B57\u6BB5\u4E0D\u5408\u89C4\u3001block type \u4E0D\u652F\u6301\uFF0C\u6216\u9876\u5C42\u7ED3\u6784\u7F3A\u5931\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
       this.aiLayoutSummary.setText(`\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25\uFF1A${state.lastError}`);
@@ -7792,20 +8561,21 @@ var AppleStyleView = class extends ItemView {
       if (modelLabel)
         errorChips.push(`\u6A21\u578B ${modelLabel}`);
       this.renderAiLayoutMetaChips(errorChips);
-      (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText("\u4FEE\u6B63\u914D\u7F6E\u540E\u53EF\u4EE5\u76F4\u63A5\u91CD\u751F\u6210\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u666E\u901A\u9884\u89C8\u3002");
+      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("\u4FEE\u6B63\u914D\u7F6E\u540E\u53EF\u4EE5\u76F4\u63A5\u91CD\u751F\u6210\uFF0C\u4E0D\u4F1A\u5F71\u54CD\u666E\u901A\u9884\u89C8\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if (!state) {
-      this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u6559\u7A0B/\u6848\u4F8B\u98CE\u683C\u7684\u7248\u5F0F JSON\u3002`);
+      this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u65B0\u7684\u5E03\u5C40\u4E0E\u989C\u8272\u7EC4\u5408\u7ED3\u679C\u3002`);
       this.renderAiLayoutMetaChips([
         aiSettings.includeImagesInLayout === false ? "\u4EC5\u6B63\u6587\u7ED3\u6784" : "\u4F18\u5148\u53C2\u8003\u56FE\u7247",
-        `\u98CE\u683C ${((_p = (_o = (_n = this.aiStylePackSelect) == null ? void 0 : _n.selectedOptions) == null ? void 0 : _o[0]) == null ? void 0 : _p.textContent) || "\u79D1\u6280\u7EFF"}`
+        `\u5E03\u5C40 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
+        `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`
       ]);
-      (_q = this.aiLayoutMetaNote) == null ? void 0 : _q.setText(hasStylePackMismatch ? "\u4F60\u5207\u6362\u4E86\u65B0\u7684\u98CE\u683C\u5305\uFF0C\u65E7\u7ED3\u679C\u5DF2\u6682\u65F6\u9690\u85CF\uFF1B\u91CD\u65B0\u751F\u6210\u540E\u4F1A\u5C55\u793A\u65B0\u7684\u533A\u5757\u6E05\u5355\u3002" : "\u751F\u6210\u540E\u4F1A\u5C55\u793A\u8FD9\u6B21\u8BC6\u522B\u5230\u7684\u7ED3\u6784\u3001\u7D20\u6750\u548C\u8865\u5168\u60C5\u51B5\u3002");
+      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u4F60\u5207\u6362\u5230\u4E86\u65B0\u7684\u5E03\u5C40\u6216\u989C\u8272\u7EC4\u5408\uFF1B\u91CD\u65B0\u751F\u6210\u540E\u4F1A\u5C55\u793A\u8FD9\u4E00\u4EFD\u5BF9\u5E94\u7684\u533A\u5757\u6E05\u5355\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else {
       const summaryBits = [
         `\u6587\u7AE0\u7C7B\u578B\uFF1A${visibleLayout.articleType || state.layoutJson.articleType || "article"}`,
-        `\u533A\u5757\u6570\uFF1A${((_r = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _r.length) || 0}`
+        `\u533A\u5757\u6570\uFF1A${((_l = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _l.length) || 0}`
       ];
       if (generationMeta == null ? void 0 : generationMeta.sectionCount) {
         summaryBits.push(`\u7AE0\u8282\uFF1A${generationMeta.sectionCount}`);
@@ -7821,8 +8591,10 @@ var AppleStyleView = class extends ItemView {
         metaChips.push(`Provider ${providerLabel}`);
       if (modelLabel)
         metaChips.push(`\u6A21\u578B ${modelLabel}`);
-      if (generationMeta == null ? void 0 : generationMeta.stylePackLabel)
-        metaChips.push(`\u98CE\u683C ${generationMeta.stylePackLabel}`);
+      if (generationMeta == null ? void 0 : generationMeta.layoutFamilyLabel)
+        metaChips.push(`\u5E03\u5C40 ${generationMeta.layoutFamilyLabel}`);
+      if (generationMeta == null ? void 0 : generationMeta.colorPaletteLabel)
+        metaChips.push(`\u989C\u8272 ${generationMeta.colorPaletteLabel}`);
       if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
         metaChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
       if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
@@ -7840,9 +8612,9 @@ var AppleStyleView = class extends ItemView {
       const baseNote = (generationMeta == null ? void 0 : generationMeta.fallbackUsed) ? `\u5DF2\u8BC6\u522B ${generationMeta.sectionCount || generationMeta.headingCount || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${generationMeta.imageCount || 0} \u5F20\uFF1B\u5176\u4E2D ${generationMeta.fallbackBlockCount} \u4E2A\u533A\u5757\u7531\u672C\u5730\u89C4\u5219\u8865\u5168\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002` : `\u5DF2\u8BC6\u522B ${(generationMeta == null ? void 0 : generationMeta.sectionCount) || (generationMeta == null ? void 0 : generationMeta.headingCount) || 0} \u6BB5\u7ED3\u6784\uFF0C\u56FE\u7247 ${(generationMeta == null ? void 0 : generationMeta.imageCount) || 0} \u5F20\u3002\u6700\u8FD1\u66F4\u65B0\u4E8E ${updateText}\u3002`;
       if (hasLastAttemptFailure && state.lastAttemptError) {
         const lastAttemptText = state.lastAttemptAt ? `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u4E8E ${new Date(state.lastAttemptAt).toLocaleString()} \u5931\u8D25\uFF1A${state.lastAttemptError}` : `\u6700\u8FD1\u4E00\u6B21\u5C1D\u8BD5\u5931\u8D25\uFF1A${state.lastAttemptError}`;
-        (_s = this.aiLayoutMetaNote) == null ? void 0 : _s.setText(`${baseNote} ${lastAttemptText}`);
+        (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(`${baseNote} ${lastAttemptText}`);
       } else {
-        (_t = this.aiLayoutMetaNote) == null ? void 0 : _t.setText(baseNote);
+        (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(baseNote);
       }
       this.refreshAiSchemaIssuePanel(schemaValidation);
     }
@@ -7856,7 +8628,7 @@ var AppleStyleView = class extends ItemView {
         content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-meta" });
         item.createDiv({ cls: "apple-ai-layout-block-skeleton-badge" });
       }
-    } else if ((_u = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _u.length) {
+    } else if ((_o = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _o.length) {
       visibleLayout.blocks.forEach((block, index) => {
         const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
         const origin = (visibleBlockOrigins == null ? void 0 : visibleBlockOrigins[index]) || null;
@@ -7895,7 +8667,7 @@ var AppleStyleView = class extends ItemView {
       });
     }
     this.aiGenerateBtn.disabled = !hasDoc || !hasProvider || !aiFeatureEnabled || isLoading;
-    this.aiApplyBtn.disabled = !state || !((_v = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _v.length) || isStale || (state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || !aiFeatureEnabled || isLoading;
+    this.aiApplyBtn.disabled = !state || !((_p = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _p.length) || isStale || (state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || !aiFeatureEnabled || isLoading;
     this.aiResetBtn.disabled = !this.aiPreviewApplied || isLoading;
     if (this.aiRestoreBlocksBtn) {
       this.aiRestoreBlocksBtn.disabled = hiddenBlockCount <= 0 || isLoading;
@@ -7927,7 +8699,7 @@ var AppleStyleView = class extends ItemView {
     };
   }
   async generateAiLayoutForCurrentArticle() {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
     const provider = resolveAiProvider(aiSettings);
     if (!provider) {
@@ -7943,8 +8715,8 @@ var AppleStyleView = class extends ItemView {
       await this.convertCurrent(true, { showLoading: true, loadingText: "\u6B63\u5728\u51C6\u5907\u6587\u7AE0\u4E0A\u4E0B\u6587..." });
     }
     const imageRefs = aiSettings.includeImagesInLayout === false ? [] : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
-    const stylePack = this.pendingAiStylePack || ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || aiSettings.defaultStylePack || "tech-green";
-    const originalText = (_b = this.aiGenerateBtn) == null ? void 0 : _b.textContent;
+    const selection = this.getCurrentAiLayoutSelection();
+    const originalText = (_a = this.aiGenerateBtn) == null ? void 0 : _a.textContent;
     try {
       this.aiLayoutLoading = true;
       this.refreshAiLayoutPanel();
@@ -7956,7 +8728,7 @@ var AppleStyleView = class extends ItemView {
         provider,
         title: context.title,
         markdown: context.markdown,
-        stylePack,
+        selection,
         imageRefs,
         timeoutMs: aiSettings.requestTimeoutMs
       });
@@ -7967,6 +8739,10 @@ var AppleStyleView = class extends ItemView {
         sourceHash: context.sourceHash,
         providerId: provider.id,
         model: provider.model,
+        selection: layoutJson.selection,
+        resolved: layoutJson.resolved,
+        recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+        recommendedColorPalette: layoutJson.recommendedColorPalette,
         stylePack: layoutJson.stylePack,
         status: "ready",
         lastError: "",
@@ -7977,38 +8753,54 @@ var AppleStyleView = class extends ItemView {
         dismissedBlockKeys: [],
         generationMeta: result.generationMeta,
         layoutJson
-      });
-      this.pendingAiStylePack = layoutJson.stylePack || stylePack;
+      }, layoutJson.selection);
+      this.pendingAiLayoutFamily = ((_b = layoutJson.selection) == null ? void 0 : _b.layoutFamily) || selection.layoutFamily;
+      this.pendingAiColorPalette = ((_c = layoutJson.selection) == null ? void 0 : _c.colorPalette) || selection.colorPalette;
       new Notice("\u2705 AI \u7F16\u6392\u5DF2\u751F\u6210\uFF0C\u53EF\u5E94\u7528\u5230\u9884\u89C8\u67E5\u770B\u6548\u679C");
     } catch (error) {
       console.error("AI \u7F16\u6392\u751F\u6210\u5931\u8D25:", error);
       const previousState = this.getCurrentArticleLayoutState();
       const isSchemaError = (error == null ? void 0 : error.code) === "ai-layout-schema-invalid";
-      const hasReusablePreviousLayout = !!((previousState == null ? void 0 : previousState.status) === "ready" && ((_d = (_c = previousState == null ? void 0 : previousState.layoutJson) == null ? void 0 : _c.blocks) == null ? void 0 : _d.length));
+      const hasReusablePreviousLayout = !!((previousState == null ? void 0 : previousState.status) === "ready" && ((_e = (_d = previousState == null ? void 0 : previousState.layoutJson) == null ? void 0 : _d.blocks) == null ? void 0 : _e.length));
       await this.plugin.saveArticleLayoutState(context.sourcePath, {
         version: AI_LAYOUT_SCHEMA_VERSION,
         updatedAt: hasReusablePreviousLayout ? previousState.updatedAt : Date.now(),
         sourceHash: hasReusablePreviousLayout ? previousState.sourceHash : context.sourceHash,
         providerId: provider.id,
         model: provider.model,
-        stylePack: hasReusablePreviousLayout ? previousState.stylePack : stylePack,
+        selection: hasReusablePreviousLayout ? previousState.selection : selection,
+        resolved: hasReusablePreviousLayout ? previousState.resolved : {
+          layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "source-first" : selection.layoutFamily,
+          colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette
+        },
+        recommendedLayoutFamily: hasReusablePreviousLayout ? previousState.recommendedLayoutFamily : "",
+        recommendedColorPalette: hasReusablePreviousLayout ? previousState.recommendedColorPalette : "",
+        stylePack: hasReusablePreviousLayout ? previousState.stylePack : selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette,
         status: hasReusablePreviousLayout ? previousState.status : isSchemaError ? "schema-error" : "error",
         lastError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
         lastAttemptStatus: isSchemaError ? "schema-error" : "error",
         lastAttemptError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
         lastAttemptAt: Date.now(),
-        lastAttemptSchemaValidation: (error == null ? void 0 : error.schemaValidation) || ((_e = error == null ? void 0 : error.generationMeta) == null ? void 0 : _e.schemaValidation) || null,
+        lastAttemptSchemaValidation: (error == null ? void 0 : error.schemaValidation) || ((_f = error == null ? void 0 : error.generationMeta) == null ? void 0 : _f.schemaValidation) || null,
         dismissedBlockKeys: hasReusablePreviousLayout ? previousState.dismissedBlockKeys || [] : [],
         generationMeta: hasReusablePreviousLayout ? previousState.generationMeta : (error == null ? void 0 : error.generationMeta) || (previousState == null ? void 0 : previousState.generationMeta) || null,
         layoutJson: hasReusablePreviousLayout ? previousState.layoutJson : (previousState == null ? void 0 : previousState.layoutJson) || {
           version: AI_LAYOUT_SCHEMA_VERSION,
           articleType: "article",
-          stylePack,
+          selection,
+          resolved: {
+            layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "source-first" : selection.layoutFamily,
+            colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette
+          },
+          recommendedLayoutFamily: "",
+          recommendedColorPalette: "",
+          stylePack: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette,
+          layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "source-first" : selection.layoutFamily,
           title: context.title,
           summary: "",
           blocks: []
         }
-      });
+      }, selection);
       new Notice(
         isSchemaError ? `\u274C AI \u7F16\u6392\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF1A${error.message}` : `\u274C AI \u7F16\u6392\u5931\u8D25\uFF1A${error.message}`
       );
@@ -8632,7 +9424,7 @@ var AppleStyleView = class extends ItemView {
    * 转换当前文档
    */
   async convertCurrent(silent = false, options = {}) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c;
     const {
       showLoading = false,
       loadingText = "\u6B63\u5728\u6E32\u67D3\u9884\u89C8...",
@@ -8720,9 +9512,21 @@ var AppleStyleView = class extends ItemView {
       this.previewContainer.addClass("apple-has-content");
       this.updateCurrentDoc();
       if (this.shouldSyncAiLayoutUi()) {
-        const activeStylePack = this.pendingAiStylePack || ((_a = this.aiStylePackSelect) == null ? void 0 : _a.value) || ((_d = (_c = (_b = this.plugin) == null ? void 0 : _b.settings) == null ? void 0 : _c.ai) == null ? void 0 : _d.defaultStylePack) || "tech-green";
-        const layoutState = sourcePath && typeof ((_e = this.plugin) == null ? void 0 : _e.getArticleLayoutState) === "function" ? this.plugin.getArticleLayoutState(sourcePath, activeStylePack) : null;
-        const canReuseAiLayout = !!(this.aiPreviewApplied && ((_g = (_f = layoutState == null ? void 0 : layoutState.layoutJson) == null ? void 0 : _f.blocks) == null ? void 0 : _g.length) && this.lastResolvedSourceHash && layoutState.sourceHash === this.lastResolvedSourceHash);
+        const activeSelection = this.getCurrentAiLayoutSelection();
+        let layoutState = null;
+        if (sourcePath && typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
+          layoutState = this.plugin.getArticleLayoutState(sourcePath, activeSelection);
+          if (layoutState && (activeSelection == null ? void 0 : activeSelection.colorPalette) && activeSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && layoutState.stylePack !== activeSelection.colorPalette) {
+            layoutState = null;
+          }
+          if (!layoutState && (activeSelection == null ? void 0 : activeSelection.colorPalette)) {
+            layoutState = this.plugin.getArticleLayoutState(sourcePath, activeSelection.colorPalette);
+            if (layoutState && activeSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && layoutState.stylePack !== activeSelection.colorPalette) {
+              layoutState = null;
+            }
+          }
+        }
+        const canReuseAiLayout = !!(this.aiPreviewApplied && ((_c = (_b = layoutState == null ? void 0 : layoutState.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length) && this.lastResolvedSourceHash && layoutState.sourceHash === this.lastResolvedSourceHash);
         if (canReuseAiLayout) {
           this.applyAiLayoutToPreview();
         } else if (this.aiPreviewApplied) {
@@ -9068,19 +9872,29 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       await this.plugin.saveSettings();
       new Notice("\u8BBE\u7F6E\u5DF2\u4FDD\u5B58\uFF0C\u8BF7\u5173\u95ED\u5E76\u91CD\u65B0\u6253\u5F00\u8F6C\u6362\u5668\u9762\u677F\u4EE5\u751F\u6548");
     }));
-    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u7BA1\u7406\u6A21\u578B\u3001\u9ED8\u8BA4\u98CE\u683C\u548C\u7F13\u5B58\u7B56\u7565\u3002\u5B9E\u9645\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
+    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u7BA1\u7406\u6A21\u578B\u3001\u9ED8\u8BA4\u5E03\u5C40\u3001\u9ED8\u8BA4\u989C\u8272\u548C\u7F13\u5B58\u7B56\u7565\u3002\u5B9E\u9645\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
     new Setting(containerEl).setName("\u5185\u7F6E\u534F\u8BAE\u7248\u672C").setDesc(`\u5F53\u524D\u5185\u7F6E\u6392\u7248\u534F\u8BAE\u4E3A skill v${AI_LAYOUT_SKILL_VERSION}\u3001schema v${AI_LAYOUT_SCHEMA_VERSION}\uFF0C\u7528\u4E8E\u7EA6\u675F AI \u8F93\u51FA\u7ED3\u6784\u3002`);
-    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7ECF\u4E3A\u6587\u7AE0\u548C\u98CE\u683C\u5305\u751F\u6210\u8FC7\u7684\u7F13\u5B58\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
+    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7ECF\u4E3A\u6587\u7AE0\u548C\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u751F\u6210\u8FC7\u7684\u7F13\u5B58\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
       this.plugin.settings.ai.enabled = value;
       await this.plugin.saveSettings();
       this.refreshOpenConverterAiState();
     }));
-    const stylePackOptions = getStylePackList();
-    new Setting(containerEl).setName("\u9ED8\u8BA4\u98CE\u683C\u5305").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u98CE\u683C\u5305\u3002\u540C\u4E00\u7BC7\u6587\u7AE0\u53EF\u4EE5\u4E3A\u4E0D\u540C\u98CE\u683C\u5305\u5206\u522B\u4FDD\u7559\u4E00\u4EFD\u7ED3\u679C\u3002").addDropdown((dropdown) => {
-      stylePackOptions.forEach((option) => dropdown.addOption(option.value, option.label));
-      dropdown.setValue(this.plugin.settings.ai.defaultStylePack || "tech-green");
+    const layoutFamilyOptions = getLayoutFamilyList({ includeAuto: true, includeReserved: false });
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u5E03\u5C40").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u5E03\u5C40\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u5E03\u5C40\u98CE\u683C\u3002").addDropdown((dropdown) => {
+      layoutFamilyOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(this.plugin.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO);
       dropdown.onChange(async (value) => {
-        this.plugin.settings.ai.defaultStylePack = value;
+        this.plugin.settings.ai.defaultLayoutFamily = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    const colorPaletteOptions = getColorPaletteList({ includeAuto: true });
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u989C\u8272").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u989C\u8272\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u5728\u5185\u7F6E\u914D\u8272\u65B9\u6848\u4E2D\u63A8\u8350\u4E00\u4E2A\u7ED3\u679C\uFF1B\u751F\u6210\u540E\u4E5F\u53EF\u4EE5\u624B\u52A8\u5207\u6362\u989C\u8272\u590D\u7528\u5F53\u524D\u5E03\u5C40\u3002").addDropdown((dropdown) => {
+      colorPaletteOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(this.plugin.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO);
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultColorPalette = value;
         await this.plugin.saveSettings();
         this.refreshOpenConverterAiState();
       });
@@ -9204,9 +10018,9 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
       if (!normalizedEntry)
         return count;
-      return count + Object.keys(normalizedEntry.stylePackStates || {}).length;
+      return count + Object.keys(normalizedEntry.selectionStates || {}).length;
     }, 0);
-    const cacheSetting = new Setting(containerEl).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u98CE\u683C\u5305\u7F16\u6392\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
+    const cacheSetting = new Setting(containerEl).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
     if (cachedLayoutCount > 0) {
       cacheSetting.addButton((button) => button.setButtonText("\u6E05\u7A7A\u7F13\u5B58").setWarning().onClick(async () => {
         if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
@@ -9747,8 +10561,8 @@ var AppleStylePlugin = class extends Plugin {
       await this.saveSettings();
     }
   }
-  getArticleLayoutState(sourcePath = "", stylePack = "") {
-    var _a, _b, _c, _d, _e, _f;
+  getArticleLayoutState(sourcePath = "", selection = {}) {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     const normalizedPath = normalizeVaultPath(sourcePath || "");
     if (!normalizedPath)
       return null;
@@ -9756,10 +10570,16 @@ var AppleStylePlugin = class extends Plugin {
     const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
     if (!normalizedEntry)
       return null;
-    const effectiveStylePack = stylePack || normalizedEntry.lastStylePack || ((_e = (_d = this.settings) == null ? void 0 : _d.ai) == null ? void 0 : _e.defaultStylePack) || "tech-green";
-    return ((_f = normalizedEntry.stylePackStates) == null ? void 0 : _f[effectiveStylePack]) || null;
+    if (!selection || Object.keys(selection).length === 0) {
+      return ((_d = normalizedEntry.selectionStates) == null ? void 0 : _d[normalizedEntry.lastSelectionKey]) || null;
+    }
+    return getArticleLayoutSelectionState(normalizedEntry, selection, {
+      layoutFamily: ((_f = (_e = this.settings) == null ? void 0 : _e.ai) == null ? void 0 : _f.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_h = (_g = this.settings) == null ? void 0 : _g.ai) == null ? void 0 : _h.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
   }
-  async saveArticleLayoutState(sourcePath = "", nextState = null, stylePack = "") {
+  async saveArticleLayoutState(sourcePath = "", nextState = null, selection = {}) {
+    var _a, _b, _c, _d;
     const normalizedPath = normalizeVaultPath(sourcePath || "");
     if (!normalizedPath)
       return false;
@@ -9770,33 +10590,45 @@ var AppleStylePlugin = class extends Plugin {
       this.settings.ai.articleLayoutsByPath = {};
     }
     const existingEntry = normalizeArticleLayoutCacheEntry(this.settings.ai.articleLayoutsByPath[normalizedPath]) || {
-      lastStylePack: this.settings.ai.defaultStylePack || "tech-green",
-      stylePackStates: {}
+      lastSelectionKey: getArticleLayoutSelectionKey({
+        layoutFamily: this.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+        colorPalette: this.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+      }),
+      selectionStates: {}
     };
-    const requestedStylePack = String(
-      (nextState == null ? void 0 : nextState.stylePack) || stylePack || existingEntry.lastStylePack || this.settings.ai.defaultStylePack || "tech-green"
-    ).trim();
-    const effectiveStylePack = requestedStylePack || this.settings.ai.defaultStylePack || "tech-green";
+    const hasExplicitSelection = typeof selection === "string" || selection && typeof selection === "object" && Object.keys(selection).length > 0;
+    const requestedSelection = normalizeLayoutSelection(
+      (nextState == null ? void 0 : nextState.selection) || (hasExplicitSelection ? selection : null) || {
+        layoutFamily: (nextState == null ? void 0 : nextState.layoutFamily) || ((_a = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _a.layoutFamily),
+        colorPalette: (nextState == null ? void 0 : nextState.stylePack) || ((_b = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _b.colorPalette) || ((_c = nextState == null ? void 0 : nextState.layoutJson) == null ? void 0 : _c.stylePack)
+      },
+      {
+        layoutFamily: this.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+        colorPalette: this.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+      }
+    );
+    const effectiveSelectionKey = getArticleLayoutSelectionKey(requestedSelection);
     if (!nextState) {
-      if (stylePack) {
-        delete existingEntry.stylePackStates[effectiveStylePack];
-        const remainingStylePacks = Object.keys(existingEntry.stylePackStates);
-        if (!remainingStylePacks.length) {
+      if (selection && Object.keys(selection).length) {
+        delete existingEntry.selectionStates[effectiveSelectionKey];
+        const remainingSelectionKeys = Object.keys(existingEntry.selectionStates);
+        if (!remainingSelectionKeys.length) {
           delete this.settings.ai.articleLayoutsByPath[normalizedPath];
         } else {
-          existingEntry.lastStylePack = existingEntry.stylePackStates[existingEntry.lastStylePack] ? existingEntry.lastStylePack : remainingStylePacks[0];
-          this.settings.ai.articleLayoutsByPath[normalizedPath] = existingEntry;
+          existingEntry.lastSelectionKey = existingEntry.selectionStates[existingEntry.lastSelectionKey] ? existingEntry.lastSelectionKey : remainingSelectionKeys[0];
+          this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
         }
       } else {
         delete this.settings.ai.articleLayoutsByPath[normalizedPath];
       }
     } else {
-      existingEntry.stylePackStates[effectiveStylePack] = {
+      existingEntry.selectionStates[effectiveSelectionKey] = {
         ...nextState,
-        stylePack: effectiveStylePack
+        selection: requestedSelection,
+        stylePack: (nextState == null ? void 0 : nextState.stylePack) || ((_d = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _d.colorPalette) || "tech-green"
       };
-      existingEntry.lastStylePack = effectiveStylePack;
-      this.settings.ai.articleLayoutsByPath[normalizedPath] = existingEntry;
+      existingEntry.lastSelectionKey = effectiveSelectionKey;
+      this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
     }
     return this.saveSettings();
   }
