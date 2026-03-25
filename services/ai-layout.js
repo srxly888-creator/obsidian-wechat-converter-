@@ -14,6 +14,8 @@ const AI_LAYOUT_SCHEMA_VERSION = 1;
 
 const AI_PROVIDER_KINDS = {
   OPENAI_COMPATIBLE: 'openai-compatible',
+  GEMINI: 'gemini',
+  ANTHROPIC: 'anthropic',
 };
 
 const MAX_LAYOUT_BLOCKS = 24;
@@ -112,9 +114,24 @@ const AI_COLOR_PALETTES = {
 
 const AI_STYLE_PACKS = AI_COLOR_PALETTES;
 
+const AI_PROVIDER_KIND_DEFAULTS = {
+  [AI_PROVIDER_KINDS.OPENAI_COMPATIBLE]: {
+    baseUrl: 'https://api.openai.com/v1',
+    model: 'gpt-4.1-mini',
+  },
+  [AI_PROVIDER_KINDS.GEMINI]: {
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    model: 'gemini-2.5-flash',
+  },
+  [AI_PROVIDER_KINDS.ANTHROPIC]: {
+    baseUrl: 'https://api.anthropic.com/v1',
+    model: 'claude-3-5-haiku-latest',
+  },
+};
+
 function createDefaultAiSettings() {
   return {
-    enabled: false,
+    enabled: true,
     defaultProviderId: '',
     defaultLayoutFamily: AI_LAYOUT_SELECTION_AUTO,
     defaultColorPalette: AI_LAYOUT_SELECTION_AUTO,
@@ -289,15 +306,16 @@ function normalizeAiProvider(raw = {}) {
   const kind = typeof raw.kind === 'string' && raw.kind.trim()
     ? raw.kind.trim()
     : AI_PROVIDER_KINDS.OPENAI_COMPATIBLE;
+  const defaults = AI_PROVIDER_KIND_DEFAULTS[kind] || AI_PROVIDER_KIND_DEFAULTS[AI_PROVIDER_KINDS.OPENAI_COMPATIBLE];
   return {
     id,
     name: typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim() : '未命名 Provider',
     kind,
     baseUrl: typeof raw.baseUrl === 'string' && raw.baseUrl.trim()
       ? raw.baseUrl.trim().replace(/\/+$/, '')
-      : 'https://api.openai.com/v1',
+      : defaults.baseUrl,
     apiKey: typeof raw.apiKey === 'string' ? raw.apiKey : '',
-    model: typeof raw.model === 'string' && raw.model.trim() ? raw.model.trim() : 'gpt-4.1-mini',
+    model: typeof raw.model === 'string' && raw.model.trim() ? raw.model.trim() : defaults.model,
     enabled: raw.enabled !== false,
   };
 }
@@ -627,7 +645,9 @@ function normalizeAiSettings(raw = {}) {
   }
 
   return {
-    enabled: raw.enabled === true,
+    enabled: Object.prototype.hasOwnProperty.call(raw, 'enabled')
+      ? raw.enabled === true
+      : defaults.enabled,
     defaultProviderId,
     defaultLayoutFamily: normalizeLayoutFamily(raw.defaultLayoutFamily, AI_LAYOUT_SELECTION_AUTO),
     defaultColorPalette: normalizeColorPalette(
@@ -819,6 +839,55 @@ function extractJsonPayload(text) {
     throw new Error('AI 返回结果不是有效 JSON');
   }
   return candidate.slice(firstBrace, lastBrace + 1);
+}
+
+function sanitizeJsonStringLiteralControls(payload = '') {
+  const raw = String(payload || '');
+  if (!raw) return raw;
+  let sanitized = '';
+  let inString = false;
+  let isEscaped = false;
+
+  for (let index = 0; index < raw.length; index += 1) {
+    const char = raw[index];
+    const charCode = raw.charCodeAt(index);
+
+    if (!inString) {
+      sanitized += char;
+      if (char === '"') inString = true;
+      continue;
+    }
+
+    if (isEscaped) {
+      sanitized += char;
+      isEscaped = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      sanitized += char;
+      isEscaped = true;
+      continue;
+    }
+
+    if (char === '"') {
+      sanitized += char;
+      inString = false;
+      continue;
+    }
+
+    if (charCode <= 0x1F) {
+      if (char === '\n') sanitized += '\\n';
+      else if (char === '\r') sanitized += '\\r';
+      else if (char === '\t') sanitized += '\\t';
+      else sanitized += ' ';
+      continue;
+    }
+
+    sanitized += char;
+  }
+
+  return sanitized;
 }
 
 function inferBlockType(rawBlock = {}) {
@@ -1314,41 +1383,93 @@ function buildFallbackLayout(context = {}) {
         note: leadNote,
       });
     }
-    if (partItems.length >= 3) {
-      headBlocks.push({ type: 'part-nav', items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
-    }
   } else {
-    if (firstImageId || leadText) {
+    if (leadText) {
       headBlocks.push({
-        type: 'hero',
-        eyebrow: signals.sectionTitles[0] ? 'Obsidian × AI 系列' : 'AI Layout Draft',
-        title,
-        subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
-        coverImageId: firstImageId,
-        variant: 'cover-right',
+        type: 'lead-quote',
+        text: leadText,
+        note: leadNote,
       });
-    }
-    if (partItems.length >= 3) {
-      headBlocks.push({ type: 'part-nav', items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
     }
   }
 
+  const heroCoverImageId = coerceString(headBlocks.find((block) => block?.type === 'hero')?.coverImageId);
   sourceSections.forEach((section, index) => {
     const block = buildSectionBlockFromSource(section, {
-      imageIds: index === 0 && firstImageId ? [firstImageId] : [],
+      imageIds: index === 0 && firstImageId && heroCoverImageId !== firstImageId ? [firstImageId] : [],
       fallbackIndex: index,
     });
     if (block) bodyBlocks.push(block);
   });
 
   const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
-  if ((resolved.layoutFamily === 'tutorial-cards' || resolved.layoutFamily === 'editorial-lite') && screenshotImage?.id) {
+  if (resolved.layoutFamily === 'tutorial-cards' && screenshotImage?.id) {
     bodyBlocks.push({
       type: 'phone-frame',
       imageId: screenshotImage.id,
       caption: screenshotImage.caption || screenshotImage.alt || '示意截图',
     });
   }
+
+  const collectUsedImageIds = (blocks = []) => {
+    const used = new Set();
+    blocks.forEach((block) => {
+      const coverImageId = coerceString(block?.coverImageId);
+      if (coverImageId) used.add(coverImageId);
+      const singleImageId = coerceString(block?.imageId);
+      if (singleImageId) used.add(singleImageId);
+      if (Array.isArray(block?.imageIds)) {
+        block.imageIds.map((item) => coerceString(item)).filter(Boolean).forEach((item) => used.add(item));
+      }
+    });
+    return used;
+  };
+  const appendRemainingImages = (blocks = [], remainingImageIds = [], familyId = '') => {
+    const queue = remainingImageIds.slice();
+    if (!queue.length) return blocks;
+
+    const attachableIndexes = [];
+    blocks.forEach((block, index) => {
+      if (block?.type === 'section-block' || block?.type === 'case-block') {
+        attachableIndexes.push(index);
+      }
+    });
+
+    attachableIndexes.forEach((blockIndex) => {
+      if (!queue.length) return;
+      const block = blocks[blockIndex];
+      const limit = block.type === 'case-block' ? MAX_CASE_BLOCK_IMAGE_IDS : 3;
+      const currentImageIds = Array.isArray(block.imageIds)
+        ? block.imageIds.map((item) => coerceString(item)).filter(Boolean)
+        : [];
+      const availableSlots = Math.max(0, limit - currentImageIds.length);
+      if (!availableSlots) return;
+      blocks[blockIndex] = {
+        ...block,
+        imageIds: currentImageIds.concat(queue.splice(0, availableSlots)),
+      };
+    });
+
+    while (queue.length) {
+      blocks.push({
+        type: 'case-block',
+        caseLabel: familyId === 'editorial-lite' ? 'IMAGES' : 'GALLERY',
+        title: familyId === 'editorial-lite' ? '图像摘录' : '配图补充',
+        summary: '',
+        bullets: [],
+        imageIds: queue.splice(0, MAX_CASE_BLOCK_IMAGE_IDS),
+        highlight: '',
+      });
+    }
+
+    return blocks;
+  };
+  const usedImageIds = collectUsedImageIds([...headBlocks, ...bodyBlocks]);
+  const remainingImageIds = imageRefs
+    .map((image) => coerceString(image?.id))
+    .filter(Boolean)
+    .filter((imageId) => !usedImageIds.has(imageId));
+  appendRemainingImages(bodyBlocks, remainingImageIds, resolved.layoutFamily);
 
   return {
     version: AI_LAYOUT_SCHEMA_VERSION,
@@ -1743,6 +1864,37 @@ function readChatCompletionContent(data) {
   throw new Error('AI 响应格式无法识别');
 }
 
+function readGeminiContent(data) {
+  const candidate = Array.isArray(data?.candidates) ? data.candidates[0] : null;
+  const parts = Array.isArray(candidate?.content?.parts) ? candidate.content.parts : [];
+  const text = parts
+    .map((item) => (typeof item?.text === 'string' ? item.text : ''))
+    .join('')
+    .trim();
+  if (text) return text;
+  throw new Error('Gemini 响应缺少可解析文本');
+}
+
+function readAnthropicContent(data) {
+  const content = Array.isArray(data?.content) ? data.content : [];
+  const text = content
+    .map((item) => (item?.type === 'text' && typeof item?.text === 'string' ? item.text : ''))
+    .join('')
+    .trim();
+  if (text) return text;
+  throw new Error('Anthropic 响应缺少可解析文本');
+}
+
+function toPlainPromptFromMessages(messages = []) {
+  return messages
+    .map((message) => {
+      const roleLabel = message?.role === 'system' ? '系统要求' : '用户请求';
+      return `${roleLabel}：\n${String(message?.content || '').trim()}`;
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 async function requestOpenAICompatibleLayout({
   provider,
   title,
@@ -1779,7 +1931,152 @@ async function requestOpenAICompatibleLayout({
     const data = await response.json();
     const content = readChatCompletionContent(data);
     const jsonPayload = extractJsonPayload(content);
-    return repairRawLayoutPayload(JSON.parse(jsonPayload));
+    try {
+      return repairRawLayoutPayload(JSON.parse(jsonPayload));
+    } catch (error) {
+      const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+      if (sanitizedPayload !== jsonPayload) {
+        return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+      }
+      throw error;
+    }
+  } catch (error) {
+    if (controller.signal.aborted || error?.name === 'AbortError') {
+      throw new AiLayoutTimeoutError(timeoutMs);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function requestGeminiLayout({
+  provider,
+  title,
+  markdown,
+  selection,
+  stylePack,
+  imageRefs,
+  timeoutMs,
+  fetchImpl,
+}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
+    const systemInstruction = String(messages[0]?.content || '').trim();
+    const userPrompt = String(messages[1]?.content || '').trim() || toPlainPromptFromMessages(messages);
+    const endpoint = `${provider.baseUrl}/models/${encodeURIComponent(provider.model)}:generateContent`;
+    const response = await fetchImpl(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': provider.apiKey,
+      },
+      body: JSON.stringify({
+        systemInstruction: systemInstruction
+          ? {
+            role: 'system',
+            parts: [{ text: systemInstruction }],
+          }
+          : undefined,
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: userPrompt }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2,
+        },
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`AI 请求失败 (${response.status}): ${text || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = readGeminiContent(data);
+    const jsonPayload = extractJsonPayload(content);
+    try {
+      return repairRawLayoutPayload(JSON.parse(jsonPayload));
+    } catch (error) {
+      const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+      if (sanitizedPayload !== jsonPayload) {
+        return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+      }
+      throw error;
+    }
+  } catch (error) {
+    if (controller.signal.aborted || error?.name === 'AbortError') {
+      throw new AiLayoutTimeoutError(timeoutMs);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function requestAnthropicLayout({
+  provider,
+  title,
+  markdown,
+  selection,
+  stylePack,
+  imageRefs,
+  timeoutMs,
+  fetchImpl,
+}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
+    const systemInstruction = String(messages[0]?.content || '').trim();
+    const userPrompt = String(messages[1]?.content || '').trim() || toPlainPromptFromMessages(messages);
+    const response = await fetchImpl(`${provider.baseUrl}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': provider.apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: provider.model,
+        max_tokens: 4096,
+        temperature: 0.2,
+        system: systemInstruction,
+        messages: [
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`AI 请求失败 (${response.status}): ${text || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = readAnthropicContent(data);
+    const jsonPayload = extractJsonPayload(content);
+    try {
+      return repairRawLayoutPayload(JSON.parse(jsonPayload));
+    } catch (error) {
+      const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+      if (sanitizedPayload !== jsonPayload) {
+        return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+      }
+      throw error;
+    }
   } catch (error) {
     if (controller.signal.aborted || error?.name === 'AbortError') {
       throw new AiLayoutTimeoutError(timeoutMs);
@@ -1813,6 +2110,30 @@ async function generateArticleLayout({
   switch (provider.kind) {
     case AI_PROVIDER_KINDS.OPENAI_COMPATIBLE:
       rawLayout = await requestOpenAICompatibleLayout({
+        provider,
+        title,
+        markdown,
+        selection,
+        stylePack,
+        imageRefs,
+        timeoutMs,
+        fetchImpl,
+      });
+      break;
+    case AI_PROVIDER_KINDS.GEMINI:
+      rawLayout = await requestGeminiLayout({
+        provider,
+        title,
+        markdown,
+        selection,
+        stylePack,
+        imageRefs,
+        timeoutMs,
+        fetchImpl,
+      });
+      break;
+    case AI_PROVIDER_KINDS.ANTHROPIC:
+      rawLayout = await requestAnthropicLayout({
         provider,
         title,
         markdown,
@@ -1870,7 +2191,9 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
   const colorPalette = getColorPaletteById(layout?.resolved?.colorPalette || layout?.stylePack);
   const tokens = colorPalette.tokens;
   const isSourceFirst = layoutFamily.id === 'source-first';
+  const isTutorialCards = layoutFamily.id === 'tutorial-cards';
   const isEditorialLite = layoutFamily.id === 'editorial-lite';
+  const editorialDisplayFont = 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif';
   const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
   const bodyFontSize = 16;
   const bodyLineHeight = 1.8;
@@ -1881,17 +2204,17 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
     `font-size:${bodyFontSize}px`,
     `line-height:${bodyLineHeight}`,
     'letter-spacing:0',
-    'padding:24px 18px',
+    `padding:${isEditorialLite ? '30px 22px 40px' : (isTutorialCards ? '26px 18px 34px' : '20px 16px 28px')}`,
     `background:${tokens.surface}`,
   ].join(';');
 
   const cardStyle = [
     `background:${tokens.surface}`,
     `border:1px solid ${tokens.border}`,
-    `border-radius:${isSourceFirst ? 14 : (isEditorialLite ? 16 : 18)}px`,
-    `padding:${isSourceFirst ? 16 : (isEditorialLite ? 20 : 18)}px`,
-    `margin:${isSourceFirst ? 16 : (isEditorialLite ? 22 : 18)}px 0`,
-    `box-shadow:${isEditorialLite ? '0 18px 32px -30px rgba(36,50,61,0.16)' : '0 10px 30px -24px rgba(0,0,0,0.18)'}`,
+    `border-radius:${isSourceFirst ? 10 : (isEditorialLite ? 0 : 18)}px`,
+    `padding:${isSourceFirst ? 0 : (isEditorialLite ? 0 : 18)}px`,
+    `margin:${isSourceFirst ? 8 : (isEditorialLite ? 30 : 18)}px 0`,
+    `box-shadow:${isTutorialCards ? '0 10px 30px -24px rgba(0,0,0,0.18)' : (isEditorialLite ? 'none' : 'none')}`,
   ].join(';');
 
   const renderImage = (imageId, extraStyle = '') => {
@@ -1910,23 +2233,41 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
   const blocksHtml = (layout.blocks || []).map((block, index) => {
     if (block.type === 'hero') {
       const heroImageStyle = isEditorialLite
-        ? 'max-width:148px;flex:0 0 148px;border-radius:22px;'
-        : 'max-width:116px;flex:0 0 116px;';
+        ? 'width:100%;max-width:none;flex:none;border-radius:28px;'
+        : (isSourceFirst
+          ? 'max-width:none;width:100%;flex:none;border-radius:18px;'
+          : 'max-width:116px;flex:0 0 116px;border-radius:18px;');
       const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : '';
       const contentHtml = [
-        block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 1.8 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:10px;">${escapeHtml(block.eyebrow)}</div>` : '',
-        block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 8 : (isEditorialLite ? 12 : 10)}px;font-size:${isSourceFirst ? 24 : (isEditorialLite ? 30 : 28)}px;line-height:${isEditorialLite ? 1.18 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 800 : 700};">${escapeHtml(block.title)}</h1>` : '',
-        block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : (isEditorialLite ? 16 : 14)}px;line-height:${isSourceFirst ? 1.8 : (isEditorialLite ? 1.82 : 1.7)};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : '',
+        block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 2 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : '',
+        block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 6 : (isEditorialLite ? 14 : 10)}px;font-size:${isSourceFirst ? 26 : (isEditorialLite ? 36 : 28)}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h1>` : '',
+        block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : (isEditorialLite ? 17 : 14)}px;line-height:${isSourceFirst ? 1.8 : (isEditorialLite ? 1.88 : 1.7)};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : '',
       ].join('');
       const flexDirection = block.variant === 'cover-left' ? 'row-reverse' : 'row';
       const heroFooter = isEditorialLite
-        ? `<div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+        ? `<div style="display:flex;align-items:center;gap:14px;margin-top:24px;">
             <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
             <div style="flex:1;height:1px;background:${tokens.border};"></div>
           </div>`
-        : `<div style="height:${isSourceFirst ? 6 : 10}px;margin-top:${isSourceFirst ? 14 : 18}px;background:${tokens.accent};border-radius:999px;"></div>`;
-      return `<section style="${cardStyle};padding:${isSourceFirst ? 18 : (isEditorialLite ? 24 : 22)}px;">
-        <div style="display:flex;flex-direction:${flexDirection};gap:${isEditorialLite ? 20 : 16}px;align-items:center;">
+        : (isSourceFirst
+          ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>`
+          : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`);
+      if (isEditorialLite) {
+        return `<section style="margin:4px 0 34px;">
+          <div style="max-width:680px;">${contentHtml}</div>
+          ${imageHtml ? `<div style="margin-top:20px;">${imageHtml}</div>` : ''}
+          ${heroFooter}
+        </section>`;
+      }
+      if (isSourceFirst) {
+        return `<section style="margin:2px 0 24px;">
+          ${imageHtml ? `<div style="margin-bottom:14px;">${imageHtml}</div>` : ''}
+          <div style="max-width:720px;">${contentHtml}</div>
+          ${heroFooter}
+        </section>`;
+      }
+      return `<section style="${cardStyle};padding:22px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);">
+        <div style="display:flex;flex-direction:${flexDirection};gap:16px;align-items:center;">
           <div style="flex:1 1 auto;min-width:0;">${contentHtml}</div>
           ${imageHtml}
         </div>
@@ -1936,19 +2277,19 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
 
     if (block.type === 'part-nav') {
       const itemsHtml = block.items.map((item) => `
-        <div style="flex:1 1 0;min-width:0;padding:${isSourceFirst ? '10px 12px' : (isEditorialLite ? '12px 0 12px 0' : '12px 10px')};border:${isEditorialLite ? 'none' : `1px solid ${tokens.border}`};border-radius:${isSourceFirst ? 12 : (isEditorialLite ? 0 : 14)}px;background:${isEditorialLite ? 'transparent' : tokens.surfaceSoft};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
+        <div style="flex:${isEditorialLite ? '1 1 100%' : '1 1 0'};min-width:0;padding:${isSourceFirst ? '0 0 0 0' : (isEditorialLite ? '14px 0' : '12px 10px')};border:${isTutorialCards ? `1px solid ${tokens.border}` : 'none'};border-radius:${isTutorialCards ? 14 : 0}px;background:${isTutorialCards ? tokens.surfaceSoft : 'transparent'};border-bottom:${isSourceFirst || isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
           <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
-          <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : (isEditorialLite ? 15 : 13)}px;font-weight:${isSourceFirst ? 500 : (isEditorialLite ? 500 : 600)};color:${tokens.text};line-height:${isEditorialLite ? 1.65 : 1.55};">${escapeHtml(item.text)}</div>
+          <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : (isEditorialLite ? 17 : 13)}px;font-weight:${isSourceFirst ? 500 : (isEditorialLite ? 500 : 600)};color:${tokens.text};line-height:${isEditorialLite ? 1.72 : 1.55};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(item.text)}</div>
         </div>
       `).join('');
-      return `<section style="margin:${isEditorialLite ? 18 : 16}px 0 8px;">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">${itemsHtml}</div>
+      return `<section style="margin:${isEditorialLite ? 20 : (isSourceFirst ? 20 : 16)}px 0 ${isSourceFirst ? 18 : 8}px;">
+        <div style="display:flex;gap:${isSourceFirst ? 16 : 10}px;flex-wrap:wrap;${isSourceFirst ? `padding:0 0 10px;border-bottom:1px solid ${tokens.border};` : ''}${isEditorialLite ? 'flex-direction:column;' : ''}">${itemsHtml}</div>
       </section>`;
     }
 
     if (block.type === 'lead-quote') {
-      return `<section style="margin:${isSourceFirst ? 16 : (isEditorialLite ? 22 : 18)}px 0;padding:${isSourceFirst ? 16 : (isEditorialLite ? 20 : 18)}px;border-radius:${isSourceFirst ? 14 : (isEditorialLite ? 0 : 16)}px;background:${isEditorialLite ? 'transparent' : tokens.quoteBg};border:${isEditorialLite ? 'none' : `1px solid ${tokens.border}`};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
-        <div style="font-size:${isSourceFirst ? 17 : (isEditorialLite ? 22 : 18)}px;font-weight:${isSourceFirst ? 600 : (isEditorialLite ? 600 : 700)};line-height:${isEditorialLite ? 1.72 : 1.75};color:${tokens.text};">${escapeHtml(block.text)}</div>
+      return `<section style="margin:${isSourceFirst ? 14 : (isEditorialLite ? 26 : 18)}px 0;padding:${isSourceFirst ? '0 0 0 14px' : (isEditorialLite ? '24px 0' : '18px')};border-radius:${isTutorialCards ? 16 : 0}px;background:${isTutorialCards ? tokens.quoteBg : 'transparent'};border:${isTutorialCards ? `1px solid ${tokens.border}` : 'none'};border-left:${isSourceFirst ? `3px solid ${tokens.accent}` : 'none'};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : 'none'};">
+        <div style="font-size:${isSourceFirst ? 16 : (isEditorialLite ? 26 : 18)}px;font-weight:${isSourceFirst ? 600 : (isEditorialLite ? 600 : 700)};line-height:${isEditorialLite ? 1.7 : 1.75};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.text)}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ''}
       </section>`;
     }
@@ -1958,12 +2299,12 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
       const bulletsHtml = block.bullets.length
         ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join('')}</ul>`
         : '';
-      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 28 : 26)}px 0;">
+      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 32 : 26)}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};` : ''}">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
           <div style="font-size:${isSourceFirst ? 22 : (isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? 'uppercase' : 'none'};">${isEditorialLite ? String(index + 1).padStart(2, '0') : String(index + 1).padStart(2, '0')}</div>
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
-        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : (isEditorialLite ? 24 : 22)}px;line-height:${isEditorialLite ? 1.32 : 1.4};color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ''}
+        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : (isEditorialLite ? 26 : 22)}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h2>` : ''}
         ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ''}
         ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ''}
         ${bulletsHtml}
@@ -1992,22 +2333,22 @@ function renderArticleLayoutHtml(layout, { imageRefs = [] } = {}) {
         ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join('')
         : '';
       const sectionHead = isSourceFirst
-        ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:${tokens.accentDeep};text-transform:uppercase;">${String(sectionDisplayIndex).padStart(2, '0')}</div>
+        ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">Section ${String(sectionDisplayIndex).padStart(2, '0')}</div>
             <div style="height:1px;flex:1;background:${tokens.border};"></div>
           </div>`
         : isEditorialLite
-          ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
               <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">Part ${String(sectionDisplayIndex).padStart(2, '0')}</div>
-              <div style="height:1px;flex:1;background:${tokens.border};"></div>
+              <div style="width:42px;height:1px;background:${tokens.border};"></div>
             </div>`
           : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, '0')}</div>
             <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, '0')}`)}</div>
           </div>`;
-      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 30 : 26)}px 0;">
+      return `<section style="margin:${isSourceFirst ? 22 : (isEditorialLite ? 36 : 26)}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};box-shadow:0 10px 30px -24px rgba(0,0,0,0.14);` : ''}${isSourceFirst ? `padding-top:4px;` : ''}">
         ${sectionHead}
-        ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:1.4;color:${titleColor};">${escapeHtml(block.title)}</h2>` : ''}
+        ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${titleColor};font-family:${isEditorialLite ? editorialDisplayFont : 'inherit'};">${escapeHtml(block.title)}</h2>` : ''}
         ${paragraphsHtml}
         ${bulletGroupsHtml}
         ${imagesHtml}

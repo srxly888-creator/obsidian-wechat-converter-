@@ -109,10 +109,30 @@ describe('AppleStylePlugin - Settings Migration', () => {
     await plugin.loadSettings();
 
     expect(plugin.settings.ai).toBeTruthy();
+    expect(plugin.settings.ai.enabled).toBe(true);
     expect(plugin.settings.ai.defaultStylePack).toBe('tech-green');
     expect(plugin.settings.ai.providers).toEqual([]);
     expect(plugin.settings.ai.articleLayoutsByPath).toEqual({});
     expect(plugin.saveData).not.toHaveBeenCalled();
+  });
+
+  it('should preserve explicit disabled ai setting during normalization', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: false,
+        providers: [],
+        articleLayoutsByPath: {},
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.ai.enabled).toBe(false);
+    expect(plugin.saveData).toHaveBeenCalledTimes(1);
   });
 
   it('should normalize stored ai settings when provider metadata is incomplete', async () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const {
   normalizeAiSettings,
@@ -31,6 +31,21 @@ describe('ai-layout service', () => {
     expect(normalized.providers).toHaveLength(1);
     expect(normalized.providers[0].model).toBe('gpt-4.1-mini');
     expect(normalized.articleLayoutsByPath).toEqual({});
+  });
+
+  it('should normalize gemini and anthropic providers with kind-specific defaults', () => {
+    const normalized = normalizeAiSettings({
+      enabled: true,
+      providers: [
+        { id: 'g1', kind: 'gemini', apiKey: 'secret' },
+        { id: 'a1', kind: 'anthropic', apiKey: 'secret' },
+      ],
+    });
+
+    expect(normalized.providers[0].baseUrl).toBe('https://generativelanguage.googleapis.com/v1beta');
+    expect(normalized.providers[0].model).toBe('gemini-2.5-flash');
+    expect(normalized.providers[1].baseUrl).toBe('https://api.anthropic.com/v1');
+    expect(normalized.providers[1].model).toBe('claude-3-5-haiku-latest');
   });
 
   it('should report provider readiness issues clearly', () => {
@@ -169,6 +184,92 @@ title: 示例
     expect(layout.blocks.some((block) => block.type === 'cta-card')).toBe(false);
   });
 
+  it('should keep source-first fallback closer to the original article flow', () => {
+    const layout = buildFallbackLayout({
+      title: '知识整理',
+      selection: {
+        layoutFamily: 'source-first',
+        colorPalette: 'tech-green',
+      },
+      markdown: `
+## 第一部分
+这是一段导语。
+
+## 第二部分
+这里是补充说明。
+      `,
+      stylePack: 'tech-green',
+      imageRefs: [{ id: 'image-1', src: 'https://example.com/cover.png', caption: '封面图', alt: '封面图' }],
+    });
+
+    expect(layout.blocks.some((block) => block.type === 'hero')).toBe(false);
+    expect(layout.blocks.some((block) => block.type === 'part-nav')).toBe(false);
+    expect(layout.blocks[0]?.type).toBe('lead-quote');
+  });
+
+  it('should preserve at least one image for source-first image-only notes', () => {
+    const layout = buildFallbackLayout({
+      title: '配图短文',
+      selection: {
+        layoutFamily: 'source-first',
+        colorPalette: 'tech-green',
+      },
+      markdown: '![封面](cover.png)',
+      stylePack: 'tech-green',
+      imageRefs: [{ id: 'image-1', src: 'https://example.com/cover.png', caption: '封面图', alt: '封面图' }],
+    });
+
+    expect(layout.blocks.some((block) => Array.isArray(block.imageIds) && block.imageIds.includes('image-1'))).toBe(true);
+  });
+
+  it('should keep editorial-lite fallback focused on masthead and lead without tutorial chrome', () => {
+    const layout = buildFallbackLayout({
+      title: '写作经验复盘',
+      selection: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'graphite-rose',
+      },
+      markdown: `
+## 为什么我后来改了写法
+这里是导语。
+
+## 写作中的一个误区
+这里是补充说明。
+      `,
+      stylePack: 'graphite-rose',
+      imageRefs: [
+        { id: 'image-1', src: 'https://example.com/cover.png', caption: '封面图', alt: '封面图' },
+        { id: 'image-2', src: 'https://example.com/screen.png', caption: '截图', alt: '截图' },
+      ],
+    });
+
+    expect(layout.blocks[0]?.type).toBe('hero');
+    expect(layout.blocks.some((block) => block.type === 'lead-quote')).toBe(true);
+    expect(layout.blocks.some((block) => block.type === 'part-nav')).toBe(false);
+    expect(layout.blocks.some((block) => block.type === 'phone-frame')).toBe(false);
+  });
+
+  it('should preserve non-cover images for editorial-lite when ai output is sparse', () => {
+    const layout = buildFallbackLayout({
+      title: '写作经验复盘',
+      selection: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'graphite-rose',
+      },
+      markdown: `
+## 第一部分
+这里是正文。
+      `,
+      stylePack: 'graphite-rose',
+      imageRefs: [
+        { id: 'image-1', src: 'https://example.com/cover.png', caption: '封面图', alt: '封面图' },
+        { id: 'image-2', src: 'https://example.com/detail.png', caption: '细节图', alt: '细节图' },
+      ],
+    });
+
+    expect(layout.blocks.some((block) => Array.isArray(block.imageIds) && block.imageIds.includes('image-2'))).toBe(true);
+  });
+
   it('should merge sparse ai output with fallback section blocks without forcing cta', () => {
     const layout = normalizeArticleLayout({
       articleType: 'tutorial',
@@ -229,7 +330,7 @@ title: 示例
       imageRefs: [],
     });
 
-    expect(html).toContain('#2c6bed');
+    expect(html).toContain('#1f4fb2');
     expect(html).not.toContain('#14b37d');
   });
 
@@ -275,6 +376,44 @@ title: 示例
     expect(html).toContain('Part 01');
     expect(html).toContain('#cc5f82');
     expect(html).not.toContain('SECTION 01');
+    expect(html).toContain('Georgia');
+  });
+
+  it('should render source-first and tutorial-cards with visibly different structural chrome', () => {
+    const sourceHtml = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'source-first',
+        colorPalette: 'tech-green',
+      },
+      stylePack: 'tech-green',
+      title: '知识整理',
+      blocks: [
+        { type: 'lead-quote', text: '一句导语。' },
+        { type: 'section-block', sectionIndex: 0, title: '第一部分', paragraphs: ['这里是正文。'] },
+      ],
+    }, {
+      imageRefs: [],
+    });
+
+    const tutorialHtml = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      stylePack: 'ocean-blue',
+      title: '操作教程',
+      blocks: [
+        { type: 'hero', eyebrow: 'AI Layout Draft', title: '操作教程', subtitle: '快速上手', variant: 'cover-right' },
+        { type: 'section-block', sectionIndex: 0, title: '第一步', paragraphs: ['这里是正文。'] },
+      ],
+    }, {
+      imageRefs: [],
+    });
+
+    expect(sourceHtml).toContain('Section 01');
+    expect(sourceHtml).toContain('border-left:3px solid');
+    expect(tutorialHtml).toContain('SECTION 01');
+    expect(tutorialHtml).toContain('box-shadow:0 10px 30px -24px');
   });
 
   it('should derive a new color variant from an existing generated layout without rerunning ai', () => {
@@ -830,6 +969,164 @@ title: 示例
     expect(userMessage.length).toBeLessThan(longMarkdown.length);
     expect(userMessage).toContain('内容已截断');
     expect(userMessage).toContain('原文如下');
+  });
+
+  it('should recover from raw control characters inside ai json strings', async () => {
+    const provider = {
+      id: 'p1',
+      name: '测试 Provider',
+      kind: 'openai-compatible',
+      baseUrl: 'https://api.example.com/v1',
+      apiKey: 'secret',
+      model: 'test-model',
+      enabled: true,
+    };
+    const brokenJson = `{
+  "articleType": "article",
+  "selection": { "layoutFamily": "source-first", "colorPalette": "auto" },
+  "resolved": { "layoutFamily": "source-first", "colorPalette": "tech-green" },
+  "recommendedLayoutFamily": "source-first",
+  "recommendedColorPalette": "tech-green",
+  "title": "测试标题",
+  "summary": "一句摘要",
+  "blocks": [
+    { "type": "lead-quote", "text": "第一行
+第二行" }
+  ]
+}`;
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: `\`\`\`json\n${brokenJson}\n\`\`\``,
+            },
+          },
+        ],
+      }),
+    });
+
+    const result = await generateArticleLayout({
+      provider,
+      title: '测试标题',
+      markdown: '## 第一部分\n这里是正文。',
+      selection: {
+        layoutFamily: 'source-first',
+        colorPalette: 'auto',
+      },
+      imageRefs: [],
+      fetchImpl,
+      timeoutMs: 2000,
+    });
+
+    expect(result.layoutJson.blocks[0].type).toBe('lead-quote');
+    expect(result.layoutJson.blocks[0].text).toContain('第一行');
+    expect(result.layoutJson.blocks[0].text).toContain('第二行');
+  });
+
+  it('should support gemini provider format', async () => {
+    const provider = {
+      id: 'g1',
+      name: 'Gemini',
+      kind: 'gemini',
+      baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+      apiKey: 'secret',
+      model: 'gemini-2.5-flash',
+      enabled: true,
+    };
+    let request = null;
+    const fetchImpl = vi.fn(async (url, options) => {
+      request = { url, options };
+      return {
+        ok: true,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: JSON.stringify({
+                      articleType: 'tutorial',
+                      selection: { layoutFamily: 'tutorial-cards', colorPalette: 'tech-green' },
+                      resolved: { layoutFamily: 'tutorial-cards', colorPalette: 'tech-green' },
+                      recommendedLayoutFamily: 'tutorial-cards',
+                      recommendedColorPalette: 'tech-green',
+                      title: 'Gemini 测试',
+                      summary: '一句摘要',
+                      blocks: [{ type: 'lead-quote', text: 'Gemini 结果' }],
+                    }),
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      };
+    });
+
+    const result = await generateArticleLayout({
+      provider,
+      title: 'Gemini 测试',
+      markdown: '## 第一部分\n正文',
+      imageRefs: [],
+      timeoutMs: 2000,
+      fetchImpl,
+    });
+
+    expect(request.url).toContain('/models/gemini-2.5-flash:generateContent');
+    expect(request.options.headers['x-goog-api-key']).toBe('secret');
+    expect(result.layoutJson.blocks.some((block) => block.type === 'lead-quote')).toBe(true);
+  });
+
+  it('should support anthropic provider format', async () => {
+    const provider = {
+      id: 'a1',
+      name: 'Anthropic',
+      kind: 'anthropic',
+      baseUrl: 'https://api.anthropic.com/v1',
+      apiKey: 'secret',
+      model: 'claude-3-5-haiku-latest',
+      enabled: true,
+    };
+    let request = null;
+    const fetchImpl = vi.fn(async (url, options) => {
+      request = { url, options };
+      return {
+        ok: true,
+        json: async () => ({
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                articleType: 'tutorial',
+                selection: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+                resolved: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+                recommendedLayoutFamily: 'source-first',
+                recommendedColorPalette: 'tech-green',
+                title: 'Claude 测试',
+                summary: '一句摘要',
+                blocks: [{ type: 'lead-quote', text: 'Anthropic 结果' }],
+              }),
+            },
+          ],
+        }),
+      };
+    });
+
+    const result = await generateArticleLayout({
+      provider,
+      title: 'Claude 测试',
+      markdown: '## 第一部分\n正文',
+      imageRefs: [],
+      timeoutMs: 2000,
+      fetchImpl,
+    });
+
+    expect(request.url).toBe('https://api.anthropic.com/v1/messages');
+    expect(request.options.headers['x-api-key']).toBe('secret');
+    expect(request.options.headers['anthropic-version']).toBe('2023-06-01');
+    expect(result.layoutJson.blocks[0].type).toBe('lead-quote');
   });
 
   it('should convert aborted provider requests into timeout errors', async () => {

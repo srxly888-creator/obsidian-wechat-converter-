@@ -408,7 +408,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(container.querySelector('.apple-icon-btn[aria-label="复制到公众号"]')).toBeNull();
   });
 
-  it('createSettingsPanel should mark AI entry disabled when feature toggle is off', () => {
+  it('createSettingsPanel should hide AI entry when feature toggle is off', () => {
     const view = new AppleStyleView(null, {
       settings: {
         ai: {
@@ -436,8 +436,45 @@ describe('AppleStyleView native render + lifecycle', () => {
 
     const aiBtn = container.querySelector('.apple-icon-btn[aria-label="AI 编排"]');
     expect(aiBtn).toBeTruthy();
-    expect(aiBtn.classList.contains('is-disabled')).toBe(true);
+    expect(aiBtn.hidden).toBe(true);
     expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('AI 编排已在插件设置中关闭');
+  });
+
+  it('updateAiToolbarState should close AI panel when feature toggle is turned off', () => {
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          providers: [],
+          articleLayoutsByPath: {},
+        },
+      },
+      saveSettings: vi.fn(),
+    });
+    view.app = { isMobile: false };
+    view.theme = { update: vi.fn() };
+    view.converter = { updateConfig: vi.fn() };
+
+    global.AppleTheme = {
+      getThemeList: () => [{ value: 'github', label: '简约' }],
+      getColorList: () => [{ value: 'blue', color: '#0366d6' }],
+    };
+
+    const container = createObsidianLikeElement();
+    view.createSettingsPanel(container);
+
+    view.aiLayoutOverlay.classList.add('visible');
+    view.aiLayoutBtn.classList.add('active');
+    view.plugin.settings.ai.enabled = false;
+
+    view.updateAiToolbarState();
+
+    expect(view.aiLayoutBtn.hidden).toBe(true);
+    expect(view.aiLayoutOverlay.classList.contains('visible')).toBe(false);
+    expect(view.aiLayoutBtn.classList.contains('active')).toBe(false);
   });
 
   it('createSettingsPanel should render AI panel with dedicated content area', () => {

@@ -3451,7 +3451,7 @@ var require_obsidian_triplet_renderer = __commonJS({
 // services/ai-layout-skill-bundle.js
 var require_ai_layout_skill_bundle = __commonJS({
   "services/ai-layout-skill-bundle.js"(exports2, module2) {
-    var AI_LAYOUT_SKILL_VERSION2 = "2026.03.24-alpha.2";
+    var AI_LAYOUT_SKILL_VERSION = "2026.03.24-alpha.2";
     var AI_LAYOUT_SELECTION_AUTO2 = "auto";
     var AI_LAYOUT_FAMILIES = ["source-first", "tutorial-cards", "editorial-lite"];
     var AI_LAYOUT_COLOR_PALETTES = ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose"];
@@ -3718,7 +3718,7 @@ var require_ai_layout_skill_bundle = __commonJS({
       };
     }
     module2.exports = {
-      AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_SKILL_VERSION,
       AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
       AI_LAYOUT_FAMILIES,
       AI_LAYOUT_COLOR_PALETTES,
@@ -3736,7 +3736,7 @@ var require_ai_layout_skill_bundle = __commonJS({
 var require_ai_layout = __commonJS({
   "services/ai-layout.js"(exports2, module2) {
     var {
-      AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_SKILL_VERSION,
       AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
       AI_LAYOUT_FAMILIES,
       AI_LAYOUT_COLOR_PALETTES,
@@ -3748,7 +3748,9 @@ var require_ai_layout = __commonJS({
     } = require_ai_layout_skill_bundle();
     var AI_LAYOUT_SCHEMA_VERSION2 = 1;
     var AI_PROVIDER_KINDS2 = {
-      OPENAI_COMPATIBLE: "openai-compatible"
+      OPENAI_COMPATIBLE: "openai-compatible",
+      GEMINI: "gemini",
+      ANTHROPIC: "anthropic"
     };
     var MAX_LAYOUT_BLOCKS = 24;
     var MAX_PART_NAV_ITEMS = 6;
@@ -3842,9 +3844,23 @@ var require_ai_layout = __commonJS({
       }
     };
     var AI_STYLE_PACKS = AI_COLOR_PALETTES;
+    var AI_PROVIDER_KIND_DEFAULTS = {
+      [AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE]: {
+        baseUrl: "https://api.openai.com/v1",
+        model: "gpt-4.1-mini"
+      },
+      [AI_PROVIDER_KINDS2.GEMINI]: {
+        baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+        model: "gemini-2.5-flash"
+      },
+      [AI_PROVIDER_KINDS2.ANTHROPIC]: {
+        baseUrl: "https://api.anthropic.com/v1",
+        model: "claude-3-5-haiku-latest"
+      }
+    };
     function createDefaultAiSettings2() {
       return {
-        enabled: false,
+        enabled: true,
         defaultProviderId: "",
         defaultLayoutFamily: AI_LAYOUT_SELECTION_AUTO2,
         defaultColorPalette: AI_LAYOUT_SELECTION_AUTO2,
@@ -3998,13 +4014,14 @@ var require_ai_layout = __commonJS({
     function normalizeAiProvider2(raw = {}) {
       const id = typeof raw.id === "string" && raw.id.trim() ? raw.id.trim() : `ai_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
       const kind = typeof raw.kind === "string" && raw.kind.trim() ? raw.kind.trim() : AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE;
+      const defaults = AI_PROVIDER_KIND_DEFAULTS[kind] || AI_PROVIDER_KIND_DEFAULTS[AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE];
       return {
         id,
         name: typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : "\u672A\u547D\u540D Provider",
         kind,
-        baseUrl: typeof raw.baseUrl === "string" && raw.baseUrl.trim() ? raw.baseUrl.trim().replace(/\/+$/, "") : "https://api.openai.com/v1",
+        baseUrl: typeof raw.baseUrl === "string" && raw.baseUrl.trim() ? raw.baseUrl.trim().replace(/\/+$/, "") : defaults.baseUrl,
         apiKey: typeof raw.apiKey === "string" ? raw.apiKey : "",
-        model: typeof raw.model === "string" && raw.model.trim() ? raw.model.trim() : "gpt-4.1-mini",
+        model: typeof raw.model === "string" && raw.model.trim() ? raw.model.trim() : defaults.model,
         enabled: raw.enabled !== false
       };
     }
@@ -4304,7 +4321,7 @@ var require_ai_layout = __commonJS({
         defaultProviderId = "";
       }
       return {
-        enabled: raw.enabled === true,
+        enabled: Object.prototype.hasOwnProperty.call(raw, "enabled") ? raw.enabled === true : defaults.enabled,
         defaultProviderId,
         defaultLayoutFamily: normalizeLayoutFamily(raw.defaultLayoutFamily, AI_LAYOUT_SELECTION_AUTO2),
         defaultColorPalette: normalizeColorPalette(
@@ -4477,6 +4494,52 @@ var require_ai_layout = __commonJS({
         throw new Error("AI \u8FD4\u56DE\u7ED3\u679C\u4E0D\u662F\u6709\u6548 JSON");
       }
       return candidate.slice(firstBrace, lastBrace + 1);
+    }
+    function sanitizeJsonStringLiteralControls(payload = "") {
+      const raw = String(payload || "");
+      if (!raw)
+        return raw;
+      let sanitized = "";
+      let inString = false;
+      let isEscaped = false;
+      for (let index = 0; index < raw.length; index += 1) {
+        const char = raw[index];
+        const charCode = raw.charCodeAt(index);
+        if (!inString) {
+          sanitized += char;
+          if (char === '"')
+            inString = true;
+          continue;
+        }
+        if (isEscaped) {
+          sanitized += char;
+          isEscaped = false;
+          continue;
+        }
+        if (char === "\\") {
+          sanitized += char;
+          isEscaped = true;
+          continue;
+        }
+        if (char === '"') {
+          sanitized += char;
+          inString = false;
+          continue;
+        }
+        if (charCode <= 31) {
+          if (char === "\n")
+            sanitized += "\\n";
+          else if (char === "\r")
+            sanitized += "\\r";
+          else if (char === "	")
+            sanitized += "\\t";
+          else
+            sanitized += " ";
+          continue;
+        }
+        sanitized += char;
+      }
+      return sanitized;
     }
     function inferBlockType(rawBlock = {}) {
       if (!rawBlock || typeof rawBlock !== "object" || Array.isArray(rawBlock))
@@ -4881,7 +4944,7 @@ var require_ai_layout = __commonJS({
       return "tech-green";
     }
     function buildFallbackLayout(context = {}) {
-      var _a;
+      var _a, _b;
       const title = coerceString(context.title || "\u672A\u547D\u540D\u6587\u7AE0");
       const selectionResolution = resolveLayoutSelection({
         requestedSelection: context.selection || { colorPalette: context.stylePack },
@@ -4937,40 +5000,87 @@ var require_ai_layout = __commonJS({
             note: leadNote
           });
         }
-        if (partItems.length >= 3) {
-          headBlocks.push({ type: "part-nav", items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
-        }
       } else {
-        if (firstImageId || leadText) {
+        if (leadText) {
           headBlocks.push({
-            type: "hero",
-            eyebrow: signals.sectionTitles[0] ? "Obsidian \xD7 AI \u7CFB\u5217" : "AI Layout Draft",
-            title,
-            subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
-            coverImageId: firstImageId,
-            variant: "cover-right"
+            type: "lead-quote",
+            text: leadText,
+            note: leadNote
           });
         }
-        if (partItems.length >= 3) {
-          headBlocks.push({ type: "part-nav", items: partItems.slice(0, MAX_PART_NAV_ITEMS) });
-        }
       }
+      const heroCoverImageId = coerceString((_b = headBlocks.find((block) => (block == null ? void 0 : block.type) === "hero")) == null ? void 0 : _b.coverImageId);
       sourceSections.forEach((section, index) => {
         const block = buildSectionBlockFromSource(section, {
-          imageIds: index === 0 && firstImageId ? [firstImageId] : [],
+          imageIds: index === 0 && firstImageId && heroCoverImageId !== firstImageId ? [firstImageId] : [],
           fallbackIndex: index
         });
         if (block)
           bodyBlocks.push(block);
       });
       const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
-      if ((resolved.layoutFamily === "tutorial-cards" || resolved.layoutFamily === "editorial-lite") && (screenshotImage == null ? void 0 : screenshotImage.id)) {
+      if (resolved.layoutFamily === "tutorial-cards" && (screenshotImage == null ? void 0 : screenshotImage.id)) {
         bodyBlocks.push({
           type: "phone-frame",
           imageId: screenshotImage.id,
           caption: screenshotImage.caption || screenshotImage.alt || "\u793A\u610F\u622A\u56FE"
         });
       }
+      const collectUsedImageIds = (blocks = []) => {
+        const used = /* @__PURE__ */ new Set();
+        blocks.forEach((block) => {
+          const coverImageId = coerceString(block == null ? void 0 : block.coverImageId);
+          if (coverImageId)
+            used.add(coverImageId);
+          const singleImageId = coerceString(block == null ? void 0 : block.imageId);
+          if (singleImageId)
+            used.add(singleImageId);
+          if (Array.isArray(block == null ? void 0 : block.imageIds)) {
+            block.imageIds.map((item) => coerceString(item)).filter(Boolean).forEach((item) => used.add(item));
+          }
+        });
+        return used;
+      };
+      const appendRemainingImages = (blocks = [], remainingImageIds2 = [], familyId = "") => {
+        const queue = remainingImageIds2.slice();
+        if (!queue.length)
+          return blocks;
+        const attachableIndexes = [];
+        blocks.forEach((block, index) => {
+          if ((block == null ? void 0 : block.type) === "section-block" || (block == null ? void 0 : block.type) === "case-block") {
+            attachableIndexes.push(index);
+          }
+        });
+        attachableIndexes.forEach((blockIndex) => {
+          if (!queue.length)
+            return;
+          const block = blocks[blockIndex];
+          const limit = block.type === "case-block" ? MAX_CASE_BLOCK_IMAGE_IDS : 3;
+          const currentImageIds = Array.isArray(block.imageIds) ? block.imageIds.map((item) => coerceString(item)).filter(Boolean) : [];
+          const availableSlots = Math.max(0, limit - currentImageIds.length);
+          if (!availableSlots)
+            return;
+          blocks[blockIndex] = {
+            ...block,
+            imageIds: currentImageIds.concat(queue.splice(0, availableSlots))
+          };
+        });
+        while (queue.length) {
+          blocks.push({
+            type: "case-block",
+            caseLabel: familyId === "editorial-lite" ? "IMAGES" : "GALLERY",
+            title: familyId === "editorial-lite" ? "\u56FE\u50CF\u6458\u5F55" : "\u914D\u56FE\u8865\u5145",
+            summary: "",
+            bullets: [],
+            imageIds: queue.splice(0, MAX_CASE_BLOCK_IMAGE_IDS),
+            highlight: ""
+          });
+        }
+        return blocks;
+      };
+      const usedImageIds = collectUsedImageIds([...headBlocks, ...bodyBlocks]);
+      const remainingImageIds = imageRefs.map((image) => coerceString(image == null ? void 0 : image.id)).filter(Boolean).filter((imageId) => !usedImageIds.has(imageId));
+      appendRemainingImages(bodyBlocks, remainingImageIds, resolved.layoutFamily);
       return {
         version: AI_LAYOUT_SCHEMA_VERSION2,
         articleType: signals.sectionTitles.length >= 2 ? "tutorial" : "article",
@@ -5333,6 +5443,29 @@ var require_ai_layout = __commonJS({
       }
       throw new Error("AI \u54CD\u5E94\u683C\u5F0F\u65E0\u6CD5\u8BC6\u522B");
     }
+    function readGeminiContent(data) {
+      var _a;
+      const candidate = Array.isArray(data == null ? void 0 : data.candidates) ? data.candidates[0] : null;
+      const parts = Array.isArray((_a = candidate == null ? void 0 : candidate.content) == null ? void 0 : _a.parts) ? candidate.content.parts : [];
+      const text = parts.map((item) => typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
+      if (text)
+        return text;
+      throw new Error("Gemini \u54CD\u5E94\u7F3A\u5C11\u53EF\u89E3\u6790\u6587\u672C");
+    }
+    function readAnthropicContent(data) {
+      const content = Array.isArray(data == null ? void 0 : data.content) ? data.content : [];
+      const text = content.map((item) => (item == null ? void 0 : item.type) === "text" && typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
+      if (text)
+        return text;
+      throw new Error("Anthropic \u54CD\u5E94\u7F3A\u5C11\u53EF\u89E3\u6790\u6587\u672C");
+    }
+    function toPlainPromptFromMessages(messages = []) {
+      return messages.map((message) => {
+        const roleLabel = (message == null ? void 0 : message.role) === "system" ? "\u7CFB\u7EDF\u8981\u6C42" : "\u7528\u6237\u8BF7\u6C42";
+        return `${roleLabel}\uFF1A
+${String((message == null ? void 0 : message.content) || "").trim()}`;
+      }).filter(Boolean).join("\n\n");
+    }
     async function requestOpenAICompatibleLayout({
       provider,
       title,
@@ -5366,7 +5499,144 @@ var require_ai_layout = __commonJS({
         const data = await response.json();
         const content = readChatCompletionContent(data);
         const jsonPayload = extractJsonPayload(content);
-        return repairRawLayoutPayload(JSON.parse(jsonPayload));
+        try {
+          return repairRawLayoutPayload(JSON.parse(jsonPayload));
+        } catch (error) {
+          const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+          if (sanitizedPayload !== jsonPayload) {
+            return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+          }
+          throw error;
+        }
+      } catch (error) {
+        if (controller.signal.aborted || (error == null ? void 0 : error.name) === "AbortError") {
+          throw new AiLayoutTimeoutError(timeoutMs);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    async function requestGeminiLayout({
+      provider,
+      title,
+      markdown,
+      selection,
+      stylePack,
+      imageRefs,
+      timeoutMs,
+      fetchImpl
+    }) {
+      var _a, _b;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
+        const systemInstruction = String(((_a = messages[0]) == null ? void 0 : _a.content) || "").trim();
+        const userPrompt = String(((_b = messages[1]) == null ? void 0 : _b.content) || "").trim() || toPlainPromptFromMessages(messages);
+        const endpoint = `${provider.baseUrl}/models/${encodeURIComponent(provider.model)}:generateContent`;
+        const response = await fetchImpl(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": provider.apiKey
+          },
+          body: JSON.stringify({
+            systemInstruction: systemInstruction ? {
+              role: "system",
+              parts: [{ text: systemInstruction }]
+            } : void 0,
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: userPrompt }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2
+            }
+          }),
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`AI \u8BF7\u6C42\u5931\u8D25 (${response.status}): ${text || response.statusText}`);
+        }
+        const data = await response.json();
+        const content = readGeminiContent(data);
+        const jsonPayload = extractJsonPayload(content);
+        try {
+          return repairRawLayoutPayload(JSON.parse(jsonPayload));
+        } catch (error) {
+          const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+          if (sanitizedPayload !== jsonPayload) {
+            return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+          }
+          throw error;
+        }
+      } catch (error) {
+        if (controller.signal.aborted || (error == null ? void 0 : error.name) === "AbortError") {
+          throw new AiLayoutTimeoutError(timeoutMs);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    async function requestAnthropicLayout({
+      provider,
+      title,
+      markdown,
+      selection,
+      stylePack,
+      imageRefs,
+      timeoutMs,
+      fetchImpl
+    }) {
+      var _a, _b;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
+        const systemInstruction = String(((_a = messages[0]) == null ? void 0 : _a.content) || "").trim();
+        const userPrompt = String(((_b = messages[1]) == null ? void 0 : _b.content) || "").trim() || toPlainPromptFromMessages(messages);
+        const response = await fetchImpl(`${provider.baseUrl}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": provider.apiKey,
+            "anthropic-version": "2023-06-01"
+          },
+          body: JSON.stringify({
+            model: provider.model,
+            max_tokens: 4096,
+            temperature: 0.2,
+            system: systemInstruction,
+            messages: [
+              {
+                role: "user",
+                content: userPrompt
+              }
+            ]
+          }),
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`AI \u8BF7\u6C42\u5931\u8D25 (${response.status}): ${text || response.statusText}`);
+        }
+        const data = await response.json();
+        const content = readAnthropicContent(data);
+        const jsonPayload = extractJsonPayload(content);
+        try {
+          return repairRawLayoutPayload(JSON.parse(jsonPayload));
+        } catch (error) {
+          const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+          if (sanitizedPayload !== jsonPayload) {
+            return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+          }
+          throw error;
+        }
       } catch (error) {
         if (controller.signal.aborted || (error == null ? void 0 : error.name) === "AbortError") {
           throw new AiLayoutTimeoutError(timeoutMs);
@@ -5401,6 +5671,30 @@ var require_ai_layout = __commonJS({
       switch (provider.kind) {
         case AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE:
           rawLayout = await requestOpenAICompatibleLayout({
+            provider,
+            title,
+            markdown,
+            selection,
+            stylePack,
+            imageRefs,
+            timeoutMs,
+            fetchImpl
+          });
+          break;
+        case AI_PROVIDER_KINDS2.GEMINI:
+          rawLayout = await requestGeminiLayout({
+            provider,
+            title,
+            markdown,
+            selection,
+            stylePack,
+            imageRefs,
+            timeoutMs,
+            fetchImpl
+          });
+          break;
+        case AI_PROVIDER_KINDS2.ANTHROPIC:
+          rawLayout = await requestAnthropicLayout({
             provider,
             title,
             markdown,
@@ -5456,7 +5750,9 @@ var require_ai_layout = __commonJS({
       const colorPalette = getColorPaletteById2(((_b = layout == null ? void 0 : layout.resolved) == null ? void 0 : _b.colorPalette) || (layout == null ? void 0 : layout.stylePack));
       const tokens = colorPalette.tokens;
       const isSourceFirst = layoutFamily.id === "source-first";
+      const isTutorialCards = layoutFamily.id === "tutorial-cards";
       const isEditorialLite = layoutFamily.id === "editorial-lite";
+      const editorialDisplayFont = 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif';
       const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
       const bodyFontSize = 16;
       const bodyLineHeight = 1.8;
@@ -5467,16 +5763,16 @@ var require_ai_layout = __commonJS({
         `font-size:${bodyFontSize}px`,
         `line-height:${bodyLineHeight}`,
         "letter-spacing:0",
-        "padding:24px 18px",
+        `padding:${isEditorialLite ? "30px 22px 40px" : isTutorialCards ? "26px 18px 34px" : "20px 16px 28px"}`,
         `background:${tokens.surface}`
       ].join(";");
       const cardStyle = [
         `background:${tokens.surface}`,
         `border:1px solid ${tokens.border}`,
-        `border-radius:${isSourceFirst ? 14 : isEditorialLite ? 16 : 18}px`,
-        `padding:${isSourceFirst ? 16 : isEditorialLite ? 20 : 18}px`,
-        `margin:${isSourceFirst ? 16 : isEditorialLite ? 22 : 18}px 0`,
-        `box-shadow:${isEditorialLite ? "0 18px 32px -30px rgba(36,50,61,0.16)" : "0 10px 30px -24px rgba(0,0,0,0.18)"}`
+        `border-radius:${isSourceFirst ? 10 : isEditorialLite ? 0 : 18}px`,
+        `padding:${isSourceFirst ? 0 : isEditorialLite ? 0 : 18}px`,
+        `margin:${isSourceFirst ? 8 : isEditorialLite ? 30 : 18}px 0`,
+        `box-shadow:${isTutorialCards ? "0 10px 30px -24px rgba(0,0,0,0.18)" : isEditorialLite ? "none" : "none"}`
       ].join(";");
       const renderImage = (imageId, extraStyle = "") => {
         const image = imageMap.get(imageId);
@@ -5493,20 +5789,34 @@ var require_ai_layout = __commonJS({
       };
       const blocksHtml = (layout.blocks || []).map((block, index) => {
         if (block.type === "hero") {
-          const heroImageStyle = isEditorialLite ? "max-width:148px;flex:0 0 148px;border-radius:22px;" : "max-width:116px;flex:0 0 116px;";
+          const heroImageStyle = isEditorialLite ? "width:100%;max-width:none;flex:none;border-radius:28px;" : isSourceFirst ? "max-width:none;width:100%;flex:none;border-radius:18px;" : "max-width:116px;flex:0 0 116px;border-radius:18px;";
           const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : "";
           const contentHtml = [
-            block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 1.8 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:10px;">${escapeHtml(block.eyebrow)}</div>` : "",
-            block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 8 : isEditorialLite ? 12 : 10}px;font-size:${isSourceFirst ? 24 : isEditorialLite ? 30 : 28}px;line-height:${isEditorialLite ? 1.18 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 800 : 700};">${escapeHtml(block.title)}</h1>` : "",
-            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : isEditorialLite ? 16 : 14}px;line-height:${isSourceFirst ? 1.8 : isEditorialLite ? 1.82 : 1.7};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : ""
+            block.eyebrow ? `<div style="font-size:${isEditorialLite ? 10 : 11}px;font-weight:700;letter-spacing:${isEditorialLite ? 2 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : "",
+            block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 6 : isEditorialLite ? 14 : 10}px;font-size:${isSourceFirst ? 26 : isEditorialLite ? 36 : 28}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h1>` : "",
+            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${isSourceFirst ? 16 : isEditorialLite ? 17 : 14}px;line-height:${isSourceFirst ? 1.8 : isEditorialLite ? 1.88 : 1.7};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : ""
           ].join("");
           const flexDirection = block.variant === "cover-left" ? "row-reverse" : "row";
-          const heroFooter = isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+          const heroFooter = isEditorialLite ? `<div style="display:flex;align-items:center;gap:14px;margin-top:24px;">
             <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
             <div style="flex:1;height:1px;background:${tokens.border};"></div>
-          </div>` : `<div style="height:${isSourceFirst ? 6 : 10}px;margin-top:${isSourceFirst ? 14 : 18}px;background:${tokens.accent};border-radius:999px;"></div>`;
-          return `<section style="${cardStyle};padding:${isSourceFirst ? 18 : isEditorialLite ? 24 : 22}px;">
-        <div style="display:flex;flex-direction:${flexDirection};gap:${isEditorialLite ? 20 : 16}px;align-items:center;">
+          </div>` : isSourceFirst ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>` : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`;
+          if (isEditorialLite) {
+            return `<section style="margin:4px 0 34px;">
+          <div style="max-width:680px;">${contentHtml}</div>
+          ${imageHtml ? `<div style="margin-top:20px;">${imageHtml}</div>` : ""}
+          ${heroFooter}
+        </section>`;
+          }
+          if (isSourceFirst) {
+            return `<section style="margin:2px 0 24px;">
+          ${imageHtml ? `<div style="margin-bottom:14px;">${imageHtml}</div>` : ""}
+          <div style="max-width:720px;">${contentHtml}</div>
+          ${heroFooter}
+        </section>`;
+          }
+          return `<section style="${cardStyle};padding:22px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);">
+        <div style="display:flex;flex-direction:${flexDirection};gap:16px;align-items:center;">
           <div style="flex:1 1 auto;min-width:0;">${contentHtml}</div>
           ${imageHtml}
         </div>
@@ -5515,30 +5825,30 @@ var require_ai_layout = __commonJS({
         }
         if (block.type === "part-nav") {
           const itemsHtml = block.items.map((item) => `
-        <div style="flex:1 1 0;min-width:0;padding:${isSourceFirst ? "10px 12px" : isEditorialLite ? "12px 0 12px 0" : "12px 10px"};border:${isEditorialLite ? "none" : `1px solid ${tokens.border}`};border-radius:${isSourceFirst ? 12 : isEditorialLite ? 0 : 14}px;background:${isEditorialLite ? "transparent" : tokens.surfaceSoft};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
+        <div style="flex:${isEditorialLite ? "1 1 100%" : "1 1 0"};min-width:0;padding:${isSourceFirst ? "0 0 0 0" : isEditorialLite ? "14px 0" : "12px 10px"};border:${isTutorialCards ? `1px solid ${tokens.border}` : "none"};border-radius:${isTutorialCards ? 14 : 0}px;background:${isTutorialCards ? tokens.surfaceSoft : "transparent"};border-bottom:${isSourceFirst || isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
           <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
-          <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : isEditorialLite ? 15 : 13}px;font-weight:${isSourceFirst ? 500 : isEditorialLite ? 500 : 600};color:${tokens.text};line-height:${isEditorialLite ? 1.65 : 1.55};">${escapeHtml(item.text)}</div>
+          <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : isEditorialLite ? 17 : 13}px;font-weight:${isSourceFirst ? 500 : isEditorialLite ? 500 : 600};color:${tokens.text};line-height:${isEditorialLite ? 1.72 : 1.55};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(item.text)}</div>
         </div>
       `).join("");
-          return `<section style="margin:${isEditorialLite ? 18 : 16}px 0 8px;">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">${itemsHtml}</div>
+          return `<section style="margin:${isEditorialLite ? 20 : isSourceFirst ? 20 : 16}px 0 ${isSourceFirst ? 18 : 8}px;">
+        <div style="display:flex;gap:${isSourceFirst ? 16 : 10}px;flex-wrap:wrap;${isSourceFirst ? `padding:0 0 10px;border-bottom:1px solid ${tokens.border};` : ""}${isEditorialLite ? "flex-direction:column;" : ""}">${itemsHtml}</div>
       </section>`;
         }
         if (block.type === "lead-quote") {
-          return `<section style="margin:${isSourceFirst ? 16 : isEditorialLite ? 22 : 18}px 0;padding:${isSourceFirst ? 16 : isEditorialLite ? 20 : 18}px;border-radius:${isSourceFirst ? 14 : isEditorialLite ? 0 : 16}px;background:${isEditorialLite ? "transparent" : tokens.quoteBg};border:${isEditorialLite ? "none" : `1px solid ${tokens.border}`};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
-        <div style="font-size:${isSourceFirst ? 17 : isEditorialLite ? 22 : 18}px;font-weight:${isSourceFirst ? 600 : isEditorialLite ? 600 : 700};line-height:${isEditorialLite ? 1.72 : 1.75};color:${tokens.text};">${escapeHtml(block.text)}</div>
+          return `<section style="margin:${isSourceFirst ? 14 : isEditorialLite ? 26 : 18}px 0;padding:${isSourceFirst ? "0 0 0 14px" : isEditorialLite ? "24px 0" : "18px"};border-radius:${isTutorialCards ? 16 : 0}px;background:${isTutorialCards ? tokens.quoteBg : "transparent"};border:${isTutorialCards ? `1px solid ${tokens.border}` : "none"};border-left:${isSourceFirst ? `3px solid ${tokens.accent}` : "none"};border-top:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
+        <div style="font-size:${isSourceFirst ? 16 : isEditorialLite ? 26 : 18}px;font-weight:${isSourceFirst ? 600 : isEditorialLite ? 600 : 700};line-height:${isEditorialLite ? 1.7 : 1.75};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.text)}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ""}
       </section>`;
         }
         if (block.type === "case-block") {
           const imagesHtml = block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("");
           const bulletsHtml = block.bullets.length ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>` : "";
-          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 28 : 26}px 0;">
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 32 : 26}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};` : ""}">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
           <div style="font-size:${isSourceFirst ? 22 : isEditorialLite ? 14 : 28}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${isEditorialLite ? String(index + 1).padStart(2, "0") : String(index + 1).padStart(2, "0")}</div>
           <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
         </div>
-        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : isEditorialLite ? 24 : 22}px;line-height:${isEditorialLite ? 1.32 : 1.4};color:${tokens.text};">${escapeHtml(block.title)}</h2>` : ""}
+        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${isSourceFirst ? 20 : isEditorialLite ? 26 : 22}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h2>` : ""}
         ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ""}
         ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ""}
         ${bulletsHtml}
@@ -5558,19 +5868,19 @@ var require_ai_layout = __commonJS({
             return `<ul style="margin:12px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>`;
           }).join("") : "";
           const imagesHtml = Array.isArray(block.imageIds) ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("") : "";
-          const sectionHead = isSourceFirst ? `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-            <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:${tokens.accentDeep};text-transform:uppercase;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
+          const sectionHead = isSourceFirst ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">Section ${String(sectionDisplayIndex).padStart(2, "0")}</div>
             <div style="height:1px;flex:1;background:${tokens.border};"></div>
-          </div>` : isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          </div>` : isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
               <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">Part ${String(sectionDisplayIndex).padStart(2, "0")}</div>
-              <div style="height:1px;flex:1;background:${tokens.border};"></div>
+              <div style="width:42px;height:1px;background:${tokens.border};"></div>
             </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
             <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `SECTION ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
           </div>`;
-          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 30 : 26}px 0;">
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 36 : 26}px 0;${isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:18px;background:${tokens.surfaceSoft};box-shadow:0 10px 30px -24px rgba(0,0,0,0.14);` : ""}${isSourceFirst ? `padding-top:4px;` : ""}">
         ${sectionHead}
-        ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:1.4;color:${titleColor};">${escapeHtml(block.title)}</h2>` : ""}
+        ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${titleColor};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h2>` : ""}
         ${paragraphsHtml}
         ${bulletGroupsHtml}
         ${imagesHtml}
@@ -5599,7 +5909,7 @@ var require_ai_layout = __commonJS({
     }
     module2.exports = {
       AI_LAYOUT_SCHEMA_VERSION: AI_LAYOUT_SCHEMA_VERSION2,
-      AI_LAYOUT_SKILL_VERSION: AI_LAYOUT_SKILL_VERSION2,
+      AI_LAYOUT_SKILL_VERSION,
       AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
       AI_LAYOUT_FAMILY_DEFS,
       AI_PROVIDER_KINDS: AI_PROVIDER_KINDS2,
@@ -6507,7 +6817,6 @@ var { normalizeVaultPath, isAbsolutePathLike } = require_path_utils();
 var { renderObsidianTripletMarkdown } = require_obsidian_triplet_renderer();
 var {
   AI_LAYOUT_SCHEMA_VERSION,
-  AI_LAYOUT_SKILL_VERSION,
   AI_LAYOUT_SELECTION_AUTO,
   AI_PROVIDER_KINDS,
   createDefaultAiSettings,
@@ -7698,6 +8007,12 @@ var AppleStyleView = class extends ItemView {
     const enabled = ((_b = (_a = this.plugin.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.enabled) === true;
     this.aiLayoutBtn.classList.toggle("is-disabled", !enabled);
     this.aiLayoutBtn.setAttribute("title", enabled ? "AI \u7F16\u6392" : "AI \u7F16\u6392\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528");
+    this.aiLayoutBtn.hidden = !enabled;
+    if (!enabled) {
+      if (this.aiLayoutOverlay)
+        this.aiLayoutOverlay.classList.remove("visible");
+      this.aiLayoutBtn.classList.remove("active");
+    }
   }
   onAiLayoutButtonClick() {
     var _a, _b;
@@ -8733,6 +9048,9 @@ var AppleStyleView = class extends ItemView {
         timeoutMs: aiSettings.requestTimeoutMs
       });
       const layoutJson = result.layoutJson;
+      if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length) {
+        throw new Error("AI \u8FD4\u56DE\u4E86\u7A7A\u7684\u7F16\u6392\u7ED3\u679C");
+      }
       await this.plugin.saveArticleLayoutState(context.sourcePath, {
         version: AI_LAYOUT_SCHEMA_VERSION,
         updatedAt: Date.now(),
@@ -9858,6 +10176,9 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
   refreshOpenConverterAiState() {
     var _a, _b;
     const view = (_b = (_a = this.plugin).getConverterView) == null ? void 0 : _b.call(_a);
+    if (view && typeof view.updateAiToolbarState === "function") {
+      view.updateAiToolbarState();
+    }
     if (view && typeof view.refreshAiLayoutPanel === "function") {
       view.refreshAiLayoutPanel();
     }
@@ -9872,166 +10193,6 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       await this.plugin.saveSettings();
       new Notice("\u8BBE\u7F6E\u5DF2\u4FDD\u5B58\uFF0C\u8BF7\u5173\u95ED\u5E76\u91CD\u65B0\u6253\u5F00\u8F6C\u6362\u5668\u9762\u677F\u4EE5\u751F\u6548");
     }));
-    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u7BA1\u7406\u6A21\u578B\u3001\u9ED8\u8BA4\u5E03\u5C40\u3001\u9ED8\u8BA4\u989C\u8272\u548C\u7F13\u5B58\u7B56\u7565\u3002\u5B9E\u9645\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
-    new Setting(containerEl).setName("\u5185\u7F6E\u534F\u8BAE\u7248\u672C").setDesc(`\u5F53\u524D\u5185\u7F6E\u6392\u7248\u534F\u8BAE\u4E3A skill v${AI_LAYOUT_SKILL_VERSION}\u3001schema v${AI_LAYOUT_SCHEMA_VERSION}\uFF0C\u7528\u4E8E\u7EA6\u675F AI \u8F93\u51FA\u7ED3\u6784\u3002`);
-    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7ECF\u4E3A\u6587\u7AE0\u548C\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u751F\u6210\u8FC7\u7684\u7F13\u5B58\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
-      this.plugin.settings.ai.enabled = value;
-      await this.plugin.saveSettings();
-      this.refreshOpenConverterAiState();
-    }));
-    const layoutFamilyOptions = getLayoutFamilyList({ includeAuto: true, includeReserved: false });
-    new Setting(containerEl).setName("\u9ED8\u8BA4\u5E03\u5C40").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u5E03\u5C40\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u5E03\u5C40\u98CE\u683C\u3002").addDropdown((dropdown) => {
-      layoutFamilyOptions.forEach((option) => dropdown.addOption(option.value, option.label));
-      dropdown.setValue(this.plugin.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO);
-      dropdown.onChange(async (value) => {
-        this.plugin.settings.ai.defaultLayoutFamily = value;
-        await this.plugin.saveSettings();
-        this.refreshOpenConverterAiState();
-      });
-    });
-    const colorPaletteOptions = getColorPaletteList({ includeAuto: true });
-    new Setting(containerEl).setName("\u9ED8\u8BA4\u989C\u8272").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u989C\u8272\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u5728\u5185\u7F6E\u914D\u8272\u65B9\u6848\u4E2D\u63A8\u8350\u4E00\u4E2A\u7ED3\u679C\uFF1B\u751F\u6210\u540E\u4E5F\u53EF\u4EE5\u624B\u52A8\u5207\u6362\u989C\u8272\u590D\u7528\u5F53\u524D\u5E03\u5C40\u3002").addDropdown((dropdown) => {
-      colorPaletteOptions.forEach((option) => dropdown.addOption(option.value, option.label));
-      dropdown.setValue(this.plugin.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO);
-      dropdown.onChange(async (value) => {
-        this.plugin.settings.ai.defaultColorPalette = value;
-        await this.plugin.saveSettings();
-        this.refreshOpenConverterAiState();
-      });
-    });
-    new Setting(containerEl).setName("\u7F16\u6392\u65F6\u53C2\u8003\u56FE\u7247").setDesc("\u5F00\u542F\u540E\uFF0CAI \u4F1A\u628A\u6587\u4E2D\u7684\u914D\u56FE\u548C\u622A\u56FE\u4F5C\u4E3A\u6392\u7248\u7D20\u6750\u53C2\u8003\uFF0C\u4F46\u4E0D\u4F1A\u76F4\u63A5\u6539\u5199\u4F60\u7684\u6B63\u6587\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.includeImagesInLayout !== false).onChange(async (value) => {
-      this.plugin.settings.ai.includeImagesInLayout = value;
-      await this.plugin.saveSettings();
-      this.refreshOpenConverterAiState();
-    }));
-    new Setting(containerEl).setName("AI \u8BF7\u6C42\u8D85\u65F6\uFF08\u79D2\uFF09").setDesc("\u8F83\u5FEB\u6A21\u578B\u53EF\u8BBE 15 \u5230 45 \u79D2\uFF1B\u8F83\u6162\u6A21\u578B\u5EFA\u8BAE\u8BBE 60 \u5230 120 \u79D2\u3002").addText((text) => text.setPlaceholder("45").setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45e3) / 1e3))).onChange(async (value) => {
-      const seconds = Math.min(180, Math.max(5, parseInt(value || "45", 10) || 45));
-      this.plugin.settings.ai.requestTimeoutMs = seconds * 1e3;
-      await this.plugin.saveSettings();
-      this.refreshOpenConverterAiState();
-    }));
-    const providers = this.plugin.settings.ai.providers || [];
-    const defaultProviderId = this.plugin.settings.ai.defaultProviderId;
-    const runnableProviders = providers.filter((provider) => isAiProviderRunnable(provider) && provider.enabled !== false);
-    new Setting(containerEl).setName("\u9ED8\u8BA4 AI Provider").setDesc(runnableProviders.length > 0 ? "\u751F\u6210 AI \u7F16\u6392\u65F6\u4F1A\u4F18\u5148\u4F7F\u7528\u8FD9\u91CC\u9009\u4E2D\u7684 Provider\u3002" : "\u8FD8\u6CA1\u6709\u53EF\u76F4\u63A5\u7528\u4E8E AI \u7F16\u6392\u7684 Provider\uFF0C\u8BF7\u5148\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\u3002").addDropdown((dropdown) => {
-      dropdown.addOption("", "\u81EA\u52A8\u9009\u62E9");
-      providers.forEach((provider) => {
-        const statusText = summarizeAiProviderIssues(provider);
-        dropdown.addOption(provider.id, `${provider.name} (${statusText})`);
-      });
-      dropdown.setValue(defaultProviderId || "");
-      dropdown.onChange(async (value) => {
-        this.plugin.settings.ai.defaultProviderId = value;
-        await this.plugin.saveSettings();
-        this.refreshOpenConverterAiState();
-      });
-    });
-    if (providers.length === 0) {
-      containerEl.createEl("p", {
-        text: "\u6682\u65E0 AI Provider\uFF0C\u8BF7\u70B9\u51FB\u4E0B\u65B9\u6309\u94AE\u6DFB\u52A0",
-        cls: "setting-item-description",
-        attr: { style: "color: var(--text-muted); font-style: italic;" }
-      });
-    } else {
-      const providerList = containerEl.createDiv({ cls: "wechat-account-list" });
-      for (const provider of providers) {
-        const isDefault = provider.id === defaultProviderId;
-        const providerIssues = getAiProviderIssues(provider);
-        const isRunnable = isAiProviderRunnable(provider) && provider.enabled !== false;
-        const providerCard = providerList.createDiv({ cls: "wechat-account-card" });
-        const info = providerCard.createDiv({ cls: "wechat-account-info" });
-        const nameRow = info.createDiv({ cls: "wechat-account-name-row" });
-        nameRow.createEl("span", { text: provider.name, cls: "wechat-account-name" });
-        if (isDefault) {
-          nameRow.createEl("span", { text: "\u9ED8\u8BA4", cls: "wechat-account-badge" });
-        }
-        if (provider.enabled === false) {
-          nameRow.createEl("span", { text: "\u5DF2\u505C\u7528", cls: "wechat-account-badge", attr: { style: "background: var(--text-faint);" } });
-        } else if (isRunnable) {
-          nameRow.createEl("span", { text: "\u53EF\u7528", cls: "wechat-account-badge", attr: { style: "background: #0f8f64;" } });
-        } else {
-          nameRow.createEl("span", { text: "\u5F85\u8865\u5168", cls: "wechat-account-badge", attr: { style: "background: #d97706;" } });
-        }
-        info.createDiv({
-          text: `${provider.kind} \xB7 ${provider.model || "\u672A\u8BBE\u7F6E\u6A21\u578B"}`,
-          cls: "wechat-account-appid"
-        });
-        info.createDiv({
-          text: summarizeAiProviderIssues(provider),
-          cls: "wechat-account-appid"
-        });
-        const actions = providerCard.createDiv({ cls: "wechat-account-actions" });
-        if (!isDefault) {
-          const defaultBtn = actions.createEl("button", { text: "\u8BBE\u4E3A\u9ED8\u8BA4", cls: "wechat-btn-small" });
-          defaultBtn.onclick = async () => {
-            this.plugin.settings.ai.defaultProviderId = provider.id;
-            await this.plugin.saveSettings();
-            this.refreshOpenConverterAiState();
-            this.display();
-          };
-        }
-        const editBtn = actions.createEl("button", { text: "\u7F16\u8F91", cls: "wechat-btn-small" });
-        editBtn.onclick = () => this.showEditAiProviderModal(provider);
-        const testBtn = actions.createEl("button", { text: "\u6D4B\u8BD5", cls: "wechat-btn-small wechat-btn-test" });
-        if (!isRunnable) {
-          testBtn.disabled = true;
-          testBtn.title = providerIssues.includes("disabled") ? "\u8BF7\u5148\u542F\u7528\u8BE5 Provider" : `\u5F53\u524D\u65E0\u6CD5\u6D4B\u8BD5\uFF1A${summarizeAiProviderIssues(provider)}`;
-        }
-        testBtn.onclick = async () => {
-          if (!isRunnable)
-            return;
-          testBtn.disabled = true;
-          testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
-          try {
-            await testAiProviderConnection(provider);
-            new Notice(`\u2705 ${provider.name} \u8FDE\u63A5\u6210\u529F\uFF01`);
-          } catch (error) {
-            new Notice(`\u274C ${provider.name} \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
-          }
-          testBtn.disabled = false;
-          testBtn.textContent = "\u6D4B\u8BD5";
-        };
-        const deleteBtn = actions.createEl("button", { text: "\u5220\u9664", cls: "wechat-btn-small wechat-btn-danger" });
-        deleteBtn.onclick = async () => {
-          if (confirm(`\u786E\u5B9A\u8981\u5220\u9664 AI Provider "${provider.name}" \u5417\uFF1F`)) {
-            this.plugin.settings.ai.providers = providers.filter((item) => item.id !== provider.id);
-            if (provider.id === defaultProviderId) {
-              const nextRunnableProvider = this.plugin.settings.ai.providers.find((item) => item.enabled !== false && isAiProviderRunnable(item));
-              this.plugin.settings.ai.defaultProviderId = (nextRunnableProvider == null ? void 0 : nextRunnableProvider.id) || "";
-            }
-            await this.plugin.saveSettings();
-            this.refreshOpenConverterAiState();
-            this.display();
-          }
-        };
-      }
-    }
-    const addProviderContainer = containerEl.createDiv({ cls: "wechat-add-account-container" });
-    const addProviderBtn = addProviderContainer.createEl("button", {
-      text: "+ \u6DFB\u52A0 AI Provider",
-      cls: "wechat-btn-add"
-    });
-    addProviderBtn.onclick = () => this.showEditAiProviderModal(null);
-    const layoutCacheEntries = Object.values(this.plugin.settings.ai.articleLayoutsByPath || {});
-    const cachedDocCount = layoutCacheEntries.length;
-    const cachedLayoutCount = layoutCacheEntries.reduce((count, entry) => {
-      const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
-      if (!normalizedEntry)
-        return count;
-      return count + Object.keys(normalizedEntry.selectionStates || {}).length;
-    }, 0);
-    const cacheSetting = new Setting(containerEl).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
-    if (cachedLayoutCount > 0) {
-      cacheSetting.addButton((button) => button.setButtonText("\u6E05\u7A7A\u7F13\u5B58").setWarning().onClick(async () => {
-        if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
-          return;
-        this.plugin.settings.ai.articleLayoutsByPath = {};
-        await this.plugin.saveSettings();
-        this.refreshOpenConverterAiState();
-        new Notice("\u5DF2\u6E05\u7A7A AI \u7F16\u6392\u7F13\u5B58");
-        this.display();
-      }));
-    }
     new Setting(containerEl).setName("\u56FE\u7247\u6C34\u5370").setHeading();
     new Setting(containerEl).setName("\u542F\u7528\u56FE\u7247\u6C34\u5370").setDesc("\u5728\u6BCF\u5F20\u56FE\u7247\u4E0A\u65B9\u663E\u793A\u5934\u50CF\uFF08\u9700\u91CD\u542F\u63D2\u4EF6\u9762\u677F\u751F\u6548\uFF09").addToggle((toggle) => toggle.setValue(this.plugin.settings.enableWatermark).onChange(async (value) => {
       this.plugin.settings.enableWatermark = value;
@@ -10152,6 +10313,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
         attr: { style: "color: var(--text-muted);" }
       });
     }
+    this.renderAiSettingsSection(containerEl);
     new Setting(containerEl).setName("\u9AD8\u7EA7\u8BBE\u7F6E").setHeading();
     new Setting(containerEl).setName("\u53D1\u9001\u6210\u529F\u540E\u81EA\u52A8\u6E05\u7406\u8D44\u6E90").setDesc("\u9ED8\u8BA4\u5173\u95ED\u3002\u5F00\u542F\u540E\u4F1A\u5728\u521B\u5EFA\u8349\u7A3F\u6210\u529F\u540E\uFF0C\u5220\u9664\u4F60\u5728\u4E0B\u65B9\u914D\u7F6E\u7684\u76EE\u5F55\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.cleanupAfterSync).onChange(async (value) => {
       this.plugin.settings.cleanupAfterSync = value;
@@ -10208,6 +10370,173 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
   }
+  renderAiSettingsSection(containerEl) {
+    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u7BA1\u7406\u6A21\u578B\u3001\u9ED8\u8BA4\u5E03\u5C40\u3001\u9ED8\u8BA4\u989C\u8272\u548C\u7F13\u5B58\u7B56\u7565\u3002\u5B9E\u9645\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
+    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF\u53F3\u4FA7\u5DE5\u5177\u680F\u4E2D\u7684 AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7ECF\u4E3A\u6587\u7AE0\u548C\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u751F\u6210\u8FC7\u7684\u7F13\u5B58\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
+      this.plugin.settings.ai.enabled = value;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    const layoutFamilyOptions = getLayoutFamilyList({ includeAuto: true, includeReserved: false });
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u5E03\u5C40").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u5E03\u5C40\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u5E03\u5C40\u98CE\u683C\u3002").addDropdown((dropdown) => {
+      layoutFamilyOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(this.plugin.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO);
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultLayoutFamily = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    const colorPaletteOptions = getColorPaletteList({ includeAuto: true });
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u989C\u8272").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u989C\u8272\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u5728\u5185\u7F6E\u914D\u8272\u65B9\u6848\u4E2D\u63A8\u8350\u4E00\u4E2A\u7ED3\u679C\uFF1B\u751F\u6210\u540E\u4E5F\u53EF\u4EE5\u624B\u52A8\u5207\u6362\u989C\u8272\u590D\u7528\u5F53\u524D\u5E03\u5C40\u3002").addDropdown((dropdown) => {
+      colorPaletteOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(this.plugin.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO);
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultColorPalette = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    const providers = this.plugin.settings.ai.providers || [];
+    const defaultProviderId = this.plugin.settings.ai.defaultProviderId;
+    const runnableProviders = providers.filter((provider) => isAiProviderRunnable(provider) && provider.enabled !== false);
+    new Setting(containerEl).setName("\u9ED8\u8BA4 AI Provider").setDesc(runnableProviders.length > 0 ? "\u751F\u6210 AI \u7F16\u6392\u65F6\u4F1A\u4F18\u5148\u4F7F\u7528\u8FD9\u91CC\u9009\u4E2D\u7684 Provider\u3002" : "\u8FD8\u6CA1\u6709\u53EF\u76F4\u63A5\u7528\u4E8E AI \u7F16\u6392\u7684 Provider\uFF0C\u8BF7\u5148\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\u3002").addDropdown((dropdown) => {
+      dropdown.addOption("", "\u81EA\u52A8\u9009\u62E9");
+      providers.forEach((provider) => {
+        const statusText = summarizeAiProviderIssues(provider);
+        dropdown.addOption(provider.id, `${provider.name} (${statusText})`);
+      });
+      dropdown.setValue(defaultProviderId || "");
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultProviderId = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    if (providers.length === 0) {
+      containerEl.createEl("p", {
+        text: "\u6682\u65E0 AI Provider\uFF0C\u8BF7\u70B9\u51FB\u4E0B\u65B9\u6309\u94AE\u6DFB\u52A0",
+        cls: "setting-item-description",
+        attr: { style: "color: var(--text-muted); font-style: italic;" }
+      });
+    } else {
+      const providerList = containerEl.createDiv({ cls: "wechat-account-list" });
+      for (const provider of providers) {
+        const isDefault = provider.id === defaultProviderId;
+        const providerIssues = getAiProviderIssues(provider);
+        const isRunnable = isAiProviderRunnable(provider) && provider.enabled !== false;
+        const providerCard = providerList.createDiv({ cls: "wechat-account-card" });
+        const info = providerCard.createDiv({ cls: "wechat-account-info" });
+        const nameRow = info.createDiv({ cls: "wechat-account-name-row" });
+        nameRow.createEl("span", { text: provider.name, cls: "wechat-account-name" });
+        if (isDefault) {
+          nameRow.createEl("span", { text: "\u9ED8\u8BA4", cls: "wechat-account-badge" });
+        }
+        if (provider.enabled === false) {
+          nameRow.createEl("span", { text: "\u5DF2\u505C\u7528", cls: "wechat-account-badge", attr: { style: "background: var(--text-faint);" } });
+        } else if (isRunnable) {
+          nameRow.createEl("span", { text: "\u53EF\u7528", cls: "wechat-account-badge", attr: { style: "background: #0f8f64;" } });
+        } else {
+          nameRow.createEl("span", { text: "\u5F85\u8865\u5168", cls: "wechat-account-badge", attr: { style: "background: #d97706;" } });
+        }
+        info.createDiv({
+          text: `${provider.kind} \xB7 ${provider.model || "\u672A\u8BBE\u7F6E\u6A21\u578B"}`,
+          cls: "wechat-account-appid"
+        });
+        info.createDiv({
+          text: summarizeAiProviderIssues(provider),
+          cls: "wechat-account-appid"
+        });
+        const actions = providerCard.createDiv({ cls: "wechat-account-actions" });
+        if (!isDefault) {
+          const defaultBtn = actions.createEl("button", { text: "\u8BBE\u4E3A\u9ED8\u8BA4", cls: "wechat-btn-small" });
+          defaultBtn.onclick = async () => {
+            this.plugin.settings.ai.defaultProviderId = provider.id;
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          };
+        }
+        const editBtn = actions.createEl("button", { text: "\u7F16\u8F91", cls: "wechat-btn-small" });
+        editBtn.onclick = () => this.showEditAiProviderModal(provider);
+        const testBtn = actions.createEl("button", { text: "\u6D4B\u8BD5", cls: "wechat-btn-small wechat-btn-test" });
+        if (!isRunnable) {
+          testBtn.disabled = true;
+          testBtn.title = providerIssues.includes("disabled") ? "\u8BF7\u5148\u542F\u7528\u8BE5 Provider" : `\u5F53\u524D\u65E0\u6CD5\u6D4B\u8BD5\uFF1A${summarizeAiProviderIssues(provider)}`;
+        }
+        testBtn.onclick = async () => {
+          if (!isRunnable)
+            return;
+          testBtn.disabled = true;
+          testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
+          try {
+            await testAiProviderConnection(provider);
+            new Notice(`\u2705 ${provider.name} \u8FDE\u63A5\u6210\u529F\uFF01`);
+          } catch (error) {
+            new Notice(`\u274C ${provider.name} \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
+          }
+          testBtn.disabled = false;
+          testBtn.textContent = "\u6D4B\u8BD5";
+        };
+        const deleteBtn = actions.createEl("button", { text: "\u5220\u9664", cls: "wechat-btn-small wechat-btn-danger" });
+        deleteBtn.onclick = async () => {
+          if (confirm(`\u786E\u5B9A\u8981\u5220\u9664 AI Provider "${provider.name}" \u5417\uFF1F`)) {
+            this.plugin.settings.ai.providers = providers.filter((item) => item.id !== provider.id);
+            if (provider.id === defaultProviderId) {
+              const nextRunnableProvider = this.plugin.settings.ai.providers.find((item) => item.enabled !== false && isAiProviderRunnable(item));
+              this.plugin.settings.ai.defaultProviderId = (nextRunnableProvider == null ? void 0 : nextRunnableProvider.id) || "";
+            }
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          }
+        };
+      }
+    }
+    const addProviderContainer = containerEl.createDiv({ cls: "wechat-add-account-container" });
+    const addProviderBtn = addProviderContainer.createEl("button", {
+      text: "+ \u6DFB\u52A0 AI Provider",
+      cls: "wechat-btn-add"
+    });
+    addProviderBtn.onclick = () => this.showEditAiProviderModal(null);
+    const advancedOptions = containerEl.createEl("details", { cls: "apple-settings-details" });
+    advancedOptions.createEl("summary", {
+      cls: "apple-settings-summary",
+      text: "AI \u7F16\u6392\u9AD8\u7EA7\u9009\u9879"
+    });
+    const advancedArea = advancedOptions.createDiv({ cls: "apple-settings-area apple-settings-advanced-area" });
+    new Setting(advancedArea).setName("\u7F16\u6392\u65F6\u53C2\u8003\u56FE\u7247").setDesc("\u5F00\u542F\u540E\uFF0CAI \u4F1A\u628A\u6587\u4E2D\u7684\u914D\u56FE\u548C\u622A\u56FE\u4F5C\u4E3A\u6392\u7248\u7D20\u6750\u53C2\u8003\uFF0C\u4F46\u4E0D\u4F1A\u76F4\u63A5\u6539\u5199\u4F60\u7684\u6B63\u6587\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.includeImagesInLayout !== false).onChange(async (value) => {
+      this.plugin.settings.ai.includeImagesInLayout = value;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    new Setting(advancedArea).setName("AI \u8BF7\u6C42\u8D85\u65F6\uFF08\u79D2\uFF09").setDesc("\u8F83\u5FEB\u6A21\u578B\u53EF\u8BBE 15 \u5230 45 \u79D2\uFF1B\u8F83\u6162\u6A21\u578B\u5EFA\u8BAE\u8BBE 60 \u5230 120 \u79D2\u3002").addText((text) => text.setPlaceholder("45").setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45e3) / 1e3))).onChange(async (value) => {
+      const seconds = Math.min(180, Math.max(5, parseInt(value || "45", 10) || 45));
+      this.plugin.settings.ai.requestTimeoutMs = seconds * 1e3;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    const layoutCacheEntries = Object.values(this.plugin.settings.ai.articleLayoutsByPath || {});
+    const cachedDocCount = layoutCacheEntries.length;
+    const cachedLayoutCount = layoutCacheEntries.reduce((count, entry) => {
+      const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+      if (!normalizedEntry)
+        return count;
+      return count + Object.keys(normalizedEntry.selectionStates || {}).length;
+    }, 0);
+    const cacheSetting = new Setting(advancedArea).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
+    if (cachedLayoutCount > 0) {
+      cacheSetting.addButton((button) => button.setButtonText("\u6E05\u7A7A\u7F13\u5B58").setWarning().onClick(async () => {
+        if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
+          return;
+        this.plugin.settings.ai.articleLayoutsByPath = {};
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+        new Notice("\u5DF2\u6E05\u7A7A AI \u7F16\u6392\u7F13\u5B58");
+        this.display();
+      }));
+    }
+  }
   /**
    * 显示添加/编辑账号的模态框
    */
@@ -10225,9 +10554,11 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
     });
     const kindGroup = form.createDiv({ cls: "wechat-form-group" });
     kindGroup.createEl("label", { text: "\u7C7B\u578B" });
-    const kindSelect = kindGroup.createEl("select");
+    const kindSelect = kindGroup.createEl("select", { cls: "wechat-form-select" });
     const providerKinds = [
-      { value: AI_PROVIDER_KINDS.OPENAI_COMPATIBLE, label: "OpenAI \u517C\u5BB9\u63A5\u53E3" }
+      { value: AI_PROVIDER_KINDS.OPENAI_COMPATIBLE, label: "OpenAI \u517C\u5BB9\u63A5\u53E3" },
+      { value: AI_PROVIDER_KINDS.GEMINI, label: "Gemini \u517C\u5BB9\u683C\u5F0F" },
+      { value: AI_PROVIDER_KINDS.ANTHROPIC, label: "Anthropic \u517C\u5BB9\u683C\u5F0F" }
     ];
     providerKinds.forEach((kind) => {
       const option = kindSelect.createEl("option", { value: kind.value, text: kind.label });
@@ -10256,15 +10587,55 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       placeholder: "gpt-4.1-mini",
       value: (provider == null ? void 0 : provider.model) || "gpt-4.1-mini"
     });
+    const applyKindDefaults = () => {
+      const kind = kindSelect.value || AI_PROVIDER_KINDS.OPENAI_COMPATIBLE;
+      if (kind === AI_PROVIDER_KINDS.GEMINI) {
+        baseUrlInput.placeholder = "https://generativelanguage.googleapis.com/v1beta";
+        modelInput.placeholder = "gemini-2.5-flash";
+        if (!provider || provider.kind !== kind) {
+          if (!baseUrlInput.value.trim())
+            baseUrlInput.value = "https://generativelanguage.googleapis.com/v1beta";
+          if (!modelInput.value.trim())
+            modelInput.value = "gemini-2.5-flash";
+        }
+        return;
+      }
+      if (kind === AI_PROVIDER_KINDS.ANTHROPIC) {
+        baseUrlInput.placeholder = "https://api.anthropic.com/v1";
+        modelInput.placeholder = "claude-3-5-haiku-latest";
+        if (!provider || provider.kind !== kind) {
+          if (!baseUrlInput.value.trim())
+            baseUrlInput.value = "https://api.anthropic.com/v1";
+          if (!modelInput.value.trim())
+            modelInput.value = "claude-3-5-haiku-latest";
+        }
+        return;
+      }
+      baseUrlInput.placeholder = "https://api.openai.com/v1";
+      modelInput.placeholder = "gpt-4.1-mini";
+      if (!provider || provider.kind !== kind) {
+        if (!baseUrlInput.value.trim())
+          baseUrlInput.value = "https://api.openai.com/v1";
+        if (!modelInput.value.trim())
+          modelInput.value = "gpt-4.1-mini";
+      }
+    };
+    kindSelect.addEventListener("change", applyKindDefaults);
+    applyKindDefaults();
     const enabledGroup = form.createDiv({ cls: "wechat-form-group" });
-    enabledGroup.createEl("label", { text: "\u72B6\u6001" });
-    const enabledWrap = enabledGroup.createDiv({ attr: { style: "display:flex;align-items:center;gap:10px;" } });
-    const enabledToggle = enabledWrap.createEl("input", {
+    enabledGroup.createEl("label", { text: "\u542F\u7528" });
+    const enabledWrap = enabledGroup.createDiv({ cls: "wechat-provider-enabled" });
+    const enabledToggle = enabledWrap.createEl("label", { cls: "apple-toggle" }).createEl("input", {
       type: "checkbox",
+      cls: "apple-toggle-input",
       checked: (provider == null ? void 0 : provider.enabled) !== false ? true : void 0
     });
     enabledToggle.checked = (provider == null ? void 0 : provider.enabled) !== false;
-    enabledWrap.createEl("span", { text: "\u542F\u7528\u8BE5 Provider" });
+    enabledToggle.parentElement.createEl("span", { cls: "apple-toggle-slider" });
+    enabledWrap.createEl("span", {
+      cls: "wechat-provider-enabled-text",
+      text: "\u4FDD\u5B58\u540E\u53EF\u7528\u4E8E AI \u7F16\u6392\u548C\u8FDE\u63A5\u6D4B\u8BD5"
+    });
     const btnRow = form.createDiv({ cls: "wechat-modal-buttons" });
     const cancelBtn = btnRow.createEl("button", { text: "\u53D6\u6D88" });
     cancelBtn.onclick = () => modal.close();

@@ -1195,27 +1195,26 @@
 
 /* === Settings Collapsible === */
 .apple-settings-details {
-  border: 1px solid var(--apple-border);
+  border: 1px solid color-mix(in srgb, var(--apple-border) 88%, transparent);
   border-radius: var(--apple-radius-md);
   margin-bottom: var(--apple-spacing-md);
   overflow: hidden;
-  background: var(--apple-background);
-  /* Cleaner background */
+  background: color-mix(in srgb, var(--apple-background) 96%, var(--background-secondary));
 }
 
 .apple-settings-summary {
-  padding: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   list-style: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: var(--apple-radius-md);
+  background: color-mix(in srgb, var(--background-secondary) 72%, transparent);
   transition: all 0.2s ease;
   user-select: none;
-  color: var(--apple-primary);
+  color: var(--text-normal);
 }
 
 .apple-settings-summary::-webkit-details-marker {
@@ -1241,18 +1240,94 @@
 }
 
 .apple-settings-summary:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--background-modifier-hover) 70%, transparent);
 }
 
 .apple-settings-details[open] .apple-settings-summary {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  border-bottom: 1px solid var(--apple-border);
+  border-bottom: 1px solid color-mix(in srgb, var(--apple-border) 88%, transparent);
 }
 
 .apple-settings-details .apple-settings-area {
-  padding: var(--apple-spacing-md);
-  background: var(--apple-background);
+  padding: 6px 16px 10px;
+  background: transparent;
+}
+
+.apple-settings-details .apple-settings-advanced-area {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  gap: 0;
+}
+
+.apple-settings-details .setting-item {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 0;
+  border-top: 1px solid color-mix(in srgb, var(--background-modifier-border) 82%, transparent);
+}
+
+.apple-settings-details .setting-item:first-child {
+  border-top: none;
+}
+
+.apple-settings-details .setting-item-info {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  padding-right: 0;
+}
+
+.apple-settings-details .setting-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.apple-settings-details .setting-item-description {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.apple-settings-details .setting-item-control {
+  margin-left: auto !important;
+  flex: 0 0 auto;
+  justify-self: end;
+  align-self: center;
+}
+
+.apple-settings-details .setting-item-control input[type="text"] {
+  width: 112px;
+  text-align: center;
+}
+
+.apple-settings-details .setting-item-control > * {
+  margin-left: 0 !important;
+}
+
+.apple-settings-details .setting-item-control .checkbox-container,
+.apple-settings-details .setting-item-control .clickable-icon {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .apple-settings-details .setting-item {
+    display: block !important;
+    gap: 10px;
+  }
+
+  .apple-settings-details .setting-item-control {
+    margin-left: 0 !important;
+    margin-top: 10px;
+  }
 }
 
 /* === 下拉选择器 === */
@@ -1955,7 +2030,8 @@ input[type="range"].apple-slider:active::-webkit-slider-thumb {
   margin-bottom: 6px;
 }
 
-.wechat-form-group input {
+.wechat-form-group input:not([type="checkbox"]),
+.wechat-form-group select {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid var(--background-modifier-border);
@@ -1964,12 +2040,46 @@ input[type="range"].apple-slider:active::-webkit-slider-thumb {
   background: var(--background-primary);
   color: var(--text-normal);
   transition: border-color 0.15s ease;
+  box-sizing: border-box;
 }
 
-.wechat-form-group input:focus {
+.wechat-form-group input:not([type="checkbox"]):focus,
+.wechat-form-group select:focus {
   outline: none;
   border-color: var(--interactive-accent);
   box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.1);
+}
+
+.wechat-form-select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 38px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236e6e73' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+
+.theme-dark .wechat-form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23b3b3b3' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
+}
+
+.wechat-provider-enabled {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wechat-provider-enabled .apple-toggle {
+  flex: 0 0 auto;
+}
+
+.wechat-provider-enabled-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .wechat-modal-buttons {
