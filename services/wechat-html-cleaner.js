@@ -3,6 +3,45 @@ function cleanHtmlForDraft(html) {
     const div = document.createElement('div');
     div.innerHTML = html;
 
+    const decodeFragment = (value) => {
+      try {
+        return decodeURIComponent(value);
+      } catch (error) {
+        return value;
+      }
+    };
+
+    const isTagLikeFragmentLink = (anchor) => {
+      if (!anchor) return false;
+      const href = (anchor.getAttribute('href') || '').trim();
+      if (!href.startsWith('#')) return false;
+
+      const text = (anchor.textContent || '').trim();
+      if (!text.startsWith('#')) return false;
+
+      const fragment = href.slice(1).trim();
+      if (!fragment) return false;
+
+      const normalizedText = text.slice(1).trim();
+      if (!normalizedText) return false;
+
+      return normalizedText === fragment || normalizedText === decodeFragment(fragment);
+    };
+
+    const unwrapTagLikeFragmentLinks = (root) => {
+      if (!root) return;
+
+      root.querySelectorAll('a[href]').forEach((anchor) => {
+        if (!isTagLikeFragmentLink(anchor)) return;
+
+        const fragment = document.createDocumentFragment();
+        while (anchor.firstChild) {
+          fragment.appendChild(anchor.firstChild);
+        }
+        anchor.replaceWith(fragment);
+      });
+    };
+
     const getInlineLabelPrefixInfo = (container) => {
       if (!container) return null;
       const nodes = Array.from(container.childNodes);
@@ -31,6 +70,12 @@ function cleanHtmlForDraft(html) {
 
       return null;
     };
+
+    // Narrow the cleanup to Obsidian tag-like fragment links (e.g. href="#标签"
+    // with visible text "#标签"). Preserve ordinary in-document anchors such as
+    // user-authored TOCs and footnote backlinks to keep copy/sync aligned with
+    // preview behavior.
+    unwrapTagLikeFragmentLinks(div);
 
     const hasInlineLabelPrefix = (container) => !!getInlineLabelPrefixInfo(container);
 

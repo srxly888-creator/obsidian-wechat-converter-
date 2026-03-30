@@ -41,7 +41,7 @@ describe('ai-layout skill bundle', () => {
       'blocks',
     ]);
     expect(getAiLayoutBlockConstraintLines()).toContain('- hero: eyebrow, title, subtitle, coverImageId, variant');
-    expect(getAiLayoutBlockConstraintLines()).toContain('- section-block: sectionIndex, imageIds');
+    expect(getAiLayoutBlockConstraintLines()).toContain('- section-block: sectionIndex, sectionLabel, headingLevel, title, paragraphs, bulletGroups, subsections, imageIds');
     expect(getAiLayoutBlockConstraintLines()).toContain('- cta-card: title, body, buttonText, note');
   });
 

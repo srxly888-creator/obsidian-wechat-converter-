@@ -29,6 +29,19 @@
     {
       "type": "section-block",
       "sectionIndex": 0,
+      "sectionLabel": "PART 01",
+      "headingLevel": 2,
+      "title": "第一部分",
+      "paragraphs": ["这里是承接原文章节的正文。"],
+      "bulletGroups": [],
+      "subsections": [
+        {
+          "title": "子节一",
+          "level": 3,
+          "paragraphs": ["这里是块内 subsection 的正文。"],
+          "bulletGroups": []
+        }
+      ],
       "imageIds": ["image-1"]
     }
   ]

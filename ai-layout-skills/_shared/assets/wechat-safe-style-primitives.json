@@ -49,6 +49,13 @@
         "useCard": false,
         "indexSize": 22,
         "titleSize": 20
+      },
+      "subsection": {
+        "titleSize": 16,
+        "titleWeight": 700,
+        "useCard": false,
+        "useBorderLeft": true,
+        "spacingTop": 14
       }
     },
     "tutorial-cards": {
@@ -82,6 +89,13 @@
         "useCard": true,
         "indexSize": 28,
         "titleSize": 22
+      },
+      "subsection": {
+        "titleSize": 15,
+        "titleWeight": 700,
+        "useCard": true,
+        "useBorderLeft": true,
+        "spacingTop": 16
       }
     },
     "editorial-lite": {
@@ -115,6 +129,13 @@
         "useCard": false,
         "indexSize": 14,
         "titleSize": 26
+      },
+      "subsection": {
+        "titleSize": 18,
+        "titleWeight": 600,
+        "useCard": false,
+        "useBorderLeft": false,
+        "spacingTop": 18
       }
     }
   },

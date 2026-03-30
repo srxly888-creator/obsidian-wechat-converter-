@@ -9,5 +9,6 @@
   "galleryCaseLabel": "GALLERY",
   "galleryTitle": "配图补充",
   "preferSectionBlocks": true,
-  "remainingImageStrategy": "sections-first"
+  "remainingImageStrategy": "sections-first",
+  "maxSectionBlocks": 6
 }

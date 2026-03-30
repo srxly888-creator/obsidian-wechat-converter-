@@ -197,6 +197,61 @@ function validateAiLayoutPayload(rawLayout) {
       if (!isNumber && !isNumericString) {
         issues.push(createSchemaIssue(`${path}.sectionIndex`, 'section-block.sectionIndex 必须是非负整数。', true));
       }
+      if ('sectionLabel' in block && typeof block.sectionLabel !== 'string') {
+        issues.push(createSchemaIssue(`${path}.sectionLabel`, 'section-block.sectionLabel 必须是字符串。', false));
+      }
+      if ('headingLevel' in block && (!Number.isInteger(block.headingLevel) || block.headingLevel < 2 || block.headingLevel > 6)) {
+        issues.push(createSchemaIssue(`${path}.headingLevel`, 'section-block.headingLevel 必须是 2 到 6 之间的整数。', false));
+      }
+      if ('title' in block && typeof block.title !== 'string') {
+        issues.push(createSchemaIssue(`${path}.title`, 'section-block.title 必须是字符串。', false));
+      }
+      if ('paragraphs' in block && !Array.isArray(block.paragraphs)) {
+        issues.push(createSchemaIssue(`${path}.paragraphs`, 'section-block.paragraphs 必须是数组。', false));
+      }
+      if ('bulletGroups' in block) {
+        if (!Array.isArray(block.bulletGroups)) {
+          issues.push(createSchemaIssue(`${path}.bulletGroups`, 'section-block.bulletGroups 必须是数组。', false));
+        } else {
+          block.bulletGroups.forEach((group, groupIndex) => {
+            if (!Array.isArray(group) || group.some((item) => typeof item !== 'string')) {
+              issues.push(createSchemaIssue(`${path}.bulletGroups[${groupIndex}]`, 'section-block.bulletGroups 中的每组必须是字符串数组。', false));
+            }
+          });
+        }
+      }
+      if ('subsections' in block) {
+        if (!Array.isArray(block.subsections)) {
+          issues.push(createSchemaIssue(`${path}.subsections`, 'section-block.subsections 必须是数组。', false));
+        } else {
+          block.subsections.forEach((subsection, subsectionIndex) => {
+            if (!subsection || typeof subsection !== 'object' || Array.isArray(subsection)) {
+              issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}]`, 'subsection 必须是对象。', false));
+              return;
+            }
+            if (typeof subsection.title !== 'string') {
+              issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].title`, 'subsection.title 必须是字符串。', false));
+            }
+            if ('level' in subsection && (!Number.isInteger(subsection.level) || subsection.level < 3 || subsection.level > 6)) {
+              issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].level`, 'subsection.level 必须是 3 到 6 之间的整数。', false));
+            }
+            if ('paragraphs' in subsection && !Array.isArray(subsection.paragraphs)) {
+              issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].paragraphs`, 'subsection.paragraphs 必须是数组。', false));
+            }
+            if ('bulletGroups' in subsection) {
+              if (!Array.isArray(subsection.bulletGroups)) {
+                issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].bulletGroups`, 'subsection.bulletGroups 必须是数组。', false));
+              } else {
+                subsection.bulletGroups.forEach((group, groupIndex) => {
+                  if (!Array.isArray(group) || group.some((item) => typeof item !== 'string')) {
+                    issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].bulletGroups[${groupIndex}]`, 'subsection.bulletGroups 中的每组必须是字符串数组。', false));
+                  }
+                });
+              }
+            }
+          });
+        }
+      }
       if ('imageIds' in block && !Array.isArray(block.imageIds)) {
         issues.push(createSchemaIssue(`${path}.imageIds`, 'section-block.imageIds 必须是数组。', false));
       }

@@ -220,10 +220,39 @@
    ```javascript
    export default {
      async fetch(request, env) {
+       const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+       const ALLOWED_METHODS = new Set(['GET', 'POST', 'UPLOAD']);
        const corsHeaders = {
          'Access-Control-Allow-Origin': '*',
          'Access-Control-Allow-Methods': 'POST, OPTIONS',
          'Access-Control-Allow-Headers': 'Content-Type',
+       };
+
+       const jsonResponse = (payload, status = 200) =>
+         new Response(JSON.stringify(payload), {
+           status,
+           headers: {
+             ...corsHeaders,
+             'Content-Type': 'application/json; charset=utf-8',
+           },
+         });
+
+       const isAllowedWechatUrl = (rawUrl) => {
+         try {
+           const parsed = new URL(rawUrl);
+           return parsed.protocol === 'https:' && parsed.hostname === 'api.weixin.qq.com';
+         } catch {
+           return false;
+         }
+       };
+
+       const toUint8Array = (base64) => {
+         const binary = atob(base64);
+         const bytes = new Uint8Array(binary.length);
+         for (let i = 0; i < binary.length; i++) {
+           bytes[i] = binary.charCodeAt(i);
+         }
+         return bytes;
        };
    
        // 处理 CORS 预检请求
@@ -232,50 +261,80 @@
        }
    
        if (request.method !== 'POST') {
-         return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+         return jsonResponse({ error: 'Method Not Allowed' }, 405);
        }
    
        try {
          const body = await request.json();
-         const { url, method = 'GET', data, fileData, fileName, mimeType, fieldName } = body;
-         
-         // === Debug Logging ===
-         console.log('Received URL:', url);
+         const { url, method = 'GET', data, fileData, fileName, mimeType } = body;
+         const normalizedMethod = String(method || 'GET').toUpperCase();
          
          // 安全校验：只允许访问微信 API
-         if (!url || !url.startsWith('https://api.weixin.qq.com/')) {
-           const errorMsg = `Invalid URL. Expected: starts with https://api.weixin.qq.com/. FLASH: Received [${typeof url}]: ${url}`;
-           return new Response(JSON.stringify({ error: errorMsg, receivedBody: body }), { status: 400, headers: corsHeaders });
+         if (typeof url !== 'string' || !isAllowedWechatUrl(url)) {
+           return jsonResponse({ error: 'Invalid URL. Only https://api.weixin.qq.com/ is allowed.' }, 400);
+         }
+
+         if (!ALLOWED_METHODS.has(normalizedMethod)) {
+           return jsonResponse({ error: 'Invalid method. Only GET, POST, and UPLOAD are allowed.' }, 400);
          }
    
          let response;
-         if (method === 'UPLOAD' && fileData) {
+         if (normalizedMethod === 'UPLOAD') {
+           if (typeof fileData !== 'string' || fileData.length === 0) {
+             return jsonResponse({ error: 'Missing fileData for upload.' }, 400);
+           }
+
+           const approxBytes = Math.floor(fileData.length * 3 / 4);
+           if (approxBytes > MAX_UPLOAD_BYTES) {
+             return jsonResponse({ error: 'Upload too large. Maximum size is 10 MB.' }, 413);
+           }
+
+           const safeMimeType =
+             typeof mimeType === 'string' && mimeType.startsWith('image/')
+               ? mimeType
+               : 'application/octet-stream';
+           const safeFileName =
+             typeof fileName === 'string' && /^[\w.\-]+$/.test(fileName)
+               ? fileName
+               : 'image';
+
            // 文件上传处理：Base64 -> Binary -> FormData
-           const binary = atob(fileData);
-           const bytes = new Uint8Array(binary.length);
-           for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-           
+           const bytes = toUint8Array(fileData);
            const formData = new FormData();
-           formData.append(fieldName || 'media', new Blob([bytes], { type: mimeType }), fileName);
+           formData.append('media', new Blob([bytes], { type: safeMimeType }), safeFileName);
            response = await fetch(url, { method: 'POST', body: formData });
          } else {
            // 普通 JSON 请求
-           const opts = { method, headers: { 'Content-Type': 'application/json' } };
-           if (method !== 'GET' && data) opts.body = JSON.stringify(data);
+           const opts = { method: normalizedMethod };
+           if (normalizedMethod === 'POST') {
+             opts.headers = { 'Content-Type': 'application/json' };
+             if (data !== undefined) opts.body = JSON.stringify(data);
+           }
            response = await fetch(url, opts);
          }
    
-         const result = await response.json();
-         return new Response(JSON.stringify(result), {
-           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-         });
+         const responseText = await response.text();
+         let result;
+         try {
+           result = responseText ? JSON.parse(responseText) : {};
+         } catch {
+           return jsonResponse({ error: 'Upstream returned a non-JSON response.' }, 502);
+         }
+
+         return jsonResponse(result, response.status);
        } catch (error) {
-         return new Response(JSON.stringify({ error: `Server Error: ${error.message}`, stack: error.stack }), { status: 500, headers: corsHeaders });
+         return jsonResponse({ error: 'Proxy request failed.' }, 500);
        }
      }
    };
    ```
 
+   这个版本比旧示例更适合直接公开在文档里：
+   - 不记录请求 URL，避免把 `appid`、`secret`、`access_token` 写进日志。
+   - 不回显原始请求体和异常堆栈，减少敏感信息暴露。
+   - 只允许 `GET`、`POST`、`UPLOAD`，并且只允许访问 `https://api.weixin.qq.com/`。
+   - 上传大小限制为 10 MB，避免异常大文件拖垮 Worker。
+   - 上传字段固定为 `media`，与插件当前行为保持一致。
 
 3. **配置微信 IP 白名单**
 
@@ -294,6 +353,8 @@
    ```
    https://wechat-proxy.your-account.workers.dev
    ```
+
+   该代理仅建议自用，请不要公开分享 Worker 地址，也不要将其部署为公共服务。
 
 
 ## 🤝 贡献 (Contributing)

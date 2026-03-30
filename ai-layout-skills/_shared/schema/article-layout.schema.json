@@ -129,6 +129,43 @@
                   { "type": "string", "pattern": "^[0-9]+$" }
                 ]
               },
+              "sectionLabel": { "type": "string" },
+              "headingLevel": { "type": "integer", "minimum": 2, "maximum": 6 },
+              "title": { "type": "string" },
+              "paragraphs": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "bulletGroups": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "subsections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["title"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "title": { "type": "string" },
+                    "level": { "type": "integer", "minimum": 3, "maximum": 6 },
+                    "paragraphs": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "bulletGroups": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              },
               "imageIds": {
                 "type": "array",
                 "maxItems": 3,
