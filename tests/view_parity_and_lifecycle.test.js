@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-const { AppleStyleView } = require('../input.js');
+const AppleStylePlugin = require('../input.js');
+const { AppleStyleView } = AppleStylePlugin;
 
 function createObsidianLikeElement(tag = 'div') {
   const el = document.createElement(tag);
@@ -860,6 +861,101 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', 'ocean-blue');
   });
 
+  it('getCurrentExportHtml should keep ai preview html untouched while returning draft-safe export html', () => {
+    const cachedState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      providerId: 'provider-1',
+      model: 'deepseek-chat',
+      stylePack: 'ocean-blue',
+      status: 'ready',
+      lastError: '',
+      lastAttemptStatus: 'success',
+      generationMeta: {
+        providerName: 'DeepSeek',
+        providerModel: 'deepseek-chat',
+        stylePackLabel: '深海蓝',
+        headingCount: 2,
+        sectionCount: 1,
+        leadParagraphCount: 1,
+        bulletGroupCount: 0,
+        imageCount: 1,
+        aiBlockCount: 3,
+        finalBlockCount: 3,
+        fallbackUsed: false,
+        fallbackBlockCount: 0,
+        fallbackBlockTypes: [],
+        blockOrigins: [
+          { index: 0, type: 'hero', source: 'ai', label: '操作教程' },
+          { index: 1, type: 'part-nav', source: 'ai', label: 'PART 01' },
+          { index: 2, type: 'section-block', source: 'ai', label: '第一步' },
+        ],
+      },
+      layoutJson: {
+        articleType: 'tutorial',
+        selection: {
+          layoutFamily: 'tutorial-cards',
+          colorPalette: 'ocean-blue',
+        },
+        resolved: {
+          layoutFamily: 'tutorial-cards',
+          colorPalette: 'ocean-blue',
+        },
+        stylePack: 'ocean-blue',
+        blocks: [
+          { type: 'hero', title: '操作教程', subtitle: '快速上手', coverImageId: 'image-1', variant: 'cover-right' },
+          { type: 'part-nav', items: [{ label: 'PART 01', text: '准备工作' }, { label: 'PART 02', text: '正式操作' }] },
+          { type: 'section-block', sectionIndex: 0, title: '第一步', paragraphs: ['这里是正文。'] },
+        ],
+      },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultStylePack: 'ocean-blue',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          providers: [],
+          articleLayoutsByPath: {
+            'notes/demo.md': cachedState,
+          },
+        },
+      },
+      getArticleLayoutState: vi.fn(() => cachedState),
+    });
+    view.app = {
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    cachedState.sourceHash = String(view.simpleHash('# demo'));
+    view.lastResolvedSourceHash = cachedState.sourceHash;
+    view.baseRenderedHtml = '<section><figure><img src="https://example.com/cover.png" alt="封面图"><figcaption>封面图</figcaption></figure></section>';
+    view.currentHtml = '<section style="background:#f6f9fd;"><div style="display:flex;gap:10px;"><div>preview nav</div></div><h1 style="font-size:28px;">操作教程</h1></section>';
+    view.aiPreviewApplied = true;
+
+    const exportHtml = view.getCurrentExportHtml();
+
+    expect(view.currentHtml).toContain('display:flex');
+    expect(view.currentHtml).toContain('<h1');
+    expect(exportHtml).toContain('操作教程');
+    expect(exportHtml).not.toContain('display:flex');
+    expect(exportHtml).not.toContain('<h1');
+  });
+
+  it('getCurrentExportHtml should leave non-ai preview html unchanged', () => {
+    const view = new AppleStyleView(null, { settings: {} });
+    view.currentHtml = '<section><h1>普通预览标题</h1><p>正文</p></section>';
+    view.aiPreviewApplied = false;
+
+    expect(view.getCurrentExportHtml()).toBe(view.currentHtml);
+  });
+
   it('ensureAiLayoutSelectionState should derive and persist a new color variant from the current layout', async () => {
     const greenState = {
       version: 1,
@@ -1050,6 +1146,134 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(1);
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('已移除 1 块');
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '恢复已移除' && button.disabled === false)).toBe(true);
+  });
+
+  it('removeAiLayoutBlock should persist dismissed state for generated auto selection results', async () => {
+    const plugin = {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultLayoutFamily: 'auto',
+          defaultColorPalette: 'auto',
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          defaultProviderId: 'provider-1',
+          providers: [{
+            id: 'provider-1',
+            name: 'Minimax',
+            kind: 'openai-compatible',
+            baseUrl: 'https://api.example.com/v1',
+            apiKey: 'secret',
+            model: 'MiniMax-M2.7',
+            enabled: true,
+          }],
+          articleLayoutsByPath: {},
+        },
+      },
+      saveSettings: vi.fn(async () => true),
+    };
+    plugin.getArticleLayoutState = AppleStylePlugin.prototype.getArticleLayoutState;
+    plugin.saveArticleLayoutState = AppleStylePlugin.prototype.saveArticleLayoutState;
+
+    await plugin.saveArticleLayoutState('notes/demo.md', {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      providerId: 'provider-1',
+      model: 'MiniMax-M2.7',
+      skillId: 'source-first',
+      skillVersion: '2026.03.25-alpha.1',
+      selection: {
+        layoutFamily: 'auto',
+        colorPalette: 'auto',
+      },
+      resolved: {
+        layoutFamily: 'source-first',
+        colorPalette: 'tech-green',
+      },
+      stylePack: 'tech-green',
+      status: 'ready',
+      lastError: '',
+      lastAttemptStatus: 'success',
+      lastAttemptError: '',
+      lastAttemptAt: Date.now(),
+      dismissedBlockKeys: [],
+      generationMeta: {
+        providerName: 'Minimax',
+        providerModel: 'MiniMax-M2.7',
+        layoutFamilyLabel: '原文增强型',
+        colorPaletteLabel: '科技绿',
+        stylePackLabel: '科技绿',
+        headingCount: 4,
+        sectionCount: 2,
+        imageCount: 0,
+        aiBlockCount: 2,
+        finalBlockCount: 2,
+        fallbackUsed: false,
+        fallbackBlockCount: 0,
+        fallbackBlockTypes: [],
+        blockOrigins: [
+          { index: 0, type: 'lead-quote', source: 'ai', label: '导语' },
+          { index: 1, type: 'section-block', source: 'ai', label: '第一部分' },
+        ],
+      },
+      layoutJson: {
+        articleType: 'article',
+        selection: {
+          layoutFamily: 'auto',
+          colorPalette: 'auto',
+        },
+        resolved: {
+          layoutFamily: 'source-first',
+          colorPalette: 'tech-green',
+        },
+        stylePack: 'tech-green',
+        title: '文章标题',
+        summary: '摘要',
+        blocks: [
+          { type: 'lead-quote', text: '导语' },
+          { type: 'section-block', title: '第一部分', sectionIndex: 0, imageIds: [] },
+        ],
+      },
+    }, {
+      layoutFamily: 'auto',
+      colorPalette: 'auto',
+    });
+
+    const view = new AppleStyleView(null, plugin);
+    view.app = {
+      isMobile: false,
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.theme = { update: vi.fn() };
+    view.converter = { updateConfig: vi.fn() };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    view.lastResolvedSourceHash = '123';
+
+    global.AppleTheme = {
+      getThemeList: () => [{ value: 'github', label: '简约' }],
+      getColorList: () => [{ value: 'blue', color: '#0366d6' }],
+    };
+
+    const container = createObsidianLikeElement();
+    view.createSettingsPanel(container);
+    view.refreshAiLayoutPanel();
+    expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(2);
+
+    await view.removeAiLayoutBlock(1);
+    view.refreshAiLayoutPanel();
+
+    const state = plugin.getArticleLayoutState('notes/demo.md', {
+      layoutFamily: 'auto',
+      colorPalette: 'auto',
+    });
+    expect(state?.dismissedBlockKeys).toContain('section-block::0::第一部分::1');
+    expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(1);
+    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('已移除 1 块');
   });
 
   it('refreshAiLayoutPanel should show full-panel loading state while generating', () => {

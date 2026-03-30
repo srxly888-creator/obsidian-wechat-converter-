@@ -2783,6 +2783,24 @@ class AppleStyleView extends ItemView {
     this.refreshAiLayoutPanel();
   }
 
+  getCurrentExportHtml() {
+    if (!this.currentHtml) return null;
+    if (!this.aiPreviewApplied) return this.currentHtml;
+
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    if (!state || !visibleSnapshot.layoutJson?.blocks?.length) {
+      return this.currentHtml;
+    }
+    if (context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+      return this.currentHtml;
+    }
+
+    const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
+    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs, mode: 'draft' });
+  }
+
   restoreBasePreview() {
     if (!this.baseRenderedHtml || !this.previewContainer) return;
     const scrollTop = this.previewContainer.scrollTop;
@@ -3146,7 +3164,7 @@ class AppleStyleView extends ItemView {
       const { cleanupResult } = await syncService.syncToDraft({
         account,
         proxyUrl: this.plugin.settings.proxyUrl,
-        currentHtml: this.currentHtml,
+        currentHtml: this.getCurrentExportHtml(),
         activeFile,
         publishMeta,
         sessionCoverBase64: this.sessionCoverBase64,
@@ -3779,9 +3797,10 @@ class AppleStyleView extends ItemView {
     }
 
     try {
+      const exportHtml = this.getCurrentExportHtml() || this.currentHtml;
       // 创建临时的 DOM 容器来解析和处理图片
       const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = this.currentHtml;
+      tempDiv.innerHTML = exportHtml;
 
       // 优化提示逻辑：只有确实需要处理图片时才显示 "正在处理..."
       const images = Array.from(tempDiv.querySelectorAll('img'));

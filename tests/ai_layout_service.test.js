@@ -2,6 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 const { cleanHtmlForDraft } = require('../services/wechat-html-cleaner');
 
 const {
+  validateAiLayoutPayload,
+} = require('../services/ai-layout-skill-bundle');
+
+const {
   normalizeAiSettings,
   getAiProviderIssues,
   isAiProviderRunnable,
@@ -123,6 +127,36 @@ title: 示例
     expect(structure.introParagraphs[0]).toContain('前言段落');
   });
 
+  it('should keep h3 content inside the parent h2 section as subsections', () => {
+    const structure = extractMarkdownSections(`
+# AI 编排实践
+
+这是一段导语。
+
+## 第一部分
+
+### 子节一
+
+第一段。
+
+#### 子节二
+
+- 要点一
+
+## 第二部分
+
+第二段。
+    `);
+
+    expect(structure.sections).toHaveLength(2);
+    expect(structure.sections[0].title).toBe('第一部分');
+    expect(structure.sections[0].subsections).toHaveLength(2);
+    expect(structure.sections[0].subsections[0].title).toBe('子节一');
+    expect(structure.sections[0].subsections[0].paragraphs[0]).toContain('第一段');
+    expect(structure.sections[0].subsections[1].title).toBe('子节二');
+    expect(structure.sections[0].subsections[1].bulletGroups[0]).toEqual(['要点一']);
+  });
+
   it('should render structured layout json into inline html', () => {
     const html = renderArticleLayoutHtml({
       stylePack: 'tech-green',
@@ -183,7 +217,7 @@ title: 示例
 这里是正文解释。
     `);
 
-    expect(signals.sectionTitles).toEqual(['AI 编排实践', '第一部分', '第二部分']);
+    expect(signals.sectionTitles).toEqual(['第一部分', '第二部分']);
     expect(signals.leadParagraphs[0]).toContain('这是一段导语');
     expect(signals.bulletGroups[0]).toEqual(['第一点', '第二点']);
   });
@@ -385,6 +419,20 @@ title: 示例
     expect(html).not.toContain('#14b37d');
   });
 
+  it('should emit inline-safe font family values in wrapper styles', () => {
+    const html = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      stylePack: 'ocean-blue',
+      blocks: [{ type: 'hero', title: '测试标题' }],
+    });
+
+    expect(html).toContain("font-family:-apple-system,BlinkMacSystemFont,'Segoe UI'");
+    expect(html).not.toContain('font-family:-apple-system,BlinkMacSystemFont,"Segoe UI"');
+  });
+
   it('should recommend editorial-lite for essay-like content signals', () => {
     const layout = normalizeArticleLayout({
       articleType: 'article',
@@ -465,6 +513,96 @@ title: 示例
     expect(sourceHtml).toContain('border-left:3px solid');
     expect(tutorialHtml).toContain('SECTION 01');
     expect(tutorialHtml).toContain('box-shadow:0 10px 30px -24px');
+  });
+
+  it('should render tutorial-cards in draft mode with wechat-safer markup', () => {
+    const draftHtml = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      stylePack: 'ocean-blue',
+      title: '操作教程',
+      blocks: [
+        { type: 'hero', eyebrow: 'AI Layout Draft', title: '操作教程', subtitle: '快速上手', variant: 'cover-right' },
+        { type: 'part-nav', items: [{ label: 'PART 01', text: '准备工作' }, { label: 'PART 02', text: '正式操作' }] },
+        { type: 'section-block', sectionIndex: 0, title: '第一步', paragraphs: ['这里是正文。'] },
+      ],
+    }, {
+      imageRefs: [],
+      mode: 'draft',
+    });
+
+    expect(draftHtml).toContain('操作教程');
+    expect(draftHtml).toContain('PART 01');
+    expect(draftHtml).not.toContain('<h1');
+    expect(draftHtml).not.toContain('<h2');
+    expect(draftHtml).not.toContain('display:flex');
+    expect(draftHtml).not.toContain('gap:');
+    expect(draftHtml).not.toContain('linear-gradient');
+    expect(draftHtml).not.toContain('box-shadow:0 10px 30px -24px');
+  });
+
+  it('should render subsection chrome differently across layout families', () => {
+    const sourceHtml = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'source-first',
+        colorPalette: 'tech-green',
+      },
+      blocks: [
+        {
+          type: 'section-block',
+          sectionIndex: 0,
+          title: '第一部分',
+          paragraphs: ['这里是正文。'],
+          subsections: [
+            { title: '子节一', level: 3, paragraphs: ['补充说明。'], bulletGroups: [] },
+          ],
+        },
+      ],
+    });
+
+    const tutorialHtml = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      blocks: [
+        {
+          type: 'section-block',
+          sectionIndex: 0,
+          title: '第一部分',
+          paragraphs: ['这里是正文。'],
+          subsections: [
+            { title: '子节一', level: 3, paragraphs: ['补充说明。'], bulletGroups: [] },
+          ],
+        },
+      ],
+    });
+
+    const editorialHtml = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'editorial-lite',
+        colorPalette: 'graphite-rose',
+      },
+      blocks: [
+        {
+          type: 'section-block',
+          sectionIndex: 0,
+          title: '第一部分',
+          paragraphs: ['这里是正文。'],
+          subsections: [
+            { title: '子节一', level: 3, paragraphs: ['补充说明。'], bulletGroups: [] },
+          ],
+        },
+      ],
+    });
+
+    expect(sourceHtml).toContain('Sub 01');
+    expect(tutorialHtml).toContain('STEP 01');
+    expect(editorialHtml).toContain('Scene 01');
+    expect(tutorialHtml).toContain('background:#f6f9fd');
+    expect(editorialHtml).toContain('border-top:1px dashed');
   });
 
   it('should derive a new color variant from an existing generated layout without rerunning ai', () => {
@@ -622,6 +760,34 @@ title: 示例
     expect(layout.blocks.some((block) => block.type === 'phone-frame')).toBe(false);
   });
 
+  it('should keep fallback subsection-rich layouts valid against the shared schema contract', () => {
+    const layout = buildFallbackLayout({
+      title: '结构测试',
+      selection: {
+        layoutFamily: 'source-first',
+        colorPalette: 'tech-green',
+      },
+      markdown: `
+## 第一部分
+
+### 子节一
+
+第一段。
+
+## 第二部分
+
+第二段。
+      `,
+      stylePack: 'tech-green',
+      imageRefs: [],
+    });
+
+    const validation = validateAiLayoutPayload(layout);
+
+    expect(validation.isValid).toBe(true);
+    expect(validation.issueCount).toBe(0);
+  });
+
   it('should keep later sections when ai output only covers the front half', () => {
     const markdown = Array.from({ length: 14 }, (_, index) => `## 第${index + 1}部分\n第${index + 1}段内容。`).join('\n\n');
     const layout = normalizeArticleLayout({
@@ -640,8 +806,9 @@ title: 示例
       imageRefs: [],
     });
 
-    expect(layout.blocks.filter((block) => block.type === 'section-block')).toHaveLength(14);
-    expect(layout.blocks.some((block) => block.type === 'section-block' && block.title === '第14部分')).toBe(true);
+    const sectionBlocks = layout.blocks.filter((block) => block.type === 'section-block');
+    expect(sectionBlocks).toHaveLength(8);
+    expect(sectionBlocks[7].subsections.some((item) => item.title === '第14部分')).toBe(true);
   });
 
   it('should not duplicate intro singleton blocks from fallback when ai already provides them', () => {

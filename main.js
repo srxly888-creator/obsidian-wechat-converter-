@@ -3448,81 +3448,1000 @@ var require_obsidian_triplet_renderer = __commonJS({
   }
 });
 
+// ai-layout-skills/_shared/assets/color-palettes.json
+var require_color_palettes = __commonJS({
+  "ai-layout-skills/_shared/assets/color-palettes.json"(exports2, module2) {
+    module2.exports = {
+      version: "2026.03.25-alpha.1",
+      defaultColorPalette: "tech-green",
+      colorPalettes: [
+        {
+          id: "tech-green",
+          label: "\u79D1\u6280\u7EFF",
+          description: "\u4FE1\u606F\u5361\u4E0E\u6848\u4F8B\u6559\u7A0B\u98CE\u683C\uFF0C\u9002\u5408\u4EA7\u54C1\u4ECB\u7ECD\u3001\u64CD\u4F5C\u6307\u5357\u548C\u6848\u4F8B\u62C6\u89E3\u3002",
+          recommendedFor: ["tutorial", "case-study", "product-intro"],
+          tokens: {
+            accent: "#14b37d",
+            accentDeep: "#0f8f64",
+            accentSoft: "#e8faf4",
+            text: "#24323d",
+            muted: "#66737f",
+            border: "#dbe7e1",
+            surface: "#ffffff",
+            surfaceSoft: "#f5f8f7",
+            quoteBg: "#f4f7f6"
+          }
+        },
+        {
+          id: "ocean-blue",
+          label: "\u6DF1\u6D77\u84DD",
+          description: "\u66F4\u51B7\u9759\u7684\u79D1\u6280\u4FE1\u606F\u98CE\u683C\uFF0C\u9002\u5408\u6559\u7A0B\u3001\u77E5\u8BC6\u5361\u7247\u548C\u4EA7\u54C1\u66F4\u65B0\u3002",
+          recommendedFor: ["tutorial", "knowledge-card", "release-note"],
+          tokens: {
+            accent: "#2c6bed",
+            accentDeep: "#1f4fb2",
+            accentSoft: "#edf4ff",
+            text: "#223047",
+            muted: "#5e718f",
+            border: "#d8e2f2",
+            surface: "#ffffff",
+            surfaceSoft: "#f6f9fd",
+            quoteBg: "#f2f6fc"
+          }
+        },
+        {
+          id: "sunset-amber",
+          label: "\u6696\u7802\u91D1",
+          description: "\u66F4\u504F\u5185\u5BB9\u6742\u5FD7\u611F\u7684\u6696\u8272\u98CE\u683C\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u6E05\u5355\u548C\u7ECF\u9A8C\u5206\u4EAB\u3002",
+          recommendedFor: ["essay", "checklist", "experience"],
+          tokens: {
+            accent: "#d8892b",
+            accentDeep: "#a66218",
+            accentSoft: "#fff5e8",
+            text: "#3a2b1f",
+            muted: "#7b6756",
+            border: "#eadfce",
+            surface: "#fffdf9",
+            surfaceSoft: "#faf6f0",
+            quoteBg: "#f8f2ea"
+          }
+        },
+        {
+          id: "graphite-rose",
+          label: "\u77F3\u58A8\u73AB\u7470",
+          description: "\u504F\u7F16\u8F91\u611F\u7684\u7070\u7C89\u4E2D\u6027\u8272\uFF0C\u9002\u5408\u6848\u4F8B\u62C6\u89E3\u548C\u54C1\u724C\u5185\u5BB9\u3002",
+          recommendedFor: ["case-study", "brand-story", "editorial"],
+          tokens: {
+            accent: "#cc5f82",
+            accentDeep: "#9f4764",
+            accentSoft: "#fff0f5",
+            text: "#2e2c33",
+            muted: "#6f6874",
+            border: "#e7dce3",
+            surface: "#fffefe",
+            surfaceSoft: "#faf7f9",
+            quoteBg: "#f8f2f5"
+          }
+        }
+      ]
+    };
+  }
+});
+
+// ai-layout-skills/_shared/assets/block-catalog.json
+var require_block_catalog = __commonJS({
+  "ai-layout-skills/_shared/assets/block-catalog.json"(exports2, module2) {
+    module2.exports = {
+      version: "2026.03.25-alpha.1",
+      selectionAutoValue: "auto",
+      outputFields: [
+        "articleType",
+        "selection",
+        "resolved",
+        "recommendedLayoutFamily",
+        "recommendedColorPalette",
+        "title",
+        "summary",
+        "blocks"
+      ],
+      blocks: [
+        {
+          type: "hero",
+          fields: ["eyebrow", "title", "subtitle", "coverImageId", "variant"],
+          description: "\u6587\u7AE0\u5C01\u9762\u5361\uFF0C\u9002\u5408\u6807\u9898\u3001\u5BFC\u8BED\u548C\u5C01\u9762\u56FE\u3002"
+        },
+        {
+          type: "part-nav",
+          fields: ["items[{label,text}]"],
+          description: "\u7AE0\u8282\u5BFC\u822A\u5361\uFF0C\u9002\u5408\u76EE\u5F55\u6216\u5206\u6BB5\u5BFC\u8BFB\u3002"
+        },
+        {
+          type: "lead-quote",
+          fields: ["text", "note"],
+          description: "\u5BFC\u8BED\u6458\u8981\u5361\uFF0C\u9002\u5408\u91D1\u53E5\u3001\u603B\u7ED3\u6216\u5F00\u573A\u91CD\u70B9\u3002"
+        },
+        {
+          type: "case-block",
+          fields: ["caseLabel", "title", "summary", "bullets", "imageIds", "highlight"],
+          description: "\u6848\u4F8B/\u6559\u7A0B\u4E3B\u4F53\u533A\u5757\uFF0C\u9002\u5408\u5206\u7AE0\u8282\u627F\u8F7D\u6B63\u6587\u3002"
+        },
+        {
+          type: "section-block",
+          fields: ["sectionIndex", "sectionLabel", "headingLevel", "title", "paragraphs", "bulletGroups", "subsections", "imageIds"],
+          description: "\u6B63\u6587\u4FDD\u771F\u533A\u5757\uFF0C\u6309 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u5185\u5BB9\uFF0C\u4E0D\u6539\u5199\u6B63\u6587\uFF1B\u9ED8\u8BA4\u7531 H2 \u7EA7\u4E3B\u7AE0\u8282\u627F\u8F7D\uFF0CH3/H4 \u7559\u5728\u5757\u5185\u505A subsection\u3002"
+        },
+        {
+          type: "phone-frame",
+          fields: ["imageId", "caption"],
+          description: "\u624B\u673A\u622A\u56FE\u5C55\u793A\u5757\uFF0C\u9002\u5408 App \u754C\u9762\u6216\u804A\u5929\u622A\u56FE\u3002"
+        },
+        {
+          type: "cta-card",
+          fields: ["title", "body", "buttonText", "note"],
+          description: "\u6536\u5C3E CTA \u533A\u5757\uFF0C\u9002\u5408\u603B\u7ED3\u3001\u5F15\u5BFC\u6216\u540E\u7EED\u52A8\u4F5C\u3002"
+        }
+      ]
+    };
+  }
+});
+
+// ai-layout-skills/_shared/assets/wechat-safe-style-primitives.json
+var require_wechat_safe_style_primitives = __commonJS({
+  "ai-layout-skills/_shared/assets/wechat-safe-style-primitives.json"(exports2, module2) {
+    module2.exports = {
+      version: "2026.03.25-alpha.1",
+      typography: {
+        bodyFontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif',
+        editorialDisplayFont: 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif',
+        bodyFontSize: 16,
+        bodyLineHeight: 1.8,
+        paragraphGap: 20,
+        letterSpacing: "0"
+      },
+      image: {
+        borderRadius: 14,
+        captionFontSize: 12
+      },
+      sectionLabels: {
+        "source-first": "Section",
+        "tutorial-cards": "SECTION",
+        "editorial-lite": "Part"
+      },
+      profiles: {
+        "source-first": {
+          wrapperPadding: "20px 16px 28px",
+          cardRadius: 10,
+          cardPadding: "0",
+          cardMargin: 8,
+          cardShadow: "none",
+          hero: {
+            eyebrowSize: 11,
+            eyebrowLetterSpacing: 1.2,
+            titleSize: 26,
+            subtitleSize: 16,
+            subtitleLineHeight: 1.8,
+            footerMode: "divider",
+            imageRadius: 18
+          },
+          partNav: {
+            gap: 16,
+            direction: "row",
+            useCard: false,
+            useDivider: true
+          },
+          leadQuote: {
+            background: "transparent",
+            borderLeft: true,
+            fontSize: 16,
+            fontWeight: 600
+          },
+          caseBlock: {
+            useCard: false,
+            indexSize: 22,
+            titleSize: 20
+          },
+          subsection: {
+            titleSize: 16,
+            titleWeight: 700,
+            useCard: false,
+            useBorderLeft: true,
+            spacingTop: 14
+          }
+        },
+        "tutorial-cards": {
+          wrapperPadding: "26px 18px 34px",
+          cardRadius: 18,
+          cardPadding: "18px",
+          cardMargin: 18,
+          cardShadow: "0 10px 30px -24px rgba(0,0,0,0.18)",
+          hero: {
+            eyebrowSize: 11,
+            eyebrowLetterSpacing: 1.2,
+            titleSize: 28,
+            subtitleSize: 14,
+            subtitleLineHeight: 1.7,
+            footerMode: "accent-bar",
+            imageRadius: 18
+          },
+          partNav: {
+            gap: 10,
+            direction: "row",
+            useCard: true,
+            useDivider: false
+          },
+          leadQuote: {
+            background: "quoteBg",
+            borderLeft: false,
+            fontSize: 18,
+            fontWeight: 700
+          },
+          caseBlock: {
+            useCard: true,
+            indexSize: 28,
+            titleSize: 22
+          },
+          subsection: {
+            titleSize: 15,
+            titleWeight: 700,
+            useCard: true,
+            useBorderLeft: true,
+            spacingTop: 16
+          }
+        },
+        "editorial-lite": {
+          wrapperPadding: "30px 22px 40px",
+          cardRadius: 0,
+          cardPadding: "0",
+          cardMargin: 30,
+          cardShadow: "none",
+          hero: {
+            eyebrowSize: 10,
+            eyebrowLetterSpacing: 2,
+            titleSize: 36,
+            subtitleSize: 17,
+            subtitleLineHeight: 1.88,
+            footerMode: "editorial-divider",
+            imageRadius: 28
+          },
+          partNav: {
+            gap: 10,
+            direction: "column",
+            useCard: false,
+            useDivider: true
+          },
+          leadQuote: {
+            background: "transparent",
+            borderLeft: false,
+            fontSize: 26,
+            fontWeight: 600
+          },
+          caseBlock: {
+            useCard: false,
+            indexSize: 14,
+            titleSize: 26
+          },
+          subsection: {
+            titleSize: 18,
+            titleWeight: 600,
+            useCard: false,
+            useBorderLeft: false,
+            spacingTop: 18
+          }
+        }
+      },
+      allowedCssNotes: [
+        "\u4EC5\u5141\u8BB8 inline style",
+        "\u4F18\u5148\u4F7F\u7528 section/p/figure/img/figcaption/span \u7B49\u7A33\u5B9A\u6807\u7B7E",
+        "\u5141\u8BB8\u6709\u9650 flex\uFF0C\u4F46\u4E0D\u80FD\u4F9D\u8D56\u590D\u6742 class \u9009\u62E9\u5668",
+        "\u7981\u6B62 style \u6807\u7B7E\u4E0E\u5916\u90E8 class \u9A71\u52A8\u6837\u5F0F"
+      ]
+    };
+  }
+});
+
+// ai-layout-skills/_shared/schema/article-layout.schema.json
+var require_article_layout_schema = __commonJS({
+  "ai-layout-skills/_shared/schema/article-layout.schema.json"(exports2, module2) {
+    module2.exports = {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      $id: "obsidian-wechat-converter/article-layout.schema.json",
+      title: "WeChat Article Layout",
+      type: "object",
+      required: ["articleType", "title", "summary", "selection", "resolved", "blocks"],
+      additionalProperties: false,
+      properties: {
+        articleType: { type: "string" },
+        title: { type: "string" },
+        summary: { type: "string" },
+        selection: {
+          type: "object",
+          required: ["layoutFamily", "colorPalette"],
+          additionalProperties: false,
+          properties: {
+            layoutFamily: {
+              enum: ["auto", "source-first", "tutorial-cards", "editorial-lite"]
+            },
+            colorPalette: {
+              enum: ["auto", "tech-green", "ocean-blue", "sunset-amber", "graphite-rose"]
+            }
+          }
+        },
+        resolved: {
+          type: "object",
+          required: ["layoutFamily", "colorPalette"],
+          additionalProperties: false,
+          properties: {
+            layoutFamily: {
+              enum: ["source-first", "tutorial-cards", "editorial-lite"]
+            },
+            colorPalette: {
+              enum: ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose"]
+            }
+          }
+        },
+        recommendedLayoutFamily: {
+          enum: ["source-first", "tutorial-cards", "editorial-lite"]
+        },
+        recommendedColorPalette: {
+          enum: ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose"]
+        },
+        stylePack: {
+          type: "string",
+          description: "\u517C\u5BB9\u65E7\u7248\u672C\u5B57\u6BB5\uFF1B\u8FD0\u884C\u65F6\u5E94\u4EE5 resolved.colorPalette \u4E3A\u51C6\u3002"
+        },
+        blocks: {
+          type: "array",
+          minItems: 1,
+          maxItems: 24,
+          items: {
+            oneOf: [
+              {
+                type: "object",
+                required: ["type", "title"],
+                additionalProperties: false,
+                properties: {
+                  type: { const: "hero" },
+                  eyebrow: { type: "string" },
+                  title: { type: "string" },
+                  subtitle: { type: "string" },
+                  coverImageId: { type: "string" },
+                  variant: { enum: ["cover-right", "cover-left"] }
+                }
+              },
+              {
+                type: "object",
+                required: ["type", "items"],
+                additionalProperties: false,
+                properties: {
+                  type: { const: "part-nav" },
+                  items: {
+                    type: "array",
+                    maxItems: 6,
+                    items: {
+                      type: "object",
+                      required: ["label", "text"],
+                      additionalProperties: false,
+                      properties: {
+                        label: { type: "string" },
+                        text: { type: "string" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                type: "object",
+                required: ["type", "text"],
+                additionalProperties: false,
+                properties: {
+                  type: { const: "lead-quote" },
+                  text: { type: "string" },
+                  note: { type: "string" }
+                }
+              },
+              {
+                type: "object",
+                required: ["type"],
+                additionalProperties: false,
+                properties: {
+                  type: { const: "case-block" },
+                  caseLabel: { type: "string" },
+                  title: { type: "string" },
+                  summary: { type: "string" },
+                  bullets: {
+                    type: "array",
+                    maxItems: 6,
+                    items: { type: "string" }
+                  },
+                  imageIds: {
+                    type: "array",
+                    maxItems: 4,
+                    items: { type: "string" }
+                  },
+                  highlight: { type: "string" }
+                }
+              },
+              {
+                type: "object",
+                required: ["type", "sectionIndex"],
+                additionalProperties: false,
+                properties: {
+                  type: { const: "section-block" },
+                  sectionIndex: {
+                    oneOf: [
+                      { type: "integer", minimum: 0 },
+                      { type: "string", pattern: "^[0-9]+$" }
+                    ]
+                  },
+                  sectionLabel: { type: "string" },
+                  headingLevel: { type: "integer", minimum: 2, maximum: 6 },
+                  title: { type: "string" },
+                  paragraphs: {
+                    type: "array",
+                    items: { type: "string" }
+                  },
+                  bulletGroups: {
+                    type: "array",
+                    items: {
+                      type: "array",
+                      items: { type: "string" }
+                    }
+                  },
+                  subsections: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      required: ["title"],
+                      additionalProperties: false,
+                      properties: {
+                        title: { type: "string" },
+                        level: { type: "integer", minimum: 3, maximum: 6 },
+                        paragraphs: {
+                          type: "array",
+                          items: { type: "string" }
+                        },
+                        bulletGroups: {
+                          type: "array",
+                          items: {
+                            type: "array",
+                            items: { type: "string" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  imageIds: {
+                    type: "array",
+                    maxItems: 3,
+                    items: { type: "string" }
+                  }
+                }
+              },
+              {
+                type: "object",
+                required: ["type", "imageId"],
+                additionalProperties: false,
+                properties: {
+                  type: { const: "phone-frame" },
+                  imageId: { type: "string" },
+                  caption: { type: "string" }
+                }
+              },
+              {
+                type: "object",
+                required: ["type"],
+                additionalProperties: false,
+                properties: {
+                  type: { const: "cta-card" },
+                  title: { type: "string" },
+                  body: { type: "string" },
+                  buttonText: { type: "string" },
+                  note: { type: "string" }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+});
+
+// ai-layout-skills/_shared/templates/article-layout.template.json
+var require_article_layout_template = __commonJS({
+  "ai-layout-skills/_shared/templates/article-layout.template.json"(exports2, module2) {
+    module2.exports = {
+      articleType: "tutorial",
+      selection: {
+        layoutFamily: "auto",
+        colorPalette: "auto"
+      },
+      resolved: {
+        layoutFamily: "tutorial-cards",
+        colorPalette: "tech-green"
+      },
+      recommendedLayoutFamily: "tutorial-cards",
+      recommendedColorPalette: "tech-green",
+      title: "\u6587\u7AE0\u6807\u9898",
+      summary: "\u4E00\u53E5\u6458\u8981",
+      blocks: [
+        {
+          type: "hero",
+          eyebrow: "AI Layout Draft",
+          title: "\u6587\u7AE0\u6807\u9898",
+          subtitle: "\u5C01\u9762\u5BFC\u8BED",
+          coverImageId: "image-1",
+          variant: "cover-right"
+        },
+        {
+          type: "lead-quote",
+          text: "\u4E00\u6BB5\u9002\u5408\u505A\u5BFC\u8BED\u7684\u91CD\u70B9\u6458\u8981\u3002",
+          note: "\u8865\u5145\u8BF4\u660E\u6216\u4E0A\u4E0B\u6587\u3002"
+        },
+        {
+          type: "section-block",
+          sectionIndex: 0,
+          sectionLabel: "PART 01",
+          headingLevel: 2,
+          title: "\u7B2C\u4E00\u90E8\u5206",
+          paragraphs: ["\u8FD9\u91CC\u662F\u627F\u63A5\u539F\u6587\u7AE0\u8282\u7684\u6B63\u6587\u3002"],
+          bulletGroups: [],
+          subsections: [
+            {
+              title: "\u5B50\u8282\u4E00",
+              level: 3,
+              paragraphs: ["\u8FD9\u91CC\u662F\u5757\u5185 subsection \u7684\u6B63\u6587\u3002"],
+              bulletGroups: []
+            }
+          ],
+          imageIds: ["image-1"]
+        }
+      ]
+    };
+  }
+});
+
+// ai-layout-skills/source-first/manifest.json
+var require_manifest = __commonJS({
+  "ai-layout-skills/source-first/manifest.json"(exports2, module2) {
+    module2.exports = {
+      id: "source-first",
+      label: "\u539F\u6587\u589E\u5F3A\u578B",
+      order: 1,
+      version: "2026.03.25-alpha.1",
+      selectionValue: "source-first",
+      defaultColorPalette: "tech-green",
+      promptMode: "source-first",
+      fallbackPolicy: "source-first-preserve",
+      renderProfile: "source-first",
+      allowedBlocks: ["hero", "part-nav", "lead-quote", "case-block", "section-block", "phone-frame", "cta-card"],
+      supportsImages: true,
+      providerStrategy: "prefer-ai-fallback-local",
+      recommendedArticleTypes: ["article", "essay", "note", "knowledge-base"],
+      description: "\u6700\u63A5\u8FD1\u666E\u901A\u9884\u89C8\uFF0C\u6B63\u6587\u5C3D\u91CF\u8FDE\u7EED\u6D41\u52A8\uFF0C\u53EA\u505A\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\u3002"
+    };
+  }
+});
+
+// ai-layout-skills/source-first/blocks.json
+var require_blocks = __commonJS({
+  "ai-layout-skills/source-first/blocks.json"(exports2, module2) {
+    module2.exports = {
+      preferredIntroBlocks: ["lead-quote"],
+      optionalIntroBlocks: ["hero", "part-nav"],
+      preferredBodyBlocks: ["section-block"],
+      optionalBodyBlocks: ["case-block"],
+      optionalTailBlocks: ["cta-card"],
+      imageStrategy: "conservative"
+    };
+  }
+});
+
+// ai-layout-skills/source-first/fallback.json
+var require_fallback = __commonJS({
+  "ai-layout-skills/source-first/fallback.json"(exports2, module2) {
+    module2.exports = {
+      includeHero: false,
+      includePartNav: false,
+      includeLeadQuote: true,
+      includePhoneFrame: false,
+      includeCta: false,
+      heroVariant: "cover-right",
+      heroEyebrow: "AI Article Layout",
+      galleryCaseLabel: "GALLERY",
+      galleryTitle: "\u914D\u56FE\u8865\u5145",
+      preferSectionBlocks: true,
+      remainingImageStrategy: "sections-first",
+      maxSectionBlocks: 6
+    };
+  }
+});
+
+// ai-layout-skills/source-first/examples/article.json
+var require_article = __commonJS({
+  "ai-layout-skills/source-first/examples/article.json"(exports2, module2) {
+    module2.exports = {
+      articleType: "article",
+      selection: {
+        layoutFamily: "source-first",
+        colorPalette: "tech-green"
+      },
+      resolved: {
+        layoutFamily: "source-first",
+        colorPalette: "tech-green"
+      },
+      recommendedLayoutFamily: "source-first",
+      recommendedColorPalette: "tech-green",
+      title: "\u517B\u597D\u4E00\u4E2A\u5B69\u5B50\uFF0C\u4ECE\u653E\u8FC7\u81EA\u5DF1\u5F00\u59CB\uFF01",
+      summary: "\u4FDD\u7559\u539F\u6587\u8282\u594F\uFF0C\u53EA\u505A\u8F7B\u91CF\u589E\u5F3A\u3002",
+      blocks: [
+        {
+          type: "lead-quote",
+          text: "\u5148\u653E\u8FC7\u81EA\u5DF1\uFF0C\u5F88\u591A\u6559\u80B2\u7126\u8651\u624D\u4F1A\u771F\u6B63\u677E\u5F00\u3002",
+          note: "\u6458\u81EA\u539F\u6587\u5BFC\u8BED"
+        },
+        {
+          type: "section-block",
+          sectionIndex: 0
+        }
+      ]
+    };
+  }
+});
+
+// ai-layout-skills/tutorial-cards/manifest.json
+var require_manifest2 = __commonJS({
+  "ai-layout-skills/tutorial-cards/manifest.json"(exports2, module2) {
+    module2.exports = {
+      id: "tutorial-cards",
+      label: "\u6559\u7A0B\u5361\u7247\u578B",
+      order: 2,
+      version: "2026.03.25-alpha.1",
+      selectionValue: "tutorial-cards",
+      defaultColorPalette: "ocean-blue",
+      promptMode: "tutorial-cards",
+      fallbackPolicy: "tutorial-structured",
+      renderProfile: "tutorial-cards",
+      allowedBlocks: ["hero", "part-nav", "lead-quote", "case-block", "section-block", "phone-frame", "cta-card"],
+      supportsImages: true,
+      providerStrategy: "require-ai",
+      recommendedArticleTypes: ["tutorial", "case-study", "product-intro", "workflow"],
+      description: "\u66F4\u5F3A\u8C03\u7AE0\u8282\u7F16\u53F7\u3001\u4FE1\u606F\u5361\u4E0E\u622A\u56FE\u5C55\u793A\uFF0C\u9002\u5408\u6559\u7A0B\u3001\u6E05\u5355\u548C\u6848\u4F8B\u62C6\u89E3\u3002"
+    };
+  }
+});
+
+// ai-layout-skills/tutorial-cards/blocks.json
+var require_blocks2 = __commonJS({
+  "ai-layout-skills/tutorial-cards/blocks.json"(exports2, module2) {
+    module2.exports = {
+      preferredIntroBlocks: ["hero", "part-nav", "lead-quote"],
+      optionalIntroBlocks: [],
+      preferredBodyBlocks: ["section-block", "case-block"],
+      optionalBodyBlocks: ["phone-frame"],
+      optionalTailBlocks: ["cta-card"],
+      imageStrategy: "tutorial-forward"
+    };
+  }
+});
+
+// ai-layout-skills/tutorial-cards/fallback.json
+var require_fallback2 = __commonJS({
+  "ai-layout-skills/tutorial-cards/fallback.json"(exports2, module2) {
+    module2.exports = {
+      includeHero: true,
+      includePartNav: true,
+      includeLeadQuote: true,
+      includePhoneFrame: true,
+      includeCta: false,
+      heroVariant: "cover-right",
+      heroEyebrow: "AI Layout Draft",
+      galleryCaseLabel: "GALLERY",
+      galleryTitle: "\u914D\u56FE\u8865\u5145",
+      preferSectionBlocks: true,
+      remainingImageStrategy: "sections-first",
+      maxSectionBlocks: 8
+    };
+  }
+});
+
+// ai-layout-skills/tutorial-cards/examples/tutorial.json
+var require_tutorial = __commonJS({
+  "ai-layout-skills/tutorial-cards/examples/tutorial.json"(exports2, module2) {
+    module2.exports = {
+      articleType: "tutorial",
+      selection: {
+        layoutFamily: "tutorial-cards",
+        colorPalette: "ocean-blue"
+      },
+      resolved: {
+        layoutFamily: "tutorial-cards",
+        colorPalette: "ocean-blue"
+      },
+      recommendedLayoutFamily: "tutorial-cards",
+      recommendedColorPalette: "ocean-blue",
+      title: "Obsidian \u5165\u95E8\uFF1A\u7ED9\u7B14\u8BB0\u6253\u6807\u7B7E",
+      summary: "\u50CF\u6559\u7A0B\u7CBE\u4FEE\u7A3F\u4E00\u6837\u7ED3\u6784\u6E05\u6670\u3002",
+      blocks: [
+        {
+          type: "hero",
+          eyebrow: "AI Layout Draft",
+          title: "Obsidian \u5165\u95E8\uFF1A\u7ED9\u7B14\u8BB0\u6253\u6807\u7B7E",
+          subtitle: "\u8BA9\u5185\u5BB9\u81EA\u5DF1\u8DF3\u51FA\u6765",
+          coverImageId: "image-1",
+          variant: "cover-right"
+        },
+        {
+          type: "part-nav",
+          items: [
+            { label: "PART 01", text: "\u6807\u7B7E\u662F\u4EC0\u4E48" },
+            { label: "PART 02", text: "\u600E\u4E48\u7528" }
+          ]
+        }
+      ]
+    };
+  }
+});
+
+// ai-layout-skills/editorial-lite/manifest.json
+var require_manifest3 = __commonJS({
+  "ai-layout-skills/editorial-lite/manifest.json"(exports2, module2) {
+    module2.exports = {
+      id: "editorial-lite",
+      label: "\u8F7B\u6742\u5FD7\u578B",
+      order: 3,
+      version: "2026.03.25-alpha.1",
+      selectionValue: "editorial-lite",
+      defaultColorPalette: "graphite-rose",
+      promptMode: "editorial-lite",
+      fallbackPolicy: "editorial-flow",
+      renderProfile: "editorial-lite",
+      allowedBlocks: ["hero", "part-nav", "lead-quote", "case-block", "section-block", "phone-frame", "cta-card"],
+      supportsImages: true,
+      providerStrategy: "require-ai",
+      recommendedArticleTypes: ["editorial", "brand-story", "opinion"],
+      description: "\u504F\u7F16\u8F91\u611F\u7684\u7559\u767D\u4E0E\u56FE\u6587\u8282\u594F\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u7ECF\u9A8C\u4E0E\u54C1\u724C\u8868\u8FBE\u7C7B\u5185\u5BB9\u3002"
+    };
+  }
+});
+
+// ai-layout-skills/editorial-lite/blocks.json
+var require_blocks3 = __commonJS({
+  "ai-layout-skills/editorial-lite/blocks.json"(exports2, module2) {
+    module2.exports = {
+      preferredIntroBlocks: ["hero", "lead-quote"],
+      optionalIntroBlocks: ["part-nav"],
+      preferredBodyBlocks: ["section-block", "case-block"],
+      optionalBodyBlocks: [],
+      optionalTailBlocks: ["cta-card"],
+      imageStrategy: "editorial-forward"
+    };
+  }
+});
+
+// ai-layout-skills/editorial-lite/fallback.json
+var require_fallback3 = __commonJS({
+  "ai-layout-skills/editorial-lite/fallback.json"(exports2, module2) {
+    module2.exports = {
+      includeHero: true,
+      includePartNav: false,
+      includeLeadQuote: true,
+      includePhoneFrame: false,
+      includeCta: false,
+      heroVariant: "cover-left",
+      heroEyebrow: "Editorial Layout",
+      galleryCaseLabel: "IMAGES",
+      galleryTitle: "\u56FE\u50CF\u6458\u5F55",
+      preferSectionBlocks: true,
+      remainingImageStrategy: "sections-first",
+      maxSectionBlocks: 5
+    };
+  }
+});
+
+// ai-layout-skills/editorial-lite/examples/editorial.json
+var require_editorial = __commonJS({
+  "ai-layout-skills/editorial-lite/examples/editorial.json"(exports2, module2) {
+    module2.exports = {
+      articleType: "article",
+      selection: {
+        layoutFamily: "editorial-lite",
+        colorPalette: "graphite-rose"
+      },
+      resolved: {
+        layoutFamily: "editorial-lite",
+        colorPalette: "graphite-rose"
+      },
+      recommendedLayoutFamily: "editorial-lite",
+      recommendedColorPalette: "graphite-rose",
+      title: "\u5199\u4F5C\u7ECF\u9A8C\u590D\u76D8",
+      summary: "\u66F4\u6709\u547C\u5438\u611F\u3001\u66F4\u50CF\u7F16\u8F91\u7A3F\u3002",
+      blocks: [
+        {
+          type: "hero",
+          eyebrow: "Editorial Layout",
+          title: "\u5199\u4F5C\u7ECF\u9A8C\u590D\u76D8",
+          subtitle: "\u66F4\u8F7B\u3001\u66F4\u6709\u547C\u5438\u611F\u7684\u7248\u5F0F",
+          coverImageId: "image-1",
+          variant: "cover-left"
+        },
+        {
+          type: "lead-quote",
+          text: "\u5199\u4F5C\u7684\u771F\u6B63\u96BE\u70B9\uFF0C\u4ECE\u6765\u4E0D\u662F\u8868\u8FBE\uFF0C\u800C\u662F\u5220\u6539\u3002",
+          note: "\u6458\u81EA\u539F\u6587\u89C2\u70B9\u53E5"
+        }
+      ]
+    };
+  }
+});
+
+// services/ai-layout-runtime/builtin-skills.js
+var require_builtin_skills = __commonJS({
+  "services/ai-layout-runtime/builtin-skills.js"(exports2, module2) {
+    var colorPalettes = require_color_palettes();
+    var blockCatalog = require_block_catalog();
+    var wechatSafeStylePrimitives = require_wechat_safe_style_primitives();
+    var schema = require_article_layout_schema();
+    var template = require_article_layout_template();
+    var sourceFirstManifest = require_manifest();
+    var sourceFirstBlocks = require_blocks();
+    var sourceFirstFallback = require_fallback();
+    var sourceFirstExample = require_article();
+    var tutorialCardsManifest = require_manifest2();
+    var tutorialCardsBlocks = require_blocks2();
+    var tutorialCardsFallback = require_fallback2();
+    var tutorialCardsExample = require_tutorial();
+    var editorialLiteManifest = require_manifest3();
+    var editorialLiteBlocks = require_blocks3();
+    var editorialLiteFallback = require_fallback3();
+    var editorialLiteExample = require_editorial();
+    var skills = [
+      {
+        id: sourceFirstManifest.id,
+        manifest: sourceFirstManifest,
+        prompt: `\u4F60\u6B63\u5728\u751F\u6210\u201C\u539F\u6587\u589E\u5F3A\u578B\u201D\u516C\u4F17\u53F7\u6392\u7248\u3002
+
+\u76EE\u6807\uFF1A
+- AI \u53EA\u505A\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\uFF0C\u4E0D\u6539\u5199\u4F5C\u8005\u89C2\u70B9\u3002
+- \u6B63\u6587\u4E3B\u4F53\u4F18\u5148\u4F7F\u7528 section-block\uFF0C\u901A\u8FC7 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u3002
+- \u9664\u975E\u539F\u6587\u975E\u5E38\u9002\u5408\uFF0C\u5426\u5219\u4E0D\u8981\u4E3B\u52A8\u751F\u6210\u6559\u7A0B\u611F\u5F88\u5F3A\u7684 hero\u3001part-nav\u3001phone-frame\u3001cta-card\u3002
+- \u5982\u679C\u8981\u7ED9\u51FA lead-quote\uFF0C\u4F18\u5148\u6458\u53D6\u539F\u6587\u4E2D\u7684\u5BFC\u8BED\u3001\u89C2\u70B9\u53E5\u6216\u603B\u7ED3\u53E5\uFF0C\u4E0D\u8981\u91CD\u65B0\u5199\u4E00\u6BB5\u65B0\u6587\u6848\u3002
+
+\u98CE\u683C\u539F\u5219\uFF1A
+- \u66F4\u50CF\u201C\u666E\u901A\u9884\u89C8\u7684\u5347\u7EA7\u7248\u201D\uFF0C\u4E0D\u662F\u6559\u7A0B\u6A21\u677F\u3002
+- \u4FDD\u7559\u539F\u6587\u8282\u594F\u548C\u7AE0\u8282\u987A\u5E8F\u3002
+- \u5141\u8BB8\u8F7B\u5FAE\u5BFC\u8BED\u589E\u5F3A\u548C\u56FE\u7247\u4E0A\u63D0\uFF0C\u4F46\u4E0D\u80FD\u727A\u7272\u6B63\u6587\u5B8C\u6574\u6027\u3002`,
+        blocks: sourceFirstBlocks,
+        fallback: sourceFirstFallback,
+        skillDoc: `---
+name: source-first-layout
+description: \u539F\u6587\u589E\u5F3A\u578B skill\u3002\u5F3A\u8C03\u6B63\u6587\u4FDD\u771F\u3001\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\u3001AI \u5931\u8D25\u65F6\u672C\u5730\u515C\u5E95\u3002
+---
+
+# Source-First Layout Skill
+
+\u8FD9\u4E2A skill \u7528\u4E8E\u628A\u6587\u7AE0\u6392\u6210\u201C\u6700\u63A5\u8FD1\u666E\u901A\u9884\u89C8\u201D\u7684\u516C\u4F17\u53F7\u7248\u5F0F\u3002
+
+## Guardrails
+
+- \u4F18\u5148\u4F7F\u7528 \`section-block\`
+- \u4E0D\u91CD\u5199\u6B63\u6587
+- \u4E0D\u9ED8\u8BA4\u8FFD\u52A0 CTA
+- \u4E0D\u9ED8\u8BA4\u52A0\u5165\u6559\u7A0B\u5F0F\u5BFC\u822A
+- \u56FE\u7247\u53EA\u505A\u8F7B\u5EA6\u4E0A\u63D0\uFF0C\u4E0D\u5F3A\u884C\u624B\u673A\u58F3`,
+        examples: [
+          { name: "article.json", value: sourceFirstExample }
+        ]
+      },
+      {
+        id: tutorialCardsManifest.id,
+        manifest: tutorialCardsManifest,
+        prompt: `\u4F60\u6B63\u5728\u751F\u6210\u201C\u6559\u7A0B\u5361\u7247\u578B\u201D\u516C\u4F17\u53F7\u6392\u7248\u3002
+
+\u76EE\u6807\uFF1A
+- \u5F3A\u5316\u7ED3\u6784\u611F\u3001\u6B65\u9AA4\u611F\u3001\u6848\u4F8B\u611F\u3002
+- \u53EF\u4EE5\u79EF\u6781\u4F7F\u7528 hero\u3001part-nav\u3001lead-quote\u3001case-block\u3002
+- section-block \u4ECD\u7136\u4F18\u5148\u627F\u8F7D\u6B63\u6587\uFF0C\u4F46\u6574\u4F53\u9700\u8981\u66F4\u50CF\u201C\u6559\u7A0B\u7CBE\u4FEE\u7A3F\u201D\u3002
+- \u5982\u679C\u6709\u622A\u56FE\u6216\u754C\u9762\u56FE\uFF0C\u4F18\u5148\u8003\u8651 hero \u5C01\u9762\u548C phone-frame\u3002
+
+\u98CE\u683C\u539F\u5219\uFF1A
+- \u7528\u6237\u5E94\u8BE5\u4E00\u773C\u770B\u51FA\u8FD9\u662F\u4E00\u7BC7\u6559\u7A0B\u6216\u6848\u4F8B\u62C6\u89E3\u3002
+- \u53EF\u4EE5\u589E\u52A0\u7ED3\u6784\u6027\u5757\uFF0C\u4F46\u4E0D\u8981\u9057\u6F0F\u540E\u534A\u6BB5\u5185\u5BB9\u3002
+- \u4F18\u5148\u505A\u201C\u5C01\u9762\u6982\u89C8 -> \u5BFC\u8BED\u6458\u8981 -> \u5206\u7AE0\u8282\u6B63\u6587 -> \u53EF\u9009\u622A\u56FE\u5757\u201D\u3002`,
+        blocks: tutorialCardsBlocks,
+        fallback: tutorialCardsFallback,
+        skillDoc: `---
+name: tutorial-cards-layout
+description: \u6559\u7A0B\u5361\u7247\u578B skill\u3002\u5F3A\u8C03\u7AE0\u8282\u7F16\u53F7\u3001\u7ED3\u6784\u5316\u5361\u7247\u3001\u622A\u56FE\u5C55\u793A\u548C\u4FE1\u606F\u626B\u63CF\u6548\u7387\u3002
+---
+
+# Tutorial Cards Layout Skill
+
+\u8FD9\u4E2A skill \u7528\u4E8E\u628A\u6587\u7AE0\u6392\u6210\u201C\u6559\u7A0B\u7CBE\u4FEE\u7A3F\u201D\u7684\u6837\u5B50\u3002
+
+## Guardrails
+
+- \u53EF\u4EE5\u5F3A\u5316\u7ED3\u6784\uFF0C\u4E0D\u53EF\u4EE5\u4E22\u6B63\u6587
+- \u53EF\u4EE5\u7528 hero / part-nav / phone-frame
+- \u6B63\u6587\u4ECD\u4F18\u5148 section-block
+- CTA \u53EA\u80FD\u6309\u9700\u751F\u6210\uFF0C\u4E0D\u80FD\u9ED8\u8BA4\u52A0`,
+        examples: [
+          { name: "tutorial.json", value: tutorialCardsExample }
+        ]
+      },
+      {
+        id: editorialLiteManifest.id,
+        manifest: editorialLiteManifest,
+        prompt: `\u4F60\u6B63\u5728\u751F\u6210\u201C\u8F7B\u6742\u5FD7\u578B\u201D\u516C\u4F17\u53F7\u6392\u7248\u3002
+
+\u76EE\u6807\uFF1A
+- \u8BA9\u6587\u7AE0\u66F4\u50CF\u7F16\u8F91\u6392\u7248\u8FC7\u7684\u5185\u5BB9\u7A3F\uFF0C\u800C\u4E0D\u662F\u6559\u7A0B\u6A21\u677F\u3002
+- \u4F18\u5148\u4F53\u73B0\u6807\u9898\u6C14\u8D28\u3001\u5BFC\u8BED\u8282\u594F\u3001\u7559\u767D\u548C\u56FE\u6587\u547C\u5438\u611F\u3002
+- \u5F31\u5316\u6559\u7A0B\u5F0F\u5BFC\u822A\u548C\u624B\u673A\u6846\u3002
+- \u5982\u679C\u539F\u6587\u9002\u5408\uFF0C\u53EF\u7528\u5F3A lead-quote\u3001masthead \u5F0F hero\u3001\u8F83\u8F7B\u7684\u7AE0\u8282\u8282\u594F\u3002
+
+\u98CE\u683C\u539F\u5219\uFF1A
+- \u66F4\u5C11\u6559\u7A0B\u611F\uFF0C\u66F4\u5F3A editorial \u611F\u3002
+- \u4E0D\u8981\u628A\u6BCF\u4E00\u6BB5\u90FD\u5361\u7247\u5316\u3002
+- \u5141\u8BB8\u56FE\u6587\u7A7F\u63D2\uFF0C\u4F46\u4E0D\u727A\u7272\u6B63\u6587\u5B8C\u6574\u6027\u3002`,
+        blocks: editorialLiteBlocks,
+        fallback: editorialLiteFallback,
+        skillDoc: `---
+name: editorial-lite-layout
+description: \u8F7B\u6742\u5FD7\u578B skill\u3002\u5F3A\u8C03\u5BFC\u8BED\u3001\u7559\u767D\u3001\u7F16\u8F91\u611F\u8282\u594F\u548C\u66F4\u514B\u5236\u7684\u56FE\u6587\u5173\u7CFB\u3002
+---
+
+# Editorial Lite Layout Skill
+
+\u8FD9\u4E2A skill \u7528\u4E8E\u628A\u6587\u7AE0\u6392\u6210\u201C\u8F7B\u6742\u5FD7\u578B\u201D\u7684\u5185\u5BB9\u7A3F\u3002
+
+## Guardrails
+
+- \u5F3A\u8C03\u8282\u594F\u548C\u7559\u767D\uFF0C\u4E0D\u8981\u6BCF\u6BB5\u90FD\u5361\u7247\u5316
+- \u4E0D\u9ED8\u8BA4\u6559\u7A0B\u5BFC\u822A
+- \u4E0D\u9ED8\u8BA4\u624B\u673A\u58F3
+- lead-quote \u53EF\u4EE5\u66F4\u5F3A\uFF0C\u4F46\u4E0D\u80FD\u6539\u5199\u89C2\u70B9`,
+        examples: [
+          { name: "editorial.json", value: editorialLiteExample }
+        ]
+      }
+    ].sort((left, right) => {
+      var _a, _b, _c, _d;
+      const leftOrder = Number(((_a = left == null ? void 0 : left.manifest) == null ? void 0 : _a.order) || 999);
+      const rightOrder = Number(((_b = right == null ? void 0 : right.manifest) == null ? void 0 : _b.order) || 999);
+      if (leftOrder !== rightOrder)
+        return leftOrder - rightOrder;
+      return String(((_c = left == null ? void 0 : left.manifest) == null ? void 0 : _c.label) || (left == null ? void 0 : left.id)).localeCompare(String(((_d = right == null ? void 0 : right.manifest) == null ? void 0 : _d.label) || (right == null ? void 0 : right.id)), "zh-Hans-CN");
+    });
+    module2.exports = {
+      shared: {
+        version: wechatSafeStylePrimitives.version || colorPalettes.version || "2026.03.25-alpha.1",
+        schema,
+        template,
+        blockCatalog,
+        colorPalettes,
+        wechatSafeStylePrimitives
+      },
+      skills
+    };
+  }
+});
+
 // services/ai-layout-runtime/registry.js
 var require_registry = __commonJS({
   "services/ai-layout-runtime/registry.js"(exports2, module2) {
-    var fs = require("fs");
-    var path = require("path");
+    var builtinSkills = require_builtin_skills();
     var cachedRegistry = null;
-    function resolveSkillsRoot() {
-      const candidates = [
-        path.join(__dirname, "..", "..", "ai-layout-skills"),
-        path.join(__dirname, "..", "ai-layout-skills"),
-        path.join(__dirname, "ai-layout-skills")
-      ];
-      for (const candidate of candidates) {
-        if (fs.existsSync(path.join(candidate, "_shared"))) {
-          return candidate;
-        }
-      }
-      throw new Error("\u65E0\u6CD5\u5B9A\u4F4D ai-layout-skills \u76EE\u5F55");
-    }
-    function readJson(filePath) {
-      return JSON.parse(fs.readFileSync(filePath, "utf8"));
-    }
-    function readText(filePath) {
-      return fs.readFileSync(filePath, "utf8");
-    }
-    function loadSkill(skillRoot) {
-      const manifest = readJson(path.join(skillRoot, "manifest.json"));
-      const prompt = readText(path.join(skillRoot, "prompt.md")).trim();
-      const blocks = readJson(path.join(skillRoot, "blocks.json"));
-      const fallback = readJson(path.join(skillRoot, "fallback.json"));
-      const skillDoc = readText(path.join(skillRoot, "SKILL.md")).trim();
-      const examplesDir = path.join(skillRoot, "examples");
-      const examples = fs.existsSync(examplesDir) ? fs.readdirSync(examplesDir).filter((file) => file.endsWith(".json")).sort().map((file) => ({
-        name: file,
-        value: readJson(path.join(examplesDir, file))
-      })) : [];
-      return {
-        id: manifest.id,
-        manifest,
-        prompt,
-        blocks,
-        fallback,
-        skillDoc,
-        examples
-      };
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
     }
     function loadAiLayoutSkillRegistry() {
       if (cachedRegistry)
         return cachedRegistry;
-      const root = resolveSkillsRoot();
-      const sharedRoot = path.join(root, "_shared");
-      const colorPaletteData = readJson(path.join(sharedRoot, "assets", "color-palettes.json"));
-      const blockCatalogData = readJson(path.join(sharedRoot, "assets", "block-catalog.json"));
-      const wechatSafeStylePrimitives = readJson(path.join(sharedRoot, "assets", "wechat-safe-style-primitives.json"));
-      const schema = readJson(path.join(sharedRoot, "schema", "article-layout.schema.json"));
-      const template = readJson(path.join(sharedRoot, "templates", "article-layout.template.json"));
-      const skills = fs.readdirSync(root).filter((name) => !name.startsWith("_")).map((name) => loadSkill(path.join(root, name))).sort((left, right) => {
-        var _a, _b, _c, _d;
-        const leftOrder = Number(((_a = left == null ? void 0 : left.manifest) == null ? void 0 : _a.order) || 999);
-        const rightOrder = Number(((_b = right == null ? void 0 : right.manifest) == null ? void 0 : _b.order) || 999);
-        if (leftOrder !== rightOrder)
-          return leftOrder - rightOrder;
-        return String(((_c = left == null ? void 0 : left.manifest) == null ? void 0 : _c.label) || (left == null ? void 0 : left.id)).localeCompare(String(((_d = right == null ? void 0 : right.manifest) == null ? void 0 : _d.label) || (right == null ? void 0 : right.id)), "zh-Hans-CN");
-      });
       cachedRegistry = {
-        root,
-        shared: {
-          version: wechatSafeStylePrimitives.version || colorPaletteData.version || "2026.03.25-alpha.1",
-          schema,
-          template,
-          blockCatalog: blockCatalogData,
-          colorPalettes: colorPaletteData,
-          wechatSafeStylePrimitives
-        },
-        skills
+        root: "embedded://ai-layout-skills",
+        shared: clone(builtinSkills.shared),
+        skills: clone(builtinSkills.skills)
       };
       return cachedRegistry;
     }
@@ -3732,6 +4651,61 @@ var require_ai_layout_skill_bundle = __commonJS({
           const isNumericString = typeof block.sectionIndex === "string" && /^\d+$/.test(block.sectionIndex.trim());
           if (!isNumber && !isNumericString) {
             issues.push(createSchemaIssue(`${path}.sectionIndex`, "section-block.sectionIndex \u5FC5\u987B\u662F\u975E\u8D1F\u6574\u6570\u3002", true));
+          }
+          if ("sectionLabel" in block && typeof block.sectionLabel !== "string") {
+            issues.push(createSchemaIssue(`${path}.sectionLabel`, "section-block.sectionLabel \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+          }
+          if ("headingLevel" in block && (!Number.isInteger(block.headingLevel) || block.headingLevel < 2 || block.headingLevel > 6)) {
+            issues.push(createSchemaIssue(`${path}.headingLevel`, "section-block.headingLevel \u5FC5\u987B\u662F 2 \u5230 6 \u4E4B\u95F4\u7684\u6574\u6570\u3002", false));
+          }
+          if ("title" in block && typeof block.title !== "string") {
+            issues.push(createSchemaIssue(`${path}.title`, "section-block.title \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+          }
+          if ("paragraphs" in block && !Array.isArray(block.paragraphs)) {
+            issues.push(createSchemaIssue(`${path}.paragraphs`, "section-block.paragraphs \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+          if ("bulletGroups" in block) {
+            if (!Array.isArray(block.bulletGroups)) {
+              issues.push(createSchemaIssue(`${path}.bulletGroups`, "section-block.bulletGroups \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+            } else {
+              block.bulletGroups.forEach((group, groupIndex) => {
+                if (!Array.isArray(group) || group.some((item) => typeof item !== "string")) {
+                  issues.push(createSchemaIssue(`${path}.bulletGroups[${groupIndex}]`, "section-block.bulletGroups \u4E2D\u7684\u6BCF\u7EC4\u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u6570\u7EC4\u3002", false));
+                }
+              });
+            }
+          }
+          if ("subsections" in block) {
+            if (!Array.isArray(block.subsections)) {
+              issues.push(createSchemaIssue(`${path}.subsections`, "section-block.subsections \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+            } else {
+              block.subsections.forEach((subsection, subsectionIndex) => {
+                if (!subsection || typeof subsection !== "object" || Array.isArray(subsection)) {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}]`, "subsection \u5FC5\u987B\u662F\u5BF9\u8C61\u3002", false));
+                  return;
+                }
+                if (typeof subsection.title !== "string") {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].title`, "subsection.title \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+                }
+                if ("level" in subsection && (!Number.isInteger(subsection.level) || subsection.level < 3 || subsection.level > 6)) {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].level`, "subsection.level \u5FC5\u987B\u662F 3 \u5230 6 \u4E4B\u95F4\u7684\u6574\u6570\u3002", false));
+                }
+                if ("paragraphs" in subsection && !Array.isArray(subsection.paragraphs)) {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].paragraphs`, "subsection.paragraphs \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+                }
+                if ("bulletGroups" in subsection) {
+                  if (!Array.isArray(subsection.bulletGroups)) {
+                    issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].bulletGroups`, "subsection.bulletGroups \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+                  } else {
+                    subsection.bulletGroups.forEach((group, groupIndex) => {
+                      if (!Array.isArray(group) || group.some((item) => typeof item !== "string")) {
+                        issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].bulletGroups[${groupIndex}]`, "subsection.bulletGroups \u4E2D\u7684\u6BCF\u7EC4\u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u6570\u7EC4\u3002", false));
+                      }
+                    });
+                  }
+                }
+              });
+            }
           }
           if ("imageIds" in block && !Array.isArray(block.imageIds)) {
             issues.push(createSchemaIssue(`${path}.imageIds`, "section-block.imageIds \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
@@ -4248,13 +5222,16 @@ var require_ai_layout = __commonJS({
         });
       }
       const selectionStates = {};
-      const ingestState = (value, fallbackSelection = {}) => {
+      const ingestState = (value, fallbackSelection = {}, options = {}) => {
         var _a2, _b;
         const normalizedState = normalizeArticleLayoutState(value);
         if (!normalizedState)
           return;
         const effectiveSelection = normalizeLayoutSelection2(normalizedState.selection, fallbackSelection);
         const effectiveKey = getArticleLayoutSelectionKey2(effectiveSelection);
+        if (options.overwrite === false && selectionStates[effectiveKey]) {
+          return;
+        }
         selectionStates[effectiveKey] = {
           ...normalizedState,
           selection: effectiveSelection,
@@ -4280,7 +5257,7 @@ var require_ai_layout = __commonJS({
           ingestState(value, {
             layoutFamily: "tutorial-cards",
             colorPalette: stylePackId || AI_LAYOUT_DEFAULT_COLOR_PALETTE
-          });
+          }, { overwrite: false });
         }
       }
       const selectionKeys = Object.keys(selectionStates);
@@ -4664,6 +5641,12 @@ var require_ai_layout = __commonJS({
       const paragraphs = Array.isArray(section.paragraphs) ? section.paragraphs.map((item) => coerceString(item)).filter(Boolean) : [];
       const bulletGroups = Array.isArray(section.bulletGroups) ? section.bulletGroups.map((group) => Array.isArray(group) ? group.map((item) => coerceString(item)).filter(Boolean).slice(0, 10) : []).filter((group) => group.length) : [];
       const normalizedImageIds = Array.isArray(imageIds) ? imageIds.map((item) => coerceString(item)).filter(Boolean).slice(0, 3) : [];
+      const subsections = Array.isArray(section.subsections) ? section.subsections.map((subsection) => ({
+        title: coerceString((subsection == null ? void 0 : subsection.title) || (subsection == null ? void 0 : subsection.heading) || ""),
+        level: Number.isInteger(subsection == null ? void 0 : subsection.level) ? subsection.level : 3,
+        paragraphs: Array.isArray(subsection == null ? void 0 : subsection.paragraphs) ? subsection.paragraphs.map((item) => coerceString(item)).filter(Boolean) : [],
+        bulletGroups: Array.isArray(subsection == null ? void 0 : subsection.bulletGroups) ? subsection.bulletGroups.map((group) => Array.isArray(group) ? group.map((item) => coerceString(item)).filter(Boolean).slice(0, 10) : []).filter((group) => group.length) : []
+      })).filter((subsection) => subsection.title || subsection.paragraphs.length || subsection.bulletGroups.length) : [];
       if (!title && !paragraphs.length && !bulletGroups.length)
         return null;
       return {
@@ -4674,8 +5657,66 @@ var require_ai_layout = __commonJS({
         title,
         paragraphs,
         bulletGroups,
-        imageIds: normalizedImageIds
+        imageIds: normalizedImageIds,
+        subsections
       };
+    }
+    function mergeSectionBlocksByBudget(blocks = [], maxSectionBlocks = 0) {
+      if (!Number.isInteger(maxSectionBlocks) || maxSectionBlocks <= 0)
+        return blocks.slice();
+      let sectionCount = 0;
+      const merged = [];
+      const getLastSectionBlock = () => {
+        var _a2;
+        for (let index = merged.length - 1; index >= 0; index -= 1) {
+          if (((_a2 = merged[index]) == null ? void 0 : _a2.type) === "section-block")
+            return merged[index];
+        }
+        return null;
+      };
+      blocks.forEach((block) => {
+        if (!block || block.type !== "section-block") {
+          merged.push(block);
+          return;
+        }
+        if (sectionCount < maxSectionBlocks) {
+          merged.push({
+            ...block,
+            paragraphs: Array.isArray(block.paragraphs) ? block.paragraphs.slice() : [],
+            bulletGroups: Array.isArray(block.bulletGroups) ? block.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : [],
+            imageIds: Array.isArray(block.imageIds) ? block.imageIds.slice() : [],
+            subsections: Array.isArray(block.subsections) ? block.subsections.map((subsection) => ({
+              ...subsection,
+              paragraphs: Array.isArray(subsection.paragraphs) ? subsection.paragraphs.slice() : [],
+              bulletGroups: Array.isArray(subsection.bulletGroups) ? subsection.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : []
+            })) : []
+          });
+          sectionCount += 1;
+          return;
+        }
+        const lastSectionBlock = getLastSectionBlock();
+        if (!lastSectionBlock) {
+          merged.push(block);
+          return;
+        }
+        const promotedSubsection = {
+          title: coerceString(block.title || block.sectionLabel || `Section ${sectionCount + 1}`),
+          level: Math.max(3, Number.isInteger(block.headingLevel) ? block.headingLevel : 2),
+          paragraphs: Array.isArray(block.paragraphs) ? block.paragraphs.slice() : [],
+          bulletGroups: Array.isArray(block.bulletGroups) ? block.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : []
+        };
+        const nestedSubsections = Array.isArray(block.subsections) ? block.subsections.map((subsection) => ({
+          title: coerceString((subsection == null ? void 0 : subsection.title) || ""),
+          level: Math.max(3, Number.isInteger(subsection == null ? void 0 : subsection.level) ? subsection.level : 3),
+          paragraphs: Array.isArray(subsection == null ? void 0 : subsection.paragraphs) ? subsection.paragraphs.slice() : [],
+          bulletGroups: Array.isArray(subsection == null ? void 0 : subsection.bulletGroups) ? subsection.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : []
+        })).filter((subsection) => subsection.title || subsection.paragraphs.length || subsection.bulletGroups.length) : [];
+        lastSectionBlock.subsections = (Array.isArray(lastSectionBlock.subsections) ? lastSectionBlock.subsections : []).concat([promotedSubsection], nestedSubsections);
+        if (Array.isArray(block.imageIds) && block.imageIds.length) {
+          lastSectionBlock.imageIds = Array.from(/* @__PURE__ */ new Set([...Array.isArray(lastSectionBlock.imageIds) ? lastSectionBlock.imageIds : [], ...block.imageIds])).slice(0, 3);
+        }
+      });
+      return merged;
     }
     function findSourceSectionByTitle(sourceSections = [], title = "") {
       const expectedKey = normalizeTitleKey(title);
@@ -4805,14 +5846,18 @@ var require_ai_layout = __commonJS({
       const sections = [];
       const introParagraphs = [];
       const introBulletGroups = [];
+      const headings = [];
       let currentSection = null;
+      let currentSubsection = null;
       let currentParagraph = [];
       let currentBullets = [];
+      const getCurrentTarget = () => currentSubsection || currentSection || null;
       const pushParagraphToTarget = () => {
         const text = stripMarkdown(currentParagraph.join(" ").trim());
         if (text) {
-          if (currentSection) {
-            currentSection.paragraphs.push(text);
+          const target = getCurrentTarget();
+          if (target) {
+            target.paragraphs.push(text);
           } else {
             introParagraphs.push(text);
           }
@@ -4821,8 +5866,9 @@ var require_ai_layout = __commonJS({
       };
       const pushBulletsToTarget = () => {
         if (currentBullets.length) {
-          if (currentSection) {
-            currentSection.bulletGroups.push(currentBullets);
+          const target = getCurrentTarget();
+          if (target) {
+            target.bulletGroups.push(currentBullets);
           } else {
             introBulletGroups.push(currentBullets);
           }
@@ -4835,6 +5881,7 @@ var require_ai_layout = __commonJS({
           sections.push(currentSection);
         }
         currentSection = null;
+        currentSubsection = null;
       };
       for (const rawLine of lines) {
         const line = rawLine.trim();
@@ -4843,18 +5890,37 @@ var require_ai_layout = __commonJS({
           pushBulletsToTarget();
           continue;
         }
-        const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
+        const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
         if (headingMatch) {
           pushParagraphToTarget();
           pushBulletsToTarget();
-          finalizeSection();
-          currentSection = {
-            index: sections.length,
-            level: headingMatch[1].length,
-            title: stripMarkdown(headingMatch[2]),
+          const level = headingMatch[1].length;
+          const title = stripMarkdown(headingMatch[2]);
+          headings.push({ level, text: title });
+          if (level === 1) {
+            currentSubsection = null;
+            continue;
+          }
+          if (level === 2 || !currentSection) {
+            finalizeSection();
+            currentSection = {
+              index: sections.length,
+              level: 2,
+              title,
+              paragraphs: [],
+              bulletGroups: [],
+              subsections: []
+            };
+            currentSubsection = null;
+            continue;
+          }
+          currentSubsection = {
+            level,
+            title,
             paragraphs: [],
             bulletGroups: []
           };
+          currentSection.subsections.push(currentSubsection);
           continue;
         }
         const bulletMatch = line.match(/^[-*+]\s+(.+)$/) || line.match(/^\d+\.\s+(.+)$/);
@@ -4874,32 +5940,40 @@ var require_ai_layout = __commonJS({
           level: 2,
           title: "\u6838\u5FC3\u5185\u5BB9",
           paragraphs: introParagraphs.slice(),
-          bulletGroups: introBulletGroups.slice()
+          bulletGroups: introBulletGroups.slice(),
+          subsections: []
         });
       }
       return {
         introParagraphs,
         introBulletGroups,
+        headings,
         sections
       };
     }
     function extractMarkdownSignals(markdown = "") {
       const structure = extractMarkdownSections(markdown);
-      const headings = structure.sections.map((section) => ({
-        level: section.level || 2,
-        text: coerceString(section.title)
-      })).filter((section) => section.text);
+      const headings = Array.isArray(structure.headings) ? structure.headings.map((heading) => ({
+        level: heading.level || 2,
+        text: coerceString(heading.text)
+      })).filter((heading) => heading.text) : [];
       const bulletGroups = [
         ...structure.introBulletGroups,
-        ...structure.sections.flatMap((section) => section.bulletGroups || [])
+        ...structure.sections.flatMap((section) => [
+          ...section.bulletGroups || [],
+          ...(section.subsections || []).flatMap((subsection) => subsection.bulletGroups || [])
+        ])
       ];
       const paragraphs = [
         ...structure.introParagraphs,
-        ...structure.sections.flatMap((section) => section.paragraphs || [])
+        ...structure.sections.flatMap((section) => [
+          ...section.paragraphs || [],
+          ...(section.subsections || []).flatMap((subsection) => subsection.paragraphs || [])
+        ])
       ];
       const leadParagraphs = paragraphs.slice(0, 3);
       const lastParagraph = paragraphs[paragraphs.length - 1] || "";
-      const sectionTitles = headings.filter((item) => item.level <= 3).map((item) => item.text).slice(0, 12);
+      const sectionTitles = structure.sections.map((section) => coerceString(section.title)).filter(Boolean).slice(0, 12);
       return {
         headings,
         sectionTitles,
@@ -5003,9 +6077,11 @@ var require_ai_layout = __commonJS({
         if (block)
           bodyBlocks.push(block);
       });
+      const maxSectionBlocks = Number.isInteger(fallbackConfig.maxSectionBlocks) ? fallbackConfig.maxSectionBlocks : 0;
+      const budgetedBodyBlocks = mergeSectionBlocksByBudget(bodyBlocks, maxSectionBlocks);
       const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
       if (fallbackConfig.includePhoneFrame && (screenshotImage == null ? void 0 : screenshotImage.id)) {
-        bodyBlocks.push({
+        budgetedBodyBlocks.push({
           type: "phone-frame",
           imageId: screenshotImage.id,
           caption: screenshotImage.caption || screenshotImage.alt || "\u793A\u610F\u622A\u56FE"
@@ -5063,9 +6139,9 @@ var require_ai_layout = __commonJS({
         }
         return blocks;
       };
-      const usedImageIds = collectUsedImageIds([...headBlocks, ...bodyBlocks]);
+      const usedImageIds = collectUsedImageIds([...headBlocks, ...budgetedBodyBlocks]);
       const remainingImageIds = imageRefs.map((image) => coerceString(image == null ? void 0 : image.id)).filter(Boolean).filter((imageId) => !usedImageIds.has(imageId));
-      appendRemainingImages(bodyBlocks, remainingImageIds, resolved.layoutFamily);
+      appendRemainingImages(budgetedBodyBlocks, remainingImageIds, resolved.layoutFamily);
       return {
         version: AI_LAYOUT_SCHEMA_VERSION2,
         articleType: signals.sectionTitles.length >= 2 ? "tutorial" : "article",
@@ -5077,7 +6153,7 @@ var require_ai_layout = __commonJS({
         layoutFamily: resolved.layoutFamily,
         title,
         summary: summarizeText(leadText || signals.lastParagraph || title, 90),
-        blocks: [...headBlocks, ...bodyBlocks].filter(Boolean).slice(0, MAX_LAYOUT_BLOCKS)
+        blocks: [...headBlocks, ...budgetedBodyBlocks].filter(Boolean).slice(0, MAX_LAYOUT_BLOCKS)
       };
     }
     function mergeBlocksWithFallback(aiBlocks = [], fallbackBlocks = []) {
@@ -5429,8 +6505,9 @@ var require_ai_layout = __commonJS({
             "",
             "\u6B63\u6587\u4E3B\u4F53\u8BF7\u4F18\u5148\u4F7F\u7528 section-block\uFF0C\u5E76\u901A\u8FC7 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u3002",
             "sectionIndex \u4ECE 0 \u5F00\u59CB\uFF0C\u5BF9\u5E94\u4E0A\u9762\u201C\u53EF\u7528\u6B63\u6587 section\u201D\u7684\u7F16\u53F7\u3002",
+            "\u9ED8\u8BA4\u53EA\u628A H2 \u7EA7\u6807\u9898\u5F53\u4F5C major section\uFF1BH3/H4 \u66F4\u9002\u5408\u7559\u5728\u5BF9\u5E94 section-block \u5185\u90E8\uFF0C\u4F5C\u4E3A subsection \u6216\u6BB5\u5185\u5C42\u7EA7\u3002",
             "\u4F18\u5148\u8986\u76D6\u5168\u6587\u4E3B\u8981\u7AE0\u8282\uFF0C\u4E0D\u8981\u53EA\u5904\u7406\u524D\u534A\u7BC7\uFF0C\u4E5F\u4E0D\u8981\u9057\u6F0F\u540E\u534A\u90E8\u5206\u5185\u5BB9\u3002",
-            "\u5982\u679C\u7AE0\u8282\u8F83\u591A\uFF0C\u5141\u8BB8\u751F\u6210\u66F4\u591A block \u6765\u8986\u76D6\u5168\u6587\uFF1B\u4FDD\u771F\u4F18\u5148\u4E8E\u82B1\u54E8\u7F16\u6392\u3002",
+            "\u4E0D\u8981\u673A\u68B0\u5730\u628A\u6BCF\u4E2A\u5C0F\u6807\u9898\u90FD\u5347\u7EA7\u6210\u72EC\u7ACB block\uFF1B\u7ED3\u6784\u6E05\u6670\u6BD4 block \u6570\u91CF\u66F4\u591A\u66F4\u91CD\u8981\u3002",
             "CTA \u548C phone-frame \u90FD\u662F\u53EF\u9009\u5757\uFF0C\u4E0D\u8981\u9ED8\u8BA4\u5F3A\u52A0\u3002",
             "",
             "\u539F\u6587\u5982\u4E0B\uFF1A",
@@ -5804,7 +6881,16 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
         "'": "&#39;"
       })[char]);
     }
-    function renderArticleLayoutHtml2(layout, { imageRefs = [] } = {}) {
+    function normalizeInlineFontFamily(fontFamily = "") {
+      return String(fontFamily || "").replace(/"/g, "'");
+    }
+    function renderStyledText(tagName, text, style, { mode = "preview" } = {}) {
+      if (text === void 0 || text === null || text === "")
+        return "";
+      const actualTagName = mode === "draft" && /^h[1-6]$/i.test(tagName) ? "p" : tagName;
+      return `<${actualTagName} style="${style}">${escapeHtml(text)}</${actualTagName}>`;
+    }
+    function renderArticleLayoutHtml2(layout, { imageRefs = [], mode = "preview" } = {}) {
       var _a2, _b, _c, _d, _e, _f, _g, _h;
       const layoutFamily = getLayoutFamilyById2(((_a2 = layout == null ? void 0 : layout.resolved) == null ? void 0 : _a2.layoutFamily) || (layout == null ? void 0 : layout.layoutFamily));
       const colorPalette = getColorPaletteById2(((_b = layout == null ? void 0 : layout.resolved) == null ? void 0 : _b.colorPalette) || (layout == null ? void 0 : layout.stylePack));
@@ -5815,7 +6901,13 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       const isSourceFirst = layoutFamily.id === "source-first";
       const isTutorialCards = layoutFamily.id === "tutorial-cards";
       const isEditorialLite = layoutFamily.id === "editorial-lite";
-      const editorialDisplayFont = typography.editorialDisplayFont || 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif';
+      const isDraft = mode === "draft";
+      const editorialDisplayFont = normalizeInlineFontFamily(
+        typography.editorialDisplayFont || 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif'
+      );
+      const bodyFontFamily = normalizeInlineFontFamily(
+        typography.bodyFontFamily || '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif'
+      );
       const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
       const bodyFontSize = Number(typography.bodyFontSize || 16);
       const bodyLineHeight = Number(typography.bodyLineHeight || 1.8);
@@ -5825,13 +6917,14 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       const cardRadius = Number((_e = renderProfile.cardRadius) != null ? _e : isSourceFirst ? 10 : isEditorialLite ? 0 : 18);
       const cardPadding = (_f = renderProfile.cardPadding) != null ? _f : isSourceFirst ? "0" : isEditorialLite ? "0" : "18px";
       const cardMargin = Number((_g = renderProfile.cardMargin) != null ? _g : isSourceFirst ? 8 : isEditorialLite ? 30 : 18);
-      const cardShadow = (_h = renderProfile.cardShadow) != null ? _h : isTutorialCards ? "0 10px 30px -24px rgba(0,0,0,0.18)" : "none";
+      const cardShadow = isDraft ? "none" : (_h = renderProfile.cardShadow) != null ? _h : isTutorialCards ? "0 10px 30px -24px rgba(0,0,0,0.18)" : "none";
       const heroProfile = renderProfile.hero || {};
       const partNavProfile = renderProfile.partNav || {};
       const leadQuoteProfile = renderProfile.leadQuote || {};
       const caseBlockProfile = renderProfile.caseBlock || {};
+      const subsectionProfile = renderProfile.subsection || {};
       const wrapperStyle = [
-        `font-family:${typography.bodyFontFamily || '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif'}`,
+        `font-family:${bodyFontFamily}`,
         `color:${tokens.text}`,
         `font-size:${bodyFontSize}px`,
         `line-height:${bodyLineHeight}`,
@@ -5862,18 +6955,31 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       };
       const blocksHtml = (layout.blocks || []).map((block, index) => {
         if (block.type === "hero") {
-          const heroImageStyle = isEditorialLite ? `width:100%;max-width:none;flex:none;border-radius:${heroProfile.imageRadius || 28}px;` : isSourceFirst ? `max-width:none;width:100%;flex:none;border-radius:${heroProfile.imageRadius || 18}px;` : `max-width:116px;flex:0 0 116px;border-radius:${heroProfile.imageRadius || 18}px;`;
+          const heroImageStyle = isDraft ? `width:100%;max-width:none;border-radius:${heroProfile.imageRadius || (isEditorialLite ? 28 : 18)}px;` : isEditorialLite ? `width:100%;max-width:none;flex:none;border-radius:${heroProfile.imageRadius || 28}px;` : isSourceFirst ? `max-width:none;width:100%;flex:none;border-radius:${heroProfile.imageRadius || 18}px;` : `max-width:116px;flex:0 0 116px;border-radius:${heroProfile.imageRadius || 18}px;`;
           const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : "";
           const contentHtml = [
             block.eyebrow ? `<div style="font-size:${heroProfile.eyebrowSize || (isEditorialLite ? 10 : 11)}px;font-weight:700;letter-spacing:${heroProfile.eyebrowLetterSpacing || (isEditorialLite ? 2 : 1.2)}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : "",
-            block.title ? `<h1 style="margin:0 0 ${isSourceFirst ? 6 : isEditorialLite ? 14 : 10}px;font-size:${heroProfile.titleSize || (isSourceFirst ? 26 : isEditorialLite ? 36 : 28)}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h1>` : "",
+            renderStyledText(
+              "h1",
+              block.title,
+              `margin:0 0 ${isSourceFirst ? 6 : isEditorialLite ? 14 : 10}px;font-size:${heroProfile.titleSize || (isSourceFirst ? 26 : isEditorialLite ? 36 : 28)}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`,
+              { mode }
+            ),
             block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${heroProfile.subtitleSize || (isSourceFirst ? 16 : isEditorialLite ? 17 : 14)}px;line-height:${heroProfile.subtitleLineHeight || (isSourceFirst ? 1.8 : isEditorialLite ? 1.88 : 1.7)};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : ""
           ].join("");
           const flexDirection = block.variant === "cover-left" ? "row-reverse" : "row";
-          const heroFooter = heroProfile.footerMode === "editorial-divider" ? `<div style="display:flex;align-items:center;gap:14px;margin-top:24px;">
-            <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
-            <div style="flex:1;height:1px;background:${tokens.border};"></div>
-          </div>` : heroProfile.footerMode === "divider" ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>` : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`;
+          const heroFooter = isDraft ? `<div style="height:${heroProfile.footerMode === "accent-bar" ? 10 : 1}px;margin-top:${heroProfile.footerMode === "editorial-divider" ? 24 : 18}px;background:${heroProfile.footerMode === "accent-bar" ? tokens.accent : tokens.border};border-radius:999px;"></div>` : heroProfile.footerMode === "editorial-divider" ? `<div style="display:flex;align-items:center;gap:14px;margin-top:24px;">
+              <div style="width:48px;height:2px;background:${tokens.accent};border-radius:999px;"></div>
+              <div style="flex:1;height:1px;background:${tokens.border};"></div>
+            </div>` : heroProfile.footerMode === "divider" ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>` : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`;
+          if (isDraft) {
+            const draftHeroStyle = isTutorialCards ? `${cardStyle};padding:18px;background:${tokens.surfaceSoft};` : `margin:${isEditorialLite ? "4px 0 34px" : "2px 0 24px"};`;
+            return `<section style="${draftHeroStyle}">
+          <div>${contentHtml}</div>
+          ${imageHtml ? `<div style="margin-top:14px;">${imageHtml}</div>` : ""}
+          ${heroFooter}
+        </section>`;
+          }
           if (isEditorialLite) {
             return `<section style="margin:4px 0 34px;">
           <div style="max-width:680px;">${contentHtml}</div>
@@ -5897,6 +7003,17 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       </section>`;
         }
         if (block.type === "part-nav") {
+          if (isDraft) {
+            const itemsHtml2 = block.items.map((item, itemIndex) => `
+          <div style="margin:${itemIndex === 0 ? 0 : 8}px 0 0;padding:12px 12px;border:1px solid ${tokens.border};border-radius:${partNavProfile.useCard ? 14 : 10}px;background:${partNavProfile.useCard ? tokens.surfaceSoft : tokens.surface};">
+            <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
+            <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : isEditorialLite ? 17 : 13}px;font-weight:${isSourceFirst ? 500 : isEditorialLite ? 500 : 600};color:${tokens.text};line-height:${isEditorialLite ? 1.72 : 1.55};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(item.text)}</div>
+          </div>
+        `).join("");
+            return `<section style="margin:${isEditorialLite ? 20 : isSourceFirst ? 20 : 16}px 0 ${isSourceFirst ? 18 : 8}px;">
+          <div>${itemsHtml2}</div>
+        </section>`;
+          }
           const itemsHtml = block.items.map((item) => `
         <div style="flex:${partNavProfile.direction === "column" ? "1 1 100%" : isEditorialLite ? "1 1 100%" : "1 1 0"};min-width:0;padding:${isSourceFirst ? "0 0 0 0" : isEditorialLite ? "14px 0" : "12px 10px"};border:${partNavProfile.useCard ? `1px solid ${tokens.border}` : "none"};border-radius:${partNavProfile.useCard ? 14 : 0}px;background:${partNavProfile.useCard ? tokens.surfaceSoft : "transparent"};border-bottom:${partNavProfile.useDivider ? `1px solid ${tokens.border}` : "none"};">
           <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
@@ -5916,12 +7033,21 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
         if (block.type === "case-block") {
           const imagesHtml = block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("");
           const bulletsHtml = block.bullets.length ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>` : "";
+          const caseHeaderHtml = isDraft ? `<div style="margin-bottom:8px;">
+            <span style="display:inline-block;font-size:${caseBlockProfile.indexSize || (isSourceFirst ? 22 : isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${String(index + 1).padStart(2, "0")}</span>
+            <span style="display:inline-block;margin-left:8px;font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</span>
+          </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:${caseBlockProfile.indexSize || (isSourceFirst ? 22 : isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${String(index + 1).padStart(2, "0")}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
+          </div>`;
           return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 32 : 26}px 0;${caseBlockProfile.useCard ? `padding:18px;border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};` : ""}">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:${caseBlockProfile.indexSize || (isSourceFirst ? 22 : isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${String(index + 1).padStart(2, "0")}</div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
-        </div>
-        ${block.title ? `<h2 style="margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${caseBlockProfile.titleSize || (isSourceFirst ? 20 : isEditorialLite ? 26 : 22)}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h2>` : ""}
+        ${caseHeaderHtml}
+        ${renderStyledText(
+            "h2",
+            block.title,
+            `margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${caseBlockProfile.titleSize || (isSourceFirst ? 20 : isEditorialLite ? 26 : 22)}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`,
+            { mode }
+          )}
         ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ""}
         ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ""}
         ${bulletsHtml}
@@ -5941,26 +7067,72 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
             return `<ul style="margin:12px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>`;
           }).join("") : "";
           const imagesHtml = Array.isArray(block.imageIds) ? block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("") : "";
-          const sectionHead = isSourceFirst ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
-            <div style="height:1px;flex:1;background:${tokens.border};"></div>
-          </div>` : isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-              <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
-              <div style="width:42px;height:1px;background:${tokens.border};"></div>
-            </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+          const subsectionsHtml = Array.isArray(block.subsections) ? block.subsections.map((subsection, subsectionIndex) => {
+            const subsectionLevel = Number.isInteger(subsection == null ? void 0 : subsection.level) ? subsection.level : 3;
+            const subsectionParagraphs = Array.isArray(subsection == null ? void 0 : subsection.paragraphs) ? subsection.paragraphs.map((paragraph) => `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(paragraph)}</p>`).join("") : "";
+            const subsectionBullets = Array.isArray(subsection == null ? void 0 : subsection.bulletGroups) ? subsection.bulletGroups.map((group) => {
+              if (!Array.isArray(group) || !group.length)
+                return "";
+              return `<ul style="margin:10px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>`;
+            }).join("") : "";
+            const subsectionTitle = coerceString(subsection == null ? void 0 : subsection.title);
+            const subsectionLabel = isTutorialCards ? `STEP ${String(subsectionIndex + 1).padStart(2, "0")}` : isEditorialLite ? `Scene ${String(subsectionIndex + 1).padStart(2, "0")}` : `Sub ${String(subsectionIndex + 1).padStart(2, "0")}`;
+            const subsectionContainerStyle = [
+              `margin-top:${subsectionProfile.spacingTop || (isEditorialLite ? 18 : 14)}px`,
+              subsectionProfile.useCard ? `padding:${isTutorialCards ? "14px 14px 10px" : "0"};border:1px solid ${tokens.border};border-radius:${isTutorialCards ? 14 : 0}px;background:${isTutorialCards ? tokens.surfaceSoft : "transparent"}` : "",
+              subsectionProfile.useBorderLeft ? `border-left:2px solid ${tokens.accent};padding-left:${isTutorialCards ? 12 : 14}px` : "",
+              isEditorialLite ? `padding-top:6px;border-top:1px dashed ${tokens.border};` : ""
+            ].filter(Boolean).join(";");
+            const subsectionTitleSize = subsectionLevel >= 4 ? Math.max(14, Number(subsectionProfile.titleSize || (isEditorialLite ? 18 : 16)) - 1) : Number(subsectionProfile.titleSize || (isEditorialLite ? 18 : 16));
+            const subsectionLabelHtml = subsectionTitle ? isDraft ? `<div style="margin-bottom:8px;">
+                  <span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:${isEditorialLite ? 1.4 : 1}px;color:${tokens.accentDeep};text-transform:uppercase;${isEditorialLite ? `font-family:${editorialDisplayFont};` : ""}">${escapeHtml(subsectionLabel)}</span>
+                </div>` : `<div style="display:flex;align-items:center;gap:${isEditorialLite ? 10 : 8}px;margin-bottom:8px;">
+                  <span style="font-size:10px;font-weight:700;letter-spacing:${isEditorialLite ? 1.4 : 1}px;color:${tokens.accentDeep};text-transform:uppercase;${isEditorialLite ? `font-family:${editorialDisplayFont};` : ""}">${escapeHtml(subsectionLabel)}</span>
+                  <div style="flex:1;height:1px;background:${isEditorialLite ? tokens.border : "transparent"};"></div>
+                </div>` : "";
+            return `<div style="${subsectionContainerStyle}">
+            ${subsectionLabelHtml}
+            ${renderStyledText(
+              "h3",
+              subsectionTitle,
+              `margin:0 0 8px;font-size:${subsectionTitleSize}px;line-height:${isEditorialLite ? 1.45 : 1.5};font-weight:${subsectionProfile.titleWeight || (isEditorialLite ? 600 : 700)};color:${tokens.accentDeep};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`,
+              { mode }
+            )}
+            ${subsectionParagraphs}
+            ${subsectionBullets}
           </div>`;
+          }).join("") : "";
+          const sectionHead = isDraft ? isTutorialCards ? `<div style="margin-bottom:8px;">
+              <span style="display:inline-block;font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</span>
+              <span style="display:inline-block;margin-left:8px;font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</span>
+            </div>` : `<div style="margin-bottom:${isEditorialLite ? 14 : 10}px;">
+              <span style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:${isEditorialLite ? 1.4 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</span>
+            </div>` : isSourceFirst ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+              <div style="height:1px;flex:1;background:${tokens.border};"></div>
+            </div>` : isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+                <div style="width:42px;height:1px;background:${tokens.border};"></div>
+              </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+            </div>`;
           return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 36 : 26}px 0;${caseBlockProfile.useCard && isTutorialCards ? `padding:18px;border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};box-shadow:${cardShadow};` : ""}${isSourceFirst ? `padding-top:4px;` : ""}">
         ${sectionHead}
-        ${block.title ? `<h2 style="margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${titleColor};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(block.title)}</h2>` : ""}
+        ${renderStyledText(
+            "h2",
+            block.title,
+            `margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${titleColor};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`,
+            { mode }
+          )}
         ${paragraphsHtml}
         ${bulletGroupsHtml}
+        ${subsectionsHtml}
         ${imagesHtml}
       </section>`;
         }
         if (block.type === "phone-frame") {
-          return `<section style="margin:24px auto;max-width:${isSourceFirst ? 420 : isEditorialLite ? 460 : 380}px;padding:${isSourceFirst ? 10 : isEditorialLite ? 12 : 14}px;border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 24 : isEditorialLite ? 18 : 42}px;background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);">
+          return `<section style="margin:24px auto;max-width:${isSourceFirst ? 420 : isEditorialLite ? 460 : 380}px;padding:${isSourceFirst ? 10 : isEditorialLite ? 12 : 14}px;border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 24 : isEditorialLite ? 18 : 42}px;background:${isDraft ? tokens.surfaceSoft : `linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%)`};${isDraft ? "" : "box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);"}">
         <div style="width:${isEditorialLite ? 28 : 42}%;height:${isEditorialLite ? 2 : 18}px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
         <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 16 : isEditorialLite ? 14 : 28}px;padding:10px;overflow:hidden;">
           ${renderImage(block.imageId, `border-radius:${isSourceFirst ? 12 : isEditorialLite ? 12 : 22}px;`)}
@@ -5969,10 +7141,15 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       </section>`;
         }
         if (block.type === "cta-card") {
-          return `<section style="${cardStyle};background:linear-gradient(135deg, ${tokens.accentSoft} 0%, #ffffff 100%);">
-        ${block.title ? `<h3 style="margin:0 0 8px;font-size:${isEditorialLite ? 22 : 20}px;color:${tokens.text};">${escapeHtml(block.title)}</h3>` : ""}
+          return `<section style="${cardStyle};background:${isDraft ? tokens.accentSoft : `linear-gradient(135deg, ${tokens.accentSoft} 0%, #ffffff 100%)`};">
+        ${renderStyledText(
+            "h3",
+            block.title,
+            `margin:0 0 8px;font-size:${isEditorialLite ? 22 : 20}px;color:${tokens.text};`,
+            { mode }
+          )}
         ${block.body ? `<p style="margin:0;color:${tokens.muted};">${escapeHtml(block.body)}</p>` : ""}
-        <div style="margin-top:14px;display:inline-flex;align-items:center;justify-content:center;padding:${isEditorialLite ? "9px 18px" : "10px 16px"};border-radius:999px;background:${tokens.accent};color:#fff;font-weight:700;font-size:14px;">${escapeHtml(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB")}</div>
+        <div style="margin-top:14px;display:${isDraft ? "inline-block" : "inline-flex"};${isDraft ? "" : "align-items:center;justify-content:center;"}padding:${isEditorialLite ? "9px 18px" : "10px 16px"};border-radius:999px;background:${tokens.accent};color:#fff;font-weight:700;font-size:14px;">${escapeHtml(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB")}</div>
         ${block.note ? `<div style="margin-top:10px;font-size:12px;color:${tokens.muted};">${escapeHtml(block.note)}</div>` : ""}
       </section>`;
         }
@@ -6341,12 +7518,35 @@ var require_wechat_html_cleaner = __commonJS({
     function cleanHtmlForDraft(html) {
       const div = document.createElement("div");
       div.innerHTML = html;
-      const unwrapFragmentOnlyLinks = (root) => {
+      const decodeFragment = (value) => {
+        try {
+          return decodeURIComponent(value);
+        } catch (error) {
+          return value;
+        }
+      };
+      const isTagLikeFragmentLink = (anchor) => {
+        if (!anchor)
+          return false;
+        const href = (anchor.getAttribute("href") || "").trim();
+        if (!href.startsWith("#"))
+          return false;
+        const text = (anchor.textContent || "").trim();
+        if (!text.startsWith("#"))
+          return false;
+        const fragment = href.slice(1).trim();
+        if (!fragment)
+          return false;
+        const normalizedText = text.slice(1).trim();
+        if (!normalizedText)
+          return false;
+        return normalizedText === fragment || normalizedText === decodeFragment(fragment);
+      };
+      const unwrapTagLikeFragmentLinks = (root) => {
         if (!root)
           return;
         root.querySelectorAll("a[href]").forEach((anchor) => {
-          const href = (anchor.getAttribute("href") || "").trim();
-          if (!href.startsWith("#"))
+          if (!isTagLikeFragmentLink(anchor))
             return;
           const fragment = document.createDocumentFragment();
           while (anchor.firstChild) {
@@ -6381,7 +7581,7 @@ var require_wechat_html_cleaner = __commonJS({
         }
         return null;
       };
-      unwrapFragmentOnlyLinks(div);
+      unwrapTagLikeFragmentLinks(div);
       const hasInlineLabelPrefix = (container) => !!getInlineLabelPrefixInfo(container);
       const collapseLabelBreakInParagraph = (paragraph) => {
         const prefixInfo = getInlineLabelPrefixInfo(paragraph);
@@ -9313,6 +10513,24 @@ var AppleStyleView = class extends ItemView {
     }
     this.refreshAiLayoutPanel();
   }
+  getCurrentExportHtml() {
+    var _a, _b;
+    if (!this.currentHtml)
+      return null;
+    if (!this.aiPreviewApplied)
+      return this.currentHtml;
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    if (!state || !((_b = (_a = visibleSnapshot.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
+      return this.currentHtml;
+    }
+    if (context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+      return this.currentHtml;
+    }
+    const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs, mode: "draft" });
+  }
   restoreBasePreview() {
     if (!this.baseRenderedHtml || !this.previewContainer)
       return;
@@ -9605,7 +10823,7 @@ var AppleStyleView = class extends ItemView {
       const { cleanupResult } = await syncService.syncToDraft({
         account,
         proxyUrl: this.plugin.settings.proxyUrl,
-        currentHtml: this.currentHtml,
+        currentHtml: this.getCurrentExportHtml(),
         activeFile,
         publishMeta,
         sessionCoverBase64: this.sessionCoverBase64,
@@ -10144,8 +11362,9 @@ var AppleStyleView = class extends ItemView {
       this.copyBtn.classList.add("active");
     }
     try {
+      const exportHtml = this.getCurrentExportHtml() || this.currentHtml;
       const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = this.currentHtml;
+      tempDiv.innerHTML = exportHtml;
       const images = Array.from(tempDiv.querySelectorAll("img"));
       const localImages = images.filter((img) => img.src.startsWith("app://"));
       if (localImages.length > 0) {
