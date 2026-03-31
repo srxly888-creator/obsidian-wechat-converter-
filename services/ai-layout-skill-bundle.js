@@ -63,6 +63,31 @@ function validateAiLayoutPayload(rawLayout) {
     if (field === 'items[{label,text}]') return ['items'];
     return [field];
   })])]));
+  if (fieldMap.has('section-block')) {
+    fieldMap.get('section-block').add('callouts');
+  }
+
+  const validateCalloutArray = (value, path) => {
+    if (!Array.isArray(value)) {
+      issues.push(createSchemaIssue(path, `${path.split('.').pop()} 必须是数组。`, false));
+      return;
+    }
+    value.forEach((callout, calloutIndex) => {
+      if (!callout || typeof callout !== 'object' || Array.isArray(callout)) {
+        issues.push(createSchemaIssue(`${path}[${calloutIndex}]`, 'callout 必须是对象。', false));
+        return;
+      }
+      if ('type' in callout && typeof callout.type !== 'string') {
+        issues.push(createSchemaIssue(`${path}[${calloutIndex}].type`, 'callout.type 必须是字符串。', false));
+      }
+      if ('title' in callout && typeof callout.title !== 'string') {
+        issues.push(createSchemaIssue(`${path}[${calloutIndex}].title`, 'callout.title 必须是字符串。', false));
+      }
+      if ('body' in callout && typeof callout.body !== 'string') {
+        issues.push(createSchemaIssue(`${path}[${calloutIndex}].body`, 'callout.body 必须是字符串。', false));
+      }
+    });
+  };
 
   if (!rawLayout || typeof rawLayout !== 'object' || Array.isArray(rawLayout)) {
     issues.push(createSchemaIssue('$', '顶层必须是一个 JSON 对象。', true));
@@ -220,6 +245,9 @@ function validateAiLayoutPayload(rawLayout) {
           });
         }
       }
+      if ('callouts' in block) {
+        validateCalloutArray(block.callouts, `${path}.callouts`);
+      }
       if ('subsections' in block) {
         if (!Array.isArray(block.subsections)) {
           issues.push(createSchemaIssue(`${path}.subsections`, 'section-block.subsections 必须是数组。', false));
@@ -248,6 +276,9 @@ function validateAiLayoutPayload(rawLayout) {
                   }
                 });
               }
+            }
+            if ('callouts' in subsection) {
+              validateCalloutArray(subsection.callouts, `${path}.subsections[${subsectionIndex}].callouts`);
             }
           });
         }

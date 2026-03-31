@@ -1832,6 +1832,11 @@ input[type="range"].apple-slider:active::-webkit-slider-thumb {
   box-shadow: none !important;
 }
 
+.apple-preview-wrapper.mode-classic.apple-ai-preview-active .apple-converter-preview,
+.apple-preview-wrapper.mode-classic .apple-converter-preview.apple-ai-preview-active {
+  padding: 0 !important;
+}
+
 .apple-converter-container.apple-converter-mobile .apple-preview-wrapper.mode-classic {
   padding: 0 !important;
   overflow: auto !important;
@@ -1839,6 +1844,11 @@ input[type="range"].apple-slider:active::-webkit-slider-thumb {
 
 .apple-converter-container.apple-converter-mobile .apple-preview-wrapper.mode-classic .apple-converter-preview {
   padding: 10px 8px calc(14px + env(safe-area-inset-bottom)) !important;
+}
+
+.apple-converter-container.apple-converter-mobile .apple-preview-wrapper.mode-classic.apple-ai-preview-active .apple-converter-preview,
+.apple-converter-container.apple-converter-mobile .apple-preview-wrapper.mode-classic .apple-converter-preview.apple-ai-preview-active {
+  padding: 0 0 calc(8px + env(safe-area-inset-bottom)) 0 !important;
 }
 
 .theme-dark .apple-preview-wrapper.mode-classic {

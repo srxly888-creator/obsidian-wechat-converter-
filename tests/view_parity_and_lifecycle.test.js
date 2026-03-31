@@ -944,8 +944,9 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(view.currentHtml).toContain('display:flex');
     expect(view.currentHtml).toContain('<h1');
     expect(exportHtml).toContain('操作教程');
-    expect(exportHtml).not.toContain('display:flex');
     expect(exportHtml).not.toContain('<h1');
+    expect(exportHtml).toContain('display:flex;align-items:center;');
+    expect(exportHtml).toContain('overflow-x:scroll');
   });
 
   it('getCurrentExportHtml should leave non-ai preview html unchanged', () => {
@@ -954,6 +955,180 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.aiPreviewApplied = false;
 
     expect(view.getCurrentExportHtml()).toBe(view.currentHtml);
+  });
+
+  it('syncPreviewPresentationMode should only mark classic preview chrome when ai preview is applied', () => {
+    const view = new AppleStyleView(null, { settings: {} });
+    const wrapper = createObsidianLikeElement('div');
+    wrapper.className = 'apple-preview-wrapper mode-classic';
+    const preview = createObsidianLikeElement('div');
+    preview.className = 'apple-converter-preview';
+    wrapper.appendChild(preview);
+    document.body.appendChild(wrapper);
+    view.previewContainer = preview;
+
+    view.aiPreviewApplied = true;
+    view.syncPreviewPresentationMode();
+
+    expect(preview.classList.contains('apple-ai-preview-active')).toBe(true);
+    expect(wrapper.classList.contains('apple-ai-preview-active')).toBe(true);
+
+    view.aiPreviewApplied = false;
+    view.syncPreviewPresentationMode();
+
+    expect(preview.classList.contains('apple-ai-preview-active')).toBe(false);
+    expect(wrapper.classList.contains('apple-ai-preview-active')).toBe(false);
+
+    wrapper.remove();
+  });
+
+  it('getCurrentExportHtml should preserve rendered code and table blocks from the base preview', () => {
+    const cachedState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      selection: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      stylePack: 'ocean-blue',
+      status: 'ready',
+      generationMeta: { blockOrigins: [] },
+      layoutJson: {
+        selection: {
+          layoutFamily: 'tutorial-cards',
+          colorPalette: 'ocean-blue',
+        },
+        resolved: {
+          layoutFamily: 'tutorial-cards',
+          colorPalette: 'ocean-blue',
+        },
+        stylePack: 'ocean-blue',
+        blocks: [
+          {
+            type: 'section-block',
+            sectionIndex: 0,
+            title: '第一部分',
+            paragraphs: ['普通正文'],
+            subsections: [{ title: '子步骤', level: 3, paragraphs: ['普通子正文'] }],
+          },
+        ],
+      },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          providers: [],
+          articleLayoutsByPath: { 'notes/demo.md': cachedState },
+        },
+      },
+      getArticleLayoutState: vi.fn(() => cachedState),
+    });
+    view.app = {
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    cachedState.sourceHash = String(view.simpleHash('# demo'));
+    view.lastResolvedSourceHash = cachedState.sourceHash;
+    view.baseRenderedHtml = '<section><h2>第一部分</h2><section class="code-snippet__fix"><pre>const x = 1;</pre></section><h3>子步骤</h3><table><tr><td>表格</td></tr></table></section>';
+    view.currentHtml = '<section><p>ai preview</p></section>';
+    view.aiPreviewApplied = true;
+
+    const exportHtml = view.getCurrentExportHtml();
+
+    expect(exportHtml).toContain('code-snippet__fix');
+    expect(exportHtml).toContain('<table>');
+    expect(exportHtml).not.toContain('普通子正文');
+  });
+
+  it('getCurrentExportHtml should preserve rendered nested lists from the base preview for ai layouts', () => {
+    const cachedState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      selection: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      stylePack: 'ocean-blue',
+      status: 'ready',
+      generationMeta: { blockOrigins: [] },
+      layoutJson: {
+        selection: {
+          layoutFamily: 'tutorial-cards',
+          colorPalette: 'ocean-blue',
+        },
+        resolved: {
+          layoutFamily: 'tutorial-cards',
+          colorPalette: 'ocean-blue',
+        },
+        stylePack: 'ocean-blue',
+        blocks: [
+          {
+            type: 'section-block',
+            sectionIndex: 0,
+            title: '第一部分',
+            paragraphs: ['降级正文'],
+          },
+        ],
+      },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          providers: [],
+          articleLayoutsByPath: { 'notes/demo.md': cachedState },
+        },
+      },
+      getArticleLayoutState: vi.fn(() => cachedState),
+    });
+    view.app = {
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    cachedState.sourceHash = String(view.simpleHash('# demo'));
+    view.lastResolvedSourceHash = cachedState.sourceHash;
+    view.baseRenderedHtml = `
+      <section>
+        <h2>第一部分</h2>
+        <ul>
+          <li>
+            父项
+            <ul>
+              <li>子项一</li>
+              <li>子项二</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+    `;
+    view.currentHtml = '<section><p>ai preview</p></section>';
+    view.aiPreviewApplied = true;
+
+    const exportHtml = view.getCurrentExportHtml();
+
+    expect(exportHtml).toContain('<ul>');
+    expect(exportHtml).toContain('父项');
+    expect(exportHtml).toContain('子项一');
+    expect(exportHtml).not.toContain('降级正文');
   });
 
   it('ensureAiLayoutSelectionState should derive and persist a new color variant from the current layout', async () => {

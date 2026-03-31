@@ -26,6 +26,7 @@ const {
   deriveArticleLayoutStateForSelection,
   normalizeArticleLayoutCacheEntry,
   extractImageRefsFromHtml,
+  extractRenderedSectionFragments,
   generateArticleLayout,
   renderArticleLayoutHtml,
   testAiProviderConnection,
@@ -2771,7 +2772,8 @@ class AppleStyleView extends ItemView {
     }
 
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
-    const html = renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs });
+    const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || '');
+    const html = renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs, renderedSectionFragments });
     const scrollTop = this.previewContainer?.scrollTop || 0;
     this.currentHtml = html;
     this.aiPreviewApplied = true;
@@ -2780,6 +2782,7 @@ class AppleStyleView extends ItemView {
       this.previewContainer.scrollTop = scrollTop;
       this.previewContainer.addClass('apple-has-content');
     }
+    this.syncPreviewPresentationMode();
     this.refreshAiLayoutPanel();
   }
 
@@ -2798,7 +2801,8 @@ class AppleStyleView extends ItemView {
     }
 
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
-    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs, mode: 'draft' });
+    const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || '');
+    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs, mode: 'draft', renderedSectionFragments });
   }
 
   restoreBasePreview() {
@@ -2809,7 +2813,16 @@ class AppleStyleView extends ItemView {
     this.previewContainer.innerHTML = this.baseRenderedHtml;
     this.previewContainer.scrollTop = scrollTop;
     this.previewContainer.addClass('apple-has-content');
+    this.syncPreviewPresentationMode();
     this.refreshAiLayoutPanel();
+  }
+
+  syncPreviewPresentationMode() {
+    if (!this.previewContainer) return;
+    const hasAiPreview = this.aiPreviewApplied === true;
+    this.previewContainer.classList.toggle('apple-ai-preview-active', hasAiPreview);
+    const previewWrapper = this.previewContainer.closest('.apple-preview-wrapper');
+    previewWrapper?.classList.toggle('apple-ai-preview-active', hasAiPreview);
   }
 
   openPluginSettings() {
@@ -3603,6 +3616,7 @@ class AppleStyleView extends ItemView {
       this.previewContainer.scrollTop = scrollTop;
 
       this.previewContainer.addClass('apple-has-content'); // 添加内容状态类
+      this.syncPreviewPresentationMode();
       this.updateCurrentDoc();
       if (this.shouldSyncAiLayoutUi()) {
         const activeSelection = this.getCurrentAiLayoutSelection();
@@ -3638,6 +3652,7 @@ class AppleStyleView extends ItemView {
           this.applyAiLayoutToPreview();
         } else if (this.aiPreviewApplied) {
           this.aiPreviewApplied = false;
+          this.syncPreviewPresentationMode();
         }
         this.refreshAiLayoutPanel();
       }
@@ -3650,6 +3665,7 @@ class AppleStyleView extends ItemView {
       this.currentHtml = null;
       this.baseRenderedHtml = null;
       this.aiPreviewApplied = false;
+      this.syncPreviewPresentationMode();
       this.lastRenderError = error?.message || '未知渲染错误';
       this.showRenderFailurePlaceholder(this.lastRenderError);
       this.updateCurrentDoc();
