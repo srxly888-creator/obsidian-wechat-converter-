@@ -143,6 +143,18 @@
                   "items": { "type": "string" }
                 }
               },
+              "callouts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": { "type": "string" },
+                    "title": { "type": "string" },
+                    "body": { "type": "string" }
+                  }
+                }
+              },
               "subsections": {
                 "type": "array",
                 "items": {
@@ -161,6 +173,18 @@
                       "items": {
                         "type": "array",
                         "items": { "type": "string" }
+                      }
+                    },
+                    "callouts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "type": { "type": "string" },
+                          "title": { "type": "string" },
+                          "body": { "type": "string" }
+                        }
                       }
                     }
                   }

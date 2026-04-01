@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+const fs = require('fs');
+const path = require('path');
 
 const {
   AI_LAYOUT_SKILL_VERSION,
@@ -41,7 +43,7 @@ describe('ai-layout skill bundle', () => {
       'blocks',
     ]);
     expect(getAiLayoutBlockConstraintLines()).toContain('- hero: eyebrow, title, subtitle, coverImageId, variant');
-    expect(getAiLayoutBlockConstraintLines()).toContain('- section-block: sectionIndex, sectionLabel, headingLevel, title, paragraphs, bulletGroups, subsections, imageIds');
+    expect(getAiLayoutBlockConstraintLines()).toContain('- section-block: sectionIndex, sectionLabel, headingLevel, title, paragraphs, bulletGroups, callouts, subsections[{title,level,paragraphs,bulletGroups,callouts}], imageIds');
     expect(getAiLayoutBlockConstraintLines()).toContain('- cta-card: title, body, buttonText, note');
   });
 
@@ -61,6 +63,71 @@ describe('ai-layout skill bundle', () => {
     expect(shared.colorPalettes?.colorPalettes?.length).toBe(4);
   });
 
+  it('should source runtime prompt and skill docs from ai-layout-skills resources', () => {
+    const skillIds = ['source-first', 'tutorial-cards', 'editorial-lite'];
+
+    skillIds.forEach((skillId) => {
+      const skill = getAiLayoutSkillById(skillId);
+      const skillDir = path.join(__dirname, '..', 'ai-layout-skills', skillId);
+      const expectedPrompt = fs.readFileSync(path.join(skillDir, 'prompt.md'), 'utf8').trimEnd();
+      const expectedSkillDoc = fs.readFileSync(path.join(skillDir, 'SKILL.md'), 'utf8').trimEnd();
+
+      expect(skill?.prompt).toBe(expectedPrompt);
+      expect(skill?.skillDoc).toBe(expectedSkillDoc);
+    });
+  });
+
+  it('should expose callout-aware section-block fields in shared resources', () => {
+    const shared = getAiLayoutSharedResources();
+    const sectionBlock = shared.blockCatalog.blocks.find((block) => block.type === 'section-block');
+    const sectionBlockSchema = shared.schema.properties.blocks.items.oneOf.find((block) => block.properties?.type?.const === 'section-block');
+
+    expect(sectionBlock.fields).toContain('callouts');
+    expect(sectionBlock.fields).toContain('subsections[{title,level,paragraphs,bulletGroups,callouts}]');
+    expect(sectionBlock.description).toContain('callout');
+    expect(sectionBlockSchema.properties.callouts).toBeTruthy();
+    expect(sectionBlockSchema.properties.subsections.items.properties.callouts).toBeTruthy();
+  });
+
+  it('should validate section and subsection callouts via shared schema-compatible payloads', () => {
+    const result = validateAiLayoutPayload({
+      articleType: 'tutorial',
+      selection: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      title: '文章标题',
+      summary: '一句摘要',
+      blocks: [
+        {
+          type: 'section-block',
+          sectionIndex: 0,
+          title: '第一部分',
+          callouts: [
+            { type: 'tip', title: '提示', body: '这里是 callout' },
+          ],
+          subsections: [
+            {
+              title: '子节一',
+              level: 3,
+              callouts: [
+                { type: 'note', title: '说明', body: '子节里的 callout' },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.fatal).toBe(false);
+    expect(result.issueCount).toBe(0);
+  });
+
   it('should provide a reusable layout template', () => {
     const template = getAiLayoutTemplate();
     expect(template.articleType).toBe('tutorial');
@@ -75,8 +142,26 @@ describe('ai-layout skill bundle', () => {
     expect(template.recommendedLayoutFamily).toBe('tutorial-cards');
     expect(template.recommendedColorPalette).toBe('tech-green');
     expect(Array.isArray(template.blocks)).toBe(true);
-    expect(template.blocks.some((block) => block.type === 'section-block')).toBe(true);
+    const sectionBlock = template.blocks.find((block) => block.type === 'section-block');
+    expect(sectionBlock).toBeTruthy();
+    expect(sectionBlock.callouts?.length).toBeGreaterThan(0);
+    expect(sectionBlock.subsections?.[0]?.callouts?.length).toBeGreaterThan(0);
     expect(template.blocks.some((block) => block.type === 'cta-card')).toBe(false);
+  });
+
+  it('should ship examples that reflect callout-preserving section blocks', () => {
+    const sourceFirst = getAiLayoutSkillById('source-first');
+    const tutorialCards = getAiLayoutSkillById('tutorial-cards');
+    const editorialLite = getAiLayoutSkillById('editorial-lite');
+
+    const sourceFirstSection = sourceFirst.examples[0].value.blocks.find((block) => block.type === 'section-block');
+    const tutorialSection = tutorialCards.examples[0].value.blocks.find((block) => block.type === 'section-block');
+    const editorialSection = editorialLite.examples[0].value.blocks.find((block) => block.type === 'section-block');
+
+    expect(sourceFirstSection.callouts?.length).toBeGreaterThan(0);
+    expect(tutorialSection.callouts?.length).toBeGreaterThan(0);
+    expect(tutorialSection.subsections?.[0]?.callouts?.length).toBeGreaterThan(0);
+    expect(editorialSection.callouts?.length).toBeGreaterThan(0);
   });
 
   it('should validate layout payload schema issues', () => {

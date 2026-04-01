@@ -1,4 +1,4 @@
-const builtinSkills = require('./builtin-skills');
+const generatedSkills = require('./generated-skills');
 
 let cachedRegistry = null;
 
@@ -10,8 +10,8 @@ function loadAiLayoutSkillRegistry() {
   if (cachedRegistry) return cachedRegistry;
   cachedRegistry = {
     root: 'embedded://ai-layout-skills',
-    shared: clone(builtinSkills.shared),
-    skills: clone(builtinSkills.skills),
+    shared: clone(generatedSkills.shared),
+    skills: clone(generatedSkills.skills),
   };
   return cachedRegistry;
 }

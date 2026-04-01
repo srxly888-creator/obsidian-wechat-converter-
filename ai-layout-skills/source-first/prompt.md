@@ -5,6 +5,7 @@
 - 正文主体优先使用 section-block，通过 sectionIndex 引用原文章节。
 - 除非原文非常适合，否则不要主动生成教程感很强的 hero、part-nav、phone-frame、cta-card。
 - 如果要给出 lead-quote，优先摘取原文中的导语、观点句或总结句，不要重新写一段新文案。
+- 如果原文章节里已经有 callout、代码块、表格、嵌套列表等特殊结构，优先保留在对应 section-block / subsection 中，不要压平成普通段落。
 
 风格原则：
 - 更像“普通预览的升级版”，不是教程模板。

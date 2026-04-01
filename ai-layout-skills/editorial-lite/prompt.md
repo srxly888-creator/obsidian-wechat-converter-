@@ -5,6 +5,7 @@
 - 优先体现标题气质、导语节奏、留白和图文呼吸感。
 - 弱化教程式导航和手机框。
 - 如果原文适合，可用强 lead-quote、masthead 式 hero、较轻的章节节奏。
+- 正文区块依然要保真，原文里的 callout、代码块、表格、嵌套列表等特殊结构应优先保留在对应 section-block / subsection 中。
 
 风格原则：
 - 更少教程感，更强 editorial 感。

@@ -34,12 +34,26 @@
       "title": "第一部分",
       "paragraphs": ["这里是承接原文章节的正文。"],
       "bulletGroups": [],
+      "callouts": [
+        {
+          "type": "tip",
+          "title": "补充提示",
+          "body": "这里是保留在 section-block 内的 callout。"
+        }
+      ],
       "subsections": [
         {
           "title": "子节一",
           "level": 3,
           "paragraphs": ["这里是块内 subsection 的正文。"],
-          "bulletGroups": []
+          "bulletGroups": [],
+          "callouts": [
+            {
+              "type": "note",
+              "title": "子节说明",
+              "body": "这里是 subsection 内的 callout。"
+            }
+          ]
         }
       ],
       "imageIds": ["image-1"]

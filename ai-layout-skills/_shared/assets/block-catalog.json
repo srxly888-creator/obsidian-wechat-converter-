@@ -34,8 +34,8 @@
     },
     {
       "type": "section-block",
-      "fields": ["sectionIndex", "sectionLabel", "headingLevel", "title", "paragraphs", "bulletGroups", "subsections", "imageIds"],
-      "description": "正文保真区块，按 sectionIndex 引用原文章节内容，不改写正文；默认由 H2 级主章节承载，H3/H4 留在块内做 subsection。"
+      "fields": ["sectionIndex", "sectionLabel", "headingLevel", "title", "paragraphs", "bulletGroups", "callouts", "subsections[{title,level,paragraphs,bulletGroups,callouts}]", "imageIds"],
+      "description": "正文保真区块，按 sectionIndex 引用原文章节内容，不改写正文；默认由 H2 级主章节承载，H3/H4 留在块内做 subsection，并尽量保留 callout、代码块、表格和嵌套列表等特殊结构。"
     },
     {
       "type": "phone-frame",

@@ -20,7 +20,14 @@
     },
     {
       "type": "section-block",
-      "sectionIndex": 0
+      "sectionIndex": 0,
+      "callouts": [
+        {
+          "type": "tip",
+          "title": "作者提醒",
+          "body": "这类提醒应保留在正文对应 section 里，而不是改写成普通段落。"
+        }
+      ]
     }
   ]
 }

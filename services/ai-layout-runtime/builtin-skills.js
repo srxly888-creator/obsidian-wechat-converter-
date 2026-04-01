@@ -1,3 +1,6 @@
+// Legacy snapshot kept temporarily for reference during the source-of-truth migration.
+// Runtime now loads ./generated-skills via registry.js. Do not update this file.
+
 const colorPalettes = require('../../ai-layout-skills/_shared/assets/color-palettes.json');
 const blockCatalog = require('../../ai-layout-skills/_shared/assets/block-catalog.json');
 const wechatSafeStylePrimitives = require('../../ai-layout-skills/_shared/assets/wechat-safe-style-primitives.json');

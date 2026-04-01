@@ -54,15 +54,20 @@ function createSchemaIssue(path, message, fatal = false) {
   };
 }
 
+function normalizeBlockFieldKey(field) {
+  const normalized = String(field || '').trim();
+  if (!normalized) return normalized;
+  if (normalized === 'items[{label,text}]') return 'items';
+  const bracketIndex = normalized.indexOf('[');
+  return bracketIndex === -1 ? normalized : normalized.slice(0, bracketIndex);
+}
+
 function validateAiLayoutPayload(rawLayout) {
   const issues = [];
   const allowedBlockTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type));
   const allowedLayoutFamilies = new Set(AI_LAYOUT_FAMILIES);
   const allowedColorPalettes = new Set(AI_LAYOUT_COLOR_PALETTES);
-  const fieldMap = new Map(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => [block.type, new Set(['type', ...block.fields.flatMap((field) => {
-    if (field === 'items[{label,text}]') return ['items'];
-    return [field];
-  })])]));
+  const fieldMap = new Map(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => [block.type, new Set(['type', ...block.fields.map((field) => normalizeBlockFieldKey(field)).filter(Boolean)])]));
   if (fieldMap.has('section-block')) {
     fieldMap.get('section-block').add('callouts');
   }
