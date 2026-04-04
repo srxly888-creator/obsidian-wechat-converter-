@@ -131,6 +131,40 @@ describe('Obsidian Triplet Serializer', () => {
     expect(html).toContain('>Tip<');
   });
 
+  it('should apply neutral semantic styling when converting Obsidian callouts', async () => {
+    const neutralConverter = await createLegacyConverter({
+      themeOptions: {
+        quoteCalloutStyleMode: 'neutral',
+        themeColor: 'blue',
+      },
+    });
+    const root = document.createElement('div');
+    root.innerHTML = '<div class="callout" data-callout="warning"><div class="callout-title"><div class="callout-title-inner">Warning</div></div><div class="callout-content"><p>内容</p></div></div>';
+
+    const html = serializeObsidianRenderedHtml({ root, converter: neutralConverter });
+
+    expect(html).toContain('border-left: 3px solid #b26a00');
+    expect(html).toContain('background: #f9f9f9');
+    expect(html).toContain('background: #b26a0014');
+  });
+
+  it('should fall back to theme accent for unknown Obsidian callout types in neutral mode', async () => {
+    const neutralConverter = await createLegacyConverter({
+      themeOptions: {
+        quoteCalloutStyleMode: 'neutral',
+        themeColor: 'green',
+      },
+    });
+    const root = document.createElement('div');
+    root.innerHTML = '<div class="callout" data-callout="tips"><div class="callout-title"><div class="callout-title-inner">Tips</div></div><div class="callout-content"><p>内容</p></div></div>';
+
+    const html = serializeObsidianRenderedHtml({ root, converter: neutralConverter });
+
+    expect(html).toContain('>📌<');
+    expect(html).toContain('border-left: 3px solid #28a745');
+    expect(html).toContain('background: #28a74514');
+  });
+
   it('should trim trailing spaces before block close tags for legacy parity', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>这是第一句。  </p><p>这是第二句。  </p>';

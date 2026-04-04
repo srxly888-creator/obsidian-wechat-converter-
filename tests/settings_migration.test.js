@@ -113,6 +113,7 @@ describe('AppleStylePlugin - Settings Migration', () => {
     expect(plugin.settings.ai.defaultStylePack).toBe('tech-green');
     expect(plugin.settings.ai.providers).toEqual([]);
     expect(plugin.settings.ai.articleLayoutsByPath).toEqual({});
+    expect(plugin.settings.quoteCalloutStyleMode).toBe('theme');
     expect(plugin.saveData).not.toHaveBeenCalled();
   });
 

@@ -132,6 +132,8 @@ window.AppleTheme = class AppleTheme {
     lg: 12,
   };
 
+  static QUOTE_CALLOUT_NEUTRAL_BG = '#f9f9f9';
+
   /**
    * 当前配置
    */
@@ -139,6 +141,7 @@ window.AppleTheme = class AppleTheme {
     this.themeName = options.theme || 'github';
     this.themeColor = options.themeColor || 'blue';
     this.customColor = options.customColor || null;
+    this.quoteCalloutStyleMode = options.quoteCalloutStyleMode || 'theme';
     this.fontFamily = options.fontFamily || 'sans-serif';
     this.fontSize = options.fontSize || 3;
     this.macCodeBlock = options.macCodeBlock !== false;
@@ -225,6 +228,10 @@ window.AppleTheme = class AppleTheme {
     return AppleTheme.FONTS[this.fontFamily] || AppleTheme.FONTS['sans-serif'];
   }
 
+  getQuoteCalloutStyleMode() {
+    return this.quoteCalloutStyleMode === 'neutral' ? 'neutral' : 'theme';
+  }
+
   /**
    * 获取元素样式
    * @param {string} tagName - HTML 标签名
@@ -235,6 +242,7 @@ window.AppleTheme = class AppleTheme {
     const sizes = this.getSizes();
     const font = this.getFontFamily();
     const color = this.getThemeColorValue();
+    const quoteCalloutStyleMode = this.getQuoteCalloutStyleMode();
     const s = AppleTheme.SPACING;
     const r = AppleTheme.RADIUS;
 
@@ -266,8 +274,18 @@ window.AppleTheme = class AppleTheme {
 
       case 'blockquote':
         if (config.blockquoteStyle === 'center') {
-          // Centered Blockquote: Now using theme color tint (1F) instead of purely grey, for continuity
-          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${config.blockquoteBg || color + '1F'}; margin: 30px 60px; padding: 20px; text-align: center; border: none; position: relative; border-radius: 4px;`;
+          const centeredBackground = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG
+            : (config.blockquoteBg || color + '1F');
+          const centeredRadius = quoteCalloutStyleMode === 'neutral' ? r.md : r.sm;
+          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${centeredBackground}; margin: 30px 60px; padding: 20px; text-align: center; border: none; position: relative; border-radius: ${centeredRadius}px;`;
+        }
+
+        if (quoteCalloutStyleMode === 'neutral') {
+          const neutralBorderWidth = this.themeName === 'wechat'
+            ? 3
+            : (config.blockquoteBorderWidth || 4);
+          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${neutralBorderWidth}px solid ${color}; border-radius: ${r.sm}px;`;
         }
 
         // 经典主题（wechat）：使用更细的边框和更浅的颜色，与 H3 区分
@@ -445,6 +463,7 @@ window.AppleTheme = class AppleTheme {
     if (options.theme !== undefined) this.themeName = options.theme;
     if (options.themeColor !== undefined) this.themeColor = options.themeColor;
     if (options.customColor !== undefined) this.customColor = options.customColor;
+    if (options.quoteCalloutStyleMode !== undefined) this.quoteCalloutStyleMode = options.quoteCalloutStyleMode;
     if (options.fontFamily !== undefined) this.fontFamily = options.fontFamily;
     if (options.fontSize !== undefined) this.fontSize = options.fontSize;
     if (options.macCodeBlock !== undefined) this.macCodeBlock = options.macCodeBlock;

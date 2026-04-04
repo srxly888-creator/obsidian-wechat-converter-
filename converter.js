@@ -44,6 +44,52 @@ const CALLOUT_ICONS = {
   example: { icon: '📋', label: '示例' },
 };
 
+const CALLOUT_SEMANTIC_GROUPS = {
+  note: 'info',
+  info: 'info',
+  todo: 'info',
+  abstract: 'info',
+  summary: 'info',
+  tldr: 'info',
+  tip: 'tip',
+  hint: 'tip',
+  important: 'tip',
+  success: 'success',
+  check: 'success',
+  done: 'success',
+  question: 'question',
+  help: 'question',
+  faq: 'question',
+  warning: 'warning',
+  caution: 'warning',
+  attention: 'warning',
+  failure: 'danger',
+  fail: 'danger',
+  missing: 'danger',
+  danger: 'danger',
+  error: 'danger',
+  bug: 'danger',
+  quote: 'quote',
+  cite: 'quote',
+  example: 'quote',
+};
+
+const CALLOUT_SEMANTIC_COLORS = {
+  info: '#2f6fdd',
+  tip: '#1f8c7a',
+  success: '#2d8a4a',
+  question: '#7251b5',
+  warning: '#b26a00',
+  danger: '#c44747',
+  quote: '#5f6b7a',
+};
+
+function resolveCalloutSemanticColor(type, fallbackColor) {
+  const key = String(type || '').trim().toLowerCase();
+  const group = CALLOUT_SEMANTIC_GROUPS[key];
+  return group ? (CALLOUT_SEMANTIC_COLORS[group] || fallbackColor) : fallbackColor;
+}
+
 window.AppleStyleConverter = class AppleStyleConverter {
   constructor(theme, avatarUrl = '', showImageCaption = true, app = null, sourcePath = '') {
     this.theme = theme;
@@ -284,13 +330,20 @@ window.AppleStyleConverter = class AppleStyleConverter {
     const sizes = this.theme.getSizes();
     const font = this.theme.getFontFamily();
     const themeName = this.theme.themeName;
-    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
+    const quoteCalloutStyleMode = typeof this.theme.getQuoteCalloutStyleMode === 'function'
+      ? this.theme.getQuoteCalloutStyleMode()
+      : 'theme';
 
     // 优雅主题：居中样式（与其引用块风格一致）
     if (themeName === 'serif') {
-      return this.renderCalloutOpenCentered(calloutInfo, color, sizes, font);
+      return this.renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode);
     }
 
+    if (quoteCalloutStyleMode === 'neutral') {
+      return this.renderCalloutOpenNeutral(calloutInfo, color, sizes, font);
+    }
+
+    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
     // 简约/经典主题：左边框样式
     const isWechat = themeName === 'wechat';
     const marginLeft = isWechat ? '4px' : '0';
@@ -337,21 +390,68 @@ window.AppleStyleConverter = class AppleStyleConverter {
       <section style="${contentStyle}">`;
   }
 
+  renderCalloutOpenNeutral(calloutInfo, themeColor, sizes, font) {
+    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
+    const themeName = this.theme.themeName;
+    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, themeColor);
+    const borderWidth = themeName === 'wechat' ? '3px' : '4px';
+
+    const containerStyle = `
+      margin: 16px 0 16px 8px;
+      border-left: ${borderWidth} solid ${accentColor};
+      background: #f9f9f9;
+      border-radius: 4px;
+      overflow: hidden;
+    `.replace(/\s+/g, ' ').trim();
+
+    const headerStyle = `
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      background: ${accentColor}14;
+      border-bottom: 1px solid ${accentColor}24;
+      font-weight: bold;
+      font-size: ${sizes.base}px;
+      font-family: ${font};
+      color: ${accentColor};
+    `.replace(/\s+/g, ' ').trim();
+
+    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;
+    const titleStyle = `flex: 1; color: ${accentColor};`;
+    const contentStyle = `
+      padding: 12px 16px;
+      font-size: ${sizes.base}px;
+      line-height: 1.8;
+      color: #595959;
+      background: #f9f9f9;
+    `.replace(/\s+/g, ' ').trim();
+
+    return `<section style="${containerStyle}">
+      <section style="${headerStyle}">
+        <span style="${iconStyle}">${calloutInfo.icon}</span>
+        <span style="${titleStyle}">${safeTitle}</span>
+      </section>
+      <section style="${contentStyle}">`;
+  }
+
   /**
    * 渲染居中样式的 Callout（用于优雅主题）
    * @param {Object} calloutInfo - { type, title, icon }
    * @param {string} color - 主题色
    * @param {Object} sizes - 字体尺寸配置
    * @param {string} font - 字体族
+   * @param {string} quoteCalloutStyleMode - 引用/Callout 风格模式
    * @returns {string} - HTML 字符串
    */
-  renderCalloutOpenCentered(calloutInfo, color, sizes, font) {
+  renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode = 'theme') {
     const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
+    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);
+    const isNeutral = quoteCalloutStyleMode === 'neutral';
     // 居中样式：无左边框，水平居中，圆角边框
     const containerStyle = `
       margin: 30px 60px;
-      background: ${color}1F;
-      border-radius: 4px;
+      background: ${isNeutral ? '#f9f9f9' : `${color}1F`};
+      border-radius: ${isNeutral ? '8px' : '4px'};
       overflow: hidden;
     `.replace(/\s+/g, ' ').trim();
 
@@ -360,11 +460,11 @@ window.AppleStyleConverter = class AppleStyleConverter {
       display: flex;
       align-items: center;
       padding: 12px 20px;
-      background: ${color}26;
+      background: ${isNeutral ? `${accentColor}12` : `${color}26`};
       font-weight: bold;
       font-size: ${sizes.base}px;
       font-family: ${font};
-      color: #333;
+      color: ${isNeutral ? accentColor : '#333'};
     `.replace(/\s+/g, ' ').trim();
 
     const contentStyle = `
@@ -373,11 +473,12 @@ window.AppleStyleConverter = class AppleStyleConverter {
       line-height: 1.8;
       color: #555;
       text-align: center;
+      background: ${isNeutral ? '#f9f9f9' : 'transparent'};
     `.replace(/\s+/g, ' ').trim();
 
     return `<section style="${containerStyle}">
       <section style="${headerStyle}">
-        <span style="margin-right: 8px;">${calloutInfo.icon}</span>
+        <span style="margin-right: 8px; color: ${isNeutral ? accentColor : '#333'};">${calloutInfo.icon}</span>
         <span>${safeTitle}</span>
       </section>
       <section style="${contentStyle}">`;

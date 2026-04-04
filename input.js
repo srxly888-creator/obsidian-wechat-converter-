@@ -45,6 +45,7 @@ const DEFAULT_SETTINGS = {
   theme: 'github',
   themeColor: 'blue',
   customColor: '#0366d6',
+  quoteCalloutStyleMode: 'theme',
   fontFamily: 'sans-serif',
   fontSize: 3,
   macCodeBlock: true,
@@ -933,6 +934,26 @@ class AppleStyleView extends ItemView {
         this.plugin.settings.customColor = newColor;
         this.theme.update({ customColor: newColor });
         await this.onColorChange('custom', grid);
+      });
+    });
+
+    // === 引用与 Callout ===
+    this.createSection(settingsArea, '引用与 Callout', (section) => {
+      const select = section.createEl('select', { cls: 'apple-select' });
+      [
+        { value: 'theme', label: '经典主题色' },
+        { value: 'neutral', label: '中性灰（推荐）' },
+      ].forEach((opt) => {
+        const option = select.createEl('option', { value: opt.value, text: opt.label });
+        if (this.plugin.settings.quoteCalloutStyleMode === opt.value) option.selected = true;
+      });
+      select.addEventListener('change', (e) => this.onQuoteCalloutStyleModeChange(e.target.value));
+
+      section.createEl('span', {
+        text: '中性灰更适合长文阅读；经典主题色兼容现有风格。',
+        attr: {
+          style: 'font-size: 11px; color: var(--apple-secondary); margin-top: 8px; opacity: 0.8; font-weight: 500; display: block;'
+        }
       });
     });
 
@@ -3410,6 +3431,14 @@ class AppleStyleView extends ItemView {
     // const colorHex = this.theme.getThemeColorValue();
     // this.containerEl.style.setProperty('--apple-accent', colorHex);
 
+    await this.convertCurrent(true);
+  }
+
+  async onQuoteCalloutStyleModeChange(value) {
+    const nextValue = value === 'neutral' ? 'neutral' : 'theme';
+    this.plugin.settings.quoteCalloutStyleMode = nextValue;
+    await this.plugin.saveSettings();
+    this.theme.update({ quoteCalloutStyleMode: nextValue });
     await this.convertCurrent(true);
   }
 

@@ -273,6 +273,50 @@ describe('Callout Syntax Support', () => {
       expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
       expect(html).not.toContain('<img src=x onerror=alert(1)>');
     });
+
+    it('should render neutral callout with semantic accent color for known types', () => {
+      const neutralTheme = new window.AppleTheme({
+        theme: 'wechat',
+        themeColor: 'blue',
+        fontSize: 3,
+        quoteCalloutStyleMode: 'neutral',
+      });
+      const neutralConverter = new window.AppleStyleConverter(neutralTheme, '', true, null, '');
+
+      const html = neutralConverter.renderCalloutOpen({
+        type: 'warning',
+        title: '警告',
+        icon: '⚠️',
+        label: '警告',
+      });
+
+      expect(html).toContain('background: #f9f9f9');
+      expect(html).toContain('margin: 16px 0 16px 8px');
+      expect(html).toContain('border-left: 3px solid #b26a00');
+      expect(html).toContain('background: #b26a0014');
+      expect(html).toContain('color: #b26a00');
+    });
+
+    it('should fall back to theme color for unknown type in neutral mode', () => {
+      const neutralTheme = new window.AppleTheme({
+        theme: 'github',
+        themeColor: 'green',
+        fontSize: 3,
+        quoteCalloutStyleMode: 'neutral',
+      });
+      const neutralConverter = new window.AppleStyleConverter(neutralTheme, '', true, null, '');
+      const themeColor = neutralTheme.getThemeColorValue();
+
+      const html = neutralConverter.renderCalloutOpen({
+        type: 'custom-type',
+        title: '自定义',
+        icon: '📌',
+        label: '自定义',
+      });
+
+      expect(html).toContain(`border-left: 4px solid ${themeColor}`);
+      expect(html).toContain(`background: ${themeColor}14`);
+    });
   });
 
   describe('renderCalloutOpen - Cross-theme Consistency', () => {
@@ -355,6 +399,22 @@ describe('Callout Syntax Support', () => {
       expect(wechatHtml).toContain(`${themeColor}99`);
       // Github uses full opacity (no suffix)
       expect(githubHtml).toContain(`solid ${themeColor};`);
+    });
+
+    it('should keep serif centered structure in neutral mode while dropping themed background', () => {
+      const serifTheme = new window.AppleTheme({
+        theme: 'serif',
+        themeColor: 'purple',
+        fontSize: 3,
+        quoteCalloutStyleMode: 'neutral',
+      });
+      const serifConverter = new window.AppleStyleConverter(serifTheme, '', true, null, '');
+
+      const html = serifConverter.renderCalloutOpen(calloutInfo);
+
+      expect(html).toContain('text-align: center');
+      expect(html).toContain('background: #f9f9f9');
+      expect(html).not.toContain('background: #6f42c11F');
     });
   });
 
@@ -507,5 +567,38 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
     expect(h3BorderWidth).toBeGreaterThan(blockquoteBorderWidth);
     expect(h3BorderWidth).toBe(4);
     expect(blockquoteBorderWidth).toBe(3);
+  });
+});
+
+describe('Neutral Quote And Callout Style Mode', () => {
+  it('should use neutral blockquote background with slight indent in wechat theme', () => {
+    const theme = new window.AppleTheme({
+      theme: 'wechat',
+      themeColor: 'blue',
+      fontSize: 3,
+      quoteCalloutStyleMode: 'neutral',
+    });
+
+    const blockquoteStyle = theme.getStyle('blockquote');
+
+    expect(blockquoteStyle).toContain('background: #f9f9f9');
+    expect(blockquoteStyle).toContain('margin: 16px 0 16px 8px');
+    expect(blockquoteStyle).toContain('border-left: 3px solid #0366d6');
+    expect(blockquoteStyle).not.toContain('99');
+  });
+
+  it('should keep serif blockquote centered in neutral mode', () => {
+    const theme = new window.AppleTheme({
+      theme: 'serif',
+      themeColor: 'purple',
+      fontSize: 3,
+      quoteCalloutStyleMode: 'neutral',
+    });
+
+    const blockquoteStyle = theme.getStyle('blockquote');
+
+    expect(blockquoteStyle).toContain('text-align: center');
+    expect(blockquoteStyle).toContain('background: #f9f9f9');
+    expect(blockquoteStyle).toContain('border-radius: 8px');
   });
 });

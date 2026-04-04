@@ -10,6 +10,7 @@ function toThemeOptions(settings = {}) {
     theme: settings.theme,
     themeColor: settings.themeColor,
     customColor: settings.customColor,
+    quoteCalloutStyleMode: settings.quoteCalloutStyleMode,
     fontFamily: settings.fontFamily,
     fontSize: settings.fontSize,
     macCodeBlock: settings.macCodeBlock,
