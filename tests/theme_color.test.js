@@ -101,4 +101,35 @@ describe('AppleTheme Color Logic', () => {
       expect(headerStyle).toContain('flex-wrap: nowrap !important;');
     });
   });
+
+  describe('Heading Typography Scale', () => {
+    it('should keep the recommended size preset in a compact WeChat-friendly range', () => {
+      const recommended = AppleTheme.FONT_SIZES[3];
+
+      expect(recommended).toMatchObject({
+        base: 16,
+        h1: 30,
+        h2: 22,
+        h3: 18,
+        h4: 16,
+        h5: 16,
+        h6: 16,
+      });
+    });
+
+    it('should apply tighter spacing for h2 and h3 in the default theme', () => {
+      const theme = new AppleTheme({
+        theme: 'wechat',
+        fontSize: 3,
+      });
+
+      const h2Style = theme.getStyle('h2');
+      const h3Style = theme.getStyle('h3');
+
+      expect(h2Style).toContain('font-size: 22px;');
+      expect(h2Style).toContain('margin: 32px auto 16px;');
+      expect(h3Style).toContain('font-size: 18px;');
+      expect(h3Style).toContain('margin: 20px 0 12px;');
+    });
+  });
 });
