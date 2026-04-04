@@ -1250,7 +1250,7 @@
 }
 
 .apple-settings-details .apple-settings-area {
-  padding: 6px 16px 10px;
+  padding: 10px 14px 14px;
   background: transparent;
 }
 
@@ -1259,6 +1259,73 @@
   max-width: none;
   margin: 0;
   gap: 0;
+}
+
+.apple-settings-details .apple-setting-section {
+  gap: 8px;
+  padding: 12px 0;
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--background-modifier-border) 82%, transparent);
+  border-radius: 0;
+  background: transparent;
+  margin-bottom: 0;
+}
+
+.apple-settings-details .apple-setting-section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.apple-settings-details .apple-setting-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-normal);
+  text-transform: none;
+  letter-spacing: 0.1px;
+  margin-bottom: 0;
+}
+
+.apple-settings-details .apple-setting-content {
+  width: 100%;
+}
+
+.apple-settings-details .apple-setting-content > span {
+  line-height: 1.45;
+}
+
+.apple-settings-details .apple-settings-featured {
+  gap: 10px;
+  padding: 12px 12px 11px;
+  border: 1px solid color-mix(in srgb, var(--apple-border) 72%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--apple-background) 92%, var(--background-secondary));
+  margin-bottom: 10px;
+}
+
+.apple-settings-details .apple-settings-featured + .apple-setting-section {
+  border-top: none;
+}
+
+.apple-settings-details .apple-settings-inline-toggle {
+  gap: 10px;
+}
+
+.apple-settings-details .apple-settings-inline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.apple-settings-details .apple-settings-inline-toggle .apple-setting-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apple-settings-details .apple-settings-inline-toggle .apple-setting-content > span {
+  margin-top: 2px;
 }
 
 .apple-settings-details .setting-item {
@@ -1311,6 +1378,12 @@
 
 .apple-settings-details .setting-item-control > * {
   margin-left: 0 !important;
+}
+
+.apple-settings-details .apple-select {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
 }
 
 .apple-settings-details .setting-item-control .checkbox-container,

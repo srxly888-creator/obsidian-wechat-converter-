@@ -292,7 +292,8 @@ describe('Callout Syntax Support', () => {
 
       expect(html).toContain('background: #f9f9f9');
       expect(html).toContain('margin: 16px 0 16px 8px');
-      expect(html).toContain('border-left: 3px solid #b26a00');
+      expect(html).not.toContain('border-left:');
+      expect(html).toContain('border: 1px solid #b26a0024');
       expect(html).toContain('background: #b26a0014');
       expect(html).toContain('color: #b26a00');
     });
@@ -314,7 +315,8 @@ describe('Callout Syntax Support', () => {
         label: '自定义',
       });
 
-      expect(html).toContain(`border-left: 4px solid ${themeColor}`);
+      expect(html).not.toContain('border-left:');
+      expect(html).toContain(`border: 1px solid ${themeColor}24`);
       expect(html).toContain(`background: ${themeColor}14`);
     });
   });
@@ -583,7 +585,7 @@ describe('Neutral Quote And Callout Style Mode', () => {
 
     expect(blockquoteStyle).toContain('background: #f9f9f9');
     expect(blockquoteStyle).toContain('margin: 16px 0 16px 8px');
-    expect(blockquoteStyle).toContain('border-left: 3px solid #0366d6');
+    expect(blockquoteStyle).toContain('border-left: 3px solid #d9d9d9');
     expect(blockquoteStyle).not.toContain('99');
   });
 

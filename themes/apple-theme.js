@@ -133,6 +133,7 @@ window.AppleTheme = class AppleTheme {
   };
 
   static QUOTE_CALLOUT_NEUTRAL_BG = '#f9f9f9';
+  static QUOTE_NEUTRAL_BORDER = '#d9d9d9';
 
   /**
    * 当前配置
@@ -285,7 +286,7 @@ window.AppleTheme = class AppleTheme {
           const neutralBorderWidth = this.themeName === 'wechat'
             ? 3
             : (config.blockquoteBorderWidth || 4);
-          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${neutralBorderWidth}px solid ${color}; border-radius: ${r.sm}px;`;
+          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${neutralBorderWidth}px solid ${AppleTheme.QUOTE_NEUTRAL_BORDER}; border-radius: ${r.sm}px;`;
         }
 
         // 经典主题（wechat）：使用更细的边框和更浅的颜色，与 H3 区分

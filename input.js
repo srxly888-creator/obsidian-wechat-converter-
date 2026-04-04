@@ -937,96 +937,6 @@ class AppleStyleView extends ItemView {
       });
     });
 
-    // === 引用与 Callout ===
-    this.createSection(settingsArea, '引用与 Callout', (section) => {
-      const select = section.createEl('select', { cls: 'apple-select' });
-      [
-        { value: 'theme', label: '经典主题色' },
-        { value: 'neutral', label: '中性灰（推荐）' },
-      ].forEach((opt) => {
-        const option = select.createEl('option', { value: opt.value, text: opt.label });
-        if (this.plugin.settings.quoteCalloutStyleMode === opt.value) option.selected = true;
-      });
-      select.addEventListener('change', (e) => this.onQuoteCalloutStyleModeChange(e.target.value));
-
-      section.createEl('span', {
-        text: '中性灰更适合长文阅读；经典主题色兼容现有风格。',
-        attr: {
-          style: 'font-size: 11px; color: var(--apple-secondary); margin-top: 8px; opacity: 0.8; font-weight: 500; display: block;'
-        }
-      });
-    });
-
-    // === 标题样式 (移到主题色下方) ===
-    this.createSection(settingsArea, '标题样式', (section) => {
-      // 1. 容器布局
-      section.style.display = 'flex';
-      section.style.alignItems = 'center';
-
-      // 2. 开关控件 (标准大小 40x22)
-      const toggle = section.createEl('label', { cls: 'apple-toggle' });
-      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
-      checkbox.checked = this.plugin.settings.coloredHeader;
-      toggle.createEl('span', { cls: 'apple-toggle-slider' });
-
-      // 3. 描述文本 (优化布局：增加间距，缩小字号)
-      section.createEl('span', {
-        text: '标题使用加深主题色',
-        attr: {
-          style: 'font-size: 11px; color: var(--apple-secondary); margin-left: 12px; opacity: 0.8; font-weight: 500; transform: translateY(-1px);'
-        }
-      });
-
-      checkbox.addEventListener('change', async () => {
-        this.plugin.settings.coloredHeader = checkbox.checked;
-        await this.plugin.saveSettings();
-
-        // 关键修复：更新主题状态并重绘
-        this.theme.update({ coloredHeader: checkbox.checked });
-        // 强制刷新
-        await this.convertCurrent(true);
-      });
-    });
-
-    // === 正文标点标准化 ===
-    this.createSection(settingsArea, '正文标点标准化', (section) => {
-      const toggle = section.createEl('label', { cls: 'apple-toggle' });
-      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
-      checkbox.checked = this.plugin.settings.normalizeChinesePunctuation === true;
-      toggle.createEl('span', { cls: 'apple-toggle-slider' });
-
-      section.createEl('span', {
-        text: '仅作用于预览 / 复制 / 同步结果',
-        attr: {
-          style: 'font-size: 11px; color: var(--apple-secondary); margin-left: 12px; opacity: 0.8; font-weight: 500; transform: translateY(-1px);'
-        }
-      });
-
-      checkbox.addEventListener('change', async () => {
-        this.plugin.settings.normalizeChinesePunctuation = checkbox.checked;
-        await this.plugin.saveSettings();
-        await this.convertCurrent(true);
-      });
-    });
-
-    // === Mac 代码块开关 ===
-    this.createSection(settingsArea, 'Mac 风格代码块', (section) => {
-      const toggle = section.createEl('label', { cls: 'apple-toggle' });
-      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
-      checkbox.checked = this.plugin.settings.macCodeBlock;
-      toggle.createEl('span', { cls: 'apple-toggle-slider' });
-      checkbox.addEventListener('change', () => this.onMacCodeBlockChange(checkbox.checked));
-    });
-
-    // === 代码块行号开关 ===
-    this.createSection(settingsArea, '显示代码行号', (section) => {
-      const toggle = section.createEl('label', { cls: 'apple-toggle' });
-      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
-      checkbox.checked = this.plugin.settings.codeLineNumber;
-      toggle.createEl('span', { cls: 'apple-toggle-slider' });
-      checkbox.addEventListener('change', () => this.onCodeLineNumberChange(checkbox.checked));
-    });
-
     // === 页面两侧留白 ===
     this.createSection(settingsArea, '页面两侧留白', (section) => {
       const mobile = isMobileClient(this.app);
@@ -1076,34 +986,151 @@ class AppleStyleView extends ItemView {
       });
     });
 
-    // === 显示图片说明文字 ===
-    const captionSetting = new Setting(settingsArea)
-      .setName('显示图片说明文字')
-      .setDesc('关闭水印时，在图片下方显示说明文字')
-      .addToggle(toggle => toggle
-        .setValue(this.plugin.settings.showImageCaption)
-        .onChange(async (value) => {
-          this.plugin.settings.showImageCaption = value;
-          await this.plugin.saveSettings();
+    const advancedOptions = settingsArea.createEl('details', { cls: 'apple-settings-details' });
+    advancedOptions.createEl('summary', {
+      cls: 'apple-settings-summary',
+      text: '高级选项'
+    });
+    const advancedArea = advancedOptions.createDiv({ cls: 'apple-settings-area apple-settings-advanced-area' });
 
-          // 实时更新转换器配置并刷新预览
-          if (this.converter) {
-            this.converter.updateConfig({ showImageCaption: value });
-            await this.convertCurrent(true);
-          }
-        }));
+    // === 引用样式 ===
+    const quoteStyleSection = this.createSection(advancedArea, '引用样式', (section) => {
+      const select = section.createEl('select', { cls: 'apple-select' });
+      [
+        { value: 'theme', label: '经典主题色' },
+        { value: 'neutral', label: '中性灰（推荐）' },
+      ].forEach((opt) => {
+        const option = select.createEl('option', { value: opt.value, text: opt.label });
+        if (this.plugin.settings.quoteCalloutStyleMode === opt.value) option.selected = true;
+      });
+      select.addEventListener('change', (e) => this.onQuoteCalloutStyleModeChange(e.target.value));
+
+      section.createEl('span', {
+        text: '中性灰更适合长文阅读；经典主题色兼容现有风格。',
+        attr: {
+          style: 'font-size: 11px; color: var(--apple-secondary); margin-top: 8px; opacity: 0.8; font-weight: 500; display: block;'
+        }
+      });
+    });
+    quoteStyleSection.classList.add('apple-settings-featured');
+
+    // === 标题样式 (移到主题色下方) ===
+    const headingStyleSection = this.createSection(advancedArea, '标题样式', (section) => {
+      const row = section.createEl('div', { cls: 'apple-settings-inline-row' });
+
+      const toggle = row.createEl('label', { cls: 'apple-toggle' });
+      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
+      checkbox.checked = this.plugin.settings.coloredHeader;
+      toggle.createEl('span', { cls: 'apple-toggle-slider' });
+
+      section.createEl('span', {
+        text: '标题使用加深主题色',
+        attr: {
+          style: 'font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;'
+        }
+      });
+
+      checkbox.addEventListener('change', async () => {
+        this.plugin.settings.coloredHeader = checkbox.checked;
+        await this.plugin.saveSettings();
+
+        // 关键修复：更新主题状态并重绘
+        this.theme.update({ coloredHeader: checkbox.checked });
+        // 强制刷新
+        await this.convertCurrent(true);
+      });
+    });
+    headingStyleSection.classList.add('apple-settings-inline-toggle');
+
+    // === 正文标点标准化 ===
+    const punctuationSection = this.createSection(advancedArea, '正文标点标准化', (section) => {
+      const row = section.createEl('div', { cls: 'apple-settings-inline-row' });
+      const toggle = row.createEl('label', { cls: 'apple-toggle' });
+      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
+      checkbox.checked = this.plugin.settings.normalizeChinesePunctuation === true;
+      toggle.createEl('span', { cls: 'apple-toggle-slider' });
+
+      section.createEl('span', {
+        text: '仅作用于预览 / 复制 / 同步结果',
+        attr: {
+          style: 'font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;'
+        }
+      });
+
+      checkbox.addEventListener('change', async () => {
+        this.plugin.settings.normalizeChinesePunctuation = checkbox.checked;
+        await this.plugin.saveSettings();
+        await this.convertCurrent(true);
+      });
+    });
+    punctuationSection.classList.add('apple-settings-inline-toggle');
+
+    // === Mac 代码块开关 ===
+    const macCodeSection = this.createSection(advancedArea, 'Mac 风格代码块', (section) => {
+      const row = section.createEl('div', { cls: 'apple-settings-inline-row' });
+      const toggle = row.createEl('label', { cls: 'apple-toggle' });
+      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
+      checkbox.checked = this.plugin.settings.macCodeBlock;
+      toggle.createEl('span', { cls: 'apple-toggle-slider' });
+      checkbox.addEventListener('change', () => this.onMacCodeBlockChange(checkbox.checked));
+    });
+    macCodeSection.classList.add('apple-settings-inline-toggle');
+
+    // === 代码块行号开关 ===
+    const codeLineNumberSection = this.createSection(advancedArea, '显示代码行号', (section) => {
+      const row = section.createEl('div', { cls: 'apple-settings-inline-row' });
+      const toggle = row.createEl('label', { cls: 'apple-toggle' });
+      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
+      checkbox.checked = this.plugin.settings.codeLineNumber;
+      toggle.createEl('span', { cls: 'apple-toggle-slider' });
+      checkbox.addEventListener('change', () => this.onCodeLineNumberChange(checkbox.checked));
+    });
+    codeLineNumberSection.classList.add('apple-settings-inline-toggle');
+
+    // === 显示图片说明文字 ===
+    const captionSection = this.createSection(advancedArea, '显示图片说明文字', (section) => {
+      const row = section.createEl('div', { cls: 'apple-settings-inline-row' });
+      const toggle = row.createEl('label', { cls: 'apple-toggle' });
+      const checkbox = toggle.createEl('input', { type: 'checkbox', cls: 'apple-toggle-input' });
+      checkbox.checked = this.plugin.settings.showImageCaption;
+      toggle.createEl('span', { cls: 'apple-toggle-slider' });
+
+      section.createEl('span', {
+        text: '关闭水印时，在图片下方显示说明文字',
+        attr: {
+          style: 'font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;'
+        }
+      });
+
+      checkbox.addEventListener('change', async () => {
+        this.plugin.settings.showImageCaption = checkbox.checked;
+        await this.plugin.saveSettings();
+
+        if (this.converter) {
+          this.converter.updateConfig({ showImageCaption: checkbox.checked });
+          await this.convertCurrent(true);
+        }
+      });
+
+      section._captionToggle = { checkbox, toggle };
+    });
+    captionSection.classList.add('apple-settings-inline-toggle');
 
     // 根据全局水印设置更新状态
     if (this.plugin.settings.enableWatermark) {
-      captionSetting.setDesc('因全局设置中已开启水印，此选项默认开启');
-      const toggleComp = captionSetting.components[0];
-      toggleComp.setValue(true); // 视觉上设为开启
-      toggleComp.setDisabled(true); // 禁用交互
-      // 强制禁止任何鼠标事件，消除点击时的跳动感
-      if (toggleComp.toggleEl) {
-        toggleComp.toggleEl.style.pointerEvents = 'none';
-        toggleComp.toggleEl.style.opacity = '0.6'; // 增加透明度以明确指示禁用
-        toggleComp.toggleEl.style.filter = 'grayscale(100%)';
+      const captionDesc = captionSection.querySelector('.apple-setting-content > span');
+      if (captionDesc) {
+        captionDesc.setText('因全局设置中已开启水印，此选项默认开启');
+      }
+      const toggleState = captionSection._captionToggle;
+      if (toggleState?.checkbox) {
+        toggleState.checkbox.checked = true;
+        toggleState.checkbox.disabled = true;
+      }
+      if (toggleState?.toggle) {
+        toggleState.toggle.style.pointerEvents = 'none';
+        toggleState.toggle.style.opacity = '0.6';
+        toggleState.toggle.style.filter = 'grayscale(100%)';
       }
     }
 
@@ -1420,6 +1447,7 @@ class AppleStyleView extends ItemView {
     section.createEl('label', { cls: 'apple-setting-label', text: label });
     const content = section.createEl('div', { cls: 'apple-setting-content' });
     builder(content);
+    return section;
   }
 
   togglePanel(overlay, button, onOpen) {

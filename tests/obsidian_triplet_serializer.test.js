@@ -143,7 +143,8 @@ describe('Obsidian Triplet Serializer', () => {
 
     const html = serializeObsidianRenderedHtml({ root, converter: neutralConverter });
 
-    expect(html).toContain('border-left: 3px solid #b26a00');
+    expect(html).not.toContain('border-left:');
+    expect(html).toContain('border: 1px solid #b26a0024');
     expect(html).toContain('background: #f9f9f9');
     expect(html).toContain('background: #b26a0014');
   });
@@ -161,7 +162,8 @@ describe('Obsidian Triplet Serializer', () => {
     const html = serializeObsidianRenderedHtml({ root, converter: neutralConverter });
 
     expect(html).toContain('>📌<');
-    expect(html).toContain('border-left: 3px solid #28a745');
+    expect(html).not.toContain('border-left:');
+    expect(html).toContain('border: 1px solid #28a74524');
     expect(html).toContain('background: #28a74514');
   });
 

@@ -392,14 +392,12 @@ window.AppleStyleConverter = class AppleStyleConverter {
 
   renderCalloutOpenNeutral(calloutInfo, themeColor, sizes, font) {
     const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
-    const themeName = this.theme.themeName;
     const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, themeColor);
-    const borderWidth = themeName === 'wechat' ? '3px' : '4px';
 
     const containerStyle = `
       margin: 16px 0 16px 8px;
-      border-left: ${borderWidth} solid ${accentColor};
       background: #f9f9f9;
+      border: 1px solid ${accentColor}24;
       border-radius: 4px;
       overflow: hidden;
     `.replace(/\s+/g, ' ').trim();
