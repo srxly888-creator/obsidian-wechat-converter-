@@ -117,7 +117,7 @@ describe('Obsidian Triplet Serializer', () => {
 
     expect(html).not.toContain('class="callout"');
     expect(html).toContain('border-left');
-    expect(html).toContain('>📌<');
+    expect(html).toContain('>ℹ️<');
     expect(html).toContain('>Tips<');
     expect(container.textContent).toContain('这是一段 callout 内容。');
   });
@@ -149,7 +149,7 @@ describe('Obsidian Triplet Serializer', () => {
     expect(html).toContain('background: #b26a0014');
   });
 
-  it('should fall back to theme accent for unknown Obsidian callout types in neutral mode', async () => {
+  it('should fall back to info semantic styling for unknown Obsidian callout types in neutral mode', async () => {
     const neutralConverter = await createLegacyConverter({
       themeOptions: {
         quoteCalloutStyleMode: 'neutral',
@@ -161,10 +161,10 @@ describe('Obsidian Triplet Serializer', () => {
 
     const html = serializeObsidianRenderedHtml({ root, converter: neutralConverter });
 
-    expect(html).toContain('>📌<');
+    expect(html).toContain('>ℹ️<');
     expect(html).not.toContain('border-left:');
-    expect(html).toContain('border: 1px solid #28a74524');
-    expect(html).toContain('background: #28a74514');
+    expect(html).toContain('border: 1px solid #2f6fdd24');
+    expect(html).toContain('background: #2f6fdd14');
   });
 
   it('should trim trailing spaces before block close tags for legacy parity', () => {

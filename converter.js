@@ -86,8 +86,8 @@ const CALLOUT_SEMANTIC_COLORS = {
 
 function resolveCalloutSemanticColor(type, fallbackColor) {
   const key = String(type || '').trim().toLowerCase();
-  const group = CALLOUT_SEMANTIC_GROUPS[key];
-  return group ? (CALLOUT_SEMANTIC_COLORS[group] || fallbackColor) : fallbackColor;
+  const group = CALLOUT_SEMANTIC_GROUPS[key] || 'info';
+  return CALLOUT_SEMANTIC_COLORS[group] || fallbackColor;
 }
 
 window.AppleStyleConverter = class AppleStyleConverter {
@@ -279,7 +279,8 @@ window.AppleStyleConverter = class AppleStyleConverter {
           if (!rawType || !/\S/u.test(rawType)) return null;
           const type = rawType.toLowerCase();
           const customTitle = match[2] ? match[2].trim() : null;
-          const config = CALLOUT_ICONS[type] || { icon: '📌', label: type };
+          const mappedConfig = CALLOUT_ICONS[type];
+          const config = mappedConfig || { icon: CALLOUT_ICONS.note.icon, label: type };
           const defaultTitle = type.charAt(0).toUpperCase() + type.slice(1);
 
           // --- 在 Token 阶段清理 Marker ---

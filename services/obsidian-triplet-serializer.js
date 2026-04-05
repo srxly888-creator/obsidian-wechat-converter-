@@ -54,8 +54,8 @@ function toTitleCase(value) {
 
 function resolveLegacyCalloutIcon(type) {
   const key = String(type || '').trim().toLowerCase();
-  if (!key) return '📌';
-  return LEGACY_CALLOUT_ICON_BY_TYPE[key] || '📌';
+  if (!key) return 'ℹ️';
+  return LEGACY_CALLOUT_ICON_BY_TYPE[key] || 'ℹ️';
 }
 
 function convertObsidianCalloutsToLegacy(container, converter) {

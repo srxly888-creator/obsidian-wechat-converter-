@@ -135,7 +135,7 @@ describe('Callout Syntax Support', () => {
       }
     });
 
-    it('should handle unknown callout type with fallback icon', () => {
+    it('should handle unknown callout type with info fallback icon', () => {
       const tokens = [
         { type: 'blockquote_open', tag: 'blockquote', nesting: 1 },
         { type: 'paragraph_open', tag: 'p', nesting: 1 },
@@ -149,10 +149,10 @@ describe('Callout Syntax Support', () => {
       expect(result).not.toBeNull();
       expect(result.type).toBe('customtype');
       expect(result.title).toBe('Custom Title');
-      expect(result.icon).toBe('📌'); // Fallback icon
+      expect(result.icon).toBe('ℹ️');
     });
 
-    it('should detect custom Chinese callout type and use fallback icon', () => {
+    it('should detect custom Chinese callout type and use info fallback icon', () => {
       const tokens = [
         { type: 'blockquote_open', tag: 'blockquote', nesting: 1 },
         { type: 'paragraph_open', tag: 'p', nesting: 1 },
@@ -166,7 +166,7 @@ describe('Callout Syntax Support', () => {
       expect(result).not.toBeNull();
       expect(result.type).toBe('学习研究');
       expect(result.title).toBe('研究内容');
-      expect(result.icon).toBe('📌'); // 未映射类型走默认图标
+      expect(result.icon).toBe('ℹ️');
       expect(result.label).toBe('学习研究');
     });
 
@@ -298,7 +298,7 @@ describe('Callout Syntax Support', () => {
       expect(html).toContain('color: #b26a00');
     });
 
-    it('should fall back to theme color for unknown type in neutral mode', () => {
+    it('should fall back to info semantic color for unknown type in neutral mode', () => {
       const neutralTheme = new window.AppleTheme({
         theme: 'github',
         themeColor: 'green',
@@ -306,18 +306,18 @@ describe('Callout Syntax Support', () => {
         quoteCalloutStyleMode: 'neutral',
       });
       const neutralConverter = new window.AppleStyleConverter(neutralTheme, '', true, null, '');
-      const themeColor = neutralTheme.getThemeColorValue();
 
       const html = neutralConverter.renderCalloutOpen({
         type: 'custom-type',
         title: '自定义',
-        icon: '📌',
+        icon: 'ℹ️',
         label: '自定义',
       });
 
       expect(html).not.toContain('border-left:');
-      expect(html).toContain(`border: 1px solid ${themeColor}24`);
-      expect(html).toContain(`background: ${themeColor}14`);
+      expect(html).toContain('border: 1px solid #2f6fdd24');
+      expect(html).toContain('background: #2f6fdd14');
+      expect(html).toContain('color: #2f6fdd');
     });
   });
 
