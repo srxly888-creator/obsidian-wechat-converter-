@@ -62,6 +62,22 @@ function createWechatSyncService(deps) {
         author: account.author || '',
         digest: sessionDigest || '一键同步自 Obsidian',
       };
+      const contentSourceUrl = String(account.contentSourceUrl || '').trim();
+      if (contentSourceUrl) {
+        article.content_source_url = contentSourceUrl;
+      }
+      if (typeof account.enableOriginal === 'boolean') {
+        article.is_open_reward = account.enableOriginal ? 1 : 0;
+      }
+      if (typeof account.allowReprint === 'boolean') {
+        article.need_open_reprint = account.allowReprint ? 1 : 0;
+      }
+      if (typeof account.openComment === 'boolean') {
+        article.need_open_comment = account.openComment ? 1 : 0;
+      }
+      if (typeof account.onlyFansCanComment === 'boolean') {
+        article.only_fans_can_comment = account.onlyFansCanComment ? 1 : 0;
+      }
 
       if (onStatus) onStatus('draft');
       await api.createDraft(article);

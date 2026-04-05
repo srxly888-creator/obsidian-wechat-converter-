@@ -7922,6 +7922,22 @@ var require_wechat_sync = __commonJS({
             author: account.author || "",
             digest: sessionDigest || "\u4E00\u952E\u540C\u6B65\u81EA Obsidian"
           };
+          const contentSourceUrl = String(account.contentSourceUrl || "").trim();
+          if (contentSourceUrl) {
+            article.content_source_url = contentSourceUrl;
+          }
+          if (typeof account.enableOriginal === "boolean") {
+            article.is_open_reward = account.enableOriginal ? 1 : 0;
+          }
+          if (typeof account.allowReprint === "boolean") {
+            article.need_open_reprint = account.allowReprint ? 1 : 0;
+          }
+          if (typeof account.openComment === "boolean") {
+            article.need_open_comment = account.openComment ? 1 : 0;
+          }
+          if (typeof account.onlyFansCanComment === "boolean") {
+            article.only_fans_can_comment = account.onlyFansCanComment ? 1 : 0;
+          }
           if (onStatus)
             onStatus("draft");
           await api.createDraft(article);
@@ -8815,6 +8831,33 @@ var DEFAULT_SETTINGS = {
   ai: createDefaultAiSettings()
 };
 var MAX_ACCOUNTS = 5;
+var DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS = Object.freeze({
+  contentSourceUrl: "",
+  enableOriginal: true,
+  allowReprint: true,
+  openComment: true,
+  onlyFansCanComment: false
+});
+function getWechatAccountPublishOptions(account = null) {
+  return {
+    contentSourceUrl: typeof (account == null ? void 0 : account.contentSourceUrl) === "string" ? account.contentSourceUrl : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.contentSourceUrl,
+    enableOriginal: typeof (account == null ? void 0 : account.enableOriginal) === "boolean" ? account.enableOriginal : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.enableOriginal,
+    allowReprint: typeof (account == null ? void 0 : account.allowReprint) === "boolean" ? account.allowReprint : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.allowReprint,
+    openComment: typeof (account == null ? void 0 : account.openComment) === "boolean" ? account.openComment : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.openComment,
+    onlyFansCanComment: typeof (account == null ? void 0 : account.onlyFansCanComment) === "boolean" ? account.onlyFansCanComment : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.onlyFansCanComment
+  };
+}
+function normalizeWechatAccountPublishOptions(values = {}) {
+  const contentSourceUrl = typeof values.contentSourceUrl === "string" ? values.contentSourceUrl.trim() : "";
+  const openComment = !!values.openComment;
+  return {
+    contentSourceUrl,
+    enableOriginal: !!values.enableOriginal,
+    allowReprint: !!values.allowReprint,
+    openComment,
+    onlyFansCanComment: openComment && !!values.onlyFansCanComment
+  };
+}
 function isMobileClient(app) {
   if (typeof (Platform == null ? void 0 : Platform.isMobile) === "boolean") {
     return Platform.isMobile;
@@ -12812,6 +12855,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
     const modal = new Modal(this.app);
     modal.titleEl.setText(account ? "\u7F16\u8F91\u8D26\u53F7" : "\u6DFB\u52A0\u8D26\u53F7");
     const form = modal.contentEl.createDiv();
+    const publishDefaults = getWechatAccountPublishOptions(account);
     const nameGroup = form.createDiv({ cls: "wechat-form-group" });
     nameGroup.createEl("label", { text: "\u8D26\u53F7\u540D\u79F0" });
     const nameInput = nameGroup.createEl("input", {
@@ -12840,6 +12884,56 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       placeholder: "\u7559\u7A7A\u5219\u4E0D\u663E\u793A\u4F5C\u8005",
       value: (account == null ? void 0 : account.author) || ""
     });
+    const publishOptions = form.createEl("details", { cls: "wechat-sync-advanced wechat-account-publish-options" });
+    publishOptions.createEl("summary", {
+      text: "\u53D1\u5E03\u9009\u9879",
+      cls: "wechat-sync-advanced-summary"
+    });
+    const publishSection = publishOptions.createDiv({ cls: "wechat-sync-advanced-body wechat-account-publish-body" });
+    publishSection.createEl("div", {
+      text: "\u53EF\u4E3A\u5F53\u524D\u516C\u4F17\u53F7\u9884\u8BBE\u539F\u521B\u3001\u8F6C\u8F7D\u3001\u7559\u8A00\u7B49\u9ED8\u8BA4\u53D1\u5E03\u7B56\u7565\u3002",
+      cls: "wechat-form-help"
+    });
+    const sourceUrlGroup = publishSection.createDiv({ cls: "wechat-form-group" });
+    sourceUrlGroup.createEl("label", { text: "\u9ED8\u8BA4\u539F\u6587\u94FE\u63A5\uFF08\u53EF\u9009\uFF09" });
+    const sourceUrlInput = sourceUrlGroup.createEl("input", {
+      type: "url",
+      placeholder: "\u7559\u7A7A\u5219\u4E0D\u540C\u6B65\u539F\u6587\u94FE\u63A5",
+      value: publishDefaults.contentSourceUrl
+    });
+    const originalGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
+    const originalLabel = originalGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
+    const originalInput = originalLabel.createEl("input", { type: "checkbox" });
+    originalInput.checked = publishDefaults.enableOriginal;
+    originalLabel.appendText("\u9ED8\u8BA4\u5F00\u542F\u539F\u521B\u58F0\u660E");
+    const reprintGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
+    const reprintLabel = reprintGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
+    const reprintInput = reprintLabel.createEl("input", { type: "checkbox" });
+    reprintInput.checked = publishDefaults.allowReprint;
+    reprintLabel.appendText("\u9ED8\u8BA4\u5141\u8BB8\u8F6C\u8F7D");
+    const commentGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
+    const commentLabel = commentGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
+    const commentInput = commentLabel.createEl("input", { type: "checkbox" });
+    commentInput.checked = publishDefaults.openComment;
+    commentLabel.appendText("\u9ED8\u8BA4\u5F00\u542F\u7559\u8A00");
+    const fansCommentGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
+    const fansCommentLabel = fansCommentGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
+    const fansCommentInput = fansCommentLabel.createEl("input", { type: "checkbox" });
+    fansCommentInput.checked = publishDefaults.openComment && publishDefaults.onlyFansCanComment;
+    fansCommentLabel.appendText("\u9ED8\u8BA4\u4EC5\u7C89\u4E1D\u53EF\u7559\u8A00");
+    fansCommentGroup.createEl("div", {
+      text: "\u5173\u95ED\u7559\u8A00\u65F6\uFF0C\u6B64\u9009\u9879\u4E0D\u4F1A\u751F\u6548\u3002",
+      cls: "wechat-form-help"
+    });
+    const syncCommentDependency = () => {
+      const enabled = commentInput.checked;
+      fansCommentInput.disabled = !enabled;
+      fansCommentGroup.toggleClass("is-disabled", !enabled);
+      if (!enabled)
+        fansCommentInput.checked = false;
+    };
+    commentInput.addEventListener("change", syncCommentDependency);
+    syncCommentDependency();
     const btnRow = form.createDiv({ cls: "wechat-modal-buttons" });
     const cancelBtn = btnRow.createEl("button", { text: "\u53D6\u6D88" });
     cancelBtn.onclick = () => modal.close();
@@ -12870,18 +12964,27 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
         new Notice("\u8BF7\u586B\u5199 AppID \u548C AppSecret");
         return;
       }
+      const publishOptions2 = normalizeWechatAccountPublishOptions({
+        contentSourceUrl: sourceUrlInput.value,
+        enableOriginal: originalInput.checked,
+        allowReprint: reprintInput.checked,
+        openComment: commentInput.checked,
+        onlyFansCanComment: fansCommentInput.checked
+      });
       if (account) {
         account.name = name;
         account.appId = appId;
         account.appSecret = appSecret;
         account.author = authorInput.value.trim();
+        Object.assign(account, publishOptions2);
       } else {
         const newAccount = {
           id: generateId(),
           name,
           appId,
           appSecret,
-          author: authorInput.value.trim()
+          author: authorInput.value.trim(),
+          ...publishOptions2
         };
         this.plugin.settings.wechatAccounts.push(newAccount);
         if (this.plugin.settings.wechatAccounts.length === 1) {

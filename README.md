@@ -17,9 +17,10 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 - Live article preview with fast side-by-side rendering.
 - Copy rich HTML directly into the WeChat editor.
 - Sync articles to the WeChat draft box with multi-account support.
+- Account-level draft defaults for source URL, originality, reprint, and comment settings.
 - Math rendering with SVG output for better WeChat compatibility.
 - Local image handling for wiki links, relative paths, absolute paths, and GIFs.
-- Visual settings panel with theme, typography, preview, and code block controls.
+- Visual settings panel with theme, typography, preview, code block controls, and quote style options.
 - Experimental AI layout planning with provider-based configuration, schema checks, and debug snapshots.
 - Chinese punctuation normalization for rendered output, with protection for code and technical tokens.
 
@@ -66,9 +67,16 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 ### Draft sync
 
 - Supports up to 5 WeChat Official Account profiles.
+- Each account can store draft defaults for `content_source_url`, originality, reprint, comments, and fans-only comments.
 - Uses `cover` and `excerpt` from frontmatter when available.
 - Falls back to the first body image and auto-generated excerpt when not provided.
 - Can optionally clean up a configured output directory after a successful sync.
+
+### Quote and callout styles
+
+- Built-in themes now support a lighter quote style workflow, including a neutral gray mode for blockquotes.
+- Callouts use semantic accent colors for common types such as `note`, `tip`, `warning`, and `danger`.
+- Unknown callout types fall back to an info-style treatment instead of reusing the current theme color.
 
 ### Chinese punctuation normalization
 

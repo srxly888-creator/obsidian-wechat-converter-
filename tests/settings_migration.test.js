@@ -117,6 +117,30 @@ describe('AppleStylePlugin - Settings Migration', () => {
     expect(plugin.saveData).not.toHaveBeenCalled();
   });
 
+  it('should keep legacy wechat accounts unchanged until publish defaults are explicitly saved', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [{
+        id: 'acc-1',
+        name: '公众号 A',
+        appId: 'wx123',
+        appSecret: 'sec',
+        author: '作者',
+      }],
+      defaultAccountId: 'acc-1',
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('contentSourceUrl');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('enableOriginal');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('allowReprint');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('openComment');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('onlyFansCanComment');
+    expect(plugin.saveData).not.toHaveBeenCalled();
+  });
+
   it('should preserve explicit disabled ai setting during normalization', async () => {
     const plugin = new AppleStylePlugin();
     plugin.loadData = vi.fn().mockResolvedValue({

@@ -78,6 +78,47 @@ const DEFAULT_SETTINGS = {
 
 // 账号上限
 const MAX_ACCOUNTS = 5;
+const DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS = Object.freeze({
+  contentSourceUrl: '',
+  enableOriginal: true,
+  allowReprint: true,
+  openComment: true,
+  onlyFansCanComment: false,
+});
+
+function getWechatAccountPublishOptions(account = null) {
+  return {
+    contentSourceUrl: typeof account?.contentSourceUrl === 'string'
+      ? account.contentSourceUrl
+      : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.contentSourceUrl,
+    enableOriginal: typeof account?.enableOriginal === 'boolean'
+      ? account.enableOriginal
+      : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.enableOriginal,
+    allowReprint: typeof account?.allowReprint === 'boolean'
+      ? account.allowReprint
+      : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.allowReprint,
+    openComment: typeof account?.openComment === 'boolean'
+      ? account.openComment
+      : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.openComment,
+    onlyFansCanComment: typeof account?.onlyFansCanComment === 'boolean'
+      ? account.onlyFansCanComment
+      : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.onlyFansCanComment,
+  };
+}
+
+function normalizeWechatAccountPublishOptions(values = {}) {
+  const contentSourceUrl = typeof values.contentSourceUrl === 'string'
+    ? values.contentSourceUrl.trim()
+    : '';
+  const openComment = !!values.openComment;
+  return {
+    contentSourceUrl,
+    enableOriginal: !!values.enableOriginal,
+    allowReprint: !!values.allowReprint,
+    openComment,
+    onlyFansCanComment: openComment && !!values.onlyFansCanComment,
+  };
+}
 
 function isMobileClient(app) {
   if (typeof Platform?.isMobile === 'boolean') {
@@ -4816,6 +4857,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
     modal.titleEl.setText(account ? '编辑账号' : '添加账号');
 
     const form = modal.contentEl.createDiv();
+    const publishDefaults = getWechatAccountPublishOptions(account);
 
     // 账号名称
     const nameGroup = form.createDiv({ cls: 'wechat-form-group' });
@@ -4853,6 +4895,62 @@ class AppleStyleSettingTab extends PluginSettingTab {
       value: account?.author || ''
     });
 
+    const publishOptions = form.createEl('details', { cls: 'wechat-sync-advanced wechat-account-publish-options' });
+    publishOptions.createEl('summary', {
+      text: '发布选项',
+      cls: 'wechat-sync-advanced-summary',
+    });
+    const publishSection = publishOptions.createDiv({ cls: 'wechat-sync-advanced-body wechat-account-publish-body' });
+    publishSection.createEl('div', {
+      text: '可为当前公众号预设原创、转载、留言等默认发布策略。',
+      cls: 'wechat-form-help',
+    });
+
+    const sourceUrlGroup = publishSection.createDiv({ cls: 'wechat-form-group' });
+    sourceUrlGroup.createEl('label', { text: '默认原文链接（可选）' });
+    const sourceUrlInput = sourceUrlGroup.createEl('input', {
+      type: 'url',
+      placeholder: '留空则不同步原文链接',
+      value: publishDefaults.contentSourceUrl,
+    });
+
+    const originalGroup = publishSection.createDiv({ cls: 'wechat-form-checkbox-group' });
+    const originalLabel = originalGroup.createEl('label', { cls: 'wechat-form-checkbox-label' });
+    const originalInput = originalLabel.createEl('input', { type: 'checkbox' });
+    originalInput.checked = publishDefaults.enableOriginal;
+    originalLabel.appendText('默认开启原创声明');
+
+    const reprintGroup = publishSection.createDiv({ cls: 'wechat-form-checkbox-group' });
+    const reprintLabel = reprintGroup.createEl('label', { cls: 'wechat-form-checkbox-label' });
+    const reprintInput = reprintLabel.createEl('input', { type: 'checkbox' });
+    reprintInput.checked = publishDefaults.allowReprint;
+    reprintLabel.appendText('默认允许转载');
+
+    const commentGroup = publishSection.createDiv({ cls: 'wechat-form-checkbox-group' });
+    const commentLabel = commentGroup.createEl('label', { cls: 'wechat-form-checkbox-label' });
+    const commentInput = commentLabel.createEl('input', { type: 'checkbox' });
+    commentInput.checked = publishDefaults.openComment;
+    commentLabel.appendText('默认开启留言');
+
+    const fansCommentGroup = publishSection.createDiv({ cls: 'wechat-form-checkbox-group' });
+    const fansCommentLabel = fansCommentGroup.createEl('label', { cls: 'wechat-form-checkbox-label' });
+    const fansCommentInput = fansCommentLabel.createEl('input', { type: 'checkbox' });
+    fansCommentInput.checked = publishDefaults.openComment && publishDefaults.onlyFansCanComment;
+    fansCommentLabel.appendText('默认仅粉丝可留言');
+    fansCommentGroup.createEl('div', {
+      text: '关闭留言时，此选项不会生效。',
+      cls: 'wechat-form-help',
+    });
+
+    const syncCommentDependency = () => {
+      const enabled = commentInput.checked;
+      fansCommentInput.disabled = !enabled;
+      fansCommentGroup.toggleClass('is-disabled', !enabled);
+      if (!enabled) fansCommentInput.checked = false;
+    };
+    commentInput.addEventListener('change', syncCommentDependency);
+    syncCommentDependency();
+
     // 按钮区
     const btnRow = form.createDiv({ cls: 'wechat-modal-buttons' });
 
@@ -4889,12 +4987,21 @@ class AppleStyleSettingTab extends PluginSettingTab {
         return;
       }
 
+      const publishOptions = normalizeWechatAccountPublishOptions({
+        contentSourceUrl: sourceUrlInput.value,
+        enableOriginal: originalInput.checked,
+        allowReprint: reprintInput.checked,
+        openComment: commentInput.checked,
+        onlyFansCanComment: fansCommentInput.checked,
+      });
+
       if (account) {
         // 编辑现有账号
         account.name = name;
         account.appId = appId;
         account.appSecret = appSecret;
         account.author = authorInput.value.trim();
+        Object.assign(account, publishOptions);
       } else {
         // 添加新账号
         const newAccount = {
@@ -4902,7 +5009,8 @@ class AppleStyleSettingTab extends PluginSettingTab {
           name,
           appId,
           appSecret,
-          author: authorInput.value.trim()
+          author: authorInput.value.trim(),
+          ...publishOptions,
         };
         this.plugin.settings.wechatAccounts.push(newAccount);
         // 如果是第一个账号，自动设为默认

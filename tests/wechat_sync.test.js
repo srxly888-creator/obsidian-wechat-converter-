@@ -50,6 +50,11 @@ describe('Wechat Sync Service', () => {
       digest: 'digest',
       content: '<p>done</p>',
     }));
+    expect(result.article).not.toHaveProperty('content_source_url');
+    expect(result.article).not.toHaveProperty('is_open_reward');
+    expect(result.article).not.toHaveProperty('need_open_reprint');
+    expect(result.article).not.toHaveProperty('need_open_comment');
+    expect(result.article).not.toHaveProperty('only_fans_can_comment');
     expect(onStatus).toHaveBeenCalledWith('cover');
     expect(onStatus).toHaveBeenCalledWith('images');
     expect(onStatus).toHaveBeenCalledWith('math');
@@ -87,6 +92,46 @@ describe('Wechat Sync Service', () => {
       expect.any(Function),
       { accountId: 'acc-1' }
     );
+  });
+
+  it('should include account-level publish defaults in draft article when configured', async () => {
+    const api = createMockApi();
+    const service = createWechatSyncService({
+      createApi: vi.fn(() => api),
+      srcToBlob: vi.fn(async () => new Blob(['cover'], { type: 'image/png' })),
+      processAllImages: vi.fn(async () => '<p>x</p>'),
+      processMathFormulas: vi.fn(async () => '<p>x</p>'),
+      cleanHtmlForDraft: vi.fn((html) => html),
+      cleanupConfiguredDirectory: vi.fn(async () => ({ attempted: false })),
+      getFirstImageFromArticle: vi.fn(() => 'app://fallback-cover'),
+    });
+
+    await service.syncToDraft({
+      account: {
+        appId: 'wx1',
+        appSecret: 'sec',
+        author: 'author1',
+        contentSourceUrl: 'https://example.com/source',
+        enableOriginal: true,
+        allowReprint: false,
+        openComment: true,
+        onlyFansCanComment: true,
+      },
+      proxyUrl: '',
+      currentHtml: '<p>x</p>',
+      activeFile: { basename: 'note-title' },
+      publishMeta: { coverSrc: null },
+      sessionCoverBase64: 'data:image/png;base64,abc',
+      sessionDigest: 'digest',
+    });
+
+    expect(api.createDraft).toHaveBeenCalledWith(expect.objectContaining({
+      content_source_url: 'https://example.com/source',
+      is_open_reward: 1,
+      need_open_reprint: 0,
+      need_open_comment: 1,
+      only_fans_can_comment: 1,
+    }));
   });
 
   it('should throw when no cover source is available', async () => {
