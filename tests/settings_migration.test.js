@@ -141,6 +141,31 @@ describe('AppleStylePlugin - Settings Migration', () => {
     expect(plugin.saveData).not.toHaveBeenCalled();
   });
 
+  it('should remove deprecated originality and reprint flags from stored wechat accounts', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [{
+        id: 'acc-1',
+        name: '公众号 A',
+        appId: 'wx123',
+        appSecret: 'sec',
+        author: '作者',
+        enableOriginal: true,
+        allowReprint: false,
+        openComment: true,
+      }],
+      defaultAccountId: 'acc-1',
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('enableOriginal');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('allowReprint');
+    expect(plugin.settings.wechatAccounts[0].openComment).toBe(true);
+    expect(plugin.saveData).toHaveBeenCalledTimes(1);
+  });
+
   it('should preserve explicit disabled ai setting during normalization', async () => {
     const plugin = new AppleStylePlugin();
     plugin.loadData = vi.fn().mockResolvedValue({

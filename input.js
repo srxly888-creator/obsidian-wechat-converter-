@@ -80,8 +80,6 @@ const DEFAULT_SETTINGS = {
 const MAX_ACCOUNTS = 5;
 const DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS = Object.freeze({
   contentSourceUrl: '',
-  enableOriginal: true,
-  allowReprint: true,
   openComment: true,
   onlyFansCanComment: false,
 });
@@ -91,12 +89,6 @@ function getWechatAccountPublishOptions(account = null) {
     contentSourceUrl: typeof account?.contentSourceUrl === 'string'
       ? account.contentSourceUrl
       : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.contentSourceUrl,
-    enableOriginal: typeof account?.enableOriginal === 'boolean'
-      ? account.enableOriginal
-      : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.enableOriginal,
-    allowReprint: typeof account?.allowReprint === 'boolean'
-      ? account.allowReprint
-      : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.allowReprint,
     openComment: typeof account?.openComment === 'boolean'
       ? account.openComment
       : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.openComment,
@@ -113,8 +105,6 @@ function normalizeWechatAccountPublishOptions(values = {}) {
   const openComment = !!values.openComment;
   return {
     contentSourceUrl,
-    enableOriginal: !!values.enableOriginal,
-    allowReprint: !!values.allowReprint,
     openComment,
     onlyFansCanComment: openComment && !!values.onlyFansCanComment,
   };
@@ -4902,7 +4892,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
     });
     const publishSection = publishOptions.createDiv({ cls: 'wechat-sync-advanced-body wechat-account-publish-body' });
     publishSection.createEl('div', {
-      text: '可为当前公众号预设原创、转载、留言等默认发布策略。',
+      text: '可为当前公众号预设原文链接与留言相关的默认发布策略。',
       cls: 'wechat-form-help',
     });
 
@@ -4913,18 +4903,6 @@ class AppleStyleSettingTab extends PluginSettingTab {
       placeholder: '留空则不同步原文链接',
       value: publishDefaults.contentSourceUrl,
     });
-
-    const originalGroup = publishSection.createDiv({ cls: 'wechat-form-checkbox-group' });
-    const originalLabel = originalGroup.createEl('label', { cls: 'wechat-form-checkbox-label' });
-    const originalInput = originalLabel.createEl('input', { type: 'checkbox' });
-    originalInput.checked = publishDefaults.enableOriginal;
-    originalLabel.appendText('默认开启原创声明');
-
-    const reprintGroup = publishSection.createDiv({ cls: 'wechat-form-checkbox-group' });
-    const reprintLabel = reprintGroup.createEl('label', { cls: 'wechat-form-checkbox-label' });
-    const reprintInput = reprintLabel.createEl('input', { type: 'checkbox' });
-    reprintInput.checked = publishDefaults.allowReprint;
-    reprintLabel.appendText('默认允许转载');
 
     const commentGroup = publishSection.createDiv({ cls: 'wechat-form-checkbox-group' });
     const commentLabel = commentGroup.createEl('label', { cls: 'wechat-form-checkbox-label' });
@@ -4989,8 +4967,6 @@ class AppleStyleSettingTab extends PluginSettingTab {
 
       const publishOptions = normalizeWechatAccountPublishOptions({
         contentSourceUrl: sourceUrlInput.value,
-        enableOriginal: originalInput.checked,
-        allowReprint: reprintInput.checked,
         openComment: commentInput.checked,
         onlyFansCanComment: fansCommentInput.checked,
       });
@@ -5154,6 +5130,28 @@ class AppleStylePlugin extends Plugin {
       this.settings.wechatAppSecret = '';
       didMigrate = true;
       console.log('✅ 已将旧账号配置迁移到新格式');
+    }
+
+    if (Array.isArray(this.settings.wechatAccounts)) {
+      this.settings.wechatAccounts = this.settings.wechatAccounts.map((account) => {
+        if (!account || typeof account !== 'object') return account;
+        const nextAccount = { ...account };
+        let changed = false;
+
+        if (Object.prototype.hasOwnProperty.call(nextAccount, 'enableOriginal')) {
+          delete nextAccount.enableOriginal;
+          changed = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(nextAccount, 'allowReprint')) {
+          delete nextAccount.allowReprint;
+          changed = true;
+        }
+
+        if (changed) {
+          didMigrate = true;
+        }
+        return nextAccount;
+      });
     }
 
     // 数据迁移：旧清理配置 -> cleanupDirTemplate

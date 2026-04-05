@@ -51,8 +51,6 @@ describe('Wechat Sync Service', () => {
       content: '<p>done</p>',
     }));
     expect(result.article).not.toHaveProperty('content_source_url');
-    expect(result.article).not.toHaveProperty('is_open_reward');
-    expect(result.article).not.toHaveProperty('need_open_reprint');
     expect(result.article).not.toHaveProperty('need_open_comment');
     expect(result.article).not.toHaveProperty('only_fans_can_comment');
     expect(onStatus).toHaveBeenCalledWith('cover');
@@ -112,8 +110,6 @@ describe('Wechat Sync Service', () => {
         appSecret: 'sec',
         author: 'author1',
         contentSourceUrl: 'https://example.com/source',
-        enableOriginal: true,
-        allowReprint: false,
         openComment: true,
         onlyFansCanComment: true,
       },
@@ -127,10 +123,14 @@ describe('Wechat Sync Service', () => {
 
     expect(api.createDraft).toHaveBeenCalledWith(expect.objectContaining({
       content_source_url: 'https://example.com/source',
-      is_open_reward: 1,
-      need_open_reprint: 0,
       need_open_comment: 1,
       only_fans_can_comment: 1,
+    }));
+    expect(api.createDraft).toHaveBeenCalledWith(expect.not.objectContaining({
+      is_open_reward: expect.anything(),
+    }));
+    expect(api.createDraft).toHaveBeenCalledWith(expect.not.objectContaining({
+      need_open_reprint: expect.anything(),
     }));
   });
 

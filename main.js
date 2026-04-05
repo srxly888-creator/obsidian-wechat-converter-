@@ -7926,12 +7926,6 @@ var require_wechat_sync = __commonJS({
           if (contentSourceUrl) {
             article.content_source_url = contentSourceUrl;
           }
-          if (typeof account.enableOriginal === "boolean") {
-            article.is_open_reward = account.enableOriginal ? 1 : 0;
-          }
-          if (typeof account.allowReprint === "boolean") {
-            article.need_open_reprint = account.allowReprint ? 1 : 0;
-          }
           if (typeof account.openComment === "boolean") {
             article.need_open_comment = account.openComment ? 1 : 0;
           }
@@ -8833,16 +8827,12 @@ var DEFAULT_SETTINGS = {
 var MAX_ACCOUNTS = 5;
 var DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS = Object.freeze({
   contentSourceUrl: "",
-  enableOriginal: true,
-  allowReprint: true,
   openComment: true,
   onlyFansCanComment: false
 });
 function getWechatAccountPublishOptions(account = null) {
   return {
     contentSourceUrl: typeof (account == null ? void 0 : account.contentSourceUrl) === "string" ? account.contentSourceUrl : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.contentSourceUrl,
-    enableOriginal: typeof (account == null ? void 0 : account.enableOriginal) === "boolean" ? account.enableOriginal : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.enableOriginal,
-    allowReprint: typeof (account == null ? void 0 : account.allowReprint) === "boolean" ? account.allowReprint : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.allowReprint,
     openComment: typeof (account == null ? void 0 : account.openComment) === "boolean" ? account.openComment : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.openComment,
     onlyFansCanComment: typeof (account == null ? void 0 : account.onlyFansCanComment) === "boolean" ? account.onlyFansCanComment : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.onlyFansCanComment
   };
@@ -8852,8 +8842,6 @@ function normalizeWechatAccountPublishOptions(values = {}) {
   const openComment = !!values.openComment;
   return {
     contentSourceUrl,
-    enableOriginal: !!values.enableOriginal,
-    allowReprint: !!values.allowReprint,
     openComment,
     onlyFansCanComment: openComment && !!values.onlyFansCanComment
   };
@@ -12891,7 +12879,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
     });
     const publishSection = publishOptions.createDiv({ cls: "wechat-sync-advanced-body wechat-account-publish-body" });
     publishSection.createEl("div", {
-      text: "\u53EF\u4E3A\u5F53\u524D\u516C\u4F17\u53F7\u9884\u8BBE\u539F\u521B\u3001\u8F6C\u8F7D\u3001\u7559\u8A00\u7B49\u9ED8\u8BA4\u53D1\u5E03\u7B56\u7565\u3002",
+      text: "\u53EF\u4E3A\u5F53\u524D\u516C\u4F17\u53F7\u9884\u8BBE\u539F\u6587\u94FE\u63A5\u4E0E\u7559\u8A00\u76F8\u5173\u7684\u9ED8\u8BA4\u53D1\u5E03\u7B56\u7565\u3002",
       cls: "wechat-form-help"
     });
     const sourceUrlGroup = publishSection.createDiv({ cls: "wechat-form-group" });
@@ -12901,16 +12889,6 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       placeholder: "\u7559\u7A7A\u5219\u4E0D\u540C\u6B65\u539F\u6587\u94FE\u63A5",
       value: publishDefaults.contentSourceUrl
     });
-    const originalGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
-    const originalLabel = originalGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
-    const originalInput = originalLabel.createEl("input", { type: "checkbox" });
-    originalInput.checked = publishDefaults.enableOriginal;
-    originalLabel.appendText("\u9ED8\u8BA4\u5F00\u542F\u539F\u521B\u58F0\u660E");
-    const reprintGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
-    const reprintLabel = reprintGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
-    const reprintInput = reprintLabel.createEl("input", { type: "checkbox" });
-    reprintInput.checked = publishDefaults.allowReprint;
-    reprintLabel.appendText("\u9ED8\u8BA4\u5141\u8BB8\u8F6C\u8F7D");
     const commentGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
     const commentLabel = commentGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
     const commentInput = commentLabel.createEl("input", { type: "checkbox" });
@@ -12966,8 +12944,6 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       }
       const publishOptions2 = normalizeWechatAccountPublishOptions({
         contentSourceUrl: sourceUrlInput.value,
-        enableOriginal: originalInput.checked,
-        allowReprint: reprintInput.checked,
         openComment: commentInput.checked,
         onlyFansCanComment: fansCommentInput.checked
       });
@@ -13099,6 +13075,26 @@ var AppleStylePlugin = class extends Plugin {
       this.settings.wechatAppSecret = "";
       didMigrate = true;
       console.log("\u2705 \u5DF2\u5C06\u65E7\u8D26\u53F7\u914D\u7F6E\u8FC1\u79FB\u5230\u65B0\u683C\u5F0F");
+    }
+    if (Array.isArray(this.settings.wechatAccounts)) {
+      this.settings.wechatAccounts = this.settings.wechatAccounts.map((account) => {
+        if (!account || typeof account !== "object")
+          return account;
+        const nextAccount = { ...account };
+        let changed = false;
+        if (Object.prototype.hasOwnProperty.call(nextAccount, "enableOriginal")) {
+          delete nextAccount.enableOriginal;
+          changed = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(nextAccount, "allowReprint")) {
+          delete nextAccount.allowReprint;
+          changed = true;
+        }
+        if (changed) {
+          didMigrate = true;
+        }
+        return nextAccount;
+      });
     }
     const currentTemplate = normalizeVaultPath(this.settings.cleanupDirTemplate || "");
     const legacyRootDir = normalizeVaultPath(this.settings.cleanupRootDir || "");

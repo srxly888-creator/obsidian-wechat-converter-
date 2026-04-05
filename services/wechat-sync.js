@@ -66,12 +66,6 @@ function createWechatSyncService(deps) {
       if (contentSourceUrl) {
         article.content_source_url = contentSourceUrl;
       }
-      if (typeof account.enableOriginal === 'boolean') {
-        article.is_open_reward = account.enableOriginal ? 1 : 0;
-      }
-      if (typeof account.allowReprint === 'boolean') {
-        article.need_open_reprint = account.allowReprint ? 1 : 0;
-      }
       if (typeof account.openComment === 'boolean') {
         article.need_open_comment = account.openComment ? 1 : 0;
       }
