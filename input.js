@@ -35,6 +35,7 @@ const { createWechatSyncService } = require('./services/wechat-sync');
 const { resolveSyncAccount, toSyncFriendlyMessage } = require('./services/sync-context');
 const { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require('./services/wechat-media');
 const { cleanHtmlForDraft: cleanHtmlForDraftService } = require('./services/wechat-html-cleaner');
+const { rasterizeSvgToPngBlob } = require('./services/svg-rasterizer');
 
 // 视图类型标识
 const APPLE_STYLE_VIEW = 'apple-style-converter';
@@ -3355,93 +3356,7 @@ class AppleStyleView extends ItemView {
    * 返回: { blob, width, height, style }
    */
   async svgToPngBlob(svgElement, scale = 3) {
-    return new Promise((resolve, reject) => {
-      try {
-        // 0. 克隆节点 (防止修改影响原 DOM)
-        // 解决 "Medium Risk": 失败回退时颜色污染问题
-        const clonedSvg = svgElement.cloneNode(true);
-
-        // 1. 获取 SVG 原始逻辑尺寸 (需用原节点获取尺寸，因为克隆节点未挂载)
-        const rect = svgElement.getBoundingClientRect();
-        let logicalWidth = rect.width;
-        let logicalHeight = rect.height;
-
-        // 尝试从属性获取更精确的值 (ex/em 单位)
-        const rawWidth = svgElement.getAttribute('width');
-        const rawHeight = svgElement.getAttribute('height');
-        const rawStyle = svgElement.getAttribute('style');
-
-        // 如果尺寸获取失败(0)，尝试读取属性
-        if (logicalWidth === 0 || logicalHeight === 0) {
-           logicalWidth = parseFloat(rawWidth) || 100;
-           logicalHeight = parseFloat(rawHeight) || 20;
-        }
-
-        // 2. 序列化 SVG (操作克隆节点)
-        // 智能改色策略：仅针对 MathJax 公式进行改色 (#333333)，保护 Mermaid 等其他 SVG 的原色
-        const isMathJax = svgElement.getAttribute('role') === 'img' ||
-                          svgElement.getAttribute('focusable') === 'false' ||
-                          svgElement.classList.contains('MathJax');
-
-        if (isMathJax) {
-            clonedSvg.setAttribute('fill', '#333333');
-            clonedSvg.style.color = '#333333';
-
-            clonedSvg.querySelectorAll('*').forEach(el => {
-                if (el.getAttribute('fill') === 'currentColor' || !el.getAttribute('fill')) {
-                    el.setAttribute('fill', '#333333');
-                }
-                if (el.getAttribute('stroke') === 'currentColor') {
-                    el.setAttribute('stroke', '#333333');
-                }
-            });
-        }
-
-        const serializer = new XMLSerializer();
-        const svgString = serializer.serializeToString(clonedSvg);
-        const svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
-        const url = URL.createObjectURL(svgBlob);
-
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            // Canvas 使用高倍率 (Retina 适配, 物理像素)
-            canvas.width = logicalWidth * scale;
-            canvas.height = logicalHeight * scale;
-
-            const ctx = canvas.getContext('2d');
-            ctx.scale(scale, scale);
-            ctx.drawImage(img, 0, 0, logicalWidth, logicalHeight);
-
-            URL.revokeObjectURL(url);
-
-            canvas.toBlob((blob) => {
-              if (blob) {
-                  resolve({
-                      blob,
-                      width: logicalWidth, // 返回逻辑宽度 (例如 20.5)
-                      height: logicalHeight,
-                      style: rawStyle
-                  });
-              }
-              else reject(new Error('Canvas conversion failed'));
-            }, 'image/png');
-          } catch (e) {
-            reject(e);
-          }
-        };
-
-        img.onerror = (e) => {
-          URL.revokeObjectURL(url);
-          reject(new Error('SVG Image load failed'));
-        };
-
-        img.src = url;
-      } catch (e) {
-        reject(e);
-      }
-    });
+    return rasterizeSvgToPngBlob(svgElement, { scale });
   }
 
   /**

@@ -199,6 +199,18 @@ describe('Obsidian Triplet Serializer', () => {
     expect(html).toContain('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB...');
   });
 
+  it('should keep Mermaid diagram images as plain images instead of wrapping into figure captions', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p><img class="mermaid-diagram-image" src="data:image/png;base64,mermaid" alt="Mermaid diagram"></p>';
+
+    const html = serializeObsidianRenderedHtml({ root, converter });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    expect(container.querySelector('img.mermaid-diagram-image')).not.toBeNull();
+    expect(container.querySelector('figure')).toBeNull();
+  });
+
   it('should align plain text smart quotes with legacy typographer output', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>为了优雅，我用了 "Sequential Shift"（层级顺延）。</p>';

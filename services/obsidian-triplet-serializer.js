@@ -142,7 +142,7 @@ function sanitizeClassList(el, tagName, finalStage = false) {
   if (tagName === 'section') {
     keep = classes.filter((cls) => cls === 'code-snippet__fix');
   } else if (tagName === 'img') {
-    keep = classes.filter((cls) => cls === 'math-formula-image');
+    keep = classes.filter((cls) => cls === 'math-formula-image' || cls === 'mermaid-diagram-image');
   } else if (!finalStage && (tagName === 'pre' || tagName === 'code')) {
     keep = classes.filter((cls) => cls.startsWith('language-'));
   }
@@ -541,6 +541,18 @@ function convertStandaloneImages(container, converter) {
     if (img.closest('figure')) continue;
     if (img.getAttribute('alt') === 'logo') continue;
     if (img.classList.contains('math-formula-image')) continue;
+    if (img.classList.contains('mermaid-diagram-image')) {
+      const src = img.getAttribute('src') || '';
+      const safeSrc =
+        converter && typeof converter.validateLink === 'function'
+          ? converter.validateLink(src, true)
+          : src;
+      img.setAttribute('src', safeSrc);
+      if (!img.getAttribute('style')) {
+        img.setAttribute('style', 'display:block;max-width:100%;height:auto;margin:16px auto;');
+      }
+      continue;
+    }
 
     let src = img.getAttribute('src') || '';
     src = normalizeObsidianImageSrcForLegacyParity(src);

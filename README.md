@@ -19,6 +19,7 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 - Sync articles to the WeChat draft box with multi-account support.
 - Account-level draft defaults for source URL and comment settings.
 - Math rendering with SVG output for better WeChat compatibility.
+- Mermaid diagrams rendered by Obsidian preview, then rasterized to PNG on export for WeChat-safe copy and sync.
 - Local image handling for wiki links, relative paths, absolute paths, and GIFs.
 - Visual settings panel with theme, typography, preview, code block controls, and quote style options.
 - Experimental AI layout planning with provider-based configuration, schema checks, and debug snapshots.

@@ -1,6 +1,7 @@
 const { MarkdownRenderer } = require('obsidian');
 const { serializeObsidianRenderedHtml } = require('./obsidian-triplet-serializer');
 const { normalizeRenderedDomPunctuation } = require('./chinese-punctuation');
+const { rasterizeRenderedMermaidDiagrams } = require('./rendered-mermaid');
 
 function isFencedBlockDelimiter(line) {
   return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ''));
@@ -651,6 +652,7 @@ async function renderObsidianTripletMarkdown({
   settings = {},
   markdownRenderer = MarkdownRenderer,
   serializer = serializeObsidianRenderedHtml,
+  mermaidRasterizer = rasterizeRenderedMermaidDiagrams,
 }) {
   if (typeof document === 'undefined') {
     throw new Error('Triplet renderer requires DOM environment');
@@ -674,6 +676,7 @@ async function renderObsidianTripletMarkdown({
 
   // Wait for image embeds to settle; MarkdownRenderer may resolve embeds asynchronously.
   await waitForTripletDomToSettle(container, shouldObserveWindow ? {} : { minObserveMs: 0 });
+  await mermaidRasterizer(container);
 
   normalizeRenderedDomPunctuation(container, {
     enabled: settings.normalizeChinesePunctuation === true,

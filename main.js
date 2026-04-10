@@ -1707,7 +1707,7 @@ var require_obsidian_triplet_serializer = __commonJS({
       if (tagName === "section") {
         keep = classes.filter((cls) => cls === "code-snippet__fix");
       } else if (tagName === "img") {
-        keep = classes.filter((cls) => cls === "math-formula-image");
+        keep = classes.filter((cls) => cls === "math-formula-image" || cls === "mermaid-diagram-image");
       } else if (!finalStage && (tagName === "pre" || tagName === "code")) {
         keep = classes.filter((cls) => cls.startsWith("language-"));
       }
@@ -2091,6 +2091,15 @@ var require_obsidian_triplet_serializer = __commonJS({
           continue;
         if (img.classList.contains("math-formula-image"))
           continue;
+        if (img.classList.contains("mermaid-diagram-image")) {
+          const src2 = img.getAttribute("src") || "";
+          const safeSrc2 = converter && typeof converter.validateLink === "function" ? converter.validateLink(src2, true) : src2;
+          img.setAttribute("src", safeSrc2);
+          if (!img.getAttribute("style")) {
+            img.setAttribute("style", "display:block;max-width:100%;height:auto;margin:16px auto;");
+          }
+          continue;
+        }
         let src = img.getAttribute("src") || "";
         src = normalizeObsidianImageSrcForLegacyParity(src);
         const safeSrc = converter && typeof converter.validateLink === "function" ? converter.validateLink(src, true) : src;
@@ -2803,12 +2812,238 @@ var require_chinese_punctuation = __commonJS({
   }
 });
 
+// services/svg-rasterizer.js
+var require_svg_rasterizer = __commonJS({
+  "services/svg-rasterizer.js"(exports2, module2) {
+    function isMathJaxSvg(svgElement) {
+      var _a, _b;
+      if (!svgElement || typeof svgElement.getAttribute !== "function")
+        return false;
+      if (svgElement.getAttribute("role") === "img")
+        return true;
+      if (svgElement.getAttribute("focusable") === "false")
+        return true;
+      if ((_a = svgElement.classList) == null ? void 0 : _a.contains("MathJax"))
+        return true;
+      return !!((_b = svgElement.closest) == null ? void 0 : _b.call(svgElement, "mjx-container,mjx-math,.MathJax"));
+    }
+    function getSvgLogicalSize(svgElement) {
+      var _a, _b, _c, _d;
+      const rect = typeof (svgElement == null ? void 0 : svgElement.getBoundingClientRect) === "function" ? svgElement.getBoundingClientRect() : { width: 0, height: 0 };
+      let logicalWidth = Number(rect == null ? void 0 : rect.width) || 0;
+      let logicalHeight = Number(rect == null ? void 0 : rect.height) || 0;
+      const rawWidth = ((_a = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _a.call(svgElement, "width")) || "";
+      const rawHeight = ((_b = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _b.call(svgElement, "height")) || "";
+      const rawStyle = ((_c = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _c.call(svgElement, "style")) || "";
+      const viewBox = ((_d = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _d.call(svgElement, "viewBox")) || "";
+      if (logicalWidth === 0 || logicalHeight === 0) {
+        logicalWidth = parseFloat(rawWidth) || logicalWidth;
+        logicalHeight = parseFloat(rawHeight) || logicalHeight;
+      }
+      if ((logicalWidth === 0 || logicalHeight === 0) && viewBox) {
+        const parts = viewBox.trim().split(/[\s,]+/).map((value) => parseFloat(value));
+        if (parts.length === 4) {
+          if (logicalWidth === 0 && Number.isFinite(parts[2]) && parts[2] > 0) {
+            logicalWidth = parts[2];
+          }
+          if (logicalHeight === 0 && Number.isFinite(parts[3]) && parts[3] > 0) {
+            logicalHeight = parts[3];
+          }
+        }
+      }
+      if (logicalWidth === 0)
+        logicalWidth = 100;
+      if (logicalHeight === 0)
+        logicalHeight = 20;
+      return {
+        logicalWidth,
+        logicalHeight,
+        rawStyle
+      };
+    }
+    function prepareSvgClone(svgElement) {
+      const clonedSvg = svgElement.cloneNode(true);
+      const { logicalWidth, logicalHeight, rawStyle } = getSvgLogicalSize(svgElement);
+      if (isMathJaxSvg(svgElement)) {
+        clonedSvg.setAttribute("fill", "#333333");
+        if (clonedSvg.style) {
+          clonedSvg.style.color = "#333333";
+        }
+        clonedSvg.querySelectorAll("*").forEach((el) => {
+          if (el.getAttribute("fill") === "currentColor" || !el.getAttribute("fill")) {
+            el.setAttribute("fill", "#333333");
+          }
+          if (el.getAttribute("stroke") === "currentColor") {
+            el.setAttribute("stroke", "#333333");
+          }
+        });
+      }
+      return {
+        clonedSvg,
+        logicalWidth,
+        logicalHeight,
+        rawStyle
+      };
+    }
+    async function rasterizeSvg(svgElement, options = {}) {
+      const { scale = 3, output = "blob" } = options;
+      return new Promise((resolve, reject) => {
+        try {
+          const {
+            clonedSvg,
+            logicalWidth,
+            logicalHeight,
+            rawStyle
+          } = prepareSvgClone(svgElement);
+          const serializer = new XMLSerializer();
+          const svgString = serializer.serializeToString(clonedSvg);
+          const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+          const url = URL.createObjectURL(svgBlob);
+          const image = new Image();
+          image.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = logicalWidth * scale;
+              canvas.height = logicalHeight * scale;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) {
+                URL.revokeObjectURL(url);
+                reject(new Error("Canvas context unavailable"));
+                return;
+              }
+              ctx.scale(scale, scale);
+              ctx.drawImage(image, 0, 0, logicalWidth, logicalHeight);
+              URL.revokeObjectURL(url);
+              if (output === "dataUrl") {
+                resolve({
+                  dataUrl: canvas.toDataURL("image/png"),
+                  width: logicalWidth,
+                  height: logicalHeight,
+                  style: rawStyle
+                });
+                return;
+              }
+              canvas.toBlob((blob) => {
+                if (!blob) {
+                  reject(new Error("Canvas toBlob failed"));
+                  return;
+                }
+                resolve({
+                  blob,
+                  width: logicalWidth,
+                  height: logicalHeight,
+                  style: rawStyle
+                });
+              }, "image/png");
+            } catch (error) {
+              URL.revokeObjectURL(url);
+              reject(error);
+            }
+          };
+          image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("SVG image load failed"));
+          };
+          image.src = url;
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+    async function rasterizeSvgToPngBlob2(svgElement, options = {}) {
+      return rasterizeSvg(svgElement, { ...options, output: "blob" });
+    }
+    async function rasterizeSvgToPngDataUrl(svgElement, options = {}) {
+      return rasterizeSvg(svgElement, { ...options, output: "dataUrl" });
+    }
+    module2.exports = {
+      isMathJaxSvg,
+      getSvgLogicalSize,
+      rasterizeSvgToPngBlob: rasterizeSvgToPngBlob2,
+      rasterizeSvgToPngDataUrl
+    };
+  }
+});
+
+// services/rendered-mermaid.js
+var require_rendered_mermaid = __commonJS({
+  "services/rendered-mermaid.js"(exports2, module2) {
+    var { isMathJaxSvg, rasterizeSvgToPngDataUrl } = require_svg_rasterizer();
+    function hasMermaidMarker(el) {
+      if (!el || el.nodeType !== Node.ELEMENT_NODE)
+        return false;
+      const values = [
+        el.getAttribute("class"),
+        el.getAttribute("id"),
+        el.getAttribute("data-type"),
+        el.getAttribute("aria-label"),
+        el.getAttribute("aria-roledescription")
+      ].filter(Boolean).join(" ").toLowerCase();
+      return values.includes("mermaid");
+    }
+    function looksLikeMermaidSvg(svg) {
+      var _a, _b;
+      if (!svg || ((_b = (_a = svg.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) !== "svg")
+        return false;
+      if (isMathJaxSvg(svg))
+        return false;
+      if (svg.closest(".callout-icon"))
+        return false;
+      if (hasMermaidMarker(svg))
+        return true;
+      let cursor = svg.parentElement;
+      let depth = 0;
+      while (cursor && depth < 5) {
+        if (hasMermaidMarker(cursor))
+          return true;
+        cursor = cursor.parentElement;
+        depth += 1;
+      }
+      return !!svg.querySelector(
+        "g.node,g.edgePath,g.cluster,g.edgeLabel,g.messageText,g.actor,.node,.edgePath,.cluster,.edgeLabel"
+      );
+    }
+    async function rasterizeRenderedMermaidDiagrams(root, options = {}) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return;
+      const {
+        rasterizeSvg = rasterizeSvgToPngDataUrl,
+        scale = 3
+      } = options;
+      const svgs = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg);
+      for (const svg of svgs) {
+        try {
+          const result = await rasterizeSvg(svg, { scale });
+          const img = document.createElement("img");
+          img.setAttribute("src", result.dataUrl);
+          img.setAttribute("alt", "Mermaid diagram");
+          img.setAttribute("class", "mermaid-diagram-image");
+          if (result.width)
+            img.setAttribute("width", String(Math.round(result.width)));
+          if (result.height)
+            img.setAttribute("height", String(Math.round(result.height)));
+          img.setAttribute("style", "display:block;max-width:100%;height:auto;margin:16px auto;");
+          svg.replaceWith(img);
+        } catch (error) {
+          console.error("Mermaid \u56FE\u8868\u6805\u683C\u5316\u5931\u8D25\uFF0C\u4FDD\u7559\u539F\u59CB SVG:", error);
+        }
+      }
+    }
+    module2.exports = {
+      hasMermaidMarker,
+      looksLikeMermaidSvg,
+      rasterizeRenderedMermaidDiagrams
+    };
+  }
+});
+
 // services/obsidian-triplet-renderer.js
 var require_obsidian_triplet_renderer = __commonJS({
   "services/obsidian-triplet-renderer.js"(exports2, module2) {
     var { MarkdownRenderer } = require("obsidian");
     var { serializeObsidianRenderedHtml } = require_obsidian_triplet_serializer();
     var { normalizeRenderedDomPunctuation } = require_chinese_punctuation();
+    var { rasterizeRenderedMermaidDiagrams } = require_rendered_mermaid();
     function isFencedBlockDelimiter(line) {
       return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ""));
     }
@@ -3403,7 +3638,8 @@ var require_obsidian_triplet_renderer = __commonJS({
       component = null,
       settings = {},
       markdownRenderer = MarkdownRenderer,
-      serializer = serializeObsidianRenderedHtml
+      serializer = serializeObsidianRenderedHtml,
+      mermaidRasterizer = rasterizeRenderedMermaidDiagrams
     }) {
       if (typeof document === "undefined") {
         throw new Error("Triplet renderer requires DOM environment");
@@ -3423,6 +3659,7 @@ var require_obsidian_triplet_renderer = __commonJS({
         markdownRenderer
       });
       await waitForTripletDomToSettle(container, shouldObserveWindow ? {} : { minObserveMs: 0 });
+      await mermaidRasterizer(container);
       normalizeRenderedDomPunctuation(container, {
         enabled: settings.normalizeChinesePunctuation === true
       });
@@ -8779,6 +9016,7 @@ var { createWechatSyncService } = require_wechat_sync();
 var { resolveSyncAccount, toSyncFriendlyMessage } = require_sync_context();
 var { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require_wechat_media();
 var { cleanHtmlForDraft: cleanHtmlForDraftService } = require_wechat_html_cleaner();
+var { rasterizeSvgToPngBlob } = require_svg_rasterizer();
 var APPLE_STYLE_VIEW = "apple-style-converter";
 var APPLE_STYLE_VIEW_TITLE = "\u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668";
 var DEFAULT_SETTINGS = {
@@ -11661,71 +11899,7 @@ var AppleStyleView = class extends ItemView {
    * 返回: { blob, width, height, style }
    */
   async svgToPngBlob(svgElement, scale = 3) {
-    return new Promise((resolve, reject) => {
-      try {
-        const clonedSvg = svgElement.cloneNode(true);
-        const rect = svgElement.getBoundingClientRect();
-        let logicalWidth = rect.width;
-        let logicalHeight = rect.height;
-        const rawWidth = svgElement.getAttribute("width");
-        const rawHeight = svgElement.getAttribute("height");
-        const rawStyle = svgElement.getAttribute("style");
-        if (logicalWidth === 0 || logicalHeight === 0) {
-          logicalWidth = parseFloat(rawWidth) || 100;
-          logicalHeight = parseFloat(rawHeight) || 20;
-        }
-        const isMathJax = svgElement.getAttribute("role") === "img" || svgElement.getAttribute("focusable") === "false" || svgElement.classList.contains("MathJax");
-        if (isMathJax) {
-          clonedSvg.setAttribute("fill", "#333333");
-          clonedSvg.style.color = "#333333";
-          clonedSvg.querySelectorAll("*").forEach((el) => {
-            if (el.getAttribute("fill") === "currentColor" || !el.getAttribute("fill")) {
-              el.setAttribute("fill", "#333333");
-            }
-            if (el.getAttribute("stroke") === "currentColor") {
-              el.setAttribute("stroke", "#333333");
-            }
-          });
-        }
-        const serializer = new XMLSerializer();
-        const svgString = serializer.serializeToString(clonedSvg);
-        const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(svgBlob);
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const canvas = document.createElement("canvas");
-            canvas.width = logicalWidth * scale;
-            canvas.height = logicalHeight * scale;
-            const ctx = canvas.getContext("2d");
-            ctx.scale(scale, scale);
-            ctx.drawImage(img, 0, 0, logicalWidth, logicalHeight);
-            URL.revokeObjectURL(url);
-            canvas.toBlob((blob) => {
-              if (blob) {
-                resolve({
-                  blob,
-                  width: logicalWidth,
-                  // 返回逻辑宽度 (例如 20.5)
-                  height: logicalHeight,
-                  style: rawStyle
-                });
-              } else
-                reject(new Error("Canvas conversion failed"));
-            }, "image/png");
-          } catch (e) {
-            reject(e);
-          }
-        };
-        img.onerror = (e) => {
-          URL.revokeObjectURL(url);
-          reject(new Error("SVG Image load failed"));
-        };
-        img.src = url;
-      } catch (e) {
-        reject(e);
-      }
-    });
+    return rasterizeSvgToPngBlob(svgElement, { scale });
   }
   /**
    * 清理 HTML 以适配微信编辑器

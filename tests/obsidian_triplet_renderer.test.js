@@ -426,6 +426,33 @@ describe('Obsidian Triplet Renderer', () => {
     expect(html).toContain('<img');
   });
 
+  it('should rasterize rendered Mermaid diagrams before serialization', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<div class="mermaid"><svg id="mermaid-1"></svg></div>';
+    });
+    const mermaidRasterizer = vi.fn(async (root) => {
+      const svg = root.querySelector('svg#mermaid-1');
+      const img = document.createElement('img');
+      img.setAttribute('src', 'data:image/png;base64,mermaid');
+      img.setAttribute('class', 'mermaid-diagram-image');
+      svg.replaceWith(img);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidRasterizer,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidRasterizer).toHaveBeenCalledTimes(1);
+    expect(html).toContain('mermaid-diagram-image');
+    expect(html).not.toContain('<svg');
+  });
+
   it('should keep observe window for reference-style local image and wait delayed embed injection', async () => {
     const renderMarkdown = vi.fn(async (_markdown, el) => {
       el.innerHTML = '<p>start</p>';
