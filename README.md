@@ -22,13 +22,20 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 - Mermaid diagrams rendered by Obsidian preview, then rasterized to PNG on export for WeChat-safe copy and sync.
 - Local image handling for wiki links, relative paths, absolute paths, and GIFs.
 - Visual settings panel with theme, typography, preview, code block controls, and quote style options.
-- Experimental AI layout planning with provider-based configuration, schema checks, and debug snapshots.
+- Experimental AI layout planning with provider profiles, built-in layout families, schema checks, and debug snapshots.
 - Chinese punctuation normalization for rendered output, with protection for code and technical tokens.
 
 <p align="center">
   <img src="images/setting_panel_light.png" alt="Settings panel (light)" height="460" />
   <img src="images/setting_panel_dark.png" alt="Settings panel (dark)" height="460" />
 </p>
+
+## What's New Since 2.6.9
+
+- AI layout planning now lives inside the converter workflow, with provider management, connection testing, built-in layout families, color palette switching, schema validation, and reusable debug snapshots.
+- Mermaid diagrams keep the Obsidian preview experience, then switch to PNG automatically during copy and draft sync so WeChat does not strip or choke on large SVG payloads.
+- Draft sync gained account-level publish defaults for supported WeChat fields, so each Official Account profile can keep its own source URL and comment preferences.
+- Quote and callout styling now includes a neutral gray mode for calmer reading, plus semantic accents for common callout types such as `note`, `tip`, `warning`, and `danger`.
 
 ## Installation
 
@@ -61,17 +68,27 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 
 ### Experimental AI layout planning
 
-- Configure AI providers from the plugin settings page.
+- Configure AI providers from the plugin settings page. The current UI supports OpenAI-compatible, Gemini-compatible, and Anthropic-compatible endpoints.
 - Open `AI 编排` from the converter toolbar to generate layout suggestions for the current article.
+- Choose from three built-in layout families: `Source-first`, `Tutorial cards`, and `Editorial lite`.
+- Switch color palettes after generation to reuse the current layout structure without rerunning the full layout plan.
 - Review schema warnings, inspect layout JSON, or copy a debug prompt snapshot before applying the result to preview.
+- If regeneration fails, the last successful layout can still remain available instead of forcing you back to the plain preview immediately.
 
 ### Draft sync
 
 - Supports up to 5 WeChat Official Account profiles.
 - Each account can store draft defaults for `content_source_url`, comments, and fans-only comments.
+- These defaults are intentionally limited to fields supported by the current WeChat draft flow.
 - Uses `cover` and `excerpt` from frontmatter when available.
 - Falls back to the first body image and auto-generated excerpt when not provided.
 - Can optionally clean up a configured output directory after a successful sync.
+
+### Mermaid export
+
+- Mermaid diagrams rendered by Obsidian can stay visible in live preview.
+- During copy and draft sync, Mermaid diagrams are rasterized to PNG so WeChat receives a safer export format.
+- The export path tries to preserve the original Mermaid colors instead of applying math-specific SVG cleanup.
 
 ### Quote and callout styles
 
