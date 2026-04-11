@@ -6,6 +6,7 @@ const {
   deriveImageCaption,
   safeDecodeCaption,
 } = require('../services/obsidian-triplet-serializer');
+const { cleanHtmlForDraft } = require('../services/wechat-html-cleaner');
 const { createLegacyConverter } = require('./helpers/render-runtime');
 const tripletFixtureRoot = path.resolve(__dirname, 'fixtures', 'triplet');
 const tripletCorpusPath = path.resolve(tripletFixtureRoot, 'corpus.json');
@@ -47,6 +48,25 @@ describe('Obsidian Triplet Serializer', () => {
     container.innerHTML = html;
     const normalized = (container.textContent || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
     expect(normalized).toMatch(/const\s+x\s*=\s*1/);
+  });
+
+  it('should keep Mac code window controls as inline circle lights through draft cleaning', () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<pre><code class="language-js">const x = 1;</code></pre>';
+
+    const html = serializeObsidianRenderedHtml({ root, converter });
+    const cleanedHtml = cleanHtmlForDraft(html);
+    const container = document.createElement('div');
+    container.innerHTML = cleanedHtml;
+
+    const header = container.querySelector('.code-snippet__fix > section');
+    const dots = Array.from(header?.querySelectorAll('span') || []);
+    expect(dots).toHaveLength(3);
+    expect(header?.getAttribute('style') || '').toContain('padding:6px 10px 6px 10px');
+    expect(dots[0]?.getAttribute('style') || '').toContain('background:#ff5f57');
+    expect(dots[0]?.getAttribute('style') || '').toContain('width:9px');
+    expect(dots[1]?.getAttribute('style') || '').toContain('background:#ffbd2e');
+    expect(dots[2]?.getAttribute('style') || '').toContain('background:#28c840');
   });
 
   it('should sanitize dangerous tags and unsafe links', () => {

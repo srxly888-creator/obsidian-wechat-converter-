@@ -567,10 +567,10 @@ window.AppleStyleConverter = class AppleStyleConverter {
 
     // Mac 头部
     // 关键修正：使用 section 而不是 div，增强在公众号中的兼容性
-    const macHeader = showMac ? `<section style="display:block !important;background:${barBackground} !important;padding:10px !important;border:none !important;border-bottom:1px solid ${borderColor} !important;border-radius:8px 8px 0 0 !important;line-height:1 !important;">
-      <span style="display:inline-block !important;width:12px !important;height:12px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:8px !important;"></span>
-      <span style="display:inline-block !important;width:12px !important;height:12px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:8px !important;"></span>
-      <span style="display:inline-block !important;width:12px !important;height:12px !important;border-radius:50% !important;background:#28c840 !important;"></span>
+    const macHeader = showMac ? `<section style="display:block !important;background:${barBackground} !important;padding:6px 10px 6px 10px !important;border:none !important;border-bottom:1px solid ${borderColor} !important;border-radius:8px 8px 0 0 !important;line-height:1 !important;">
+      <span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;"></span>
+      <span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;"></span>
+      <span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#28c840 !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;"></span>
     </section>` : '';
 
     // 统一行高和字体变量

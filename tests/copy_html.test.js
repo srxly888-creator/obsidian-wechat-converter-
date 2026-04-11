@@ -76,6 +76,20 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     expect(window.__OWC_LAST_CLIPBOARD_TEXT).toBe('清理时机： 正文');
   });
 
+  it('should convert mac code blocks to table layout for clipboard compatibility', async () => {
+    view.currentHtml = '<section class="code-snippet__fix" style="width:100% !important;margin:12px 0 !important;background:#0d1117 !important;border:1px solid #30363d !important;border-radius:8px !important;overflow:hidden !important;display:block !important;"><section style="display:block !important;background:#161b22 !important;padding:10px !important;border-bottom:1px solid #30363d !important;"><span><svg xmlns="http://www.w3.org/2000/svg" width="45" height="13"><ellipse cx="5" cy="6" rx="5" ry="5"></ellipse></svg></span></section><section><pre style="margin:0 !important;"><section>const x = 1;</section></pre></section></section>';
+    view.cleanHtmlForDraft = vi.fn((html) => html);
+
+    await view.copyHTML();
+
+    const item = writeMock.mock.calls[0][0][0];
+    const html = await blobToText(item.items['text/html']);
+    expect(html).toContain('<table');
+    expect(html).toContain('background:#161b22');
+    expect(html).toContain('background:#ff5f57');
+    expect(html).not.toContain('<svg');
+  });
+
   it('should fail on desktop when clipboard html write is unavailable', async () => {
     Object.defineProperty(global.navigator, 'clipboard', {
       value: {},
