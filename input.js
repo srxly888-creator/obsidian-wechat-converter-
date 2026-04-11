@@ -2095,7 +2095,19 @@ class AppleStyleView extends ItemView {
     if (isLoading) {
       return { mode: 'generate-apply', label: '生成中...', disabled: true };
     }
-    if (!hasDoc || !aiFeatureEnabled || !canGenerateForSelection) {
+    if (!hasDoc || !aiFeatureEnabled) {
+      return { mode: 'generate-apply', label: '生成并应用', disabled: true };
+    }
+    if (hasReusableLayout && hasLastAttemptFailure) {
+      if (hasApplied) {
+        return { mode: 'generate-apply', label: '重新生成并应用', disabled: !canGenerateForSelection };
+      }
+      return { mode: 'apply', label: '应用上一版', disabled: false };
+    }
+    if (visibleLayout?.blocks?.length && !hasApplied) {
+      return { mode: 'apply', label: '应用当前结果', disabled: false };
+    }
+    if (!canGenerateForSelection) {
       return { mode: 'generate-apply', label: '生成并应用', disabled: true };
     }
     if (!state) {
@@ -2104,17 +2116,8 @@ class AppleStyleView extends ItemView {
     if (isStale) {
       return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
     }
-    if ((state.status === 'error' || state.status === 'schema-error') && !hasReusableLayout) {
+    if (state.status === 'error' || state.status === 'schema-error') {
       return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
-    }
-    if (hasReusableLayout && hasLastAttemptFailure) {
-      if (hasApplied) {
-        return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
-      }
-      return { mode: 'apply', label: '应用上一版', disabled: false };
-    }
-    if (visibleLayout?.blocks?.length && !hasApplied) {
-      return { mode: 'apply', label: '应用当前结果', disabled: false };
     }
     return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
   }
@@ -2494,6 +2497,8 @@ class AppleStyleView extends ItemView {
     const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
     const hasApplied = this.aiPreviewApplied === true && !!state && !isStale;
     const isLoading = this.aiLayoutLoading === true;
+    const hasVisibleLayout = !!(visibleLayout?.blocks?.length);
+    const canApplyVisibleLayout = hasVisibleLayout && !hasApplied && !isStale;
 
     let badge = '未生成';
     let statusText = hasDoc ? '当前文章还没有 AI 编排结果。' : '请先打开一篇文章。';
@@ -2503,14 +2508,16 @@ class AppleStyleView extends ItemView {
     } else if (!aiFeatureEnabled) {
       badge = '已关闭';
       statusText = 'AI 编排已关闭，请先在设置中启用。';
-    } else if (!hasProvider && !canUseLocalLayout) {
-      badge = '待配置';
-      statusText = configuredProviders > 0
-        ? '当前布局需要可用的 AI Provider，请补全配置后再试。'
-        : '当前布局需要 AI Provider，请先到设置中完成配置。';
     } else if (!state) {
-      badge = '未生成';
-      statusText = '选择布局和颜色后，点击“生成并应用”查看效果。';
+      if (!hasProvider && !canUseLocalLayout) {
+        badge = '待配置';
+        statusText = configuredProviders > 0
+          ? '当前布局需要可用的 AI Provider，请补全配置后再试。'
+          : '当前布局需要 AI Provider，请先到设置中完成配置。';
+      } else {
+        badge = '未生成';
+        statusText = '选择布局和颜色后，点击“生成并应用”查看效果。';
+      }
     } else if (state?.status === 'schema-error') {
       badge = hasReusableLayout ? '已保留上一版' : '生成失败';
       statusText = hasReusableLayout
@@ -2522,8 +2529,13 @@ class AppleStyleView extends ItemView {
         ? '这次生成没有成功，已为你保留上一版结果。'
         : '生成失败，请重试或检查 AI 设置。';
     } else if (state && isStale) {
-      badge = '需更新';
-      statusText = '文章内容有更新，建议重新生成并应用。';
+      if (canGenerateForSelection) {
+        badge = '需更新';
+        statusText = '文章内容有更新，建议重新生成并应用。';
+      } else {
+        badge = '待配置';
+        statusText = '当前已有旧结果，但文章内容已更新。若要重新生成，请先完成 AI Provider 配置。';
+      }
     } else if (hasReusableLayout && hasLastAttemptFailure) {
       badge = '已保留上一版';
       statusText = '这次生成没有成功，已为你保留上一版结果。';
@@ -2612,11 +2624,6 @@ class AppleStyleView extends ItemView {
       this.aiLayoutMetaNote?.setText('当前支持原文增强型、教程卡片型、轻杂志型三种布局。');
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
-    } else if (!hasProvider && !canUseLocalLayout) {
-      this.aiLayoutSummary.setText('当前所选布局依赖 AI Provider。');
-      this.aiLayoutMetaNote?.setText('完成 Provider 配置后，就可以直接生成并应用。');
-      this.renderAiLayoutMetaChips([]);
-      this.refreshAiSchemaIssuePanel(null);
     } else if (state?.status === 'schema-error') {
       this.aiLayoutSummary.setText(hasReusableLayout ? '上一版结果仍可继续使用。' : '这次生成没有成功。');
       this.renderAiLayoutMetaChips([
@@ -2634,14 +2641,6 @@ class AppleStyleView extends ItemView {
       ]);
       this.aiLayoutMetaNote?.setText(hasReusableLayout ? '当前不会影响你继续使用上一版结果。' : '如果反复失败，可以到高级里查看错误详情。');
       this.refreshAiSchemaIssuePanel(null);
-    } else if (!state) {
-      this.aiLayoutSummary.setText(`将为「${context.title}」生成新的排版结果。`);
-      this.renderAiLayoutMetaChips([
-        `布局 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
-        `颜色 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`,
-      ]);
-      this.aiLayoutMetaNote?.setText('生成后会直接应用到预览，你再决定保留或移除哪些区块。');
-      this.refreshAiSchemaIssuePanel(null);
     } else if (hasReusableLayout && hasLastAttemptFailure) {
       this.aiLayoutSummary.setText('上一版结果仍可继续使用。');
       this.renderAiLayoutMetaChips([
@@ -2651,6 +2650,28 @@ class AppleStyleView extends ItemView {
       ]);
       this.aiLayoutMetaNote?.setText(hiddenBlockCount > 0 ? `已隐藏 ${hiddenBlockCount} 个区块，可随时恢复。` : '如果当前效果还能用，你可以先继续使用上一版。');
       this.refreshAiSchemaIssuePanel(state.lastAttemptStatus === 'schema-error' ? schemaValidation : null);
+    } else if (!state) {
+      if (!hasProvider && !canUseLocalLayout) {
+        this.aiLayoutSummary.setText('当前所选布局依赖 AI Provider。');
+        this.aiLayoutMetaNote?.setText('完成 Provider 配置后，就可以直接生成并应用。');
+        this.renderAiLayoutMetaChips([]);
+      } else {
+        this.aiLayoutSummary.setText(`将为「${context.title}」生成新的排版结果。`);
+        this.renderAiLayoutMetaChips([
+          `布局 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
+          `颜色 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`,
+        ]);
+        this.aiLayoutMetaNote?.setText('生成后会直接应用到预览，你再决定保留或移除哪些区块。');
+      }
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (state && isStale && !canGenerateForSelection) {
+      this.aiLayoutSummary.setText('当前已有一版旧结果，但要重新生成需要先完成 AI Provider 配置。');
+      this.renderAiLayoutMetaChips([
+        ...(providerLabel ? [`Provider ${providerLabel}`] : []),
+        ...(modelLabel ? [`模型 ${modelLabel}`] : []),
+      ]);
+      this.aiLayoutMetaNote?.setText(canApplyVisibleLayout ? '当前结果仍可继续应用；如果要更新内容，请先恢复 Provider。' : '完成 Provider 配置后，就可以基于最新内容重新生成。');
+      this.refreshAiSchemaIssuePanel(null);
     } else {
       const blockCount = visibleLayout?.blocks?.length || 0;
       this.aiLayoutSummary.setText(`当前结果共 ${blockCount} 个区块，可直接应用，也可以移除不需要的部分。`);

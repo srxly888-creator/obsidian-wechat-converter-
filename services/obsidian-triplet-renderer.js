@@ -1,7 +1,11 @@
 const { MarkdownRenderer } = require('obsidian');
 const { serializeObsidianRenderedHtml } = require('./obsidian-triplet-serializer');
 const { normalizeRenderedDomPunctuation } = require('./chinese-punctuation');
-const { rasterizeRenderedMermaidDiagrams } = require('./rendered-mermaid');
+const {
+  hasMermaidMarker,
+  looksLikeMermaidSvg,
+  rasterizeRenderedMermaidDiagrams,
+} = require('./rendered-mermaid');
 
 function isFencedBlockDelimiter(line) {
   return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ''));
@@ -486,6 +490,59 @@ function countUnresolvedImageEmbeds(root) {
   return unresolved;
 }
 
+function shouldObserveMermaidRenderWindow(markdown) {
+  const lines = String(markdown || '').split('\n');
+  let fenceState = null;
+
+  for (const line of lines) {
+    const delimiter = parseFencedBlockDelimiter(line);
+    if (!delimiter) continue;
+
+    if (!fenceState) {
+      const infoString = String(line || '').replace(/^\s{0,3}(?:`{3,}|~{3,})/, '').trim().toLowerCase();
+      if (infoString === 'mermaid' || infoString.startsWith('mermaid ')) {
+        return true;
+      }
+      fenceState = delimiter;
+      continue;
+    }
+
+    if (delimiter.marker === fenceState.marker && delimiter.length >= fenceState.length) {
+      fenceState = null;
+    }
+  }
+
+  return false;
+}
+
+function collectMermaidHostElements(root) {
+  if (!root || typeof root.querySelectorAll !== 'function') return [];
+  const elements = Array.from(root.querySelectorAll('*')).filter((el) => hasMermaidMarker(el));
+  return elements.filter((el) => !el.closest('mjx-container'));
+}
+
+function countRenderedMermaidDiagrams(root) {
+  if (!root || typeof root.querySelectorAll !== 'function') return 0;
+  const svgCount = Array.from(root.querySelectorAll('svg')).filter(looksLikeMermaidSvg).length;
+  const imageCount = root.querySelectorAll('img.mermaid-diagram-image').length;
+  return svgCount + imageCount;
+}
+
+function countPendingMermaidHosts(root) {
+  const hosts = collectMermaidHostElements(root);
+  let pending = 0;
+  for (const host of hosts) {
+    if (host.tagName?.toLowerCase?.() === 'svg') continue;
+    if (host.tagName?.toLowerCase?.() === 'img' && host.classList.contains('mermaid-diagram-image')) continue;
+    const hasRenderedSvg = Array.from(host.querySelectorAll('svg')).some(looksLikeMermaidSvg);
+    const hasRenderedImage = !!host.querySelector('img.mermaid-diagram-image');
+    if (!hasRenderedSvg && !hasRenderedImage) {
+      pending += 1;
+    }
+  }
+  return pending;
+}
+
 function normalizeReferenceLabel(label) {
   return String(label || '').trim().replace(/\s+/g, ' ').toLowerCase();
 }
@@ -580,33 +637,53 @@ async function waitForTripletDomToSettle(root, options = {}) {
   if (!root) return;
   const timeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : 500;
   const intervalMs = Number.isFinite(options.intervalMs) ? options.intervalMs : 16;
+  const observeMermaid = options.observeMermaid === true;
   const minObserveMs = Number.isFinite(options.minObserveMs)
     ? Math.max(0, Math.floor(options.minObserveMs))
     : Math.min(48, timeoutMs);
+  const mermaidObserveMs = observeMermaid
+    ? (
+      Number.isFinite(options.mermaidObserveMs)
+        ? Math.max(0, Math.floor(options.mermaidObserveMs))
+        : Math.min(180, timeoutMs)
+    )
+    : 0;
 
   const start = Date.now();
   let unresolved = countUnresolvedImageEmbeds(root);
-  if (unresolved === 0 && minObserveMs <= 0) {
+  let renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+  let pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+  const initialObserveMs = Math.max(minObserveMs, mermaidObserveMs);
+
+  if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0 && initialObserveMs <= 0) {
     return;
   }
 
   // Fast path with a short observation window: avoid waiting full settle time
   // while still catching delayed async embed insertion after render.
-  if (unresolved === 0 && minObserveMs > 0) {
-    while (Date.now() - start < minObserveMs) {
+  if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0 && initialObserveMs > 0) {
+    while (Date.now() - start < initialObserveMs) {
       // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve) => setTimeout(resolve, intervalMs));
       unresolved = countUnresolvedImageEmbeds(root);
-      if (unresolved > 0) break;
+      renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+      pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+      if (unresolved > 0 || renderedMermaid > 0 || pendingMermaid > 0) break;
     }
-    if (unresolved === 0) return;
+    if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0) return;
   }
 
   let stableCount = 0;
 
   while (Date.now() - start < timeoutMs) {
     unresolved = countUnresolvedImageEmbeds(root);
-    if (unresolved === 0) {
+    renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+    pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+    const mermaidReady = !observeMermaid || (
+      (pendingMermaid === 0 && renderedMermaid > 0)
+      || (pendingMermaid === 0 && renderedMermaid === 0 && (Date.now() - start >= mermaidObserveMs))
+    );
+    if (unresolved === 0 && mermaidReady) {
       stableCount += 1;
       if (stableCount >= 2) return;
     } else {
@@ -665,6 +742,7 @@ async function renderObsidianTripletMarkdown({
   const { markdown: preparedMarkdown, mathFormulas } = preprocessMarkdownForTriplet(markdown, converter);
 
   const shouldObserveWindow = shouldObserveAsyncEmbedWindow(preparedMarkdown);
+  const shouldObserveMermaid = shouldObserveMermaidRenderWindow(preparedMarkdown);
   await renderByObsidianMarkdownRenderer({
     app,
     markdown: preparedMarkdown,
@@ -675,7 +753,10 @@ async function renderObsidianTripletMarkdown({
   });
 
   // Wait for image embeds to settle; MarkdownRenderer may resolve embeds asynchronously.
-  await waitForTripletDomToSettle(container, shouldObserveWindow ? {} : { minObserveMs: 0 });
+  await waitForTripletDomToSettle(container, {
+    minObserveMs: shouldObserveWindow ? void 0 : 0,
+    observeMermaid: shouldObserveMermaid,
+  });
   await mermaidRasterizer(container);
 
   normalizeRenderedDomPunctuation(container, {
@@ -700,6 +781,7 @@ module.exports = {
   injectHardBreaksForLegacyParity,
   normalizeRenderedDomPunctuation,
   shouldObserveAsyncEmbedWindow,
+  shouldObserveMermaidRenderWindow,
   waitForTripletDomToSettle,
   renderByObsidianMarkdownRenderer,
   renderObsidianTripletMarkdown,

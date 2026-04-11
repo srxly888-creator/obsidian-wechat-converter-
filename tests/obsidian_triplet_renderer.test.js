@@ -6,6 +6,7 @@ const {
   preprocessMarkdownForTriplet,
   injectHardBreaksForLegacyParity,
   shouldObserveAsyncEmbedWindow,
+  shouldObserveMermaidRenderWindow,
   waitForTripletDomToSettle,
   renderByObsidianMarkdownRenderer,
   renderObsidianTripletMarkdown,
@@ -224,6 +225,13 @@ describe('Obsidian Triplet Renderer', () => {
     expect(shouldObserveAsyncEmbedWindow('![alt](https://example.com/a.png "title")')).toBe(false);
     // Reference with title
     expect(shouldObserveAsyncEmbedWindow('![ref][img]\n[img]: https://example.com/a.png "title"')).toBe(false);
+  });
+
+  it('should detect Mermaid fences for async observe window', () => {
+    expect(shouldObserveMermaidRenderWindow('纯文本')).toBe(false);
+    expect(shouldObserveMermaidRenderWindow('```mermaid\ngraph TD\nA-->B\n```')).toBe(true);
+    expect(shouldObserveMermaidRenderWindow('~~~mermaid\nflowchart LR\nA-->B\n~~~')).toBe(true);
+    expect(shouldObserveMermaidRenderWindow('````markdown\n```mermaid\ngraph TD\nA-->B\n```\n````')).toBe(false);
   });
 
   it('should render with renderMarkdown API and serialize output', async () => {
@@ -451,6 +459,37 @@ describe('Obsidian Triplet Renderer', () => {
     expect(mermaidRasterizer).toHaveBeenCalledTimes(1);
     expect(html).toContain('mermaid-diagram-image');
     expect(html).not.toContain('<svg');
+  });
+
+  it('should wait for delayed Mermaid svg injection before rasterization and serialization', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<p>placeholder</p>';
+      setTimeout(() => {
+        el.innerHTML = '<div class="mermaid"><svg id="late-mermaid"></svg></div>';
+      }, 80);
+    });
+    const mermaidRasterizer = vi.fn(async (root) => {
+      const svg = root.querySelector('svg#late-mermaid');
+      if (!svg) return;
+      const img = document.createElement('img');
+      img.setAttribute('src', 'data:image/png;base64,late-mermaid');
+      img.setAttribute('class', 'mermaid-diagram-image');
+      svg.replaceWith(img);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidRasterizer,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidRasterizer).toHaveBeenCalledTimes(1);
+    expect(html).toContain('mermaid-diagram-image');
+    expect(html).not.toContain('placeholder');
   });
 
   it('should keep observe window for reference-style local image and wait delayed embed injection', async () => {

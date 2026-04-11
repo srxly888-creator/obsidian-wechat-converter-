@@ -757,6 +757,86 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '生成并应用')).toBe(true);
   });
 
+  it('refreshAiLayoutPanel should keep apply available for cached results even when the provider is unavailable', () => {
+    const cachedState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      providerId: 'provider-1',
+      model: 'deepseek-chat',
+      stylePack: 'tech-green',
+      status: 'ready',
+      lastError: '',
+      lastAttemptStatus: 'success',
+      generationMeta: {
+        providerName: 'DeepSeek',
+        providerModel: 'deepseek-chat',
+        stylePackLabel: '科技绿',
+        headingCount: 1,
+        sectionCount: 1,
+        leadParagraphCount: 1,
+        bulletGroupCount: 0,
+        imageCount: 0,
+        aiBlockCount: 1,
+        finalBlockCount: 1,
+        fallbackUsed: false,
+        fallbackBlockCount: 0,
+        fallbackBlockTypes: [],
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '缓存标题' }],
+      },
+      layoutJson: {
+        articleType: 'tutorial',
+        stylePack: 'tech-green',
+        blocks: [{ type: 'hero', title: '缓存标题' }],
+      },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          defaultProviderId: 'provider-1',
+          providers: [],
+          articleLayoutsByPath: {
+            'notes/demo.md': cachedState,
+          },
+        },
+      },
+      saveSettings: vi.fn(),
+      getArticleLayoutState: vi.fn(() => cachedState),
+    });
+    view.app = {
+      isMobile: false,
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.theme = { update: vi.fn() };
+    view.converter = { updateConfig: vi.fn() };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    cachedState.sourceHash = String(view.simpleHash('# demo'));
+    view.lastResolvedSourceHash = cachedState.sourceHash;
+    vi.spyOn(view, 'getCurrentArticleLayoutState').mockReturnValue(cachedState);
+
+    global.AppleTheme = {
+      getThemeList: () => [{ value: 'github', label: '简约' }],
+      getColorList: () => [{ value: 'blue', color: '#0366d6' }],
+    };
+
+    const container = createObsidianLikeElement();
+    view.createSettingsPanel(container);
+    view.refreshAiLayoutPanel();
+
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('可应用');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('当前结果已准备好');
+    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 1 个区块');
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果' && button.disabled === false)).toBe(true);
+  });
+
   it('refreshAiLayoutPanel should restore cached blocks when switching back to another generated color palette', () => {
     const greenState = {
       version: 1,

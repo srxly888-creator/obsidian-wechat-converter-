@@ -3043,7 +3043,11 @@ var require_obsidian_triplet_renderer = __commonJS({
     var { MarkdownRenderer } = require("obsidian");
     var { serializeObsidianRenderedHtml } = require_obsidian_triplet_serializer();
     var { normalizeRenderedDomPunctuation } = require_chinese_punctuation();
-    var { rasterizeRenderedMermaidDiagrams } = require_rendered_mermaid();
+    var {
+      hasMermaidMarker,
+      looksLikeMermaidSvg,
+      rasterizeRenderedMermaidDiagrams
+    } = require_rendered_mermaid();
     function isFencedBlockDelimiter(line) {
       return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ""));
     }
@@ -3500,6 +3504,57 @@ var require_obsidian_triplet_renderer = __commonJS({
       }
       return unresolved;
     }
+    function shouldObserveMermaidRenderWindow(markdown) {
+      const lines = String(markdown || "").split("\n");
+      let fenceState = null;
+      for (const line of lines) {
+        const delimiter = parseFencedBlockDelimiter(line);
+        if (!delimiter)
+          continue;
+        if (!fenceState) {
+          const infoString = String(line || "").replace(/^\s{0,3}(?:`{3,}|~{3,})/, "").trim().toLowerCase();
+          if (infoString === "mermaid" || infoString.startsWith("mermaid ")) {
+            return true;
+          }
+          fenceState = delimiter;
+          continue;
+        }
+        if (delimiter.marker === fenceState.marker && delimiter.length >= fenceState.length) {
+          fenceState = null;
+        }
+      }
+      return false;
+    }
+    function collectMermaidHostElements(root) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return [];
+      const elements = Array.from(root.querySelectorAll("*")).filter((el) => hasMermaidMarker(el));
+      return elements.filter((el) => !el.closest("mjx-container"));
+    }
+    function countRenderedMermaidDiagrams(root) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      const svgCount = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg).length;
+      const imageCount = root.querySelectorAll("img.mermaid-diagram-image").length;
+      return svgCount + imageCount;
+    }
+    function countPendingMermaidHosts(root) {
+      var _a, _b, _c, _d;
+      const hosts = collectMermaidHostElements(root);
+      let pending = 0;
+      for (const host of hosts) {
+        if (((_b = (_a = host.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) === "svg")
+          continue;
+        if (((_d = (_c = host.tagName) == null ? void 0 : _c.toLowerCase) == null ? void 0 : _d.call(_c)) === "img" && host.classList.contains("mermaid-diagram-image"))
+          continue;
+        const hasRenderedSvg = Array.from(host.querySelectorAll("svg")).some(looksLikeMermaidSvg);
+        const hasRenderedImage = !!host.querySelector("img.mermaid-diagram-image");
+        if (!hasRenderedSvg && !hasRenderedImage) {
+          pending += 1;
+        }
+      }
+      return pending;
+    }
     function normalizeReferenceLabel(label) {
       return String(label || "").trim().replace(/\s+/g, " ").toLowerCase();
     }
@@ -3578,26 +3633,36 @@ var require_obsidian_triplet_renderer = __commonJS({
         return;
       const timeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : 500;
       const intervalMs = Number.isFinite(options.intervalMs) ? options.intervalMs : 16;
+      const observeMermaid = options.observeMermaid === true;
       const minObserveMs = Number.isFinite(options.minObserveMs) ? Math.max(0, Math.floor(options.minObserveMs)) : Math.min(48, timeoutMs);
+      const mermaidObserveMs = observeMermaid ? Number.isFinite(options.mermaidObserveMs) ? Math.max(0, Math.floor(options.mermaidObserveMs)) : Math.min(180, timeoutMs) : 0;
       const start = Date.now();
       let unresolved = countUnresolvedImageEmbeds(root);
-      if (unresolved === 0 && minObserveMs <= 0) {
+      let renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+      let pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+      const initialObserveMs = Math.max(minObserveMs, mermaidObserveMs);
+      if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0 && initialObserveMs <= 0) {
         return;
       }
-      if (unresolved === 0 && minObserveMs > 0) {
-        while (Date.now() - start < minObserveMs) {
+      if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0 && initialObserveMs > 0) {
+        while (Date.now() - start < initialObserveMs) {
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
           unresolved = countUnresolvedImageEmbeds(root);
-          if (unresolved > 0)
+          renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+          pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+          if (unresolved > 0 || renderedMermaid > 0 || pendingMermaid > 0)
             break;
         }
-        if (unresolved === 0)
+        if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0)
           return;
       }
       let stableCount = 0;
       while (Date.now() - start < timeoutMs) {
         unresolved = countUnresolvedImageEmbeds(root);
-        if (unresolved === 0) {
+        renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+        pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+        const mermaidReady = !observeMermaid || (pendingMermaid === 0 && renderedMermaid > 0 || pendingMermaid === 0 && renderedMermaid === 0 && Date.now() - start >= mermaidObserveMs);
+        if (unresolved === 0 && mermaidReady) {
           stableCount += 1;
           if (stableCount >= 2)
             return;
@@ -3650,6 +3715,7 @@ var require_obsidian_triplet_renderer = __commonJS({
       const container = document.createElement("div");
       const { markdown: preparedMarkdown, mathFormulas } = preprocessMarkdownForTriplet(markdown, converter);
       const shouldObserveWindow = shouldObserveAsyncEmbedWindow(preparedMarkdown);
+      const shouldObserveMermaid = shouldObserveMermaidRenderWindow(preparedMarkdown);
       await renderByObsidianMarkdownRenderer({
         app,
         markdown: preparedMarkdown,
@@ -3658,7 +3724,10 @@ var require_obsidian_triplet_renderer = __commonJS({
         component,
         markdownRenderer
       });
-      await waitForTripletDomToSettle(container, shouldObserveWindow ? {} : { minObserveMs: 0 });
+      await waitForTripletDomToSettle(container, {
+        minObserveMs: shouldObserveWindow ? void 0 : 0,
+        observeMermaid: shouldObserveMermaid
+      });
       await mermaidRasterizer(container);
       normalizeRenderedDomPunctuation(container, {
         enabled: settings.normalizeChinesePunctuation === true
@@ -3679,6 +3748,7 @@ var require_obsidian_triplet_renderer = __commonJS({
       injectHardBreaksForLegacyParity,
       normalizeRenderedDomPunctuation,
       shouldObserveAsyncEmbedWindow,
+      shouldObserveMermaidRenderWindow,
       waitForTripletDomToSettle,
       renderByObsidianMarkdownRenderer,
       renderObsidianTripletMarkdown: renderObsidianTripletMarkdown2
@@ -10777,7 +10847,19 @@ var AppleStyleView = class extends ItemView {
     if (isLoading) {
       return { mode: "generate-apply", label: "\u751F\u6210\u4E2D...", disabled: true };
     }
-    if (!hasDoc || !aiFeatureEnabled || !canGenerateForSelection) {
+    if (!hasDoc || !aiFeatureEnabled) {
+      return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: true };
+    }
+    if (hasReusableLayout && hasLastAttemptFailure) {
+      if (hasApplied) {
+        return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: !canGenerateForSelection };
+      }
+      return { mode: "apply", label: "\u5E94\u7528\u4E0A\u4E00\u7248", disabled: false };
+    }
+    if (((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length) && !hasApplied) {
+      return { mode: "apply", label: "\u5E94\u7528\u5F53\u524D\u7ED3\u679C", disabled: false };
+    }
+    if (!canGenerateForSelection) {
       return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: true };
     }
     if (!state) {
@@ -10786,17 +10868,8 @@ var AppleStyleView = class extends ItemView {
     if (isStale) {
       return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
     }
-    if ((state.status === "error" || state.status === "schema-error") && !hasReusableLayout) {
+    if (state.status === "error" || state.status === "schema-error") {
       return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
-    }
-    if (hasReusableLayout && hasLastAttemptFailure) {
-      if (hasApplied) {
-        return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
-      }
-      return { mode: "apply", label: "\u5E94\u7528\u4E0A\u4E00\u7248", disabled: false };
-    }
-    if (((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length) && !hasApplied) {
-      return { mode: "apply", label: "\u5E94\u7528\u5F53\u524D\u7ED3\u679C", disabled: false };
     }
     return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
   }
@@ -11117,7 +11190,7 @@ var AppleStyleView = class extends ItemView {
     this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
   }
   refreshAiLayoutPanel() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
     if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
       return;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
@@ -11152,6 +11225,8 @@ var AppleStyleView = class extends ItemView {
     const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
     const hasApplied = this.aiPreviewApplied === true && !!state && !isStale;
     const isLoading = this.aiLayoutLoading === true;
+    const hasVisibleLayout = !!((_f = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _f.length);
+    const canApplyVisibleLayout = hasVisibleLayout && !hasApplied && !isStale;
     let badge = "\u672A\u751F\u6210";
     let statusText = hasDoc ? "\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709 AI \u7F16\u6392\u7ED3\u679C\u3002" : "\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u3002";
     if (isLoading) {
@@ -11160,12 +11235,14 @@ var AppleStyleView = class extends ItemView {
     } else if (!aiFeatureEnabled) {
       badge = "\u5DF2\u5173\u95ED";
       statusText = "AI \u7F16\u6392\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u8BBE\u7F6E\u4E2D\u542F\u7528\u3002";
-    } else if (!hasProvider && !canUseLocalLayout) {
-      badge = "\u5F85\u914D\u7F6E";
-      statusText = configuredProviders > 0 ? "\u5F53\u524D\u5E03\u5C40\u9700\u8981\u53EF\u7528\u7684 AI Provider\uFF0C\u8BF7\u8865\u5168\u914D\u7F6E\u540E\u518D\u8BD5\u3002" : "\u5F53\u524D\u5E03\u5C40\u9700\u8981 AI Provider\uFF0C\u8BF7\u5148\u5230\u8BBE\u7F6E\u4E2D\u5B8C\u6210\u914D\u7F6E\u3002";
     } else if (!state) {
-      badge = "\u672A\u751F\u6210";
-      statusText = "\u9009\u62E9\u5E03\u5C40\u548C\u989C\u8272\u540E\uFF0C\u70B9\u51FB\u201C\u751F\u6210\u5E76\u5E94\u7528\u201D\u67E5\u770B\u6548\u679C\u3002";
+      if (!hasProvider && !canUseLocalLayout) {
+        badge = "\u5F85\u914D\u7F6E";
+        statusText = configuredProviders > 0 ? "\u5F53\u524D\u5E03\u5C40\u9700\u8981\u53EF\u7528\u7684 AI Provider\uFF0C\u8BF7\u8865\u5168\u914D\u7F6E\u540E\u518D\u8BD5\u3002" : "\u5F53\u524D\u5E03\u5C40\u9700\u8981 AI Provider\uFF0C\u8BF7\u5148\u5230\u8BBE\u7F6E\u4E2D\u5B8C\u6210\u914D\u7F6E\u3002";
+      } else {
+        badge = "\u672A\u751F\u6210";
+        statusText = "\u9009\u62E9\u5E03\u5C40\u548C\u989C\u8272\u540E\uFF0C\u70B9\u51FB\u201C\u751F\u6210\u5E76\u5E94\u7528\u201D\u67E5\u770B\u6548\u679C\u3002";
+      }
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
       badge = hasReusableLayout ? "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248" : "\u751F\u6210\u5931\u8D25";
       statusText = hasReusableLayout ? "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u8BF7\u91CD\u8BD5\u6216\u68C0\u67E5 AI \u8BBE\u7F6E\u3002";
@@ -11173,8 +11250,13 @@ var AppleStyleView = class extends ItemView {
       badge = hasReusableLayout ? "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248" : "\u751F\u6210\u5931\u8D25";
       statusText = hasReusableLayout ? "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u751F\u6210\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5\u6216\u68C0\u67E5 AI \u8BBE\u7F6E\u3002";
     } else if (state && isStale) {
-      badge = "\u9700\u66F4\u65B0";
-      statusText = "\u6587\u7AE0\u5185\u5BB9\u6709\u66F4\u65B0\uFF0C\u5EFA\u8BAE\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528\u3002";
+      if (canGenerateForSelection) {
+        badge = "\u9700\u66F4\u65B0";
+        statusText = "\u6587\u7AE0\u5185\u5BB9\u6709\u66F4\u65B0\uFF0C\u5EFA\u8BAE\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528\u3002";
+      } else {
+        badge = "\u5F85\u914D\u7F6E";
+        statusText = "\u5F53\u524D\u5DF2\u6709\u65E7\u7ED3\u679C\uFF0C\u4F46\u6587\u7AE0\u5185\u5BB9\u5DF2\u66F4\u65B0\u3002\u82E5\u8981\u91CD\u65B0\u751F\u6210\uFF0C\u8BF7\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002";
+      }
     } else if (hasReusableLayout && hasLastAttemptFailure) {
       badge = "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248";
       statusText = "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C\u3002";
@@ -11186,7 +11268,7 @@ var AppleStyleView = class extends ItemView {
     this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
     this.aiLayoutStatusText.setText(statusText);
     this.applyAiLayoutPanelStylePack(
-      ((_f = state == null ? void 0 : state.resolved) == null ? void 0 : _f.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
+      ((_g = state == null ? void 0 : state.resolved) == null ? void 0 : _g.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
     );
     this.aiLayoutFamilySelect.value = effectiveSelection.layoutFamily;
     this.aiColorPaletteSelect.value = effectiveSelection.colorPalette;
@@ -11210,7 +11292,7 @@ var AppleStyleView = class extends ItemView {
     if (this.aiLayoutOverlay) {
       this.aiLayoutOverlay.classList.toggle("is-loading", isLoading);
     }
-    const converterContainer = (_g = this.previewContainer) == null ? void 0 : _g.closest(".apple-converter-container");
+    const converterContainer = (_h = this.previewContainer) == null ? void 0 : _h.closest(".apple-converter-container");
     if (converterContainer) {
       converterContainer.classList.toggle("apple-ai-layout-panel-loading", isLoading);
     }
@@ -11243,21 +11325,16 @@ var AppleStyleView = class extends ItemView {
     if (isLoading) {
       this.aiLayoutSummary.setText(`\u6B63\u5728\u4E3A\u300C${context.title || "\u5F53\u524D\u6587\u7AE0"}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u6548\u679C\u3002`);
       this.renderAiLayoutMetaChips([]);
-      (_h = this.aiLayoutMetaNote) == null ? void 0 : _h.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u79FB\u9664\u4E0D\u9700\u8981\u7684\u533A\u5757\u3002");
+      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u79FB\u9664\u4E0D\u9700\u8981\u7684\u533A\u5757\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else if (!aiFeatureEnabled) {
       this.aiLayoutSummary.setText("\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u6839\u636E\u5F53\u524D\u6587\u7AE0\u751F\u6210\u7248\u5F0F\u7ED3\u679C\u3002");
-      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("AI \u7F16\u6392\u53EA\u8D1F\u8D23\u7ED3\u6784\u8C03\u6574\uFF0C\u6700\u7EC8\u89C6\u89C9\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
+      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("AI \u7F16\u6392\u53EA\u8D1F\u8D23\u7ED3\u6784\u8C03\u6574\uFF0C\u6700\u7EC8\u89C6\u89C9\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (!hasDoc) {
       this.aiLayoutSummary.setText("\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u540E\uFF0C\u5C31\u53EF\u4EE5\u751F\u6210\u4E13\u5C5E\u7F16\u6392\u3002");
-      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("\u5F53\u524D\u652F\u6301\u539F\u6587\u589E\u5F3A\u578B\u3001\u6559\u7A0B\u5361\u7247\u578B\u3001\u8F7B\u6742\u5FD7\u578B\u4E09\u79CD\u5E03\u5C40\u3002");
-      this.renderAiLayoutMetaChips([]);
-      this.refreshAiSchemaIssuePanel(null);
-    } else if (!hasProvider && !canUseLocalLayout) {
-      this.aiLayoutSummary.setText("\u5F53\u524D\u6240\u9009\u5E03\u5C40\u4F9D\u8D56 AI Provider\u3002");
-      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u76F4\u63A5\u751F\u6210\u5E76\u5E94\u7528\u3002");
+      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u5F53\u524D\u652F\u6301\u539F\u6587\u589E\u5F3A\u578B\u3001\u6559\u7A0B\u5361\u7247\u578B\u3001\u8F7B\u6742\u5FD7\u578B\u4E09\u79CD\u5E03\u5C40\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
@@ -11277,14 +11354,6 @@ var AppleStyleView = class extends ItemView {
       ]);
       (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(hasReusableLayout ? "\u5F53\u524D\u4E0D\u4F1A\u5F71\u54CD\u4F60\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u5982\u679C\u53CD\u590D\u5931\u8D25\uFF0C\u53EF\u4EE5\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002");
       this.refreshAiSchemaIssuePanel(null);
-    } else if (!state) {
-      this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u7ED3\u679C\u3002`);
-      this.renderAiLayoutMetaChips([
-        `\u5E03\u5C40 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
-        `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`
-      ]);
-      (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText("\u751F\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u518D\u51B3\u5B9A\u4FDD\u7559\u6216\u79FB\u9664\u54EA\u4E9B\u533A\u5757\u3002");
-      this.refreshAiSchemaIssuePanel(null);
     } else if (hasReusableLayout && hasLastAttemptFailure) {
       this.aiLayoutSummary.setText("\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002");
       this.renderAiLayoutMetaChips([
@@ -11292,10 +11361,32 @@ var AppleStyleView = class extends ItemView {
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
         state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u6821\u9A8C\u5931\u8D25" : "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25"
       ]);
-      (_o = this.aiLayoutMetaNote) == null ? void 0 : _o.setText(hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u5148\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002");
+      (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u5148\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002");
       this.refreshAiSchemaIssuePanel(state.lastAttemptStatus === "schema-error" ? schemaValidation : null);
+    } else if (!state) {
+      if (!hasProvider && !canUseLocalLayout) {
+        this.aiLayoutSummary.setText("\u5F53\u524D\u6240\u9009\u5E03\u5C40\u4F9D\u8D56 AI Provider\u3002");
+        (_o = this.aiLayoutMetaNote) == null ? void 0 : _o.setText("\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u76F4\u63A5\u751F\u6210\u5E76\u5E94\u7528\u3002");
+        this.renderAiLayoutMetaChips([]);
+      } else {
+        this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u7ED3\u679C\u3002`);
+        this.renderAiLayoutMetaChips([
+          `\u5E03\u5C40 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
+          `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`
+        ]);
+        (_p = this.aiLayoutMetaNote) == null ? void 0 : _p.setText("\u751F\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u518D\u51B3\u5B9A\u4FDD\u7559\u6216\u79FB\u9664\u54EA\u4E9B\u533A\u5757\u3002");
+      }
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (state && isStale && !canGenerateForSelection) {
+      this.aiLayoutSummary.setText("\u5F53\u524D\u5DF2\u6709\u4E00\u7248\u65E7\u7ED3\u679C\uFF0C\u4F46\u8981\u91CD\u65B0\u751F\u6210\u9700\u8981\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002");
+      this.renderAiLayoutMetaChips([
+        ...providerLabel ? [`Provider ${providerLabel}`] : [],
+        ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
+      ]);
+      (_q = this.aiLayoutMetaNote) == null ? void 0 : _q.setText(canApplyVisibleLayout ? "\u5F53\u524D\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u5E94\u7528\uFF1B\u5982\u679C\u8981\u66F4\u65B0\u5185\u5BB9\uFF0C\u8BF7\u5148\u6062\u590D Provider\u3002" : "\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u57FA\u4E8E\u6700\u65B0\u5185\u5BB9\u91CD\u65B0\u751F\u6210\u3002");
+      this.refreshAiSchemaIssuePanel(null);
     } else {
-      const blockCount = ((_p = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _p.length) || 0;
+      const blockCount = ((_r = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _r.length) || 0;
       this.aiLayoutSummary.setText(`\u5F53\u524D\u7ED3\u679C\u5171 ${blockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u76F4\u63A5\u5E94\u7528\uFF0C\u4E5F\u53EF\u4EE5\u79FB\u9664\u4E0D\u9700\u8981\u7684\u90E8\u5206\u3002`);
       const metaChips = [];
       if (providerLabel)
@@ -11327,11 +11418,11 @@ var AppleStyleView = class extends ItemView {
       this.renderAiLayoutMetaChips(metaChips);
       const hiddenText = hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "";
       if (hasLastAttemptFailure && state.lastAttemptError) {
-        (_q = this.aiLayoutMetaNote) == null ? void 0 : _q.setText(`\u4E0A\u4E00\u7248\u7ED3\u679C\u5DF2\u4FDD\u7559\u3002${hiddenText}`.trim());
+        (_s = this.aiLayoutMetaNote) == null ? void 0 : _s.setText(`\u4E0A\u4E00\u7248\u7ED3\u679C\u5DF2\u4FDD\u7559\u3002${hiddenText}`.trim());
       } else if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
-        (_r = this.aiLayoutMetaNote) == null ? void 0 : _r.setText(`\u5F53\u524D\u4F7F\u7528\u7684\u662F\u66F4\u7A33\u5B9A\u7684\u5FEB\u901F\u589E\u5F3A\u7ED3\u679C\u3002${hiddenText}`.trim());
+        (_t = this.aiLayoutMetaNote) == null ? void 0 : _t.setText(`\u5F53\u524D\u4F7F\u7528\u7684\u662F\u66F4\u7A33\u5B9A\u7684\u5FEB\u901F\u589E\u5F3A\u7ED3\u679C\u3002${hiddenText}`.trim());
       } else {
-        (_s = this.aiLayoutMetaNote) == null ? void 0 : _s.setText(hiddenText || "\u4F60\u53EF\u4EE5\u7EE7\u7EED\u5FAE\u8C03\u533A\u5757\uFF0C\u6216\u76F4\u63A5\u4FDD\u7559\u5F53\u524D\u7ED3\u679C\u3002");
+        (_u = this.aiLayoutMetaNote) == null ? void 0 : _u.setText(hiddenText || "\u4F60\u53EF\u4EE5\u7EE7\u7EED\u5FAE\u8C03\u533A\u5757\uFF0C\u6216\u76F4\u63A5\u4FDD\u7559\u5F53\u524D\u7ED3\u679C\u3002");
       }
       this.refreshAiSchemaIssuePanel(schemaValidation);
     }
@@ -11345,7 +11436,7 @@ var AppleStyleView = class extends ItemView {
         content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-meta" });
         item.createDiv({ cls: "apple-ai-layout-block-skeleton-badge" });
       }
-    } else if ((_t = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _t.length) {
+    } else if ((_v = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _v.length) {
       visibleLayout.blocks.forEach((block, index) => {
         const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
         const origin = (visibleBlockOrigins == null ? void 0 : visibleBlockOrigins[index]) || null;
