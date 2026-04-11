@@ -438,7 +438,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     const aiBtn = container.querySelector('.apple-icon-btn[aria-label="AI 编排"]');
     expect(aiBtn).toBeTruthy();
     expect(aiBtn.hidden).toBe(true);
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('AI 编排已在插件设置中关闭');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('AI 编排已关闭，请先在设置中启用');
   });
 
   it('updateAiToolbarState should close AI panel when feature toggle is turned off', () => {
@@ -555,7 +555,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(parentWheelSpy).not.toHaveBeenCalled();
   });
 
-  it('refreshAiLayoutPanel should surface provider, structure and fallback details', () => {
+  it('refreshAiLayoutPanel should default to simplified result view while keeping advanced details collapsible', () => {
     const cachedState = {
       version: 1,
       updatedAt: Date.now(),
@@ -648,13 +648,17 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.createSettingsPanel(container);
     view.refreshAiLayoutPanel();
 
-    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('章节：2');
+    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 5 个区块');
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果')).toBe(true);
+    expect(container.querySelector('.apple-ai-layout-advanced-body')?.hidden).toBe(true);
+    expect(container.querySelector('.apple-ai-layout-block-type')).toBeNull();
+    expect(container.querySelector('.apple-ai-layout-block-origin')).toBeNull();
+
+    const advancedToggle = container.querySelector('.apple-ai-layout-advanced-toggle');
+    advancedToggle.click();
+    expect(container.querySelector('.apple-ai-layout-advanced-body')?.hidden).toBe(false);
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('Provider DeepSeek');
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('补全 2 块');
-    const originBadges = Array.from(container.querySelectorAll('.apple-ai-layout-block-origin')).map((el) => el.textContent);
-    expect(originBadges).toContain('AI');
-    expect(originBadges).toContain('原文');
-    expect(originBadges).toContain('补全');
   });
 
   it('refreshAiLayoutPanel should reset to initial state when selected color palette has no cached result', () => {
@@ -746,10 +750,11 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.refreshAiLayoutPanel();
 
     expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('未生成');
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('当前布局和颜色组合还没有生成结果');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('选择布局和颜色后，点击“生成并应用”查看效果');
     expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('将为');
     expect(container.querySelector('.apple-ai-layout-empty')?.textContent).toContain('生成后会展示区块清单');
     expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(0);
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '生成并应用')).toBe(true);
   });
 
   it('refreshAiLayoutPanel should restore cached blocks when switching back to another generated color palette', () => {
@@ -1319,7 +1324,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.refreshAiLayoutPanel();
 
     expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(1);
-    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('已移除 1 块');
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-mini-note')).some((el) => el.textContent.includes('已隐藏 1 个区块'))).toBe(true);
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '恢复已移除' && button.disabled === false)).toBe(true);
   });
 
@@ -1448,7 +1453,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     });
     expect(state?.dismissedBlockKeys).toContain('section-block::0::第一部分::1');
     expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(1);
-    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('已移除 1 块');
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-mini-note')).some((el) => el.textContent.includes('已隐藏 1 个区块'))).toBe(true);
   });
 
   it('refreshAiLayoutPanel should show full-panel loading state while generating', () => {
@@ -1487,7 +1492,7 @@ describe('AppleStyleView native render + lifecycle', () => {
 
     expect(container.querySelector('.apple-ai-layout-overlay')?.classList.contains('is-loading')).toBe(true);
     expect(container.querySelector('.apple-ai-layout-loading-mask')?.classList.contains('visible')).toBe(true);
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('正在基于当前文章、布局和颜色生成');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('正在生成并应用新的编排');
   });
 
   it('refreshAiLayoutPanel should toggle debug panel for layout json and error details', () => {
@@ -1574,6 +1579,10 @@ describe('AppleStyleView native render + lifecycle', () => {
 
     const container = createObsidianLikeElement();
     view.createSettingsPanel(container);
+
+    const advancedToggle = container.querySelector('.apple-ai-layout-advanced-toggle');
+    advancedToggle.click();
+    expect(container.querySelector('.apple-ai-layout-advanced-body')?.hidden).toBe(false);
 
     const jsonBtn = container.querySelector('.apple-ai-layout-debug-btn');
     const errorBtn = container.querySelectorAll('.apple-ai-layout-debug-btn')[1];
@@ -1892,12 +1901,13 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.createSettingsPanel(container);
     view.refreshAiLayoutPanel();
 
-    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('校验失败');
-    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('schema 校验');
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('生成失败');
+    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('这次生成没有成功');
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '重新生成并应用' && button.disabled === false)).toBe(true);
+    const advancedToggle = container.querySelector('.apple-ai-layout-advanced-toggle');
+    advancedToggle.click();
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('Schema 2 项');
     expect(container.querySelector('.apple-ai-layout-issues')?.textContent).toContain('不支持的 block type');
-    const applyBtn = Array.from(container.querySelectorAll('button')).find((el) => el.textContent === '应用到预览');
-    expect(applyBtn?.disabled).toBe(true);
   });
 
   it('refreshAiLayoutPanel should show schema warnings even when generation succeeds', () => {
@@ -1992,6 +2002,8 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.createSettingsPanel(container);
     view.refreshAiLayoutPanel();
 
+    const advancedToggle = container.querySelector('.apple-ai-layout-advanced-toggle');
+    advancedToggle.click();
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('Schema 1 项');
     expect(container.querySelector('.apple-ai-layout-issues')?.textContent).toContain('extraField');
     expect(container.querySelector('.apple-ai-layout-issues-title')?.textContent).toContain('Schema 提醒');
@@ -2085,11 +2097,12 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.createSettingsPanel(container);
     view.refreshAiLayoutPanel();
 
-    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('可回退');
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('已保留上一版');
+    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('上一版结果仍可继续使用');
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用上一版' && button.disabled === false)).toBe(true);
+    const advancedToggle = container.querySelector('.apple-ai-layout-advanced-toggle');
+    advancedToggle.click();
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('最近一次生成失败');
-    expect(Array.from(container.querySelectorAll('.apple-ai-layout-mini-note')).some((el) => el.textContent.includes('429 rate limited'))).toBe(true);
-    const applyBtn = Array.from(container.querySelectorAll('button')).find((el) => el.textContent === '应用到预览');
-    expect(applyBtn?.disabled).toBe(false);
   });
 
   it('refreshAiLayoutPanel should keep the pending style pack selection before regeneration', () => {
@@ -2239,11 +2252,13 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.createSettingsPanel(container);
     view.refreshAiLayoutPanel();
 
-    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('可回退');
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('已保留上一版');
     expect(container.querySelector('.apple-ai-layout-summary')?.textContent).not.toContain('schema');
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).not.toContain('Schema');
     expect(container.querySelector('.apple-ai-layout-issues')?.classList.contains('visible')).toBe(false);
 
+    const advancedToggle = container.querySelector('.apple-ai-layout-advanced-toggle');
+    advancedToggle.click();
     const errorBtn = container.querySelectorAll('.apple-ai-layout-debug-btn')[1];
     errorBtn.click();
     const errorBody = container.querySelector('.apple-ai-layout-debug-body')?.textContent || '';

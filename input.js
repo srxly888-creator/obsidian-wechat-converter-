@@ -1589,7 +1589,7 @@ class AppleStyleView extends ItemView {
     getLayoutFamilyList({ includeAuto: true, includeReserved: false }).forEach((family) => {
       const option = this.aiLayoutFamilySelect.createEl('option', {
         value: family.value,
-        text: family.label,
+        text: this.getAiLayoutFamilyLabel(family.value),
       });
       if ((this.plugin.settings.ai?.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO) === family.value) {
         option.selected = true;
@@ -1642,11 +1642,8 @@ class AppleStyleView extends ItemView {
     });
 
     const actionRow = area.createDiv({ cls: 'apple-ai-layout-actions' });
-    this.aiGenerateBtn = actionRow.createEl('button', { cls: 'apple-btn-primary', text: '生成编排' });
-    this.aiGenerateBtn.addEventListener('click', () => this.generateAiLayoutForCurrentArticle());
-
-    this.aiApplyBtn = actionRow.createEl('button', { cls: 'apple-btn-secondary', text: '应用到预览' });
-    this.aiApplyBtn.addEventListener('click', () => this.applyAiLayoutToPreview());
+    this.aiGenerateBtn = actionRow.createEl('button', { cls: 'apple-btn-primary', text: '生成并应用' });
+    this.aiGenerateBtn.addEventListener('click', () => this.handleAiPrimaryAction());
 
     this.aiResetBtn = actionRow.createEl('button', { cls: 'apple-btn-secondary', text: '恢复普通预览' });
     this.aiResetBtn.addEventListener('click', () => this.restoreBasePreview());
@@ -1654,26 +1651,40 @@ class AppleStyleView extends ItemView {
     this.aiRestoreBlocksBtn = actionRow.createEl('button', { cls: 'apple-btn-secondary', text: '恢复已移除' });
     this.aiRestoreBlocksBtn.addEventListener('click', () => this.restoreRemovedAiLayoutBlocks());
 
-    const debugRow = area.createDiv({ cls: 'apple-ai-layout-debug-actions' });
+    const summarySection = area.createDiv({ cls: 'apple-ai-layout-section' });
+    summarySection.createEl('label', { cls: 'apple-setting-label', text: '结果摘要' });
+    this.aiLayoutSummary = summarySection.createDiv({
+      cls: 'apple-ai-layout-summary',
+      text: '生成后会在这里展示当前结果的简要说明。',
+    });
+    this.aiLayoutMetaNote = summarySection.createDiv({ cls: 'apple-ai-layout-mini-note' });
+
+    this.aiBlockList = area.createDiv({ cls: 'apple-ai-layout-block-list' });
+
+    const advancedSection = area.createDiv({ cls: 'apple-ai-layout-section apple-ai-layout-advanced' });
+    this.aiAdvancedToggleBtn = advancedSection.createEl('button', {
+      cls: 'apple-ai-layout-advanced-toggle',
+      text: '高级 / 调试',
+      attr: { 'aria-expanded': 'false' },
+    });
+    this.aiAdvancedToggleBtn.addEventListener('click', () => {
+      this.aiAdvancedOpen = !this.aiAdvancedOpen;
+      if (!this.aiAdvancedOpen) this.aiLayoutDebugMode = '';
+      this.refreshAiLayoutPanel();
+    });
+    this.aiAdvancedBody = advancedSection.createDiv({ cls: 'apple-ai-layout-advanced-body' });
+
+    this.aiLayoutMetaChips = this.aiAdvancedBody.createDiv({ cls: 'apple-ai-layout-meta-chips' });
+    this.aiSchemaIssuePanel = this.aiAdvancedBody.createDiv({ cls: 'apple-ai-layout-issues' });
+
+    const debugRow = this.aiAdvancedBody.createDiv({ cls: 'apple-ai-layout-debug-actions' });
     this.aiViewJsonBtn = debugRow.createEl('button', { cls: 'apple-btn-secondary apple-ai-layout-debug-btn', text: '查看布局 JSON' });
     this.aiViewJsonBtn.addEventListener('click', () => this.toggleAiLayoutDebugMode('json'));
 
     this.aiViewErrorBtn = debugRow.createEl('button', { cls: 'apple-btn-secondary apple-ai-layout-debug-btn', text: '查看错误详情' });
     this.aiViewErrorBtn.addEventListener('click', () => this.toggleAiLayoutDebugMode('error'));
 
-    const summarySection = area.createDiv({ cls: 'apple-ai-layout-section' });
-    summarySection.createEl('label', { cls: 'apple-setting-label', text: '结果摘要' });
-    this.aiLayoutSummary = summarySection.createDiv({
-      cls: 'apple-ai-layout-summary',
-      text: '生成后会在这里展示文章类型、区块数量和最近一次模型信息。',
-    });
-    this.aiLayoutMetaChips = summarySection.createDiv({ cls: 'apple-ai-layout-meta-chips' });
-    this.aiLayoutMetaNote = summarySection.createDiv({ cls: 'apple-ai-layout-mini-note' });
-    this.aiSchemaIssuePanel = summarySection.createDiv({ cls: 'apple-ai-layout-issues' });
-
-    this.aiBlockList = area.createDiv({ cls: 'apple-ai-layout-block-list' });
-
-    this.aiDebugPanel = area.createDiv({ cls: 'apple-ai-layout-debug-panel' });
+    this.aiDebugPanel = this.aiAdvancedBody.createDiv({ cls: 'apple-ai-layout-debug-panel' });
     const debugHeader = this.aiDebugPanel.createDiv({ cls: 'apple-ai-layout-debug-header' });
     this.aiDebugPanelTitle = debugHeader.createDiv({ cls: 'apple-ai-layout-debug-title', text: '调试输出' });
     const debugTools = debugHeader.createDiv({ cls: 'apple-ai-layout-debug-tools' });
@@ -1851,7 +1862,17 @@ class AppleStyleView extends ItemView {
     this.refreshAiLayoutPanel();
   }
 
+  async handleAiPrimaryAction() {
+    const mode = this.aiPrimaryActionMode || 'generate-apply';
+    if (mode === 'apply') {
+      this.applyAiLayoutToPreview();
+      return;
+    }
+    await this.generateAiLayoutForCurrentArticle({ applyAfterGenerate: true });
+  }
+
   toggleAiLayoutDebugMode(mode) {
+    this.aiAdvancedOpen = true;
     this.aiLayoutDebugMode = this.aiLayoutDebugMode === mode ? '' : mode;
     this.refreshAiLayoutPanel();
   }
@@ -2025,7 +2046,10 @@ class AppleStyleView extends ItemView {
 
   getAiLayoutFamilyLabel(value) {
     if (value === AI_LAYOUT_SELECTION_AUTO) return '自动推荐';
-    return getLayoutFamilyById(value)?.label || value || '自动推荐';
+    const family = getLayoutFamilyById(value);
+    if (!family) return value || '自动推荐';
+    if (family.id === 'source-first') return '原文增强型（快速）';
+    return family.label || value || '自动推荐';
   }
 
   getAiColorPaletteLabel(value) {
@@ -2054,6 +2078,45 @@ class AppleStyleView extends ItemView {
         text: chip,
       });
     });
+  }
+
+  getAiPrimaryActionConfig({
+    hasDoc,
+    aiFeatureEnabled,
+    canGenerateForSelection,
+    state,
+    visibleLayout,
+    hasReusableLayout,
+    hasLastAttemptFailure,
+    hasApplied,
+    isStale,
+    isLoading,
+  }) {
+    if (isLoading) {
+      return { mode: 'generate-apply', label: '生成中...', disabled: true };
+    }
+    if (!hasDoc || !aiFeatureEnabled || !canGenerateForSelection) {
+      return { mode: 'generate-apply', label: '生成并应用', disabled: true };
+    }
+    if (!state) {
+      return { mode: 'generate-apply', label: '生成并应用', disabled: false };
+    }
+    if (isStale) {
+      return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
+    }
+    if ((state.status === 'error' || state.status === 'schema-error') && !hasReusableLayout) {
+      return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
+    }
+    if (hasReusableLayout && hasLastAttemptFailure) {
+      if (hasApplied) {
+        return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
+      }
+      return { mode: 'apply', label: '应用上一版', disabled: false };
+    }
+    if (visibleLayout?.blocks?.length && !hasApplied) {
+      return { mode: 'apply', label: '应用当前结果', disabled: false };
+    }
+    return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
   }
 
   refreshAiSchemaIssuePanel(schemaValidation = null) {
@@ -2350,6 +2413,7 @@ class AppleStyleView extends ItemView {
     const isLoading = this.aiLayoutLoading === true;
     const canShowJson = !!state?.layoutJson;
     const canShowError = !!(state?.status === 'error' || state?.status === 'schema-error' || state?.lastError);
+    const isAdvancedOpen = this.aiAdvancedOpen === true;
 
     if (this.aiViewJsonBtn) {
       this.aiViewJsonBtn.disabled = !canShowJson || isLoading;
@@ -2370,7 +2434,7 @@ class AppleStyleView extends ItemView {
       this.aiLayoutDebugMode = '';
     }
 
-    if (!this.aiLayoutDebugMode) {
+    if (!isAdvancedOpen || !this.aiLayoutDebugMode) {
       this.aiDebugPanel.classList.remove('visible');
       this.aiDebugPanelTitle.setText('调试输出');
       this.aiDebugPanelBody.setText('');
@@ -2425,6 +2489,8 @@ class AppleStyleView extends ItemView {
 
     const hasDoc = !!context.sourcePath;
     const hasProvider = !!provider;
+    const canUseLocalLayout = effectiveSelection.layoutFamily === 'source-first';
+    const canGenerateForSelection = hasProvider || canUseLocalLayout;
     const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
     const hasApplied = this.aiPreviewApplied === true && !!state && !isStale;
     const isLoading = this.aiLayoutLoading === true;
@@ -2433,45 +2499,39 @@ class AppleStyleView extends ItemView {
     let statusText = hasDoc ? '当前文章还没有 AI 编排结果。' : '请先打开一篇文章。';
     if (isLoading) {
       badge = '生成中';
-      statusText = '正在基于当前文章、布局和颜色生成区块化排版，请稍候。';
+      statusText = '正在生成并应用新的编排，请稍候。';
     } else if (!aiFeatureEnabled) {
       badge = '已关闭';
-      statusText = 'AI 编排已在插件设置中关闭。启用后可对当前文章生成排版建议。';
-    } else if (!hasProvider) {
+      statusText = 'AI 编排已关闭，请先在设置中启用。';
+    } else if (!hasProvider && !canUseLocalLayout) {
       badge = '待配置';
       statusText = configuredProviders > 0
-        ? '当前已有 AI Provider，但没有可直接运行的配置。请补全 Base URL、API Key 和模型，或启用可用 Provider。'
-        : '请先在插件设置中配置可用的 AI Provider。';
+        ? '当前布局需要可用的 AI Provider，请补全配置后再试。'
+        : '当前布局需要 AI Provider，请先到设置中完成配置。';
     } else if (!state) {
       badge = '未生成';
-      statusText = '当前布局和颜色组合还没有生成结果，请重新生成编排。';
+      statusText = '选择布局和颜色后，点击“生成并应用”查看效果。';
     } else if (state?.status === 'schema-error') {
-      badge = '校验失败';
-      statusText = schemaValidation?.issueCount > 0
-        ? `AI 返回结果未通过 schema 校验，共发现 ${schemaValidation.issueCount} 项问题。`
-        : 'AI 返回结果未通过 schema 校验，请查看错误详情。';
+      badge = hasReusableLayout ? '已保留上一版' : '生成失败';
+      statusText = hasReusableLayout
+        ? '这次生成没有成功，已为你保留上一版结果。'
+        : '这次生成没有成功，请重试或检查 AI 设置。';
     } else if (state?.status === 'error') {
-      badge = '失败';
-      statusText = state.lastError
-        ? `上次生成失败：${state.lastError}`
-        : '上次生成失败，请检查 Provider 配置后重试。';
+      badge = hasReusableLayout ? '已保留上一版' : '生成失败';
+      statusText = hasReusableLayout
+        ? '这次生成没有成功，已为你保留上一版结果。'
+        : '生成失败，请重试或检查 AI 设置。';
     } else if (state && isStale) {
-      badge = '已过期';
-      statusText = '文章内容已变化，建议重新生成编排。';
+      badge = '需更新';
+      statusText = '文章内容有更新，建议重新生成并应用。';
     } else if (hasReusableLayout && hasLastAttemptFailure) {
-      badge = '可回退';
-      statusText = state.lastAttemptStatus === 'schema-error'
-        ? '最近一次重新生成未通过 schema 校验，仍可继续使用上一版成功结果。'
-        : '最近一次重新生成失败，仍可继续使用上一版成功结果。';
+      badge = '已保留上一版';
+      statusText = '这次生成没有成功，已为你保留上一版结果。';
     } else if (state) {
-      badge = hasApplied ? '已应用' : '已生成';
-      if (generationMeta?.executionMode === 'local-fallback') {
-        statusText = '最近一次生成已切换为本地兜底，正文结构仍按当前文章保真输出。';
-      } else if (generationMeta?.fallbackUsed) {
-        statusText = `最近一次生成使用 ${modelLabel || provider.model}，并补全了 ${generationMeta.fallbackBlockCount} 个区块。`;
-      } else {
-        statusText = `最近一次生成使用 ${modelLabel || provider.model}，可直接应用到预览。`;
-      }
+      badge = hasApplied ? '已应用' : '可应用';
+      statusText = hasApplied
+        ? '当前编排已应用到预览。'
+        : '当前结果已准备好，可以直接应用到预览。';
     }
 
     this.aiLayoutStatusBadge.setText(badge);
@@ -2492,6 +2552,14 @@ class AppleStyleView extends ItemView {
     this.aiLayoutFamilySelect.disabled = !aiFeatureEnabled || isLoading;
     this.aiColorPaletteSelect.disabled = !aiFeatureEnabled || isLoading;
     if (this.aiStylePackSelect) this.aiStylePackSelect.disabled = !aiFeatureEnabled || isLoading;
+    if (this.aiAdvancedToggleBtn) {
+      this.aiAdvancedToggleBtn.classList.toggle('is-open', this.aiAdvancedOpen === true);
+      this.aiAdvancedToggleBtn.setAttribute('aria-expanded', this.aiAdvancedOpen === true ? 'true' : 'false');
+    }
+    if (this.aiAdvancedBody) {
+      this.aiAdvancedBody.classList.toggle('visible', this.aiAdvancedOpen === true);
+      this.aiAdvancedBody.hidden = this.aiAdvancedOpen !== true;
+    }
     if (this.aiLayoutOverlay) {
       this.aiLayoutOverlay.classList.toggle('is-loading', isLoading);
     }
@@ -2513,69 +2581,79 @@ class AppleStyleView extends ItemView {
         : '将优先参考当前文章里的配图与截图。'
     );
 
+    const primaryAction = this.getAiPrimaryActionConfig({
+      hasDoc,
+      aiFeatureEnabled,
+      canGenerateForSelection,
+      state,
+      visibleLayout,
+      hasReusableLayout,
+      hasLastAttemptFailure,
+      hasApplied,
+      isStale,
+      isLoading,
+    });
+    this.aiPrimaryActionMode = primaryAction.mode;
+    this.aiGenerateBtn.setText(primaryAction.label);
+    this.aiGenerateBtn.disabled = primaryAction.disabled;
+
     if (isLoading) {
-      this.aiLayoutSummary.setText(`正在为「${context.title || '当前文章'}」生成新的区块结果。`);
-      this.renderAiLayoutMetaChips([
-        `布局 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
-        `颜色 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`,
-        aiSettings.includeImagesInLayout === false ? '仅正文结构' : '优先参考图片',
-      ]);
-      this.aiLayoutMetaNote?.setText('生成完成后会自动刷新区块清单，你也可以继续根据结果移除多余区块。');
+      this.aiLayoutSummary.setText(`正在为「${context.title || '当前文章'}」生成新的排版效果。`);
+      this.renderAiLayoutMetaChips([]);
+      this.aiLayoutMetaNote?.setText('生成完成后会直接应用到预览，你也可以继续移除不需要的区块。');
       this.refreshAiSchemaIssuePanel(null);
     } else if (!aiFeatureEnabled) {
-      this.aiLayoutSummary.setText('你可以先在插件设置中配置 Provider，并启用 AI 编排后再回到这里操作。');
-      this.aiLayoutMetaNote?.setText('AI 输出只负责结构化编排，最终样式仍由插件渲染。');
+      this.aiLayoutSummary.setText('启用 AI 编排后，这里会根据当前文章生成版式结果。');
+      this.aiLayoutMetaNote?.setText('AI 编排只负责结构调整，最终视觉样式仍由插件渲染。');
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (!hasDoc) {
-      this.aiLayoutSummary.setText('打开文章后，可以针对当前文档生成专属排版。');
-      this.aiLayoutMetaNote?.setText('当前支持“原文增强型”“教程卡片型”“轻杂志型”三种布局。');
+      this.aiLayoutSummary.setText('打开一篇文章后，就可以生成专属编排。');
+      this.aiLayoutMetaNote?.setText('当前支持原文增强型、教程卡片型、轻杂志型三种布局。');
+      this.renderAiLayoutMetaChips([]);
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (!hasProvider && !canUseLocalLayout) {
+      this.aiLayoutSummary.setText('当前所选布局依赖 AI Provider。');
+      this.aiLayoutMetaNote?.setText('完成 Provider 配置后，就可以直接生成并应用。');
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (state?.status === 'schema-error') {
-      this.aiLayoutSummary.setText(
-        schemaValidation?.issueCount > 0
-          ? `本次 AI 输出未通过 schema 校验：${schemaValidation.issueCount} 项。`
-          : '本次 AI 输出未通过 schema 校验。'
-      );
-      const errorChips = [];
-      if (providerLabel) errorChips.push(`Provider ${providerLabel}`);
-      if (modelLabel) errorChips.push(`模型 ${modelLabel}`);
-      if (schemaValidation?.issueCount > 0) errorChips.push(`Schema ${schemaValidation.issueCount} 项`);
-      this.renderAiLayoutMetaChips(errorChips);
-      this.aiLayoutMetaNote?.setText('这通常表示模型输出字段不合规、block type 不支持，或顶层结构缺失。');
+      this.aiLayoutSummary.setText(hasReusableLayout ? '上一版结果仍可继续使用。' : '这次生成没有成功。');
+      this.renderAiLayoutMetaChips([
+        ...(providerLabel ? [`Provider ${providerLabel}`] : []),
+        ...(modelLabel ? [`模型 ${modelLabel}`] : []),
+        ...(schemaValidation?.issueCount > 0 ? [`Schema ${schemaValidation.issueCount} 项`] : []),
+      ]);
+      this.aiLayoutMetaNote?.setText(hasReusableLayout ? '如果当前效果还能用，你可以直接继续使用上一版。' : '可以重试一次；如仍失败，再到高级里查看具体原因。');
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if (state?.status === 'error' && state.lastError) {
-      this.aiLayoutSummary.setText(`最近一次生成失败：${state.lastError}`);
-      const errorChips = [];
-      if (providerLabel) errorChips.push(`Provider ${providerLabel}`);
-      if (modelLabel) errorChips.push(`模型 ${modelLabel}`);
-      this.renderAiLayoutMetaChips(errorChips);
-      this.aiLayoutMetaNote?.setText('修正配置后可以直接重生成，不会影响普通预览。');
-      this.refreshAiSchemaIssuePanel(schemaValidation);
-    } else if (!state) {
-      this.aiLayoutSummary.setText(`将为「${context.title}」生成新的布局与颜色组合结果。`);
+      this.aiLayoutSummary.setText(hasReusableLayout ? '上一版结果仍可继续使用。' : '生成失败，请稍后重试。');
       this.renderAiLayoutMetaChips([
-        aiSettings.includeImagesInLayout === false ? '仅正文结构' : '优先参考图片',
+        ...(providerLabel ? [`Provider ${providerLabel}`] : []),
+        ...(modelLabel ? [`模型 ${modelLabel}`] : []),
+      ]);
+      this.aiLayoutMetaNote?.setText(hasReusableLayout ? '当前不会影响你继续使用上一版结果。' : '如果反复失败，可以到高级里查看错误详情。');
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (!state) {
+      this.aiLayoutSummary.setText(`将为「${context.title}」生成新的排版结果。`);
+      this.renderAiLayoutMetaChips([
         `布局 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
         `颜色 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`,
       ]);
-      this.aiLayoutMetaNote?.setText('你切换到了新的布局或颜色组合；重新生成后会展示这一份对应的区块清单。');
+      this.aiLayoutMetaNote?.setText('生成后会直接应用到预览，你再决定保留或移除哪些区块。');
       this.refreshAiSchemaIssuePanel(null);
+    } else if (hasReusableLayout && hasLastAttemptFailure) {
+      this.aiLayoutSummary.setText('上一版结果仍可继续使用。');
+      this.renderAiLayoutMetaChips([
+        ...(providerLabel ? [`Provider ${providerLabel}`] : []),
+        ...(modelLabel ? [`模型 ${modelLabel}`] : []),
+        state.lastAttemptStatus === 'schema-error' ? '最近一次校验失败' : '最近一次生成失败',
+      ]);
+      this.aiLayoutMetaNote?.setText(hiddenBlockCount > 0 ? `已隐藏 ${hiddenBlockCount} 个区块，可随时恢复。` : '如果当前效果还能用，你可以先继续使用上一版。');
+      this.refreshAiSchemaIssuePanel(state.lastAttemptStatus === 'schema-error' ? schemaValidation : null);
     } else {
-      const summaryBits = [
-        `文章类型：${visibleLayout.articleType || state.layoutJson.articleType || 'article'}`,
-        `区块数：${visibleLayout?.blocks?.length || 0}`,
-      ];
-      if (generationMeta?.sectionCount) {
-        summaryBits.push(`章节：${generationMeta.sectionCount}`);
-      } else if (generationMeta?.headingCount) {
-        summaryBits.push(`标题：${generationMeta.headingCount}`);
-      }
-      if (generationMeta?.imageCount > 0) {
-        summaryBits.push(`图片：${generationMeta.imageCount}`);
-      }
-      this.aiLayoutSummary.setText(summaryBits.join(' · '));
+      const blockCount = visibleLayout?.blocks?.length || 0;
+      this.aiLayoutSummary.setText(`当前结果共 ${blockCount} 个区块，可直接应用，也可以移除不需要的部分。`);
 
       const metaChips = [];
       if (providerLabel) metaChips.push(`Provider ${providerLabel}`);
@@ -2597,19 +2675,13 @@ class AppleStyleView extends ItemView {
         metaChips.push(state.lastAttemptStatus === 'schema-error' ? '最近一次校验失败' : '最近一次生成失败');
       }
       this.renderAiLayoutMetaChips(metaChips);
-      const updateText = new Date(state.updatedAt).toLocaleString();
-      const baseNote = generationMeta?.executionMode === 'local-fallback'
-        ? `当前使用 ${generationMeta?.skillLabel || '原文增强型'} 的本地兜底结果；已识别 ${generationMeta.sectionCount || generationMeta.headingCount || 0} 段结构，图片 ${generationMeta.imageCount || 0} 张。最近更新于 ${updateText}。`
-        : generationMeta?.fallbackUsed
-        ? `已识别 ${generationMeta.sectionCount || generationMeta.headingCount || 0} 段结构，图片 ${generationMeta.imageCount || 0} 张；其中 ${generationMeta.fallbackBlockCount} 个区块由本地规则补全。最近更新于 ${updateText}。`
-        : `已识别 ${generationMeta?.sectionCount || generationMeta?.headingCount || 0} 段结构，图片 ${generationMeta?.imageCount || 0} 张。最近更新于 ${updateText}。`;
+      const hiddenText = hiddenBlockCount > 0 ? `已隐藏 ${hiddenBlockCount} 个区块，可随时恢复。` : '';
       if (hasLastAttemptFailure && state.lastAttemptError) {
-        const lastAttemptText = state.lastAttemptAt
-          ? `最近一次尝试于 ${new Date(state.lastAttemptAt).toLocaleString()} 失败：${state.lastAttemptError}`
-          : `最近一次尝试失败：${state.lastAttemptError}`;
-        this.aiLayoutMetaNote?.setText(`${baseNote} ${lastAttemptText}`);
+        this.aiLayoutMetaNote?.setText(`上一版结果已保留。${hiddenText}`.trim());
+      } else if (generationMeta?.executionMode === 'local-fallback') {
+        this.aiLayoutMetaNote?.setText(`当前使用的是更稳定的快速增强结果。${hiddenText}`.trim());
       } else {
-        this.aiLayoutMetaNote?.setText(baseNote);
+        this.aiLayoutMetaNote?.setText(hiddenText || '你可以继续微调区块，或直接保留当前结果。');
       }
       this.refreshAiSchemaIssuePanel(schemaValidation);
     }
@@ -2637,19 +2709,6 @@ class AppleStyleView extends ItemView {
           cls: 'apple-ai-layout-block-name',
           text: this.getAiLayoutBlockLabel(block),
         });
-        content.createEl('span', {
-          cls: 'apple-ai-layout-block-type',
-          text: block.type,
-        });
-        if (origin?.source) {
-          const originText = origin.source === 'fallback'
-            ? (block.type === 'section-block' ? '原文' : '补全')
-            : 'AI';
-          item.createEl('span', {
-            cls: `apple-ai-layout-block-origin ${origin.source === 'fallback' ? 'is-fallback' : 'is-ai'}`,
-            text: originText,
-          });
-        }
         if (origin?.originalIndex >= 0) {
           const removeBtn = item.createEl('button', {
             cls: 'apple-ai-layout-block-remove',
@@ -2667,11 +2726,10 @@ class AppleStyleView extends ItemView {
       });
     }
 
-    this.aiGenerateBtn.disabled = !hasDoc || !hasProvider || !aiFeatureEnabled || isLoading;
-    this.aiApplyBtn.disabled = !state || !visibleLayout?.blocks?.length || isStale || state?.status === 'error' || state?.status === 'schema-error' || !aiFeatureEnabled || isLoading;
     this.aiResetBtn.disabled = !this.aiPreviewApplied || isLoading;
     if (this.aiRestoreBlocksBtn) {
       this.aiRestoreBlocksBtn.disabled = hiddenBlockCount <= 0 || isLoading;
+      this.aiRestoreBlocksBtn.hidden = hiddenBlockCount <= 0;
     }
     this.restoreAiLayoutPendingAnchor();
     this.refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale });
@@ -2702,7 +2760,7 @@ class AppleStyleView extends ItemView {
     };
   }
 
-  async generateAiLayoutForCurrentArticle() {
+  async generateAiLayoutForCurrentArticle({ applyAfterGenerate = false } = {}) {
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
     const context = await this.ensureCurrentArticleContext();
     if (!context) {
@@ -2768,11 +2826,21 @@ class AppleStyleView extends ItemView {
       }, layoutJson.selection);
       this.pendingAiLayoutFamily = layoutJson.selection?.layoutFamily || selection.layoutFamily;
       this.pendingAiColorPalette = layoutJson.selection?.colorPalette || selection.colorPalette;
-      new Notice(
-        result.generationMeta?.executionMode === 'local-fallback'
-          ? '✅ 已生成原文增强型本地兜底编排，可应用到预览查看效果'
-          : '✅ AI 编排已生成，可应用到预览查看效果'
-      );
+      this.pendingAiStylePack = this.pendingAiColorPalette;
+      if (applyAfterGenerate) {
+        this.applyAiLayoutToPreview();
+        new Notice(
+          result.generationMeta?.executionMode === 'local-fallback'
+            ? '✅ 已生成并应用原文增强结果'
+            : '✅ 已生成并应用新的编排结果'
+        );
+      } else {
+        new Notice(
+          result.generationMeta?.executionMode === 'local-fallback'
+            ? '✅ 已生成原文增强结果'
+            : '✅ AI 编排已生成'
+        );
+      }
     } catch (error) {
       console.error('AI 编排生成失败:', error);
       const previousState = this.getCurrentArticleLayoutState();
@@ -2824,15 +2892,15 @@ class AppleStyleView extends ItemView {
         }),
       }, selection);
       new Notice(
-        isSchemaError
-          ? `❌ AI 编排未通过 schema 校验：${error.message}`
-          : `❌ AI 编排失败：${error.message}`
+        hasReusablePreviousLayout
+          ? '❌ 这次生成没有成功，已为你保留上一版结果'
+          : (isSchemaError ? `❌ 生成失败：${error.message}` : `❌ 生成失败：${error.message}`)
       );
     } finally {
       this.aiLayoutLoading = false;
       if (this.aiGenerateBtn) {
         this.aiGenerateBtn.disabled = false;
-        this.aiGenerateBtn.setText(originalText || '生成编排');
+        this.aiGenerateBtn.setText(originalText || '生成并应用');
       }
       this.refreshAiLayoutPanel();
     }
@@ -3786,6 +3854,51 @@ class AppleStyleView extends ItemView {
     return (text || '').replace(/\s+/g, ' ').trim();
   }
 
+  transformCodeBlocksForClipboard(root) {
+    if (!root) return;
+
+    const codeBlocks = Array.from(root.querySelectorAll('.code-snippet__fix'));
+    codeBlocks.forEach((block) => {
+      const codePre = block.querySelector('pre');
+      if (!codePre) return;
+
+      const codeHtml = codePre.innerHTML || '';
+      const styleText = block.getAttribute('style') || '';
+      const backgroundMatch = styleText.match(/background:([^;!]+)(?:\s*!important)?/i);
+      const borderMatch = styleText.match(/border:([^;!]+)(?:\s*!important)?/i);
+      const radiusMatch = styleText.match(/border-radius:([^;!]+)(?:\s*!important)?/i);
+      const background = backgroundMatch ? backgroundMatch[1].trim() : '#0d1117';
+      const border = borderMatch ? borderMatch[1].trim() : '1px solid #30363d';
+      const borderRadius = radiusMatch ? radiusMatch[1].trim() : '8px';
+
+      const table = document.createElement('table');
+      table.setAttribute('style', `width:100% !important;border-collapse:collapse !important;margin:12px 0 !important;background:${background} !important;border:${border} !important;border-radius:${borderRadius} !important;overflow:hidden !important;`);
+
+      const toolbarRow = document.createElement('tr');
+      const toolbarCell = document.createElement('td');
+      toolbarCell.setAttribute('style', 'background:#161b22 !important;padding:6px 10px 6px 10px !important;border:none !important;line-height:1 !important;vertical-align:top !important;');
+      toolbarCell.innerHTML = [
+        '<span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;color:transparent !important;vertical-align:top !important;">&nbsp;</span>',
+        '<span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;color:transparent !important;vertical-align:top !important;">&nbsp;</span>',
+        '<span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#28c840 !important;font-size:0 !important;line-height:0 !important;color:transparent !important;vertical-align:top !important;">&nbsp;</span>',
+      ].join('');
+      toolbarRow.appendChild(toolbarCell);
+      table.appendChild(toolbarRow);
+
+      const codeRow = document.createElement('tr');
+      const codeCell = document.createElement('td');
+      codeCell.setAttribute('style', `padding:0 !important;border:none !important;background:${background} !important;color:#f0f6fc !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:1.75 !important;overflow-x:auto !important;`);
+      const newPre = document.createElement('pre');
+      newPre.setAttribute('style', `margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:#f0f6fc !important;white-space:nowrap !important;overflow-x:visible !important;display:inline-block !important;min-width:100% !important;`);
+      newPre.innerHTML = codeHtml;
+      codeCell.appendChild(newPre);
+      codeRow.appendChild(codeCell);
+      table.appendChild(codeRow);
+
+      block.replaceWith(table);
+    });
+  }
+
   async readClipboardTextSnapshot() {
     if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') {
       return { supported: false, text: '' };
@@ -3832,6 +3945,9 @@ class AppleStyleView extends ItemView {
       // 处理本地图片：转换为 JPEG Base64
       // 返回 true 表示有图片被处理了
       const processed = await this.processImagesToDataURL(tempDiv);
+
+      // 针对公众号粘贴：将代码块转换为更稳定的表格结构，避免头部装饰被微信清洗掉。
+      this.transformCodeBlocksForClipboard(tempDiv);
 
       // 清理 HTML 以适配微信编辑器（处理嵌套列表等）
       const cleanedHtml = this.cleanHtmlForDraft(tempDiv.innerHTML);
