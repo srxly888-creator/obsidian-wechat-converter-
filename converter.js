@@ -671,6 +671,36 @@ ${macHeader}
     // Fix: Remove assistive MathML (hidden text that shows up in WeChat)
     html = html.replace(/<mjx-assistive-mml[^>]*>[\s\S]*?<\/mjx-assistive-mml>/gi, '');
 
+    const normalizeMathPositionStyles = (markup) => String(markup || '').replace(
+      /style="([^"]*)"/gi,
+      (_match, styleText) => {
+        let style = String(styleText || '');
+        let topValue = null;
+        style = style.replace(/(^|;)\s*top\s*:\s*([^;"]+)\s*;?/i, (_m, prefix, value) => {
+          topValue = String(value || '').trim();
+          return prefix || '';
+        });
+        if (!topValue) return `style="${style}"`;
+
+        if (/transform\s*:/i.test(style)) {
+          style = style.replace(
+            /transform\s*:\s*([^;"]+)/i,
+            (_m, value) => `transform:${String(value || '').trim()} translateY(${topValue})`
+          );
+        } else {
+          style = `${style}${style.trim().endsWith(';') || !style.trim() ? '' : ';'}transform: translateY(${topValue});`;
+        }
+        return `style="${style}"`;
+      }
+    );
+
+    const appendSvgStyle = (markup, extraStyle) => String(markup || '').replace(/<svg([^>]*)>/i, (_m, svgAttrs) => {
+      if (svgAttrs.includes('style="')) {
+        return `<svg${svgAttrs.replace('style="', `style="${extraStyle}`)}>`;
+      }
+      return `<svg${svgAttrs} style="${extraStyle}">`;
+    });
+
     // Replace <mjx-container> with <section> (block) or <span> (inline)
     // WeChat strips custom tags like mjx-container but keeps SVG content
     return html.replace(/<mjx-container([^>]*)>(.*?)<\/mjx-container>/gs, (match, attrs, content) => {
@@ -683,23 +713,22 @@ ${macHeader}
       // Inline math needs vertical alignment adjustment
       // Block math needs centering and scaling (not scrolling) as per WeChat behavior
       const style = isBlock
-        ? 'display: block; margin: 1em 0; text-align: center; max-width: 100%;'
-        : 'display: inline-block; vertical-align: -0.1em; margin: 0 1px;';
+        ? 'display:block; width:100%; margin:1em auto; text-align:center; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;'
+        : 'display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px; line-height:1;';
+
+      content = normalizeMathPositionStyles(content);
 
       // 关键修复：给块级公式的 SVG 添加 max-width: 100% 和 height: auto
       // 这样在手机上预览时，公式会按比例缩小以适应屏幕，而不是被遮挡或需要滚动
       // 这符合微信公众号的默认渲染行为
       if (isBlock) {
-        content = content.replace(/<svg([^>]*)>/, (m, svgAttrs) => {
-          if (svgAttrs.includes('style="')) {
-            return `<svg${svgAttrs.replace('style="', 'style="max-width: 100%; height: auto; ')}>`;
-          } else {
-            return `<svg${svgAttrs} style="max-width: 100%; height: auto;">`;
-          }
-        });
+        content = appendSvgStyle(content, 'display:block; margin:0 auto; max-width:100%; height:auto; ');
+      } else {
+        content = content.replace(/vertical-align\s*:\s*[^;"]+;?/gi, '');
+        content = appendSvgStyle(content, 'display:inline-block; max-width:300vw !important; height:auto; vertical-align:middle; ');
       }
 
-      return `<${tag} style="${style}">${content}</${tag}>`;
+      return `<${tag} data-owc-math="${isBlock ? 'block' : 'inline'}" style="${style}">${content}</${tag}>`;
     });
   }
 

@@ -126,6 +126,46 @@ async function processMathFormulas({
   svgUploadCache,
   svgToPngBlob,
 }) {
+    const INLINE_MATH_IMAGE_STYLE = 'display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px;';
+    const BLOCK_MATH_WRAP_STYLE = 'display:block; width:100%; margin:1em auto; text-align:center; max-width:100%;';
+    const BLOCK_MATH_IMAGE_STYLE = 'display:block; max-width:100%; height:auto; margin:0 auto;';
+
+    const appendStyle = (base, extra) => {
+      const left = String(base || '').trim();
+      const right = String(extra || '').trim();
+      if (!left) return right;
+      if (!right) return left;
+      return `${left}${left.endsWith(';') ? '' : ';'}${right}`;
+    };
+
+    const filterMathStyle = (styleText, { keepVerticalAlign = false } = {}) => {
+      let style = String(styleText || '');
+      style = style.replace(/display\s*:\s*[^;]+;?/gi, '');
+      style = style.replace(/margin(?:-[a-z]+)?\s*:\s*[^;]+;?/gi, '');
+      if (!keepVerticalAlign) {
+        style = style.replace(/vertical-align\s*:\s*[^;]+;?/gi, '');
+      }
+      return style.trim();
+    };
+
+    const isBlockMathHost = (svg) => {
+      const parent = svg?.parentElement;
+      if (!parent) return false;
+      const parentTag = parent.tagName.toLowerCase();
+      const styleText = String(parent.getAttribute('display') || parent.getAttribute('style') || '').toLowerCase();
+      if (parentTag === 'section') return true;
+      if (parentTag === 'mjx-container' && (styleText.includes('true') || styleText.includes('display:block') || styleText.includes('display: block'))) {
+        return true;
+      }
+      if (parentTag === 'p') {
+        const meaningfulChildren = Array.from(parent.childNodes).filter((node) => {
+          if (node.nodeType === Node.TEXT_NODE) return /\S/.test(node.textContent || '');
+          return true;
+        });
+        return meaningfulChildren.length === 1;
+      }
+      return false;
+    };
 
     // 创建临时容器并挂载到 DOM (为了正确计算 SVG 尺寸)
     const container = document.createElement('div');
@@ -196,20 +236,37 @@ async function processMathFormulas({
           if (logicalHeight) img.setAttribute('height', logicalHeight);
 
           // 5. 样式继承
-          let finalStyle = 'display: inline-block; margin: 0 2px;';
           const svgStyle = svg.getAttribute('style');
-          if (svgStyle) finalStyle += svgStyle;
-
           const parent = svg.parentElement;
-          if (parent && parent.tagName.toLowerCase().includes('mjx')) {
-             const parentStyle = parent.getAttribute('style');
-             if (parentStyle) finalStyle += parentStyle;
-             img.setAttribute('style', finalStyle);
-             parent.replaceWith(img);
+          const isBlockMath = isBlockMathHost(svg);
+
+          if (isBlockMath) {
+             const extraStyle = appendStyle(filterMathStyle(svgStyle), rawStyle);
+             img.setAttribute('style', appendStyle(BLOCK_MATH_IMAGE_STYLE, extraStyle));
+             const wrapper = document.createElement('section');
+             wrapper.setAttribute('style', BLOCK_MATH_WRAP_STYLE);
+             wrapper.appendChild(img);
+
+             if (parent && parent.tagName.toLowerCase() === 'p' && parent.parentElement) {
+               parent.replaceWith(wrapper);
+             } else if (parent && parent.tagName.toLowerCase().includes('mjx')) {
+               parent.replaceWith(wrapper);
+             } else {
+               svg.replaceWith(wrapper);
+             }
           } else {
-             if (rawStyle) finalStyle += rawStyle;
+             let finalStyle = INLINE_MATH_IMAGE_STYLE;
+             finalStyle = appendStyle(finalStyle, filterMathStyle(svgStyle, { keepVerticalAlign: false }));
+             if (parent && parent.tagName.toLowerCase().includes('mjx')) {
+               finalStyle = appendStyle(finalStyle, filterMathStyle(parent.getAttribute('style'), { keepVerticalAlign: false }));
+             }
+             finalStyle = appendStyle(finalStyle, filterMathStyle(rawStyle, { keepVerticalAlign: false }));
              img.setAttribute('style', finalStyle);
-             svg.replaceWith(img);
+             if (parent && parent.tagName.toLowerCase().includes('mjx')) {
+               parent.replaceWith(img);
+             } else {
+               svg.replaceWith(img);
+             }
           }
 
           completed++;

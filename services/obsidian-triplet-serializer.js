@@ -143,6 +143,8 @@ function sanitizeClassList(el, tagName, finalStage = false) {
     keep = classes.filter((cls) => cls === 'code-snippet__fix');
   } else if (tagName === 'img') {
     keep = classes.filter((cls) => cls === 'math-formula-image' || cls === 'mermaid-diagram-image');
+  } else if (tagName === 'svg') {
+    keep = classes.filter((cls) => cls === 'owc-mermaid-diagram');
   } else if (!finalStage && (tagName === 'pre' || tagName === 'code')) {
     keep = classes.filter((cls) => cls.startsWith('language-'));
   }
@@ -801,6 +803,107 @@ function restoreSvgStyleTags(html, placeholders = []) {
   return result;
 }
 
+function looksLikeMathSvg(svg) {
+  if (!svg || svg.tagName?.toLowerCase?.() !== 'svg') return false;
+  if (svg.getAttribute('role') === 'img') return true;
+  if (svg.getAttribute('focusable') === 'false') return true;
+  if (svg.classList?.contains('MathJax')) return true;
+  return !!svg.closest?.('mjx-container,mjx-math,.MathJax');
+}
+
+function normalizeMathPresentation(container) {
+  if (!container || typeof document === 'undefined') return;
+
+  const blockStyle = 'display:block; width:100%; margin:1em auto; text-align:center; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;';
+  const inlineStyle = 'display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px; line-height:1;';
+
+  const normalizeTopOffsets = (el) => {
+    if (!el || typeof el.getAttribute !== 'function' || typeof el.setAttribute !== 'function') return;
+    const style = String(el.getAttribute('style') || '');
+    if (!/\btop\s*:/i.test(style)) return;
+    let topValue = null;
+    let nextStyle = style.replace(/(^|;)\s*top\s*:\s*([^;]+)\s*;?/i, (_m, prefix, value) => {
+      topValue = String(value || '').trim();
+      return prefix || '';
+    });
+    if (!topValue) return;
+    if (/transform\s*:/i.test(nextStyle)) {
+      nextStyle = nextStyle.replace(
+        /transform\s*:\s*([^;]+)/i,
+        (_m, value) => `transform:${String(value || '').trim()} translateY(${topValue})`
+      );
+    } else {
+      nextStyle = `${nextStyle}${nextStyle.trim().endsWith(';') || !nextStyle.trim() ? '' : ';'}transform: translateY(${topValue});`;
+    }
+    el.setAttribute('style', nextStyle);
+  };
+
+  container.querySelectorAll('mjx-container').forEach((mjx) => {
+    const attrs = `${mjx.getAttribute('display') || ''} ${mjx.getAttribute('style') || ''}`.toLowerCase();
+    const isBlock = attrs.includes('true') || attrs.includes('display: block') || attrs.includes('display:block');
+    const existing = String(mjx.getAttribute('style') || '');
+    const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+    mjx.setAttribute('style', `${normalized}${isBlock ? blockStyle : inlineStyle}`);
+  });
+
+  container.querySelectorAll('svg').forEach((svg) => {
+    if (!looksLikeMathSvg(svg)) return;
+    const svgStyle = String(svg.getAttribute('style') || '');
+    let normalizedSvgStyle = svgStyle ? `${svgStyle}${svgStyle.trim().endsWith(';') ? '' : ';'}` : '';
+    normalizedSvgStyle = normalizedSvgStyle.replace(/vertical-align\s*:\s*[^;]+;?/gi, '');
+    if (!/max-width\s*:/i.test(normalizedSvgStyle)) {
+      normalizedSvgStyle = `${normalizedSvgStyle}max-width: 100%; height: auto;`;
+    }
+    svg.setAttribute('style', `${normalizedSvgStyle}display:inline-block;vertical-align:middle;`);
+
+    const parent = svg.parentElement;
+    if (!parent) return;
+
+    const parentTag = parent.tagName.toLowerCase();
+    const mathParent = parentTag === 'mjx-container' ? parent : null;
+    const blockHint = String(mathParent?.getAttribute('display') || mathParent?.getAttribute('style') || '').toLowerCase();
+    const wrapperMathMode = parent.getAttribute('data-owc-math');
+    const hostMathMode = parentTag !== 'mjx-container' ? parent.closest?.('[data-owc-math]')?.getAttribute('data-owc-math') : null;
+    const isBlockMath = wrapperMathMode === 'block'
+      || hostMathMode === 'block'
+      || blockHint.includes('true')
+      || blockHint.includes('display: block')
+      || blockHint.includes('display:block');
+
+    if (isBlockMath) {
+      const host = parentTag === 'section'
+        ? parent
+        : (parentTag === 'p' && parent.childNodes.length === 1 ? parent : null);
+      if (host) {
+        host.setAttribute('style', blockStyle);
+      }
+      svg.setAttribute(
+        'style',
+        `${svg.getAttribute('style') || ''}${String(svg.getAttribute('style') || '').trim().endsWith(';') || !svg.getAttribute('style') ? '' : ';'}display:block;margin:0 auto;`
+      );
+    } else if (parentTag === 'span' || parentTag === 'mjx-container') {
+      const existing = String(parent.getAttribute('style') || '');
+      const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+      parent.setAttribute('style', `${normalized}${inlineStyle}`);
+    }
+
+    normalizeTopOffsets(svg);
+    Array.from(svg.querySelectorAll('[style*="top:"], [style*="top: "]')).forEach(normalizeTopOffsets);
+  });
+
+  container.querySelectorAll('[data-owc-math="block"]').forEach((el) => {
+    const existing = String(el.getAttribute('style') || '');
+    const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+    el.setAttribute('style', `${normalized}${blockStyle}`);
+  });
+
+  container.querySelectorAll('[data-owc-math="inline"]').forEach((el) => {
+    const existing = String(el.getAttribute('style') || '');
+    const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+    el.setAttribute('style', `${normalized}${inlineStyle}`);
+  });
+}
+
 function applyLegacyTypographerParity(container, converter) {
   if (!container || !converter || !converter.md) return;
   if (typeof converter.md.renderInline !== 'function') return;
@@ -1011,6 +1114,7 @@ function serializeObsidianRenderedHtml({
   applyLegacyLinkifyParity(container, converter);
   applyLegacyTypographerParity(container, converter);
   sanitizeAnchorAndImageLinks(container, converter);
+  normalizeMathPresentation(container);
   convertPreBlocks(container, converter);
   convertStandaloneImages(container, converter);
   applyThemeInlineStyles(container, converter);

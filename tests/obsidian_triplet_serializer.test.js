@@ -73,7 +73,7 @@ describe('Obsidian Triplet Serializer', () => {
     const root = document.createElement('div');
     root.innerHTML = [
       '<div class="mermaid">',
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80">',
+      '<svg class="owc-mermaid-diagram" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80">',
       '<g transform="translate(10,10)">',
       '<rect x="0" y="0" width="100" height="40" fill="#ecebff" stroke="#8b7cf6"></rect>',
       '<text x="50" y="25" text-anchor="middle">Mermaid</text>',
@@ -90,6 +90,7 @@ describe('Obsidian Triplet Serializer', () => {
     const rect = container.querySelector('rect');
     expect(svg?.getAttribute('viewBox')).toBe('0 0 120 80');
     expect(svg?.getAttribute('width')).toBe('120');
+    expect(svg?.getAttribute('class')).toBe('owc-mermaid-diagram');
     expect(rect?.getAttribute('fill')).toBe('#ecebff');
     expect(rect?.getAttribute('stroke')).toBe('#8b7cf6');
   });

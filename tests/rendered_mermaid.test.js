@@ -6,6 +6,7 @@ const {
   isMermaidCodeBlock,
   buildMermaidCompatSource,
   normalizeRenderedMermaidDiagrams,
+  prepareRenderedMermaidDiagramsForWechat,
   renderMermaidCodeBlocks,
   rasterizeRenderedMermaidDiagrams,
 } = require('../services/rendered-mermaid');
@@ -89,6 +90,69 @@ describe('Rendered Mermaid Service', () => {
     expect(host.querySelector('svg')).toBeNull();
   });
 
+  it('should inline Mermaid svg style rules before rasterizing detached export dom', async () => {
+    const host = document.createElement('div');
+    host.innerHTML = [
+      '<div class="mermaid">',
+      '  <svg id="mermaid-export" viewBox="0 0 100 60">',
+      '    <style>#mermaid-export .node rect { fill:#efeaff; stroke:#b197fc; } #mermaid-export .nodeLabel p { color:#2f2f2f; }</style>',
+      '    <g class="node"><rect width="40" height="20"></rect></g>',
+      '    <foreignObject class="nodeLabel"><div><p>Label</p></div></foreignObject>',
+      '  </svg>',
+      '</div>',
+    ].join('');
+
+    const rasterizeSvg = vi.fn(async (svg) => {
+      const rect = svg.querySelector('rect');
+      const label = svg.querySelector('text');
+      expect(svg.querySelector('style')).toBeNull();
+      expect(rect?.getAttribute('style') || '').toContain('fill:#efeaff');
+      expect(rect?.getAttribute('style') || '').toContain('stroke:#b197fc');
+      expect(label?.getAttribute('fill') || '').toBe('#333333');
+      return {
+        dataUrl: 'data:image/png;base64,mermaid',
+        width: 100,
+        height: 60,
+        style: '',
+      };
+    });
+
+    await rasterizeRenderedMermaidDiagrams(host, { rasterizeSvg });
+
+    expect(rasterizeSvg.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(host.querySelector('img.mermaid-diagram-image')).not.toBeNull();
+  });
+
+  it('should flatten Mermaid foreignObject labels before rasterization for WeChat compatibility', async () => {
+    const host = document.createElement('div');
+    host.innerHTML = [
+      '<div class="mermaid">',
+      '  <svg id="mermaid-foreign" viewBox="0 0 100 60">',
+      '    <style>#mermaid-foreign .nodeLabel p { color:#2f2f2f; font-size:14px; }</style>',
+      '    <foreignObject x="10" y="10" width="40" height="20"><div><p style="color:#2f2f2f;font-size:14px;">Label</p></div></foreignObject>',
+      '  </svg>',
+      '</div>',
+    ].join('');
+
+    const rasterizeSvg = vi.fn(async (svg) => {
+      expect(svg.querySelector('foreignObject')).toBeNull();
+      const text = svg.querySelector('text');
+      expect(text?.textContent).toBe('Label');
+      expect(text?.getAttribute('text-anchor')).toBe('middle');
+      return {
+        dataUrl: 'data:image/png;base64,mermaid',
+        width: 100,
+        height: 60,
+        style: '',
+      };
+    });
+
+    await rasterizeRenderedMermaidDiagrams(host, { rasterizeSvg });
+
+    expect(rasterizeSvg.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(host.querySelector('img.mermaid-diagram-image')).not.toBeNull();
+  });
+
   it('should normalize rendered Mermaid svg hosts for responsive preview', () => {
     const host = document.createElement('div');
     host.innerHTML = '<div class="mermaid"><svg id="mermaid-preview" viewBox="0 0 400 120"></svg></div>';
@@ -97,6 +161,7 @@ describe('Rendered Mermaid Service', () => {
 
     expect(normalized).toBe(1);
     expect(host.querySelector('.mermaid')?.getAttribute('style') || '').toContain('width: 100%');
+    expect(host.querySelector('svg#mermaid-preview')?.getAttribute('class') || '').toContain('owc-mermaid-diagram');
     expect(host.querySelector('svg#mermaid-preview')?.getAttribute('style') || '').toContain('max-width: 100%');
   });
 
@@ -121,5 +186,30 @@ describe('Rendered Mermaid Service', () => {
     expect(rect?.getAttribute('style') || '').toContain('fill:#efeaff');
     expect(rect?.getAttribute('style') || '').toContain('stroke:#b197fc');
     expect(text?.getAttribute('style') || '').toContain('color:#2f2f2f');
+  });
+
+  it('should rewrite Mermaid svg labels for WeChat-friendly export', () => {
+    const host = document.createElement('div');
+    host.innerHTML = [
+      '<div class="mermaid">',
+      '  <svg id="mermaid-wechat" viewBox="0 0 100 60">',
+      '    <foreignObject x="10" y="10" width="40" height="20">',
+      '      <div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;">',
+      '        <span class="nodeLabel"><p>Label</p></span>',
+      '      </div>',
+      '    </foreignObject>',
+      '    <text><tspan>Edge</tspan></text>',
+      '  </svg>',
+      '</div>',
+    ].join('');
+
+    const processed = prepareRenderedMermaidDiagramsForWechat(host);
+
+    expect(processed).toBe(1);
+    expect(host.querySelector('.nodeLabel p')).toBeNull();
+    expect(host.querySelector('foreignObject')).toBeNull();
+    expect(host.querySelector('text tspan')).not.toBeNull();
+    expect(host.querySelector('tspan')?.getAttribute('style') || '').toContain('fill:#333333');
+    expect(host.querySelector('svg#mermaid-wechat')?.getAttribute('preserveAspectRatio')).toBe('xMidYMid meet');
   });
 });

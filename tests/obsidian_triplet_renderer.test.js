@@ -625,6 +625,7 @@ describe('Obsidian Triplet Renderer', () => {
 
     // Block math should render to mjx-container or section with SVG
     expect(html).toMatch(/mjx-container|<svg/);
+    expect(html).toContain('text-align:center');
   });
 
   it('should render blockquote block math without quote marker artifacts', async () => {
@@ -735,6 +736,27 @@ describe('Obsidian Triplet Renderer', () => {
     expect(html).toContain('Before');
     expect(html).toContain('after');
     expect(html).toMatch(/mjx-container|<svg/);
+  });
+
+  it('should nudge inline math formulas upward in preview output', async () => {
+    const converter = await createLegacyConverter();
+
+    const renderMarkdown = vi.fn(async (markdown, el) => {
+      el.innerHTML = converter.md.render(markdown);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter,
+      markdown: 'Energy $E=mc^2$ test',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      rasterizeMermaid: false,
+      preserveSvgStyleTags: true,
+    });
+
+    expect(html).toContain('vertical-align:middle');
+    expect(html).toContain('translateY(-0.12em)');
   });
 
   it('should handle empty or invalid math gracefully', async () => {

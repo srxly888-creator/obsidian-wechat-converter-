@@ -5,7 +5,7 @@ const { buildRenderRuntime } = require('./services/dependency-loader');
 const { resolveMarkdownSource } = require('./services/markdown-source');
 const { normalizeVaultPath, isAbsolutePathLike } = require('./services/path-utils');
 const { renderObsidianTripletMarkdown } = require('./services/obsidian-triplet-renderer');
-const { rasterizeRenderedMermaidDiagrams } = require('./services/rendered-mermaid');
+const { prepareRenderedMermaidDiagramsForWechat } = require('./services/rendered-mermaid');
 const {
   AI_LAYOUT_SCHEMA_VERSION,
   AI_LAYOUT_SELECTION_AUTO,
@@ -3881,8 +3881,21 @@ class AppleStyleView extends ItemView {
 
   async enhanceHtmlForWechatPublishing(root) {
     if (!root) return;
-    await rasterizeRenderedMermaidDiagrams(root);
-    this.transformCodeBlocksForClipboard(root);
+    let mount = null;
+    try {
+      if (typeof document !== 'undefined' && document.body && !root.isConnected) {
+        mount = document.createElement('div');
+        mount.setAttribute('style', 'position:fixed;left:-99999px;top:0;width:760px;opacity:0;pointer-events:none;overflow:hidden;');
+        document.body.appendChild(mount);
+        mount.appendChild(root);
+      }
+      prepareRenderedMermaidDiagramsForWechat(root);
+      this.transformCodeBlocksForClipboard(root);
+    } finally {
+      if (mount) {
+        mount.remove();
+      }
+    }
   }
 
   async prepareHtmlForWechatDraft(html) {
