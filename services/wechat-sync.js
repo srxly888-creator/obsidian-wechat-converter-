@@ -4,6 +4,7 @@ function createWechatSyncService(deps) {
     srcToBlob,
     processAllImages,
     processMathFormulas,
+    prepareHtmlForDraft = async (html) => html,
     cleanHtmlForDraft,
     cleanupConfiguredDirectory,
     getFirstImageFromArticle,
@@ -34,8 +35,10 @@ function createWechatSyncService(deps) {
       const coverRes = await api.uploadCover(coverBlob);
       const thumbMediaId = coverRes.media_id;
 
+      let draftHtml = await prepareHtmlForDraft(currentHtml);
+
       if (onStatus) onStatus('images');
-      let processedHtml = await processAllImages(currentHtml, api, (current, total) => {
+      let processedHtml = await processAllImages(draftHtml, api, (current, total) => {
         if (onImageProgress) onImageProgress(current, total);
       }, {
         accountId: account.id || '',

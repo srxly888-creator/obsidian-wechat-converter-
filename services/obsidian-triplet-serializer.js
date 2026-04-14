@@ -157,11 +157,29 @@ function sanitizeClassList(el, tagName, finalStage = false) {
 function pruneObsidianOnlyAttributes(container, { finalStage = false } = {}) {
   if (!container) return;
 
+  const SVG_ALLOWED_ATTRS = new Set([
+    'style', 'class', 'xmlns', 'viewbox', 'width', 'height', 'x', 'y',
+    'cx', 'cy', 'rx', 'ry', 'r', 'x1', 'y1', 'x2', 'y2', 'd', 'points',
+    'transform', 'fill', 'stroke', 'stroke-width', 'stroke-linecap',
+    'stroke-linejoin', 'stroke-dasharray', 'stroke-dashoffset', 'opacity',
+    'fill-opacity', 'stroke-opacity', 'font-size', 'font-family',
+    'font-weight', 'text-anchor', 'dominant-baseline', 'preserveaspectratio',
+    'marker-start', 'marker-mid', 'marker-end', 'markerwidth', 'markerheight',
+    'refx', 'refy', 'orient', 'pathlength', 'role', 'focusable', 'aria-hidden',
+    'xmlns:xlink', 'xlink:href',
+  ]);
+  const SVG_TAGS = new Set([
+    'svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline',
+    'polygon', 'text', 'tspan', 'defs', 'marker', 'foreignobject', 'clippath',
+    'pattern', 'mask', 'symbol', 'use',
+  ]);
+
   const getAllowedAttrs = (tagName) => {
     if (tagName === 'a') return new Set(['href', 'style']);
     if (tagName === 'img') return new Set(['src', 'alt', 'style', 'width', 'height', 'class']);
     if (tagName === 'section') return new Set(['style', 'class']);
     if (!finalStage && (tagName === 'pre' || tagName === 'code')) return new Set(['style', 'class']);
+    if (SVG_TAGS.has(tagName)) return SVG_ALLOWED_ATTRS;
     return new Set(['style']);
   };
 
@@ -742,9 +760,45 @@ function applyThemeInlineStyles(container, converter) {
   }
 }
 
-function stripDangerousTags(container) {
+function stripDangerousTags(container, { preserveSvgStyleTags = false } = {}) {
   if (!container) return;
-  container.querySelectorAll('script,iframe,object,embed,form,input,button,style').forEach((el) => el.remove());
+  container.querySelectorAll('script,iframe,object,embed,form,input,button,style').forEach((el) => {
+    if (
+      preserveSvgStyleTags
+      && el.tagName?.toLowerCase?.() === 'style'
+      && el.closest?.('svg')
+    ) {
+      return;
+    }
+    el.remove();
+  });
+}
+
+function protectSvgStyleTags(html) {
+  if (typeof html !== 'string' || !html.includes('<style')) {
+    return { html, placeholders: [] };
+  }
+
+  const placeholders = [];
+  let index = 0;
+  const protectedHtml = html.replace(/<svg\b[\s\S]*?<\/svg>/gi, (svgMarkup) => {
+    return svgMarkup.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, (styleMarkup) => {
+      const token = `__OWC_SVG_STYLE_${index}__`;
+      placeholders.push({ token, styleMarkup });
+      index += 1;
+      return token;
+    });
+  });
+
+  return { html: protectedHtml, placeholders };
+}
+
+function restoreSvgStyleTags(html, placeholders = []) {
+  let result = String(html || '');
+  placeholders.forEach(({ token, styleMarkup }) => {
+    result = result.split(token).join(styleMarkup);
+  });
+  return result;
 }
 
 function applyLegacyTypographerParity(container, converter) {
@@ -932,7 +986,12 @@ function injectPreRenderedMathFormulas(html, formulas) {
   return result;
 }
 
-function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }) {
+function serializeObsidianRenderedHtml({
+  root,
+  converter,
+  preRenderedMath = [],
+  preserveSvgStyleTags = false,
+}) {
   if (typeof document === 'undefined') {
     throw new Error('Triplet serializer requires DOM environment');
   }
@@ -946,7 +1005,7 @@ function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }
   pruneObsidianOnlyAttributes(container, { finalStage: false });
   normalizeLegacyTagAliases(container);
   normalizeLegacyDeleteNesting(container);
-  stripDangerousTags(container);
+  stripDangerousTags(container, { preserveSvgStyleTags });
   // Render math formulas that Obsidian's MarkdownRenderer didn't process
   renderUnresolvedMathFormulas(container, converter);
   applyLegacyLinkifyParity(container, converter);
@@ -977,8 +1036,18 @@ function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }
   if (converter && typeof converter.fixMathJaxTags === 'function') {
     html = converter.fixMathJaxTags(html);
   }
+  let svgStyleProtection = { html, placeholders: [] };
+  if (preserveSvgStyleTags) {
+    svgStyleProtection = protectSvgStyleTags(html);
+    html = svgStyleProtection.html;
+  }
+
   if (converter && typeof converter.sanitizeHtml === 'function') {
     html = converter.sanitizeHtml(html);
+  }
+
+  if (preserveSvgStyleTags) {
+    html = restoreSvgStyleTags(html, svgStyleProtection.placeholders);
   }
   html = normalizeLegacyDeleteNestingInHtml(html);
 

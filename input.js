@@ -5,6 +5,7 @@ const { buildRenderRuntime } = require('./services/dependency-loader');
 const { resolveMarkdownSource } = require('./services/markdown-source');
 const { normalizeVaultPath, isAbsolutePathLike } = require('./services/path-utils');
 const { renderObsidianTripletMarkdown } = require('./services/obsidian-triplet-renderer');
+const { rasterizeRenderedMermaidDiagrams } = require('./services/rendered-mermaid');
 const {
   AI_LAYOUT_SCHEMA_VERSION,
   AI_LAYOUT_SELECTION_AUTO,
@@ -800,6 +801,8 @@ class AppleStyleView extends ItemView {
             sourcePath: context.sourcePath || '',
             settings: context.settings || this.plugin.settings,
             component: this,
+            rasterizeMermaid: false,
+            preserveSvgStyleTags: true,
           });
         },
       });
@@ -3339,6 +3342,7 @@ class AppleStyleView extends ItemView {
         srcToBlob: this.srcToBlob.bind(this),
         processAllImages: this.processAllImages.bind(this),
         processMathFormulas: this.processMathFormulas.bind(this),
+        prepareHtmlForDraft: this.prepareHtmlForWechatDraft.bind(this),
         cleanHtmlForDraft: this.cleanHtmlForDraft.bind(this),
         cleanupConfiguredDirectory: this.cleanupConfiguredDirectory.bind(this),
         getFirstImageFromArticle: this.getFirstImageFromArticle.bind(this),
@@ -3875,6 +3879,19 @@ class AppleStyleView extends ItemView {
     return (text || '').replace(/\s+/g, ' ').trim();
   }
 
+  async enhanceHtmlForWechatPublishing(root) {
+    if (!root) return;
+    await rasterizeRenderedMermaidDiagrams(root);
+    this.transformCodeBlocksForClipboard(root);
+  }
+
+  async prepareHtmlForWechatDraft(html) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html || '';
+    await this.enhanceHtmlForWechatPublishing(tempDiv);
+    return tempDiv.innerHTML;
+  }
+
   transformCodeBlocksForClipboard(root) {
     if (!root) return;
 
@@ -3967,8 +3984,7 @@ class AppleStyleView extends ItemView {
       // 返回 true 表示有图片被处理了
       const processed = await this.processImagesToDataURL(tempDiv);
 
-      // 针对公众号粘贴：将代码块转换为更稳定的表格结构，避免头部装饰被微信清洗掉。
-      this.transformCodeBlocksForClipboard(tempDiv);
+      await this.enhanceHtmlForWechatPublishing(tempDiv);
 
       // 清理 HTML 以适配微信编辑器（处理嵌套列表等）
       const cleanedHtml = this.cleanHtmlForDraft(tempDiv.innerHTML);

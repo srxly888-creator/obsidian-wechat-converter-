@@ -69,6 +69,55 @@ describe('Obsidian Triplet Serializer', () => {
     expect(dots[2]?.getAttribute('style') || '').toContain('background:#28c840');
   });
 
+  it('should preserve Mermaid svg attributes when raw svg is kept for preview/export fallback', () => {
+    const root = document.createElement('div');
+    root.innerHTML = [
+      '<div class="mermaid">',
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80">',
+      '<g transform="translate(10,10)">',
+      '<rect x="0" y="0" width="100" height="40" fill="#ecebff" stroke="#8b7cf6"></rect>',
+      '<text x="50" y="25" text-anchor="middle">Mermaid</text>',
+      '</g>',
+      '</svg>',
+      '</div>',
+    ].join('');
+
+    const html = serializeObsidianRenderedHtml({ root, converter });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    const svg = container.querySelector('svg');
+    const rect = container.querySelector('rect');
+    expect(svg?.getAttribute('viewBox')).toBe('0 0 120 80');
+    expect(svg?.getAttribute('width')).toBe('120');
+    expect(rect?.getAttribute('fill')).toBe('#ecebff');
+    expect(rect?.getAttribute('stroke')).toBe('#8b7cf6');
+  });
+
+  it('should preserve Mermaid svg style tags for preview when requested', () => {
+    const previewConverter = {
+      ...converter,
+      sanitizeHtml: (html) => html.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*>[\s\S]*?<\/\1>/gi, ''),
+    };
+    const root = document.createElement('div');
+    root.innerHTML = [
+      '<div class="mermaid">',
+      '<svg id="mermaid-preview" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80">',
+      '<style>#mermaid-preview .node rect { fill:#efeaff; stroke:#b197fc; }</style>',
+      '<g class="node"><rect x="0" y="0" width="100" height="40"></rect></g>',
+      '</svg>',
+      '</div>',
+    ].join('');
+
+    const html = serializeObsidianRenderedHtml({
+      root,
+      converter: previewConverter,
+      preserveSvgStyleTags: true,
+    });
+
+    expect(html).toContain('<style>#mermaid-preview .node rect { fill:#efeaff; stroke:#b197fc; }</style>');
+  });
+
   it('should sanitize dangerous tags and unsafe links', () => {
     const root = document.createElement('div');
     root.innerHTML = '<script>alert(1)</script><a href="javascript:alert(1)">x</a>';

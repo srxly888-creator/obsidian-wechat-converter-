@@ -1720,6 +1720,79 @@ var require_obsidian_triplet_serializer = __commonJS({
     function pruneObsidianOnlyAttributes(container, { finalStage = false } = {}) {
       if (!container)
         return;
+      const SVG_ALLOWED_ATTRS = /* @__PURE__ */ new Set([
+        "style",
+        "class",
+        "xmlns",
+        "viewbox",
+        "width",
+        "height",
+        "x",
+        "y",
+        "cx",
+        "cy",
+        "rx",
+        "ry",
+        "r",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "d",
+        "points",
+        "transform",
+        "fill",
+        "stroke",
+        "stroke-width",
+        "stroke-linecap",
+        "stroke-linejoin",
+        "stroke-dasharray",
+        "stroke-dashoffset",
+        "opacity",
+        "fill-opacity",
+        "stroke-opacity",
+        "font-size",
+        "font-family",
+        "font-weight",
+        "text-anchor",
+        "dominant-baseline",
+        "preserveaspectratio",
+        "marker-start",
+        "marker-mid",
+        "marker-end",
+        "markerwidth",
+        "markerheight",
+        "refx",
+        "refy",
+        "orient",
+        "pathlength",
+        "role",
+        "focusable",
+        "aria-hidden",
+        "xmlns:xlink",
+        "xlink:href"
+      ]);
+      const SVG_TAGS = /* @__PURE__ */ new Set([
+        "svg",
+        "g",
+        "path",
+        "rect",
+        "circle",
+        "ellipse",
+        "line",
+        "polyline",
+        "polygon",
+        "text",
+        "tspan",
+        "defs",
+        "marker",
+        "foreignobject",
+        "clippath",
+        "pattern",
+        "mask",
+        "symbol",
+        "use"
+      ]);
       const getAllowedAttrs = (tagName) => {
         if (tagName === "a")
           return /* @__PURE__ */ new Set(["href", "style"]);
@@ -1729,6 +1802,8 @@ var require_obsidian_triplet_serializer = __commonJS({
           return /* @__PURE__ */ new Set(["style", "class"]);
         if (!finalStage && (tagName === "pre" || tagName === "code"))
           return /* @__PURE__ */ new Set(["style", "class"]);
+        if (SVG_TAGS.has(tagName))
+          return SVG_ALLOWED_ATTRS;
         return /* @__PURE__ */ new Set(["style"]);
       };
       Array.from(container.querySelectorAll("*")).forEach((el) => {
@@ -2277,10 +2352,39 @@ var require_obsidian_triplet_serializer = __commonJS({
         container.querySelectorAll("li > p").forEach((p) => setInlineStyleIfMissing(p, liPStyle));
       }
     }
-    function stripDangerousTags(container) {
+    function stripDangerousTags(container, { preserveSvgStyleTags = false } = {}) {
       if (!container)
         return;
-      container.querySelectorAll("script,iframe,object,embed,form,input,button,style").forEach((el) => el.remove());
+      container.querySelectorAll("script,iframe,object,embed,form,input,button,style").forEach((el) => {
+        var _a, _b, _c;
+        if (preserveSvgStyleTags && ((_b = (_a = el.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) === "style" && ((_c = el.closest) == null ? void 0 : _c.call(el, "svg"))) {
+          return;
+        }
+        el.remove();
+      });
+    }
+    function protectSvgStyleTags(html) {
+      if (typeof html !== "string" || !html.includes("<style")) {
+        return { html, placeholders: [] };
+      }
+      const placeholders = [];
+      let index = 0;
+      const protectedHtml = html.replace(/<svg\b[\s\S]*?<\/svg>/gi, (svgMarkup) => {
+        return svgMarkup.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, (styleMarkup) => {
+          const token = `__OWC_SVG_STYLE_${index}__`;
+          placeholders.push({ token, styleMarkup });
+          index += 1;
+          return token;
+        });
+      });
+      return { html: protectedHtml, placeholders };
+    }
+    function restoreSvgStyleTags(html, placeholders = []) {
+      let result = String(html || "");
+      placeholders.forEach(({ token, styleMarkup }) => {
+        result = result.split(token).join(styleMarkup);
+      });
+      return result;
     }
     function applyLegacyTypographerParity(container, converter) {
       if (!container || !converter || !converter.md)
@@ -2444,7 +2548,12 @@ var require_obsidian_triplet_serializer = __commonJS({
       }
       return result;
     }
-    function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }) {
+    function serializeObsidianRenderedHtml({
+      root,
+      converter,
+      preRenderedMath = [],
+      preserveSvgStyleTags = false
+    }) {
       if (typeof document === "undefined") {
         throw new Error("Triplet serializer requires DOM environment");
       }
@@ -2456,7 +2565,7 @@ var require_obsidian_triplet_serializer = __commonJS({
       pruneObsidianOnlyAttributes(container, { finalStage: false });
       normalizeLegacyTagAliases(container);
       normalizeLegacyDeleteNesting(container);
-      stripDangerousTags(container);
+      stripDangerousTags(container, { preserveSvgStyleTags });
       renderUnresolvedMathFormulas(container, converter);
       applyLegacyLinkifyParity(container, converter);
       applyLegacyTypographerParity(container, converter);
@@ -2482,8 +2591,16 @@ var require_obsidian_triplet_serializer = __commonJS({
       if (converter && typeof converter.fixMathJaxTags === "function") {
         html = converter.fixMathJaxTags(html);
       }
+      let svgStyleProtection = { html, placeholders: [] };
+      if (preserveSvgStyleTags) {
+        svgStyleProtection = protectSvgStyleTags(html);
+        html = svgStyleProtection.html;
+      }
       if (converter && typeof converter.sanitizeHtml === "function") {
         html = converter.sanitizeHtml(html);
+      }
+      if (preserveSvgStyleTags) {
+        html = restoreSvgStyleTags(html, svgStyleProtection.placeholders);
       }
       html = normalizeLegacyDeleteNestingInHtml(html);
       const sectionStyle = getTagStyle(converter, "section");
@@ -2827,6 +2944,79 @@ var require_svg_rasterizer = __commonJS({
         return true;
       return !!((_b = svgElement.closest) == null ? void 0 : _b.call(svgElement, "mjx-container,mjx-math,.MathJax"));
     }
+    var SVG_INLINE_STYLE_PROPS = [
+      "color",
+      "fill",
+      "fill-opacity",
+      "stroke",
+      "stroke-opacity",
+      "stroke-width",
+      "stroke-dasharray",
+      "stroke-dashoffset",
+      "stroke-linecap",
+      "stroke-linejoin",
+      "opacity",
+      "background",
+      "background-color",
+      "font",
+      "font-size",
+      "font-family",
+      "font-weight",
+      "line-height",
+      "text-anchor",
+      "dominant-baseline",
+      "letter-spacing",
+      "word-spacing",
+      "white-space"
+    ];
+    function appendInlineStyle(el, declarations = {}) {
+      if (!el || typeof el.setAttribute !== "function")
+        return;
+      const current = String(el.getAttribute("style") || "").trim();
+      const nextParts = [];
+      Object.entries(declarations).forEach(([key, value]) => {
+        const normalized = String(value || "").trim();
+        if (!normalized)
+          return;
+        nextParts.push(`${key}:${normalized}`);
+      });
+      if (!nextParts.length)
+        return;
+      const joined = current ? `${current}${current.endsWith(";") ? "" : ";"}${nextParts.join(";")};` : `${nextParts.join(";")};`;
+      el.setAttribute("style", joined);
+    }
+    function inlineSvgComputedStyles(sourceSvg, clonedSvg) {
+      if (!sourceSvg || !clonedSvg || typeof window === "undefined" || typeof window.getComputedStyle !== "function") {
+        return;
+      }
+      const sourceElements = [sourceSvg, ...Array.from(sourceSvg.querySelectorAll("*"))];
+      const clonedElements = [clonedSvg, ...Array.from(clonedSvg.querySelectorAll("*"))];
+      const pairCount = Math.min(sourceElements.length, clonedElements.length);
+      for (let index = 0; index < pairCount; index += 1) {
+        const sourceEl = sourceElements[index];
+        const clonedEl = clonedElements[index];
+        if (!sourceEl || !clonedEl)
+          continue;
+        const computed = window.getComputedStyle(sourceEl);
+        const styleMap = {};
+        SVG_INLINE_STYLE_PROPS.forEach((prop) => {
+          const value = computed.getPropertyValue(prop);
+          if (!value)
+            return;
+          const trimmed = String(value).trim();
+          if (!trimmed || trimmed === "none" || trimmed === "normal")
+            return;
+          styleMap[prop] = trimmed;
+        });
+        if (styleMap.fill && !clonedEl.getAttribute("fill"))
+          clonedEl.setAttribute("fill", styleMap.fill);
+        if (styleMap.stroke && !clonedEl.getAttribute("stroke"))
+          clonedEl.setAttribute("stroke", styleMap.stroke);
+        if (styleMap["stroke-width"] && !clonedEl.getAttribute("stroke-width"))
+          clonedEl.setAttribute("stroke-width", styleMap["stroke-width"]);
+        appendInlineStyle(clonedEl, styleMap);
+      }
+    }
     function getSvgLogicalSize(svgElement) {
       var _a, _b, _c, _d;
       const rect = typeof (svgElement == null ? void 0 : svgElement.getBoundingClientRect) === "function" ? svgElement.getBoundingClientRect() : { width: 0, height: 0 };
@@ -2864,6 +3054,7 @@ var require_svg_rasterizer = __commonJS({
     function prepareSvgClone(svgElement) {
       const clonedSvg = svgElement.cloneNode(true);
       const { logicalWidth, logicalHeight, rawStyle } = getSvgLogicalSize(svgElement);
+      inlineSvgComputedStyles(svgElement, clonedSvg);
       if (isMathJaxSvg(svgElement)) {
         clonedSvg.setAttribute("fill", "#333333");
         if (clonedSvg.style) {
@@ -2969,6 +3160,159 @@ var require_svg_rasterizer = __commonJS({
 var require_rendered_mermaid = __commonJS({
   "services/rendered-mermaid.js"(exports2, module2) {
     var { isMathJaxSvg, rasterizeSvgToPngDataUrl } = require_svg_rasterizer();
+    var MERMAID_COMPAT_THEME = {
+      theme: "base",
+      flowchart: {
+        htmlLabels: false,
+        useMaxWidth: true,
+        curve: "basis"
+      },
+      themeVariables: {
+        background: "#ffffff",
+        primaryColor: "#efeaff",
+        primaryBorderColor: "#b197fc",
+        primaryTextColor: "#2f2f2f",
+        secondaryColor: "#efeaff",
+        secondaryBorderColor: "#b197fc",
+        secondaryTextColor: "#2f2f2f",
+        tertiaryColor: "#fff7cc",
+        tertiaryBorderColor: "#d6c978",
+        tertiaryTextColor: "#2f2f2f",
+        clusterBkg: "#fff7cc",
+        clusterBorder: "#d6c978",
+        lineColor: "#555555",
+        defaultLinkColor: "#555555",
+        edgeLabelBackground: "#ffffff",
+        mainBkg: "#efeaff",
+        nodeBorder: "#b197fc",
+        textColor: "#2f2f2f",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+      }
+    };
+    function hasMermaidInitDirective(source) {
+      return /^\s*%%\{init:/m.test(String(source || ""));
+    }
+    function buildMermaidCompatSource(source) {
+      const normalized = String(source || "").trim();
+      if (!normalized)
+        return "";
+      if (hasMermaidInitDirective(normalized))
+        return normalized;
+      return `%%{init: ${JSON.stringify(MERMAID_COMPAT_THEME)}}%%
+${normalized}`;
+    }
+    function normalizeMermaidPreviewHost(host) {
+      if (!host || typeof host.setAttribute !== "function")
+        return;
+      host.style.display = "block";
+      host.style.width = "100%";
+      host.style.maxWidth = "100%";
+      host.style.margin = "16px auto";
+      host.style.overflow = "hidden";
+      host.style.textAlign = "center";
+    }
+    function normalizeMermaidPreviewSvg(svg) {
+      if (!svg || typeof svg.setAttribute !== "function")
+        return;
+      svg.style.display = "block";
+      svg.style.width = "100%";
+      svg.style.maxWidth = "100%";
+      svg.style.height = "auto";
+      svg.style.margin = "0 auto";
+    }
+    function appendInlineStyle(el, declarations) {
+      if (!el || !declarations)
+        return;
+      const current = String(el.getAttribute("style") || "").trim();
+      const normalized = current ? current.endsWith(";") ? current : `${current};` : "";
+      el.setAttribute("style", `${normalized}${declarations}`);
+    }
+    function normalizeMermaidRuleSelector(selector, svg) {
+      var _a;
+      const raw = String(selector || "").trim();
+      if (!raw || raw.startsWith("@"))
+        return null;
+      const svgId = String(((_a = svg == null ? void 0 : svg.getAttribute) == null ? void 0 : _a.call(svg, "id")) || "").trim();
+      let normalized = raw;
+      if (svgId) {
+        const escapedId = svgId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        normalized = normalized.replace(new RegExp(`#${escapedId}\\b`, "g"), "").trim();
+      }
+      normalized = normalized.replace(/^svg\b/i, "").replace(/^:root\b/i, "").replace(/^\s*>\s*/, "").trim();
+      if (!normalized)
+        return ":scope";
+      return normalized;
+    }
+    function inlineMermaidSvgStyles(svg) {
+      if (!svg || typeof svg.querySelectorAll !== "function")
+        return 0;
+      const styleNodes = Array.from(svg.querySelectorAll("style"));
+      if (styleNodes.length === 0)
+        return 0;
+      let appliedCount = 0;
+      for (const styleNode of styleNodes) {
+        const cssText = String(styleNode.textContent || "");
+        const ruleRegex = /([^{}]+)\{([^{}]+)\}/g;
+        let match;
+        while (match = ruleRegex.exec(cssText)) {
+          const selectorGroup = String(match[1] || "").trim();
+          const declarations = String(match[2] || "").trim();
+          if (!selectorGroup || !declarations)
+            continue;
+          const selectors = selectorGroup.split(",").map((selector) => normalizeMermaidRuleSelector(selector, svg)).filter(Boolean);
+          for (const selector of selectors) {
+            let targets = [];
+            try {
+              if (selector === ":scope") {
+                targets = [svg];
+              } else {
+                targets = Array.from(svg.querySelectorAll(selector));
+              }
+            } catch (error) {
+              continue;
+            }
+            for (const target of targets) {
+              appendInlineStyle(target, declarations);
+              appliedCount += 1;
+            }
+          }
+        }
+        styleNode.remove();
+      }
+      return appliedCount;
+    }
+    function normalizeRenderedMermaidDiagrams(root) {
+      var _a, _b;
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      let normalizedCount = 0;
+      const svgs = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg);
+      for (const svg of svgs) {
+        inlineMermaidSvgStyles(svg);
+        const host = (_a = svg.closest) == null ? void 0 : _a.call(svg, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+        if (host) {
+          normalizeMermaidPreviewHost(host);
+        }
+        normalizeMermaidPreviewSvg(svg);
+        normalizedCount += 1;
+      }
+      const images = Array.from(root.querySelectorAll("img.mermaid-diagram-image"));
+      for (const img of images) {
+        const host = (_b = img.closest) == null ? void 0 : _b.call(img, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+        if (host) {
+          normalizeMermaidPreviewHost(host);
+        }
+        if (!img.getAttribute("style")) {
+          const maxWidthStyle = img.getAttribute("width") ? `${Math.round(Number(img.getAttribute("width")) || 0)}px` : "100%";
+          img.setAttribute(
+            "style",
+            `display:block;width:100%;max-width:${maxWidthStyle};height:auto;margin:0 auto;`
+          );
+        }
+        normalizedCount += 1;
+      }
+      return normalizedCount;
+    }
     function hasMermaidMarker(el) {
       if (!el || el.nodeType !== Node.ELEMENT_NODE)
         return false;
@@ -3003,7 +3347,66 @@ var require_rendered_mermaid = __commonJS({
         "g.node,g.edgePath,g.cluster,g.edgeLabel,g.messageText,g.actor,.node,.edgePath,.cluster,.edgeLabel"
       );
     }
-    async function rasterizeRenderedMermaidDiagrams(root, options = {}) {
+    function isMermaidCodeBlock(codeEl) {
+      var _a, _b;
+      if (!codeEl || ((_b = (_a = codeEl.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) !== "code")
+        return false;
+      const className = String(codeEl.getAttribute("class") || "").toLowerCase();
+      if (className.split(/\s+/).includes("language-mermaid"))
+        return true;
+      if (className.includes("language-mermaid"))
+        return true;
+      return !!codeEl.closest(".block-language-mermaid");
+    }
+    function resolveMermaidApi(options = {}) {
+      if (options.mermaidApi && typeof options.mermaidApi.render === "function") {
+        return options.mermaidApi;
+      }
+      const globalApi = (globalThis == null ? void 0 : globalThis.mermaid) || (typeof window !== "undefined" ? window.mermaid : null);
+      if (globalApi && typeof globalApi.render === "function") {
+        return globalApi;
+      }
+      return null;
+    }
+    var mermaidRenderNonce = 0;
+    async function renderMermaidCodeBlocks(root, options = {}) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      const mermaidApi = resolveMermaidApi(options);
+      if (!mermaidApi)
+        return 0;
+      const codeBlocks = Array.from(root.querySelectorAll("pre > code")).filter(isMermaidCodeBlock);
+      let renderedCount = 0;
+      for (const codeEl of codeBlocks) {
+        const source = String(codeEl.textContent || "").trim();
+        if (!source)
+          continue;
+        try {
+          mermaidRenderNonce += 1;
+          const renderSource = buildMermaidCompatSource(source);
+          const renderResult = await mermaidApi.render(`obsidian-wechat-mermaid-${mermaidRenderNonce}`, renderSource);
+          const svg = typeof renderResult === "string" ? renderResult : (renderResult == null ? void 0 : renderResult.svg) || "";
+          if (!svg)
+            continue;
+          const host = document.createElement("div");
+          host.setAttribute("class", "mermaid");
+          host.setAttribute("data-obsidian-wechat-mermaid", "true");
+          host.innerHTML = svg;
+          normalizeRenderedMermaidDiagrams(host);
+          if (typeof (renderResult == null ? void 0 : renderResult.bindFunctions) === "function") {
+            renderResult.bindFunctions(host);
+          }
+          const pre = codeEl.closest("pre");
+          (pre || codeEl).replaceWith(host);
+          renderedCount += 1;
+        } catch (error) {
+          console.error("Mermaid \u4EE3\u7801\u5757\u6E32\u67D3\u5931\u8D25\uFF0C\u4FDD\u7559\u539F\u59CB\u4EE3\u7801\u5757:", error);
+        }
+      }
+      return renderedCount;
+    }
+    async function rasterizeRenderedMermaidDiagrams2(root, options = {}) {
+      var _a;
       if (!root || typeof root.querySelectorAll !== "function")
         return;
       const {
@@ -3022,8 +3425,18 @@ var require_rendered_mermaid = __commonJS({
             img.setAttribute("width", String(Math.round(result.width)));
           if (result.height)
             img.setAttribute("height", String(Math.round(result.height)));
-          img.setAttribute("style", "display:block;max-width:100%;height:auto;margin:16px auto;");
-          svg.replaceWith(img);
+          const maxWidthStyle = result.width ? `${Math.round(result.width)}px` : "100%";
+          img.setAttribute(
+            "style",
+            `display:block;width:100%;max-width:${maxWidthStyle};height:auto;margin:0 auto;`
+          );
+          const host = (_a = svg.closest) == null ? void 0 : _a.call(svg, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+          if (host && host !== root) {
+            normalizeMermaidPreviewHost(host);
+            host.replaceChildren(img);
+          } else {
+            svg.replaceWith(img);
+          }
         } catch (error) {
           console.error("Mermaid \u56FE\u8868\u6805\u683C\u5316\u5931\u8D25\uFF0C\u4FDD\u7559\u539F\u59CB SVG:", error);
         }
@@ -3032,7 +3445,11 @@ var require_rendered_mermaid = __commonJS({
     module2.exports = {
       hasMermaidMarker,
       looksLikeMermaidSvg,
-      rasterizeRenderedMermaidDiagrams
+      isMermaidCodeBlock,
+      buildMermaidCompatSource,
+      normalizeRenderedMermaidDiagrams,
+      renderMermaidCodeBlocks,
+      rasterizeRenderedMermaidDiagrams: rasterizeRenderedMermaidDiagrams2
     };
   }
 });
@@ -3045,8 +3462,10 @@ var require_obsidian_triplet_renderer = __commonJS({
     var { normalizeRenderedDomPunctuation } = require_chinese_punctuation();
     var {
       hasMermaidMarker,
+      renderMermaidCodeBlocks,
       looksLikeMermaidSvg,
-      rasterizeRenderedMermaidDiagrams
+      normalizeRenderedMermaidDiagrams,
+      rasterizeRenderedMermaidDiagrams: rasterizeRenderedMermaidDiagrams2
     } = require_rendered_mermaid();
     function isFencedBlockDelimiter(line) {
       return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ""));
@@ -3529,7 +3948,15 @@ var require_obsidian_triplet_renderer = __commonJS({
       if (!root || typeof root.querySelectorAll !== "function")
         return [];
       const elements = Array.from(root.querySelectorAll("*")).filter((el) => hasMermaidMarker(el));
-      return elements.filter((el) => !el.closest("mjx-container"));
+      return elements.filter((el) => {
+        var _a, _b;
+        if (el.closest("mjx-container"))
+          return false;
+        const tagName = (_b = (_a = el.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a);
+        if (tagName === "pre" || tagName === "code")
+          return false;
+        return true;
+      });
     }
     function countRenderedMermaidDiagrams(root) {
       if (!root || typeof root.querySelectorAll !== "function")
@@ -3704,7 +4131,11 @@ var require_obsidian_triplet_renderer = __commonJS({
       settings = {},
       markdownRenderer = MarkdownRenderer,
       serializer = serializeObsidianRenderedHtml,
-      mermaidRasterizer = rasterizeRenderedMermaidDiagrams
+      mermaidCodeRenderer = renderMermaidCodeBlocks,
+      mermaidRasterizer = rasterizeRenderedMermaidDiagrams2,
+      mermaidApi = null,
+      rasterizeMermaid = true,
+      preserveSvgStyleTags = false
     }) {
       if (typeof document === "undefined") {
         throw new Error("Triplet renderer requires DOM environment");
@@ -3728,7 +4159,11 @@ var require_obsidian_triplet_renderer = __commonJS({
         minObserveMs: shouldObserveWindow ? void 0 : 0,
         observeMermaid: shouldObserveMermaid
       });
-      await mermaidRasterizer(container);
+      await mermaidCodeRenderer(container, { mermaidApi });
+      normalizeRenderedMermaidDiagrams(container);
+      if (rasterizeMermaid !== false) {
+        await mermaidRasterizer(container);
+      }
       normalizeRenderedDomPunctuation(container, {
         enabled: settings.normalizeChinesePunctuation === true
       });
@@ -3737,7 +4172,8 @@ var require_obsidian_triplet_renderer = __commonJS({
         converter,
         sourcePath,
         app,
-        preRenderedMath: mathFormulas
+        preRenderedMath: mathFormulas,
+        preserveSvgStyleTags
       });
       return serializedHtml;
     }
@@ -8173,6 +8609,7 @@ var require_wechat_sync = __commonJS({
         srcToBlob,
         processAllImages,
         processMathFormulas,
+        prepareHtmlForDraft = async (html) => html,
         cleanHtmlForDraft,
         cleanupConfiguredDirectory,
         getFirstImageFromArticle
@@ -8200,9 +8637,10 @@ var require_wechat_sync = __commonJS({
           const coverBlob = await srcToBlob(coverSrc);
           const coverRes = await api.uploadCover(coverBlob);
           const thumbMediaId = coverRes.media_id;
+          let draftHtml = await prepareHtmlForDraft(currentHtml);
           if (onStatus)
             onStatus("images");
-          let processedHtml = await processAllImages(currentHtml, api, (current, total) => {
+          let processedHtml = await processAllImages(draftHtml, api, (current, total) => {
             if (onImageProgress)
               onImageProgress(current, total);
           }, {
@@ -9056,6 +9494,7 @@ var { buildRenderRuntime } = require_dependency_loader();
 var { resolveMarkdownSource } = require_markdown_source();
 var { normalizeVaultPath, isAbsolutePathLike } = require_path_utils();
 var { renderObsidianTripletMarkdown } = require_obsidian_triplet_renderer();
+var { rasterizeRenderedMermaidDiagrams } = require_rendered_mermaid();
 var {
   AI_LAYOUT_SCHEMA_VERSION,
   AI_LAYOUT_SELECTION_AUTO,
@@ -9678,7 +10117,9 @@ var AppleStyleView = class extends ItemView {
             markdown,
             sourcePath: context.sourcePath || "",
             settings: context.settings || this.plugin.settings,
-            component: this
+            component: this,
+            rasterizeMermaid: false,
+            preserveSvgStyleTags: true
           });
         }
       });
@@ -11963,6 +12404,7 @@ var AppleStyleView = class extends ItemView {
         srcToBlob: this.srcToBlob.bind(this),
         processAllImages: this.processAllImages.bind(this),
         processMathFormulas: this.processMathFormulas.bind(this),
+        prepareHtmlForDraft: this.prepareHtmlForWechatDraft.bind(this),
         cleanHtmlForDraft: this.cleanHtmlForDraft.bind(this),
         cleanupConfiguredDirectory: this.cleanupConfiguredDirectory.bind(this),
         getFirstImageFromArticle: this.getFirstImageFromArticle.bind(this)
@@ -12429,6 +12871,18 @@ var AppleStyleView = class extends ItemView {
   normalizeClipboardText(text) {
     return (text || "").replace(/\s+/g, " ").trim();
   }
+  async enhanceHtmlForWechatPublishing(root) {
+    if (!root)
+      return;
+    await rasterizeRenderedMermaidDiagrams(root);
+    this.transformCodeBlocksForClipboard(root);
+  }
+  async prepareHtmlForWechatDraft(html) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html || "";
+    await this.enhanceHtmlForWechatPublishing(tempDiv);
+    return tempDiv.innerHTML;
+  }
   transformCodeBlocksForClipboard(root) {
     if (!root)
       return;
@@ -12504,7 +12958,7 @@ var AppleStyleView = class extends ItemView {
         new Notice("\u23F3 \u6B63\u5728\u5904\u7406\u56FE\u7247...");
       }
       const processed = await this.processImagesToDataURL(tempDiv);
-      this.transformCodeBlocksForClipboard(tempDiv);
+      await this.enhanceHtmlForWechatPublishing(tempDiv);
       const cleanedHtml = this.cleanHtmlForDraft(tempDiv.innerHTML);
       const htmlContent = cleanedHtml;
       window.__OWC_LAST_CLIPBOARD_HTML = htmlContent;

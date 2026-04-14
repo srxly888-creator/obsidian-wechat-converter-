@@ -461,6 +461,72 @@ describe('Obsidian Triplet Renderer', () => {
     expect(html).not.toContain('<svg');
   });
 
+  it('should render Mermaid code fences before rasterization when MarkdownRenderer leaves them as code blocks', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<pre><code class="language-mermaid">graph TD\\nA-->B</code></pre>';
+    });
+    const mermaidApi = {
+      render: vi.fn(async () => ({
+        svg: '<svg id="rendered-from-code"></svg>',
+      })),
+    };
+    const mermaidRasterizer = vi.fn(async (root) => {
+      const svg = root.querySelector('svg#rendered-from-code');
+      if (!svg) return;
+      const img = document.createElement('img');
+      img.setAttribute('src', 'data:image/png;base64,rendered-from-code');
+      img.setAttribute('class', 'mermaid-diagram-image');
+      svg.replaceWith(img);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidApi,
+      mermaidRasterizer,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidApi.render).toHaveBeenCalledTimes(1);
+    expect(mermaidRasterizer).toHaveBeenCalledTimes(1);
+    expect(html).toContain('mermaid-diagram-image');
+    expect(html).not.toContain('language-mermaid');
+  });
+
+  it('should keep raw Mermaid svg when preview path disables rasterization', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<pre><code class="language-mermaid">graph TD\\nA-->B</code></pre>';
+    });
+    const mermaidApi = {
+      render: vi.fn(async () => ({
+        svg: '<svg id="preview-mermaid" viewBox="0 0 100 60"><rect width="100" height="60"></rect></svg>',
+      })),
+    };
+    const mermaidRasterizer = vi.fn(async () => {});
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidApi,
+      mermaidRasterizer,
+      rasterizeMermaid: false,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidApi.render).toHaveBeenCalledTimes(1);
+    expect(mermaidRasterizer).not.toHaveBeenCalled();
+    expect(html).toContain('preview-mermaid');
+    expect(html).toContain('<svg');
+    expect(html).toContain('max-width: 100%');
+    expect(html).toContain('width: 100%');
+  });
+
   it('should wait for delayed Mermaid svg injection before rasterization and serialization', async () => {
     const renderMarkdown = vi.fn(async (_markdown, el) => {
       el.innerHTML = '<p>placeholder</p>';

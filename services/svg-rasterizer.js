@@ -6,6 +6,84 @@ function isMathJaxSvg(svgElement) {
   return !!svgElement.closest?.('mjx-container,mjx-math,.MathJax');
 }
 
+const SVG_INLINE_STYLE_PROPS = [
+  'color',
+  'fill',
+  'fill-opacity',
+  'stroke',
+  'stroke-opacity',
+  'stroke-width',
+  'stroke-dasharray',
+  'stroke-dashoffset',
+  'stroke-linecap',
+  'stroke-linejoin',
+  'opacity',
+  'background',
+  'background-color',
+  'font',
+  'font-size',
+  'font-family',
+  'font-weight',
+  'line-height',
+  'text-anchor',
+  'dominant-baseline',
+  'letter-spacing',
+  'word-spacing',
+  'white-space',
+];
+
+function appendInlineStyle(el, declarations = {}) {
+  if (!el || typeof el.setAttribute !== 'function') return;
+  const current = String(el.getAttribute('style') || '').trim();
+  const nextParts = [];
+  Object.entries(declarations).forEach(([key, value]) => {
+    const normalized = String(value || '').trim();
+    if (!normalized) return;
+    nextParts.push(`${key}:${normalized}`);
+  });
+  if (!nextParts.length) return;
+  const joined = current ? `${current}${current.endsWith(';') ? '' : ';'}${nextParts.join(';')};` : `${nextParts.join(';')};`;
+  el.setAttribute('style', joined);
+}
+
+function inlineSvgComputedStyles(sourceSvg, clonedSvg) {
+  if (
+    !sourceSvg
+    || !clonedSvg
+    || typeof window === 'undefined'
+    || typeof window.getComputedStyle !== 'function'
+  ) {
+    return;
+  }
+
+  const sourceElements = [sourceSvg, ...Array.from(sourceSvg.querySelectorAll('*'))];
+  const clonedElements = [clonedSvg, ...Array.from(clonedSvg.querySelectorAll('*'))];
+  const pairCount = Math.min(sourceElements.length, clonedElements.length);
+
+  for (let index = 0; index < pairCount; index += 1) {
+    const sourceEl = sourceElements[index];
+    const clonedEl = clonedElements[index];
+    if (!sourceEl || !clonedEl) continue;
+
+    const computed = window.getComputedStyle(sourceEl);
+    const styleMap = {};
+    SVG_INLINE_STYLE_PROPS.forEach((prop) => {
+      const value = computed.getPropertyValue(prop);
+      if (!value) return;
+      const trimmed = String(value).trim();
+      if (!trimmed || trimmed === 'none' || trimmed === 'normal') return;
+      styleMap[prop] = trimmed;
+    });
+
+    // Many Mermaid nodes rely on computed presentation attributes that would be
+    // lost once the SVG is drawn from a detached blob URL.
+    if (styleMap.fill && !clonedEl.getAttribute('fill')) clonedEl.setAttribute('fill', styleMap.fill);
+    if (styleMap.stroke && !clonedEl.getAttribute('stroke')) clonedEl.setAttribute('stroke', styleMap.stroke);
+    if (styleMap['stroke-width'] && !clonedEl.getAttribute('stroke-width')) clonedEl.setAttribute('stroke-width', styleMap['stroke-width']);
+    appendInlineStyle(clonedEl, styleMap);
+  }
+}
+
 function getSvgLogicalSize(svgElement) {
   const rect = typeof svgElement?.getBoundingClientRect === 'function'
     ? svgElement.getBoundingClientRect()
@@ -49,6 +127,8 @@ function getSvgLogicalSize(svgElement) {
 function prepareSvgClone(svgElement) {
   const clonedSvg = svgElement.cloneNode(true);
   const { logicalWidth, logicalHeight, rawStyle } = getSvgLogicalSize(svgElement);
+
+  inlineSvgComputedStyles(svgElement, clonedSvg);
 
   if (isMathJaxSvg(svgElement)) {
     clonedSvg.setAttribute('fill', '#333333');

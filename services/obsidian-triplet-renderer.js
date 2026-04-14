@@ -3,7 +3,9 @@ const { serializeObsidianRenderedHtml } = require('./obsidian-triplet-serializer
 const { normalizeRenderedDomPunctuation } = require('./chinese-punctuation');
 const {
   hasMermaidMarker,
+  renderMermaidCodeBlocks,
   looksLikeMermaidSvg,
+  normalizeRenderedMermaidDiagrams,
   rasterizeRenderedMermaidDiagrams,
 } = require('./rendered-mermaid');
 
@@ -518,7 +520,12 @@ function shouldObserveMermaidRenderWindow(markdown) {
 function collectMermaidHostElements(root) {
   if (!root || typeof root.querySelectorAll !== 'function') return [];
   const elements = Array.from(root.querySelectorAll('*')).filter((el) => hasMermaidMarker(el));
-  return elements.filter((el) => !el.closest('mjx-container'));
+  return elements.filter((el) => {
+    if (el.closest('mjx-container')) return false;
+    const tagName = el.tagName?.toLowerCase?.();
+    if (tagName === 'pre' || tagName === 'code') return false;
+    return true;
+  });
 }
 
 function countRenderedMermaidDiagrams(root) {
@@ -729,7 +736,11 @@ async function renderObsidianTripletMarkdown({
   settings = {},
   markdownRenderer = MarkdownRenderer,
   serializer = serializeObsidianRenderedHtml,
+  mermaidCodeRenderer = renderMermaidCodeBlocks,
   mermaidRasterizer = rasterizeRenderedMermaidDiagrams,
+  mermaidApi = null,
+  rasterizeMermaid = true,
+  preserveSvgStyleTags = false,
 }) {
   if (typeof document === 'undefined') {
     throw new Error('Triplet renderer requires DOM environment');
@@ -757,7 +768,11 @@ async function renderObsidianTripletMarkdown({
     minObserveMs: shouldObserveWindow ? void 0 : 0,
     observeMermaid: shouldObserveMermaid,
   });
-  await mermaidRasterizer(container);
+  await mermaidCodeRenderer(container, { mermaidApi });
+  normalizeRenderedMermaidDiagrams(container);
+  if (rasterizeMermaid !== false) {
+    await mermaidRasterizer(container);
+  }
 
   normalizeRenderedDomPunctuation(container, {
     enabled: settings.normalizeChinesePunctuation === true,
@@ -769,6 +784,7 @@ async function renderObsidianTripletMarkdown({
     sourcePath,
     app,
     preRenderedMath: mathFormulas,
+    preserveSvgStyleTags,
   });
 
   return serializedHtml;
