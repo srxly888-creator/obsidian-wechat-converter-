@@ -3543,7 +3543,7 @@ ${normalized}`;
       });
       return count;
     }
-    function prepareRenderedMermaidDiagramsForWechat2(root) {
+    function prepareRenderedMermaidDiagramsForWechat(root) {
       if (!root || typeof root.querySelectorAll !== "function")
         return 0;
       normalizeRenderedMermaidDiagrams(root);
@@ -3558,6 +3558,76 @@ ${normalized}`;
         processed += 1;
       }
       return processed;
+    }
+    function buildMermaidImageStyle(width, height) {
+      const numericWidth = Number(width) || 0;
+      const numericHeight = Number(height) || 0;
+      const isPortrait = numericWidth > 0 && numericHeight > numericWidth * 1.08;
+      const widthPercent = isPortrait ? "78%" : "100%";
+      const maxWidthStyle = numericWidth > 0 ? `${Math.round(numericWidth)}px` : "100%";
+      return `display:block;width:${widthPercent};max-width:${maxWidthStyle};height:auto;margin:0 auto;`;
+    }
+    function getSerializedMermaidCacheKey(svg, scale, simpleHash) {
+      const serializer = typeof XMLSerializer !== "undefined" ? new XMLSerializer() : null;
+      const svgMarkup = serializer ? serializer.serializeToString(svg) : (svg == null ? void 0 : svg.outerHTML) || "";
+      const payload = `${svgMarkup}::scale:${scale}`;
+      return typeof simpleHash === "function" ? simpleHash(payload) : payload;
+    }
+    async function convertRenderedMermaidDiagramsToImages2(root, options = {}) {
+      var _a;
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      const {
+        rasterizeSvg = rasterizeSvgToPngDataUrl,
+        scale = 3,
+        simpleHash = null,
+        mermaidImageCache = null
+      } = options;
+      normalizeRenderedMermaidDiagrams(root);
+      const svgs = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg);
+      let convertedCount = 0;
+      for (const svg of svgs) {
+        try {
+          const cacheKey = getSerializedMermaidCacheKey(svg, scale, simpleHash);
+          let result = (mermaidImageCache == null ? void 0 : mermaidImageCache.get(cacheKey)) || null;
+          if (!result) {
+            try {
+              result = await rasterizeSvg(svg, { scale });
+            } catch (firstError) {
+              if (!svg.querySelector("foreignObject")) {
+                throw firstError;
+              }
+              flattenMermaidForeignObjectLabels(svg);
+              result = await rasterizeSvg(svg, { scale });
+            }
+            if (mermaidImageCache && (result == null ? void 0 : result.dataUrl)) {
+              mermaidImageCache.set(cacheKey, result);
+            }
+          }
+          if (!(result == null ? void 0 : result.dataUrl))
+            continue;
+          const img = document.createElement("img");
+          img.setAttribute("src", result.dataUrl);
+          img.setAttribute("alt", "Mermaid diagram");
+          img.setAttribute("class", "mermaid-diagram-image");
+          if (result.width)
+            img.setAttribute("width", String(Math.round(result.width)));
+          if (result.height)
+            img.setAttribute("height", String(Math.round(result.height)));
+          img.setAttribute("style", buildMermaidImageStyle(result.width, result.height));
+          const host = (_a = svg.closest) == null ? void 0 : _a.call(svg, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+          if (host && host !== root) {
+            normalizeMermaidPreviewHost(host);
+            host.replaceChildren(img);
+          } else {
+            svg.replaceWith(img);
+          }
+          convertedCount += 1;
+        } catch (error) {
+          console.error("Mermaid \u56FE\u8868\u5BFC\u51FA\u4E3A\u56FE\u7247\u5931\u8D25\uFF0C\u4FDD\u7559\u539F\u59CB SVG:", error);
+        }
+      }
+      return convertedCount;
     }
     function hasMermaidMarker(el) {
       if (!el || el.nodeType !== Node.ELEMENT_NODE)
@@ -3704,7 +3774,8 @@ ${normalized}`;
       isMermaidCodeBlock,
       buildMermaidCompatSource,
       normalizeRenderedMermaidDiagrams,
-      prepareRenderedMermaidDiagramsForWechat: prepareRenderedMermaidDiagramsForWechat2,
+      prepareRenderedMermaidDiagramsForWechat,
+      convertRenderedMermaidDiagramsToImages: convertRenderedMermaidDiagramsToImages2,
       renderMermaidCodeBlocks,
       rasterizeRenderedMermaidDiagrams
     };
@@ -9806,7 +9877,7 @@ var { buildRenderRuntime } = require_dependency_loader();
 var { resolveMarkdownSource } = require_markdown_source();
 var { normalizeVaultPath, isAbsolutePathLike } = require_path_utils();
 var { renderObsidianTripletMarkdown } = require_obsidian_triplet_renderer();
-var { prepareRenderedMermaidDiagramsForWechat } = require_rendered_mermaid();
+var { convertRenderedMermaidDiagramsToImages } = require_rendered_mermaid();
 var {
   AI_LAYOUT_SCHEMA_VERSION,
   AI_LAYOUT_SELECTION_AUTO,
@@ -10176,6 +10247,7 @@ var AppleStyleView = class extends ItemView {
     this.articleStates = /* @__PURE__ */ new Map();
     this.svgUploadCache = /* @__PURE__ */ new Map();
     this.imageUploadCache = /* @__PURE__ */ new Map();
+    this.mermaidImageCache = /* @__PURE__ */ new Map();
     this.renderGeneration = 0;
     this.lastRenderError = "";
     this.lastRenderFailureNoticeKey = "";
@@ -13194,7 +13266,10 @@ var AppleStyleView = class extends ItemView {
         document.body.appendChild(mount);
         mount.appendChild(root);
       }
-      prepareRenderedMermaidDiagramsForWechat(root);
+      await convertRenderedMermaidDiagramsToImages(root, {
+        simpleHash: this.simpleHash.bind(this),
+        mermaidImageCache: this.mermaidImageCache
+      });
       this.transformCodeBlocksForClipboard(root);
     } finally {
       if (mount) {
@@ -13436,6 +13511,9 @@ var AppleStyleView = class extends ItemView {
     }
     if (this.imageUploadCache) {
       this.imageUploadCache.clear();
+    }
+    if (this.mermaidImageCache) {
+      this.mermaidImageCache.clear();
     }
     console.log("\u{1F34E} \u8F6C\u6362\u5668\u9762\u677F\u5DF2\u5173\u95ED");
   }

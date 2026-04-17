@@ -5,7 +5,7 @@ const { buildRenderRuntime } = require('./services/dependency-loader');
 const { resolveMarkdownSource } = require('./services/markdown-source');
 const { normalizeVaultPath, isAbsolutePathLike } = require('./services/path-utils');
 const { renderObsidianTripletMarkdown } = require('./services/obsidian-triplet-renderer');
-const { prepareRenderedMermaidDiagramsForWechat } = require('./services/rendered-mermaid');
+const { convertRenderedMermaidDiagramsToImages } = require('./services/rendered-mermaid');
 const {
   AI_LAYOUT_SCHEMA_VERSION,
   AI_LAYOUT_SELECTION_AUTO,
@@ -466,6 +466,9 @@ class AppleStyleView extends ItemView {
     // 普通图片上传缓存：Map<accountId::src, wechatUrl>
     // 用于同一视图生命周期内跨次同步复用，避免重复上传相同图片
     this.imageUploadCache = new Map();
+    // Mermaid 导出缓存：Map<Hash, { dataUrl, width, height, style }>
+    // 复制与同步复用同一份本地导出结果，避免重复栅格化
+    this.mermaidImageCache = new Map();
 
     this.renderGeneration = 0;
     this.lastRenderError = '';
@@ -3889,7 +3892,10 @@ class AppleStyleView extends ItemView {
         document.body.appendChild(mount);
         mount.appendChild(root);
       }
-      prepareRenderedMermaidDiagramsForWechat(root);
+      await convertRenderedMermaidDiagramsToImages(root, {
+        simpleHash: this.simpleHash.bind(this),
+        mermaidImageCache: this.mermaidImageCache,
+      });
       this.transformCodeBlocksForClipboard(root);
     } finally {
       if (mount) {
@@ -4191,6 +4197,9 @@ class AppleStyleView extends ItemView {
     }
     if (this.imageUploadCache) {
       this.imageUploadCache.clear();
+    }
+    if (this.mermaidImageCache) {
+      this.mermaidImageCache.clear();
     }
 
     console.log('🍎 转换器面板已关闭');

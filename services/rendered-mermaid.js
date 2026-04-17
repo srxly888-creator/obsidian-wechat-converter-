@@ -358,6 +358,83 @@ function prepareRenderedMermaidDiagramsForWechat(root) {
   return processed;
 }
 
+function buildMermaidImageStyle(width, height) {
+  const numericWidth = Number(width) || 0;
+  const numericHeight = Number(height) || 0;
+  const isPortrait = numericWidth > 0 && numericHeight > (numericWidth * 1.08);
+  const widthPercent = isPortrait ? '78%' : '100%';
+  const maxWidthStyle = numericWidth > 0 ? `${Math.round(numericWidth)}px` : '100%';
+  return `display:block;width:${widthPercent};max-width:${maxWidthStyle};height:auto;margin:0 auto;`;
+}
+
+function getSerializedMermaidCacheKey(svg, scale, simpleHash) {
+  const serializer = typeof XMLSerializer !== 'undefined' ? new XMLSerializer() : null;
+  const svgMarkup = serializer ? serializer.serializeToString(svg) : (svg?.outerHTML || '');
+  const payload = `${svgMarkup}::scale:${scale}`;
+  return typeof simpleHash === 'function' ? simpleHash(payload) : payload;
+}
+
+async function convertRenderedMermaidDiagramsToImages(root, options = {}) {
+  if (!root || typeof root.querySelectorAll !== 'function') return 0;
+
+  const {
+    rasterizeSvg = rasterizeSvgToPngDataUrl,
+    scale = 3,
+    simpleHash = null,
+    mermaidImageCache = null,
+  } = options;
+
+  normalizeRenderedMermaidDiagrams(root);
+
+  const svgs = Array.from(root.querySelectorAll('svg')).filter(looksLikeMermaidSvg);
+  let convertedCount = 0;
+
+  for (const svg of svgs) {
+    try {
+      const cacheKey = getSerializedMermaidCacheKey(svg, scale, simpleHash);
+      let result = mermaidImageCache?.get(cacheKey) || null;
+
+      if (!result) {
+        try {
+          result = await rasterizeSvg(svg, { scale });
+        } catch (firstError) {
+          if (!svg.querySelector('foreignObject')) {
+            throw firstError;
+          }
+          flattenMermaidForeignObjectLabels(svg);
+          result = await rasterizeSvg(svg, { scale });
+        }
+        if (mermaidImageCache && result?.dataUrl) {
+          mermaidImageCache.set(cacheKey, result);
+        }
+      }
+
+      if (!result?.dataUrl) continue;
+
+      const img = document.createElement('img');
+      img.setAttribute('src', result.dataUrl);
+      img.setAttribute('alt', 'Mermaid diagram');
+      img.setAttribute('class', 'mermaid-diagram-image');
+      if (result.width) img.setAttribute('width', String(Math.round(result.width)));
+      if (result.height) img.setAttribute('height', String(Math.round(result.height)));
+      img.setAttribute('style', buildMermaidImageStyle(result.width, result.height));
+
+      const host = svg.closest?.('.mermaid,[data-obsidian-wechat-mermaid="true"]');
+      if (host && host !== root) {
+        normalizeMermaidPreviewHost(host);
+        host.replaceChildren(img);
+      } else {
+        svg.replaceWith(img);
+      }
+      convertedCount += 1;
+    } catch (error) {
+      console.error('Mermaid 图表导出为图片失败，保留原始 SVG:', error);
+    }
+  }
+
+  return convertedCount;
+}
+
 function hasMermaidMarker(el) {
   if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
   const values = [
@@ -512,6 +589,7 @@ module.exports = {
   buildMermaidCompatSource,
   normalizeRenderedMermaidDiagrams,
   prepareRenderedMermaidDiagramsForWechat,
+  convertRenderedMermaidDiagramsToImages,
   renderMermaidCodeBlocks,
   rasterizeRenderedMermaidDiagrams,
 };

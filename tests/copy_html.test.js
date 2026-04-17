@@ -90,6 +90,23 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     expect(html).not.toContain('<svg');
   });
 
+  it('should convert Mermaid diagrams to images before writing clipboard html', async () => {
+    view.currentHtml = '<div class="mermaid"><svg viewBox="0 0 120 80"><rect width="120" height="80"></rect></svg></div>';
+    view.cleanHtmlForDraft = vi.fn((html) => html);
+    view.enhanceHtmlForWechatPublishing = vi.fn(async (root) => {
+      root.innerHTML = '<img class="mermaid-diagram-image" src="data:image/png;base64,portrait" style="display:block;width:78%;max-width:120px;height:auto;margin:0 auto;">';
+    });
+
+    await view.copyHTML();
+
+    const item = writeMock.mock.calls[0][0][0];
+    const html = await blobToText(item.items['text/html']);
+    expect(html).toContain('mermaid-diagram-image');
+    expect(html).toContain('data:image/png;base64');
+    expect(html).not.toContain('<svg');
+    expect(view.enhanceHtmlForWechatPublishing).toHaveBeenCalled();
+  });
+
   it('should fail on desktop when clipboard html write is unavailable', async () => {
     Object.defineProperty(global.navigator, 'clipboard', {
       value: {},

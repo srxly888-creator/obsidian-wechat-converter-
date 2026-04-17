@@ -137,6 +137,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.articleStates = new Map([['note-a', { coverBase64: 'x', digest: 'd' }]]);
     view.svgUploadCache = new Map([['svg-hash', 'https://wx/svg.png']]);
     view.imageUploadCache = new Map([['acc-1::app://img', 'https://wx/img.png']]);
+    view.mermaidImageCache = new Map([['mermaid-hash', { dataUrl: 'data:image/png;base64,abc' }]]);
 
     await view.onClose();
 
@@ -146,6 +147,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(view.articleStates.size).toBe(0);
     expect(view.svgUploadCache.size).toBe(0);
     expect(view.imageUploadCache.size).toBe(0);
+    expect(view.mermaidImageCache.size).toBe(0);
   });
 
   it('scheduleActiveLeafRender should debounce and call convertCurrent with loading options', async () => {

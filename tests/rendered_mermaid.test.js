@@ -7,6 +7,7 @@ const {
   buildMermaidCompatSource,
   normalizeRenderedMermaidDiagrams,
   prepareRenderedMermaidDiagramsForWechat,
+  convertRenderedMermaidDiagramsToImages,
   renderMermaidCodeBlocks,
   rasterizeRenderedMermaidDiagrams,
 } = require('../services/rendered-mermaid');
@@ -211,5 +212,52 @@ describe('Rendered Mermaid Service', () => {
     expect(host.querySelector('text tspan')).not.toBeNull();
     expect(host.querySelector('tspan')?.getAttribute('style') || '').toContain('fill:#333333');
     expect(host.querySelector('svg#mermaid-wechat')?.getAttribute('preserveAspectRatio')).toBe('xMidYMid meet');
+  });
+
+  it('should convert Mermaid svg into cached export images', async () => {
+    const cache = new Map();
+    const createHost = () => {
+      const host = document.createElement('div');
+      host.innerHTML = '<div class="mermaid"><svg id="cached-mermaid" viewBox="0 0 120 80"><rect width="120" height="80"></rect></svg></div>';
+      return host;
+    };
+    const rasterizeSvg = vi.fn(async () => ({
+      dataUrl: 'data:image/png;base64,cached-mermaid',
+      width: 120,
+      height: 80,
+      style: '',
+    }));
+
+    await convertRenderedMermaidDiagramsToImages(createHost(), {
+      rasterizeSvg,
+      simpleHash: (value) => value,
+      mermaidImageCache: cache,
+    });
+    const secondHost = createHost();
+    await convertRenderedMermaidDiagramsToImages(secondHost, {
+      rasterizeSvg,
+      simpleHash: (value) => value,
+      mermaidImageCache: cache,
+    });
+
+    expect(rasterizeSvg).toHaveBeenCalledTimes(1);
+    expect(secondHost.querySelector('img.mermaid-diagram-image')?.getAttribute('src')).toBe('data:image/png;base64,cached-mermaid');
+  });
+
+  it('should shrink portrait Mermaid export images to preserve article width', async () => {
+    const host = document.createElement('div');
+    host.innerHTML = '<div class="mermaid"><svg id="portrait-mermaid" viewBox="0 0 100 220"><rect width="100" height="220"></rect></svg></div>';
+    const rasterizeSvg = vi.fn(async () => ({
+      dataUrl: 'data:image/png;base64,portrait',
+      width: 100,
+      height: 220,
+      style: '',
+    }));
+
+    await convertRenderedMermaidDiagramsToImages(host, { rasterizeSvg });
+
+    const img = host.querySelector('img.mermaid-diagram-image');
+    expect(img).not.toBeNull();
+    expect(img.getAttribute('style') || '').toContain('width:78%');
   });
 });
