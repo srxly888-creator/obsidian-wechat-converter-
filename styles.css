@@ -209,6 +209,33 @@
   color: white;
 }
 
+.apple-icon-btn.is-copying {
+  color: var(--apple-accent);
+  background: transparent;
+  cursor: progress;
+}
+
+.apple-icon-btn.is-copying:hover {
+  color: var(--apple-accent);
+  background: var(--apple-surface);
+}
+
+.apple-copy-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: apple-copy-spinner-rotate 0.7s linear infinite;
+}
+
+@keyframes apple-copy-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .apple-icon-btn.is-disabled {
   opacity: 0.45;
   cursor: not-allowed;

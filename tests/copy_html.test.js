@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Alias configured in vitest.config.mjs handles the mock
+const obsidian = require('obsidian');
 const { AppleStyleView } = require('../input.js');
 
 describe('AppleStyleView - copyHTML clipboard behavior', () => {
@@ -55,6 +56,7 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     delete global.ClipboardItem;
     global.Blob = realBlob;
     if (realExecCommand) {
@@ -74,6 +76,39 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     const html = await blobToText(item.items['text/html']);
     expect(html).toBe('<ol><li>清理时机： 正文</li></ol>');
     expect(window.__OWC_LAST_CLIPBOARD_TEXT).toBe('清理时机： 正文');
+  });
+
+  it('should show a CSS spinner before success feedback on the copy icon', async () => {
+    vi.useFakeTimers();
+    const copyBtn = document.createElement('div');
+    copyBtn.innerHTML = '<svg data-old-copy-stroke="true"><path d="M0 0H10"></path></svg>';
+    const setIconSpy = vi.spyOn(obsidian, 'setIcon');
+    view.copyBtn = copyBtn;
+    let resolveImages;
+    view.processImagesToDataURL = vi.fn(() => new Promise((resolve) => {
+      resolveImages = resolve;
+    }));
+
+    const copyPromise = view.copyHTML();
+    await Promise.resolve();
+
+    expect(copyBtn.classList.contains('is-copying')).toBe(true);
+    expect(copyBtn.classList.contains('active')).toBe(false);
+    expect(copyBtn.querySelector('[data-old-copy-stroke]')).toBeNull();
+    expect(copyBtn.querySelector('.apple-copy-spinner')).not.toBeNull();
+    expect(setIconSpy).not.toHaveBeenCalledWith(copyBtn, 'copy');
+    expect(setIconSpy).not.toHaveBeenCalledWith(copyBtn, 'refresh-cw');
+    expect(setIconSpy).not.toHaveBeenCalledWith(copyBtn, 'loader-circle');
+
+    resolveImages(false);
+    await copyPromise;
+
+    expect(copyBtn.classList.contains('is-copying')).toBe(false);
+    expect(setIconSpy).toHaveBeenCalledWith(copyBtn, 'check');
+
+    vi.advanceTimersByTime(2000);
+    expect(setIconSpy).toHaveBeenLastCalledWith(copyBtn, 'copy');
+    vi.useRealTimers();
   });
 
   it('should convert mac code blocks to table layout for clipboard compatibility', async () => {
@@ -107,7 +142,7 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     expect(view.enhanceHtmlForWechatPublishing).toHaveBeenCalled();
   });
 
-  it('should fail on desktop when clipboard html write is unavailable', async () => {
+  it('should fall back to rich selection copy on desktop when clipboard html write is unavailable', async () => {
     Object.defineProperty(global.navigator, 'clipboard', {
       value: {},
       configurable: true,
@@ -115,7 +150,7 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
 
     await view.copyHTML();
 
-    expect(document.execCommand).not.toHaveBeenCalled();
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
     expect(writeMock).not.toHaveBeenCalled();
   });
 

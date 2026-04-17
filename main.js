@@ -13255,6 +13255,22 @@ var AppleStyleView = class extends ItemView {
   normalizeClipboardText(text) {
     return (text || "").replace(/\s+/g, " ").trim();
   }
+  setCopyButtonIcon(icon) {
+    if (!this.copyBtn)
+      return;
+    const { setIcon } = require("obsidian");
+    this.copyBtn.replaceChildren();
+    setIcon(this.copyBtn, icon);
+  }
+  setCopyButtonSpinner() {
+    if (!this.copyBtn)
+      return;
+    this.copyBtn.replaceChildren();
+    const spinner = document.createElement("span");
+    spinner.className = "apple-copy-spinner";
+    spinner.setAttribute("aria-hidden", "true");
+    this.copyBtn.appendChild(spinner);
+  }
   async enhanceHtmlForWechatPublishing(root) {
     if (!root)
       return;
@@ -13346,17 +13362,13 @@ var AppleStyleView = class extends ItemView {
     }
     this.isCopying = true;
     if (this.copyBtn) {
-      this.copyBtn.classList.add("active");
+      this.copyBtn.classList.add("is-copying");
+      this.setCopyButtonSpinner();
     }
     try {
       const exportHtml = this.getCurrentExportHtml() || this.currentHtml;
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = exportHtml;
-      const images = Array.from(tempDiv.querySelectorAll("img"));
-      const localImages = images.filter((img) => img.src.startsWith("app://"));
-      if (localImages.length > 0) {
-        new Notice("\u23F3 \u6B63\u5728\u5904\u7406\u56FE\u7247...");
-      }
       const processed = await this.processImagesToDataURL(tempDiv);
       await this.enhanceHtmlForWechatPublishing(tempDiv);
       const cleanedHtml = this.cleanHtmlForDraft(tempDiv.innerHTML);
@@ -13375,19 +13387,25 @@ var AppleStyleView = class extends ItemView {
           copied = snapshot.supported && snapshot.text === expectedPlainText;
         }
       } else {
-        copied = await this.copyRichHTMLByClipboard(htmlContent);
+        try {
+          copied = await this.copyRichHTMLByClipboard(htmlContent);
+        } catch (error) {
+          copied = false;
+        }
+        if (!copied) {
+          copied = this.copyRichHTMLBySelection(htmlContent);
+        }
       }
       if (!copied) {
         throw new Error("rich copy unavailable");
       }
       new Notice("\u2705 \u5DF2\u590D\u5236\u516C\u4F17\u53F7\u683C\u5F0F\uFF0C\u8BF7\u76F4\u63A5\u7C98\u8D34\u5230\u516C\u4F17\u53F7\u7F16\u8F91\u5668");
       if (this.copyBtn) {
-        const { setIcon } = require("obsidian");
-        setIcon(this.copyBtn, "check");
+        this.copyBtn.classList.remove("is-copying");
+        this.setCopyButtonIcon("check");
         setTimeout(() => {
           if (this.copyBtn) {
-            setIcon(this.copyBtn, "copy");
-            this.copyBtn.classList.remove("active");
+            this.setCopyButtonIcon("copy");
           }
         }, 2e3);
       }
@@ -13396,7 +13414,8 @@ var AppleStyleView = class extends ItemView {
       console.error("\u590D\u5236\u5931\u8D25:", error);
       new Notice("\u274C \u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u4F7F\u7528\u300C\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1\u300D\u53D1\u9001\u6587\u7AE0");
       if (this.copyBtn) {
-        this.copyBtn.classList.remove("active");
+        this.copyBtn.classList.remove("is-copying");
+        this.setCopyButtonIcon("copy");
       }
     } finally {
       this.isCopying = false;

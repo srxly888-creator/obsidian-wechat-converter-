@@ -3882,6 +3882,22 @@ class AppleStyleView extends ItemView {
     return (text || '').replace(/\s+/g, ' ').trim();
   }
 
+  setCopyButtonIcon(icon) {
+    if (!this.copyBtn) return;
+    const { setIcon } = require('obsidian');
+    this.copyBtn.replaceChildren();
+    setIcon(this.copyBtn, icon);
+  }
+
+  setCopyButtonSpinner() {
+    if (!this.copyBtn) return;
+    this.copyBtn.replaceChildren();
+    const spinner = document.createElement('span');
+    spinner.className = 'apple-copy-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    this.copyBtn.appendChild(spinner);
+  }
+
   async enhanceHtmlForWechatPublishing(root) {
     if (!root) return;
     let mount = null;
@@ -3982,7 +3998,8 @@ class AppleStyleView extends ItemView {
 
     this.isCopying = true;
     if (this.copyBtn) {
-      this.copyBtn.classList.add('active'); // 可选：保持高亮状态
+      this.copyBtn.classList.add('is-copying');
+      this.setCopyButtonSpinner();
     }
 
     try {
@@ -3990,14 +4007,6 @@ class AppleStyleView extends ItemView {
       // 创建临时的 DOM 容器来解析和处理图片
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = exportHtml;
-
-      // 优化提示逻辑：只有确实需要处理图片时才显示 "正在处理..."
-      const images = Array.from(tempDiv.querySelectorAll('img'));
-      const localImages = images.filter(img => img.src.startsWith('app://'));
-
-      if (localImages.length > 0) {
-        new Notice('⏳ 正在处理图片...');
-      }
 
       // 处理本地图片：转换为 JPEG Base64
       // 返回 true 表示有图片被处理了
@@ -4024,7 +4033,14 @@ class AppleStyleView extends ItemView {
           copied = snapshot.supported && snapshot.text === expectedPlainText;
         }
       } else {
-        copied = await this.copyRichHTMLByClipboard(htmlContent);
+        try {
+          copied = await this.copyRichHTMLByClipboard(htmlContent);
+        } catch (error) {
+          copied = false;
+        }
+        if (!copied) {
+          copied = this.copyRichHTMLBySelection(htmlContent);
+        }
       }
 
       if (!copied) {
@@ -4034,12 +4050,11 @@ class AppleStyleView extends ItemView {
       // Success Feedback
       new Notice('✅ 已复制公众号格式，请直接粘贴到公众号编辑器');
       if (this.copyBtn) {
-         const { setIcon } = require('obsidian');
-         setIcon(this.copyBtn, 'check'); // 变成对勾图标
+         this.copyBtn.classList.remove('is-copying');
+         this.setCopyButtonIcon('check'); // 变成对勾图标
          setTimeout(() => {
            if (this.copyBtn) {
-             setIcon(this.copyBtn, 'copy'); // 恢复复制图标
-             this.copyBtn.classList.remove('active');
+             this.setCopyButtonIcon('copy'); // 恢复复制图标
            }
          }, 2000);
       }
@@ -4049,7 +4064,8 @@ class AppleStyleView extends ItemView {
       console.error('复制失败:', error);
       new Notice('❌ 复制失败，请使用「一键同步到草稿箱」发送文章');
       if (this.copyBtn) {
-        this.copyBtn.classList.remove('active');
+        this.copyBtn.classList.remove('is-copying');
+        this.setCopyButtonIcon('copy');
       }
     } finally {
       this.isCopying = false;
