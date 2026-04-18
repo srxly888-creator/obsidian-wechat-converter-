@@ -22,6 +22,7 @@ const {
   generateArticleLayout,
   AiLayoutSchemaError,
   renderArticleLayoutHtml,
+  resolveColorPaletteForRender,
   AiLayoutTimeoutError,
 } = require('../services/ai-layout');
 
@@ -195,6 +196,62 @@ title: 示例
     expect(html).toContain('一句重点摘要');
     expect(html).toContain('https://example.com/cover.png');
     expect(html).toContain('重点高亮');
+  });
+
+  it('should render custom ai colors from independent ai color settings', () => {
+    const palette = resolveColorPaletteForRender('custom', { customColor: '#ff3366' });
+    const html = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'source-first',
+        colorPalette: 'custom',
+      },
+      stylePack: 'custom',
+      title: '自定义颜色',
+      blocks: [
+        { type: 'hero', title: '自定义颜色标题', subtitle: '独立于普通预览主题色' },
+      ],
+    }, {
+      colorPaletteOverride: { customColor: '#ff3366' },
+    });
+
+    expect(palette.tokens.accent).toBe('#ff3366');
+    expect(html).toContain(palette.tokens.border);
+    expect(html).toContain('自定义颜色标题');
+  });
+
+  it('should keep custom out of automatic color recommendations while respecting explicit custom selection', () => {
+    const autoLayout = normalizeArticleLayout({
+      articleType: 'article',
+      title: '自动颜色',
+      selection: { layoutFamily: 'auto', colorPalette: 'auto' },
+      resolved: { layoutFamily: 'source-first', colorPalette: 'custom' },
+      recommendedColorPalette: 'custom',
+      stylePack: 'custom',
+      blocks: [{ type: 'hero', title: '自动颜色' }],
+    }, {
+      title: '自动颜色',
+      markdown: '## 小节\n正文',
+      selection: { layoutFamily: 'auto', colorPalette: 'auto' },
+    });
+
+    const customLayout = normalizeArticleLayout({
+      articleType: 'article',
+      title: '自定义颜色',
+      selection: { layoutFamily: 'auto', colorPalette: 'custom' },
+      resolved: { layoutFamily: 'source-first', colorPalette: 'custom' },
+      recommendedColorPalette: 'custom',
+      stylePack: 'custom',
+      blocks: [{ type: 'hero', title: '自定义颜色' }],
+    }, {
+      title: '自定义颜色',
+      markdown: '## 小节\n正文',
+      selection: { layoutFamily: 'auto', colorPalette: 'custom' },
+    });
+
+    expect(autoLayout.resolved.colorPalette).toBe('tech-green');
+    expect(autoLayout.recommendedColorPalette).toBe('tech-green');
+    expect(customLayout.resolved.colorPalette).toBe('custom');
+    expect(customLayout.recommendedColorPalette).toBe('tech-green');
   });
 
   it('should keep core ai layout structure after wechat draft cleaning', () => {

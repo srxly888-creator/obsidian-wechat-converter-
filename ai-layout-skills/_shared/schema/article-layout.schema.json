@@ -18,7 +18,7 @@
           "enum": ["auto", "source-first", "tutorial-cards", "editorial-lite"]
         },
         "colorPalette": {
-          "enum": ["auto", "tech-green", "ocean-blue", "sunset-amber", "graphite-rose"]
+          "enum": ["auto", "tech-green", "ocean-blue", "sunset-amber", "graphite-rose", "basic-blue", "basic-green", "basic-purple", "basic-orange", "basic-teal", "basic-rose", "basic-ruby", "basic-slate", "custom"]
         }
       }
     },
@@ -31,7 +31,7 @@
           "enum": ["source-first", "tutorial-cards", "editorial-lite"]
         },
         "colorPalette": {
-          "enum": ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose"]
+          "enum": ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose", "basic-blue", "basic-green", "basic-purple", "basic-orange", "basic-teal", "basic-rose", "basic-ruby", "basic-slate", "custom"]
         }
       }
     },
@@ -39,7 +39,7 @@
       "enum": ["source-first", "tutorial-cards", "editorial-lite"]
     },
     "recommendedColorPalette": {
-      "enum": ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose"]
+      "enum": ["tech-green", "ocean-blue", "sunset-amber", "graphite-rose", "basic-blue", "basic-green", "basic-purple", "basic-orange", "basic-teal", "basic-rose", "basic-ruby", "basic-slate", "custom"]
     },
     "stylePack": {
       "type": "string",

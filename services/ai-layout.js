@@ -86,6 +86,7 @@ function createDefaultAiSettings() {
     defaultProviderId: '',
     defaultLayoutFamily: AI_LAYOUT_SELECTION_AUTO,
     defaultColorPalette: AI_LAYOUT_SELECTION_AUTO,
+    customColor: '#7c3aed',
     includeImagesInLayout: true,
     requestTimeoutMs: 45000,
     providers: [],
@@ -97,6 +98,60 @@ function clampNumber(value, fallback, min, max) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
   return Math.min(max, Math.max(min, Math.round(parsed)));
+}
+
+function normalizeHexColor(value, fallback = '#7c3aed') {
+  const raw = String(value || '').trim();
+  if (/^#[0-9a-f]{6}$/i.test(raw)) return raw.toLowerCase();
+  if (/^[0-9a-f]{6}$/i.test(raw)) return `#${raw.toLowerCase()}`;
+  return fallback;
+}
+
+function hexToRgb(hex) {
+  const normalized = normalizeHexColor(hex).slice(1);
+  return {
+    r: parseInt(normalized.slice(0, 2), 16),
+    g: parseInt(normalized.slice(2, 4), 16),
+    b: parseInt(normalized.slice(4, 6), 16),
+  };
+}
+
+function rgbToHex({ r, g, b }) {
+  return `#${[r, g, b].map((channel) => {
+    const clamped = Math.max(0, Math.min(255, Math.round(channel)));
+    return clamped.toString(16).padStart(2, '0');
+  }).join('')}`;
+}
+
+function mixHexColor(color, target, amount) {
+  const sourceRgb = hexToRgb(color);
+  const targetRgb = hexToRgb(target);
+  return rgbToHex({
+    r: sourceRgb.r + (targetRgb.r - sourceRgb.r) * amount,
+    g: sourceRgb.g + (targetRgb.g - sourceRgb.g) * amount,
+    b: sourceRgb.b + (targetRgb.b - sourceRgb.b) * amount,
+  });
+}
+
+function createColorPaletteFromAccent(accentColor, { id = 'custom', label = '自定义' } = {}) {
+  const accent = normalizeHexColor(accentColor);
+  return {
+    id,
+    label,
+    description: 'AI 编排独立自定义色，会根据你选择的颜色自动派生深色、浅底和边框。',
+    recommendedFor: ['custom'],
+    tokens: {
+      accent,
+      accentDeep: mixHexColor(accent, '#000000', 0.28),
+      accentSoft: mixHexColor(accent, '#ffffff', 0.9),
+      text: mixHexColor(accent, '#1f2937', 0.78),
+      muted: mixHexColor(accent, '#6b7280', 0.72),
+      border: mixHexColor(accent, '#ffffff', 0.78),
+      surface: '#ffffff',
+      surfaceSoft: mixHexColor(accent, '#ffffff', 0.96),
+      quoteBg: mixHexColor(accent, '#ffffff', 0.93),
+    },
+  };
 }
 
 function normalizeLayoutFamily(value, fallback = AI_LAYOUT_SELECTION_AUTO) {
@@ -125,6 +180,15 @@ function normalizeResolvedColorPalette(value, fallback = AI_LAYOUT_DEFAULT_COLOR
   const normalized = coerceString(value);
   if (AI_COLOR_PALETTES[normalized]) return normalized;
   return AI_COLOR_PALETTES[fallback] ? fallback : AI_LAYOUT_DEFAULT_COLOR_PALETTE;
+}
+
+function normalizeAutoRecommendedColorPalette(value, fallback = AI_LAYOUT_DEFAULT_COLOR_PALETTE) {
+  const normalized = normalizeResolvedColorPalette(value, fallback);
+  if (normalized === 'custom') {
+    const fallbackPalette = normalizeResolvedColorPalette(fallback, AI_LAYOUT_DEFAULT_COLOR_PALETTE);
+    return fallbackPalette === 'custom' ? AI_LAYOUT_DEFAULT_COLOR_PALETTE : fallbackPalette;
+  }
+  return normalized;
 }
 
 function normalizeLayoutSelection(raw = {}, fallback = {}) {
@@ -228,6 +292,21 @@ function getColorPaletteById(id) {
   return AI_COLOR_PALETTES[normalizeResolvedColorPalette(id)] || AI_COLOR_PALETTES[AI_LAYOUT_DEFAULT_COLOR_PALETTE];
 }
 
+function resolveColorPaletteForRender(id, override = {}) {
+  const normalizedId = normalizeResolvedColorPalette(id);
+  const customColor = normalizeHexColor(
+    override?.customColor || override?.accentColor || override?.accent || '',
+    ''
+  );
+  if (normalizedId === 'custom' && customColor) {
+    return createColorPaletteFromAccent(customColor, {
+      id: 'custom',
+      label: getColorPaletteById('custom')?.label || '自定义',
+    });
+  }
+  return getColorPaletteById(normalizedId);
+}
+
 function resolveLayoutSelection({
   requestedSelection = {},
   rawLayout = {},
@@ -241,7 +320,7 @@ function resolveLayoutSelection({
     rawLayout?.recommendedLayoutFamily || rawLayout?.resolved?.layoutFamily || rawLayout?.layoutFamily,
     inferredLayoutFamily
   );
-  const recommendedColorPalette = normalizeResolvedColorPalette(
+  const recommendedColorPalette = normalizeAutoRecommendedColorPalette(
     rawLayout?.recommendedColorPalette || rawLayout?.resolved?.colorPalette || rawLayout?.stylePack,
     inferredColorPalette
   );
@@ -627,6 +706,7 @@ function normalizeAiSettings(raw = {}) {
       AI_LAYOUT_SELECTION_AUTO
     ),
     defaultStylePack: normalizeResolvedColorPalette(raw.defaultStylePack, AI_LAYOUT_DEFAULT_COLOR_PALETTE),
+    customColor: normalizeHexColor(raw.customColor, defaults.customColor),
     includeImagesInLayout: raw.includeImagesInLayout !== false,
     requestTimeoutMs: clampNumber(raw.requestTimeoutMs, defaults.requestTimeoutMs, 5000, 180000),
     providers,
@@ -1689,7 +1769,9 @@ function recommendColorPalette({ rawLayout = {}, signals = null } = {}) {
   const rawRecommended = coerceString(
     rawLayout?.recommendedColorPalette || rawLayout?.resolved?.colorPalette || rawLayout?.stylePack
   );
-  if (rawRecommended && AI_COLOR_PALETTES[rawRecommended]) return normalizeResolvedColorPalette(rawRecommended);
+  if (rawRecommended && rawRecommended !== 'custom' && AI_COLOR_PALETTES[rawRecommended]) {
+    return normalizeResolvedColorPalette(rawRecommended);
+  }
   const headingTitles = Array.isArray(signals?.sectionTitles)
     ? signals.sectionTitles.join(' ')
     : '';
@@ -2226,6 +2308,7 @@ function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs 
         'selection 规则：',
         `- layoutFamily 只能是 ${AI_LAYOUT_SELECTION_AUTO} / ${AI_LAYOUT_FAMILIES.join(' / ')}`,
         `- colorPalette 只能是 ${AI_LAYOUT_SELECTION_AUTO} / ${AI_LAYOUT_COLOR_PALETTES.join(' / ')}`,
+        '- 当 selection.colorPalette = auto 时，请只从内置非 custom 颜色中推荐；custom 只在用户明确选择自定义时使用。',
         `- 当前 selection.layoutFamily = ${selectedLayoutFamily}`,
         `- 当前 selection.colorPalette = ${selectedColorPalette}`,
         '如果 selection 为 auto，请你给出 recommended* 并写入 resolved；如果不是 auto，请尊重用户选择。',
@@ -2662,9 +2745,12 @@ function renderEditorialPreviewDivider(tokens) {
   </div>`;
 }
 
-function renderArticleLayoutHtml(layout, { imageRefs = [], mode = 'preview', renderedSectionFragments = null } = {}) {
+function renderArticleLayoutHtml(layout, { imageRefs = [], mode = 'preview', renderedSectionFragments = null, colorPaletteOverride = null } = {}) {
   const layoutFamily = getLayoutFamilyById(layout?.resolved?.layoutFamily || layout?.layoutFamily);
-  const colorPalette = getColorPaletteById(layout?.resolved?.colorPalette || layout?.stylePack);
+  const colorPalette = resolveColorPaletteForRender(
+    layout?.resolved?.colorPalette || layout?.stylePack,
+    colorPaletteOverride
+  );
   const tokens = colorPalette.tokens;
   const renderProfile = getWechatSafeRenderProfile(layoutFamily.id);
   const typography = AI_WECHAT_SAFE_STYLE_PRIMITIVES.typography || {};
@@ -3210,6 +3296,8 @@ module.exports = {
   getLayoutFamilyById,
   getColorPaletteList,
   getColorPaletteById,
+  resolveColorPaletteForRender,
+  normalizeHexColor,
   getStylePackList,
   getStylePackById,
   listEnabledAiProviders,

@@ -360,13 +360,14 @@
 }
 
 .apple-ai-layout-area {
-  max-width: 420px;
+  max-width: 360px;
   width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 2px 2px 0;
+  gap: 16px;
+  padding: 2px 14px 0;
+  box-sizing: border-box;
 }
 
 .apple-ai-layout-loading-mask {
@@ -512,7 +513,7 @@
 .apple-ai-layout-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .apple-ai-layout-advanced {
@@ -561,6 +562,72 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.apple-ai-layout-color-select {
+  display: none;
+}
+
+.apple-ai-color-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: flex-start;
+}
+
+.apple-ai-color-mode-row,
+.apple-ai-color-custom-row {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+}
+
+.apple-ai-color-grid {
+  display: grid;
+  grid-template-columns: repeat(6, max-content);
+  gap: 6px;
+  align-items: center;
+}
+
+.apple-ai-color-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.apple-ai-color-btn::after {
+  width: 16px;
+  height: 16px;
+}
+
+.apple-ai-color-pill {
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--apple-border);
+  border-radius: 13px;
+  background: var(--apple-background);
+  color: var(--apple-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.apple-ai-color-pill:hover {
+  color: var(--apple-primary);
+  border-color: color-mix(in srgb, var(--ai-layout-accent-border) 28%, var(--apple-border));
+}
+
+.apple-ai-color-pill.active {
+  background: color-mix(in srgb, var(--ai-layout-accent) 10%, transparent);
+  color: var(--ai-layout-accent-deep);
+  border-color: color-mix(in srgb, var(--ai-layout-accent-border) 30%, var(--apple-border));
+}
+
+.apple-ai-custom-color-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  visibility: hidden;
 }
 
 .apple-ai-layout-summary {
@@ -877,6 +944,7 @@
 
 .apple-converter-container.apple-converter-mobile .apple-ai-layout-area {
   max-width: 360px;
+  padding: 2px 2px 0;
 }
 
 .apple-converter-container.apple-converter-mobile .apple-ai-layout-section {

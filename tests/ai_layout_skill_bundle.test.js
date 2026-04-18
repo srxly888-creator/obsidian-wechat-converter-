@@ -60,7 +60,21 @@ describe('ai-layout skill bundle', () => {
     expect(sourceFirst?.manifest?.providerStrategy).toBe('prefer-ai-fallback-local');
     expect(sourceFirst?.prompt).toContain('原文增强型');
     expect(shared.wechatSafeStylePrimitives?.profiles?.['tutorial-cards']).toBeTruthy();
-    expect(shared.colorPalettes?.colorPalettes?.length).toBe(4);
+    expect(shared.colorPalettes?.colorPalettes?.map((item) => item.id)).toEqual([
+      'tech-green',
+      'ocean-blue',
+      'sunset-amber',
+      'graphite-rose',
+      'basic-blue',
+      'basic-green',
+      'basic-purple',
+      'basic-orange',
+      'basic-teal',
+      'basic-rose',
+      'basic-ruby',
+      'basic-slate',
+      'custom',
+    ]);
   });
 
   it('should source runtime prompt and skill docs from ai-layout-skills resources', () => {

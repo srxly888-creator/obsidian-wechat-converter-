@@ -4612,6 +4612,193 @@ var require_generated_skills = __commonJS({
                 "surfaceSoft": "#faf7f9",
                 "quoteBg": "#f8f2f5"
               }
+            },
+            {
+              "id": "basic-blue",
+              "label": "\u7ECF\u5178\u84DD",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u901A\u7528\u77E5\u8BC6\u6587\u7AE0\u548C\u5DE5\u5177\u8BF4\u660E\u3002",
+              "recommendedFor": [
+                "article",
+                "tutorial",
+                "knowledge-card"
+              ],
+              "tokens": {
+                "accent": "#2c6bed",
+                "accentDeep": "#1f4fb2",
+                "accentSoft": "#edf4ff",
+                "text": "#223047",
+                "muted": "#5e718f",
+                "border": "#d8e2f2",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f6f9fd",
+                "quoteBg": "#f2f6fc"
+              }
+            },
+            {
+              "id": "basic-green",
+              "label": "\u6E05\u723D\u7EFF",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u6D41\u7A0B\u3001\u7ECF\u9A8C\u548C\u6548\u7387\u4E3B\u9898\u3002",
+              "recommendedFor": [
+                "workflow",
+                "experience",
+                "tutorial"
+              ],
+              "tokens": {
+                "accent": "#28a745",
+                "accentDeep": "#1e7e34",
+                "accentSoft": "#edf9f0",
+                "text": "#24332a",
+                "muted": "#63746a",
+                "border": "#d8e7dc",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f6faf7",
+                "quoteBg": "#f2f8f4"
+              }
+            },
+            {
+              "id": "basic-purple",
+              "label": "\u7075\u611F\u7D2B",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u521B\u4F5C\u3001\u7075\u611F\u548C\u65B9\u6CD5\u8BBA\u5185\u5BB9\u3002",
+              "recommendedFor": [
+                "essay",
+                "creative",
+                "method"
+              ],
+              "tokens": {
+                "accent": "#7c3aed",
+                "accentDeep": "#5b21b6",
+                "accentSoft": "#f3edff",
+                "text": "#302942",
+                "muted": "#716780",
+                "border": "#e1d8f2",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f9f6fd",
+                "quoteBg": "#f5f0fb"
+              }
+            },
+            {
+              "id": "basic-orange",
+              "label": "\u6D3B\u529B\u6A59",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u6E05\u5355\u3001\u63A8\u8350\u548C\u8FD0\u8425\u590D\u76D8\u3002",
+              "recommendedFor": [
+                "checklist",
+                "recommendation",
+                "operation"
+              ],
+              "tokens": {
+                "accent": "#f97316",
+                "accentDeep": "#c2410c",
+                "accentSoft": "#fff2e8",
+                "text": "#3f2b20",
+                "muted": "#7c6759",
+                "border": "#ecd9ca",
+                "surface": "#fffefe",
+                "surfaceSoft": "#fff8f3",
+                "quoteBg": "#fbf1ea"
+              }
+            },
+            {
+              "id": "basic-teal",
+              "label": "\u6E56\u6C34\u9752",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u4EA7\u54C1\u3001\u6570\u636E\u548C\u8F7B\u79D1\u6280\u5185\u5BB9\u3002",
+              "recommendedFor": [
+                "product-intro",
+                "data",
+                "tech"
+              ],
+              "tokens": {
+                "accent": "#0f9f9a",
+                "accentDeep": "#0b756f",
+                "accentSoft": "#e8f8f7",
+                "text": "#213737",
+                "muted": "#5f7474",
+                "border": "#d2e7e5",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f4faf9",
+                "quoteBg": "#eef8f7"
+              }
+            },
+            {
+              "id": "basic-rose",
+              "label": "\u67D4\u548C\u73AB\u7470",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u54C1\u724C\u3001\u751F\u6D3B\u65B9\u5F0F\u548C\u6848\u4F8B\u6545\u4E8B\u3002",
+              "recommendedFor": [
+                "brand-story",
+                "lifestyle",
+                "case-study"
+              ],
+              "tokens": {
+                "accent": "#e83e8c",
+                "accentDeep": "#b81f66",
+                "accentSoft": "#fff0f7",
+                "text": "#3a2832",
+                "muted": "#766672",
+                "border": "#ead8e3",
+                "surface": "#fffefe",
+                "surfaceSoft": "#fff7fb",
+                "quoteBg": "#faf0f6"
+              }
+            },
+            {
+              "id": "basic-ruby",
+              "label": "\u9192\u76EE\u7EA2",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u91CD\u70B9\u63D0\u9192\u3001\u89C2\u70B9\u8868\u8FBE\u548C\u53D1\u5E03\u8BF4\u660E\u3002",
+              "recommendedFor": [
+                "announcement",
+                "opinion",
+                "release-note"
+              ],
+              "tokens": {
+                "accent": "#dc3545",
+                "accentDeep": "#a81825",
+                "accentSoft": "#fff0f2",
+                "text": "#3b282b",
+                "muted": "#766367",
+                "border": "#ead8da",
+                "surface": "#fffefe",
+                "surfaceSoft": "#fff7f8",
+                "quoteBg": "#faf0f1"
+              }
+            },
+            {
+              "id": "basic-slate",
+              "label": "\u514B\u5236\u7070",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u957F\u6587\u3001\u8BF4\u660E\u6587\u548C\u504F\u4E13\u4E1A\u5185\u5BB9\u3002",
+              "recommendedFor": [
+                "article",
+                "documentation",
+                "professional"
+              ],
+              "tokens": {
+                "accent": "#64748b",
+                "accentDeep": "#475569",
+                "accentSoft": "#f1f5f9",
+                "text": "#27313f",
+                "muted": "#687386",
+                "border": "#dbe2ea",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f8fafc",
+                "quoteBg": "#f3f6f9"
+              }
+            },
+            {
+              "id": "custom",
+              "label": "\u81EA\u5B9A\u4E49",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u81EA\u5B9A\u4E49\u8272\uFF0C\u4F1A\u6839\u636E\u4F60\u9009\u62E9\u7684\u989C\u8272\u81EA\u52A8\u6D3E\u751F\u6DF1\u8272\u3001\u6D45\u5E95\u548C\u8FB9\u6846\u3002",
+              "recommendedFor": [
+                "custom"
+              ],
+              "tokens": {
+                "accent": "#7c3aed",
+                "accentDeep": "#5b21b6",
+                "accentSoft": "#f3edff",
+                "text": "#302942",
+                "muted": "#716780",
+                "border": "#e1d8f2",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f9f6fd",
+                "quoteBg": "#f5f0fb"
+              }
             }
           ]
         },
@@ -4896,7 +5083,16 @@ var require_generated_skills = __commonJS({
                     "tech-green",
                     "ocean-blue",
                     "sunset-amber",
-                    "graphite-rose"
+                    "graphite-rose",
+                    "basic-blue",
+                    "basic-green",
+                    "basic-purple",
+                    "basic-orange",
+                    "basic-teal",
+                    "basic-rose",
+                    "basic-ruby",
+                    "basic-slate",
+                    "custom"
                   ]
                 }
               }
@@ -4921,7 +5117,16 @@ var require_generated_skills = __commonJS({
                     "tech-green",
                     "ocean-blue",
                     "sunset-amber",
-                    "graphite-rose"
+                    "graphite-rose",
+                    "basic-blue",
+                    "basic-green",
+                    "basic-purple",
+                    "basic-orange",
+                    "basic-teal",
+                    "basic-rose",
+                    "basic-ruby",
+                    "basic-slate",
+                    "custom"
                   ]
                 }
               }
@@ -4938,7 +5143,16 @@ var require_generated_skills = __commonJS({
                 "tech-green",
                 "ocean-blue",
                 "sunset-amber",
-                "graphite-rose"
+                "graphite-rose",
+                "basic-blue",
+                "basic-green",
+                "basic-purple",
+                "basic-orange",
+                "basic-teal",
+                "basic-rose",
+                "basic-ruby",
+                "basic-slate",
+                "custom"
               ]
             },
             "stylePack": {
@@ -6115,6 +6329,7 @@ var require_ai_layout = __commonJS({
         defaultProviderId: "",
         defaultLayoutFamily: AI_LAYOUT_SELECTION_AUTO2,
         defaultColorPalette: AI_LAYOUT_SELECTION_AUTO2,
+        customColor: "#7c3aed",
         includeImagesInLayout: true,
         requestTimeoutMs: 45e3,
         providers: [],
@@ -6126,6 +6341,57 @@ var require_ai_layout = __commonJS({
       if (!Number.isFinite(parsed))
         return fallback;
       return Math.min(max, Math.max(min, Math.round(parsed)));
+    }
+    function normalizeHexColor2(value, fallback = "#7c3aed") {
+      const raw = String(value || "").trim();
+      if (/^#[0-9a-f]{6}$/i.test(raw))
+        return raw.toLowerCase();
+      if (/^[0-9a-f]{6}$/i.test(raw))
+        return `#${raw.toLowerCase()}`;
+      return fallback;
+    }
+    function hexToRgb(hex) {
+      const normalized = normalizeHexColor2(hex).slice(1);
+      return {
+        r: parseInt(normalized.slice(0, 2), 16),
+        g: parseInt(normalized.slice(2, 4), 16),
+        b: parseInt(normalized.slice(4, 6), 16)
+      };
+    }
+    function rgbToHex({ r, g, b }) {
+      return `#${[r, g, b].map((channel) => {
+        const clamped = Math.max(0, Math.min(255, Math.round(channel)));
+        return clamped.toString(16).padStart(2, "0");
+      }).join("")}`;
+    }
+    function mixHexColor(color, target, amount) {
+      const sourceRgb = hexToRgb(color);
+      const targetRgb = hexToRgb(target);
+      return rgbToHex({
+        r: sourceRgb.r + (targetRgb.r - sourceRgb.r) * amount,
+        g: sourceRgb.g + (targetRgb.g - sourceRgb.g) * amount,
+        b: sourceRgb.b + (targetRgb.b - sourceRgb.b) * amount
+      });
+    }
+    function createColorPaletteFromAccent(accentColor, { id = "custom", label = "\u81EA\u5B9A\u4E49" } = {}) {
+      const accent = normalizeHexColor2(accentColor);
+      return {
+        id,
+        label,
+        description: "AI \u7F16\u6392\u72EC\u7ACB\u81EA\u5B9A\u4E49\u8272\uFF0C\u4F1A\u6839\u636E\u4F60\u9009\u62E9\u7684\u989C\u8272\u81EA\u52A8\u6D3E\u751F\u6DF1\u8272\u3001\u6D45\u5E95\u548C\u8FB9\u6846\u3002",
+        recommendedFor: ["custom"],
+        tokens: {
+          accent,
+          accentDeep: mixHexColor(accent, "#000000", 0.28),
+          accentSoft: mixHexColor(accent, "#ffffff", 0.9),
+          text: mixHexColor(accent, "#1f2937", 0.78),
+          muted: mixHexColor(accent, "#6b7280", 0.72),
+          border: mixHexColor(accent, "#ffffff", 0.78),
+          surface: "#ffffff",
+          surfaceSoft: mixHexColor(accent, "#ffffff", 0.96),
+          quoteBg: mixHexColor(accent, "#ffffff", 0.93)
+        }
+      };
     }
     function normalizeLayoutFamily(value, fallback = AI_LAYOUT_SELECTION_AUTO2) {
       const normalized = coerceString(value);
@@ -6155,6 +6421,14 @@ var require_ai_layout = __commonJS({
       if (AI_COLOR_PALETTES[normalized])
         return normalized;
       return AI_COLOR_PALETTES[fallback] ? fallback : AI_LAYOUT_DEFAULT_COLOR_PALETTE;
+    }
+    function normalizeAutoRecommendedColorPalette(value, fallback = AI_LAYOUT_DEFAULT_COLOR_PALETTE) {
+      const normalized = normalizeResolvedColorPalette(value, fallback);
+      if (normalized === "custom") {
+        const fallbackPalette = normalizeResolvedColorPalette(fallback, AI_LAYOUT_DEFAULT_COLOR_PALETTE);
+        return fallbackPalette === "custom" ? AI_LAYOUT_DEFAULT_COLOR_PALETTE : fallbackPalette;
+      }
+      return normalized;
     }
     function normalizeLayoutSelection2(raw = {}, fallback = {}) {
       var _a2, _b, _c, _d, _e, _f;
@@ -6242,6 +6516,21 @@ var require_ai_layout = __commonJS({
     function getColorPaletteById2(id) {
       return AI_COLOR_PALETTES[normalizeResolvedColorPalette(id)] || AI_COLOR_PALETTES[AI_LAYOUT_DEFAULT_COLOR_PALETTE];
     }
+    function resolveColorPaletteForRender2(id, override = {}) {
+      var _a2;
+      const normalizedId = normalizeResolvedColorPalette(id);
+      const customColor = normalizeHexColor2(
+        (override == null ? void 0 : override.customColor) || (override == null ? void 0 : override.accentColor) || (override == null ? void 0 : override.accent) || "",
+        ""
+      );
+      if (normalizedId === "custom" && customColor) {
+        return createColorPaletteFromAccent(customColor, {
+          id: "custom",
+          label: ((_a2 = getColorPaletteById2("custom")) == null ? void 0 : _a2.label) || "\u81EA\u5B9A\u4E49"
+        });
+      }
+      return getColorPaletteById2(normalizedId);
+    }
     function resolveLayoutSelection({
       requestedSelection = {},
       rawLayout = {},
@@ -6256,7 +6545,7 @@ var require_ai_layout = __commonJS({
         (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily),
         inferredLayoutFamily
       );
-      const recommendedColorPalette = normalizeResolvedColorPalette(
+      const recommendedColorPalette = normalizeAutoRecommendedColorPalette(
         (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_b = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _b.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack),
         inferredColorPalette
       );
@@ -6599,6 +6888,7 @@ var require_ai_layout = __commonJS({
           AI_LAYOUT_SELECTION_AUTO2
         ),
         defaultStylePack: normalizeResolvedColorPalette(raw.defaultStylePack, AI_LAYOUT_DEFAULT_COLOR_PALETTE),
+        customColor: normalizeHexColor2(raw.customColor, defaults.customColor),
         includeImagesInLayout: raw.includeImagesInLayout !== false,
         requestTimeoutMs: clampNumber(raw.requestTimeoutMs, defaults.requestTimeoutMs, 5e3, 18e4),
         providers,
@@ -7573,8 +7863,9 @@ var require_ai_layout = __commonJS({
       const rawRecommended = coerceString(
         (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack)
       );
-      if (rawRecommended && AI_COLOR_PALETTES[rawRecommended])
+      if (rawRecommended && rawRecommended !== "custom" && AI_COLOR_PALETTES[rawRecommended]) {
         return normalizeResolvedColorPalette(rawRecommended);
+      }
       const headingTitles = Array.isArray(signals == null ? void 0 : signals.sectionTitles) ? signals.sectionTitles.join(" ") : "";
       const titleHints = `${coerceString(rawLayout == null ? void 0 : rawLayout.title)} ${headingTitles}`.toLowerCase();
       if (/(教程|指南|入门|步骤|实践|实操|配置|接入|使用|标签|双链|知识库|workflow|guide|tutorial|how to)/i.test(titleHints)) {
@@ -8060,6 +8351,7 @@ var require_ai_layout = __commonJS({
             "selection \u89C4\u5219\uFF1A",
             `- layoutFamily \u53EA\u80FD\u662F ${AI_LAYOUT_SELECTION_AUTO2} / ${AI_LAYOUT_FAMILIES.join(" / ")}`,
             `- colorPalette \u53EA\u80FD\u662F ${AI_LAYOUT_SELECTION_AUTO2} / ${AI_LAYOUT_COLOR_PALETTES.join(" / ")}`,
+            "- \u5F53 selection.colorPalette = auto \u65F6\uFF0C\u8BF7\u53EA\u4ECE\u5185\u7F6E\u975E custom \u989C\u8272\u4E2D\u63A8\u8350\uFF1Bcustom \u53EA\u5728\u7528\u6237\u660E\u786E\u9009\u62E9\u81EA\u5B9A\u4E49\u65F6\u4F7F\u7528\u3002",
             `- \u5F53\u524D selection.layoutFamily = ${selectedLayoutFamily}`,
             `- \u5F53\u524D selection.colorPalette = ${selectedColorPalette}`,
             "\u5982\u679C selection \u4E3A auto\uFF0C\u8BF7\u4F60\u7ED9\u51FA recommended* \u5E76\u5199\u5165 resolved\uFF1B\u5982\u679C\u4E0D\u662F auto\uFF0C\u8BF7\u5C0A\u91CD\u7528\u6237\u9009\u62E9\u3002",
@@ -8468,10 +8760,13 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
     </div>
   </div>`;
     }
-    function renderArticleLayoutHtml2(layout, { imageRefs = [], mode = "preview", renderedSectionFragments = null } = {}) {
+    function renderArticleLayoutHtml2(layout, { imageRefs = [], mode = "preview", renderedSectionFragments = null, colorPaletteOverride = null } = {}) {
       var _a2, _b, _c, _d, _e, _f, _g, _h;
       const layoutFamily = getLayoutFamilyById2(((_a2 = layout == null ? void 0 : layout.resolved) == null ? void 0 : _a2.layoutFamily) || (layout == null ? void 0 : layout.layoutFamily));
-      const colorPalette = getColorPaletteById2(((_b = layout == null ? void 0 : layout.resolved) == null ? void 0 : _b.colorPalette) || (layout == null ? void 0 : layout.stylePack));
+      const colorPalette = resolveColorPaletteForRender2(
+        ((_b = layout == null ? void 0 : layout.resolved) == null ? void 0 : _b.colorPalette) || (layout == null ? void 0 : layout.stylePack),
+        colorPaletteOverride
+      );
       const tokens = colorPalette.tokens;
       const renderProfile = getWechatSafeRenderProfile(layoutFamily.id);
       const typography = AI_WECHAT_SAFE_STYLE_PRIMITIVES.typography || {};
@@ -8906,6 +9201,8 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       getLayoutFamilyById: getLayoutFamilyById2,
       getColorPaletteList: getColorPaletteList2,
       getColorPaletteById: getColorPaletteById2,
+      resolveColorPaletteForRender: resolveColorPaletteForRender2,
+      normalizeHexColor: normalizeHexColor2,
       getStylePackList,
       getStylePackById,
       listEnabledAiProviders,
@@ -9892,6 +10189,8 @@ var {
   getLayoutFamilyById,
   getColorPaletteList,
   getColorPaletteById,
+  resolveColorPaletteForRender,
+  normalizeHexColor,
   normalizeLayoutSelection,
   getArticleLayoutSelectionKey,
   getArticleLayoutSelectionState,
@@ -11142,15 +11441,42 @@ var AppleStyleView = class extends ItemView {
     if (this.aiLayoutBtn)
       this.aiLayoutBtn.classList.remove("active");
   }
+  getCurrentArticleAnyLayoutState() {
+    var _a, _b, _c, _d, _e, _f;
+    const { sourcePath } = this.getCurrentLayoutContext();
+    if (!sourcePath)
+      return null;
+    if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
+      return this.plugin.getArticleLayoutState(sourcePath, {}) || null;
+    }
+    const normalizedPath = normalizeVaultPath(sourcePath);
+    const entry = ((_e = (_d = (_c = (_b = this.plugin) == null ? void 0 : _b.settings) == null ? void 0 : _c.ai) == null ? void 0 : _d.articleLayoutsByPath) == null ? void 0 : _e[normalizedPath]) || null;
+    const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+    if (!normalizedEntry)
+      return null;
+    return ((_f = normalizedEntry.selectionStates) == null ? void 0 : _f[normalizedEntry.lastSelectionKey]) || null;
+  }
+  hasCurrentArticleAiLayoutCache() {
+    var _a;
+    const state = this.getCurrentArticleAnyLayoutState();
+    return !!((state == null ? void 0 : state.status) === "ready" && Array.isArray((_a = state.layoutJson) == null ? void 0 : _a.blocks) && state.layoutJson.blocks.length);
+  }
   updateAiToolbarState() {
-    var _a, _b;
+    var _a;
     if (!this.aiLayoutBtn)
       return;
-    const enabled = ((_b = (_a = this.plugin.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.enabled) === true;
-    this.aiLayoutBtn.classList.toggle("is-disabled", !enabled);
-    this.aiLayoutBtn.setAttribute("title", enabled ? "AI \u7F16\u6392" : "AI \u7F16\u6392\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528");
-    this.aiLayoutBtn.hidden = !enabled;
-    if (!enabled) {
+    const aiSettings = ((_a = this.plugin.settings) == null ? void 0 : _a.ai) || createDefaultAiSettings();
+    const enabled = aiSettings.enabled === true;
+    const hasProvider = !!resolveAiProvider(aiSettings);
+    const hasCachedLayout = this.hasCurrentArticleAiLayoutCache();
+    const shouldShow = enabled && (hasProvider || hasCachedLayout);
+    this.aiLayoutBtn.classList.toggle("is-disabled", !shouldShow);
+    this.aiLayoutBtn.setAttribute(
+      "title",
+      !enabled ? "AI \u7F16\u6392\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528" : shouldShow ? "AI \u7F16\u6392" : "\u914D\u7F6E\u53EF\u7528 AI Provider \u540E\u663E\u793A AI \u7F16\u6392\u5165\u53E3"
+    );
+    this.aiLayoutBtn.hidden = !shouldShow;
+    if (!shouldShow) {
       if (this.aiLayoutOverlay)
         this.aiLayoutOverlay.classList.remove("visible");
       this.aiLayoutBtn.classList.remove("active");
@@ -11198,7 +11524,7 @@ var AppleStyleView = class extends ItemView {
     });
     const paletteControl = controlSection.createDiv({ cls: "apple-ai-layout-control" });
     paletteControl.createEl("label", { cls: "apple-setting-label", text: "\u989C\u8272" });
-    this.aiColorPaletteSelect = paletteControl.createEl("select", { cls: "apple-select" });
+    this.aiColorPaletteSelect = paletteControl.createEl("select", { cls: "apple-select apple-ai-layout-color-select" });
     getColorPaletteList({ includeAuto: true }).forEach((palette) => {
       var _a2;
       const option = this.aiColorPaletteSelect.createEl("option", {
@@ -11215,25 +11541,56 @@ var AppleStyleView = class extends ItemView {
     this.aiLayoutFamilySelect.value = this.pendingAiLayoutFamily;
     this.aiColorPaletteSelect.value = this.pendingAiColorPalette;
     this.aiStylePackSelect = this.aiColorPaletteSelect;
+    this.aiColorPaletteControls = paletteControl.createDiv({ cls: "apple-ai-color-controls" });
+    const autoPaletteRow = this.aiColorPaletteControls.createDiv({ cls: "apple-ai-color-mode-row" });
+    this.aiColorPaletteGrid = this.aiColorPaletteControls.createDiv({ cls: "apple-ai-color-grid" });
+    const customPaletteRow = this.aiColorPaletteControls.createDiv({ cls: "apple-ai-color-custom-row" });
+    getColorPaletteList({ includeAuto: true }).forEach((palette) => {
+      var _a2;
+      const isAuto = palette.value === AI_LAYOUT_SELECTION_AUTO;
+      const isCustom = palette.value === "custom";
+      const target = isAuto ? autoPaletteRow : isCustom ? customPaletteRow : this.aiColorPaletteGrid;
+      const button = target.createEl("button", {
+        cls: isCustom ? "apple-btn-custom-text apple-ai-color-custom" : isAuto ? "apple-ai-color-pill" : "apple-btn-color apple-ai-color-btn",
+        text: isAuto ? "\u81EA\u52A8" : isCustom ? "\u81EA\u5B9A\u4E49" : "",
+        title: palette.label
+      });
+      button.dataset.value = palette.value;
+      if (!isAuto && !isCustom) {
+        const pack = getColorPaletteById(palette.value);
+        button.style.setProperty("--btn-color", ((_a2 = pack == null ? void 0 : pack.tokens) == null ? void 0 : _a2.accent) || "#7c3aed");
+      }
+      button.addEventListener("click", async () => {
+        var _a3;
+        await this.onAiColorPaletteChange(palette.value);
+        if (isCustom)
+          (_a3 = this.aiCustomColorInput) == null ? void 0 : _a3.click();
+      });
+    });
+    this.aiCustomColorInput = paletteControl.createEl("input", {
+      type: "color",
+      cls: "apple-color-picker-hidden apple-ai-custom-color-input"
+    });
+    this.aiCustomColorInput.value = this.getAiCustomColor();
+    this.aiCustomColorInput.addEventListener("input", (event) => {
+      const nextColor = normalizeHexColor(event.target.value, this.getAiCustomColor());
+      this.plugin.settings.ai.customColor = nextColor;
+    });
+    this.aiCustomColorInput.addEventListener("change", async (event) => {
+      const nextColor = normalizeHexColor(event.target.value, this.getAiCustomColor());
+      this.plugin.settings.ai.customColor = nextColor;
+      await this.plugin.saveSettings();
+      await this.onAiColorPaletteChange("custom", { skipSave: true });
+    });
+    this.updateAiColorPaletteControls();
     this.aiLayoutFamilySelect.addEventListener("change", () => {
       var _a2;
       this.pendingAiLayoutFamily = this.aiLayoutFamilySelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO;
       this.refreshAiLayoutPanel();
     });
-    this.aiColorPaletteSelect.addEventListener("change", async () => {
-      var _a2, _b2, _c2;
-      const previousState = this.getCurrentArticleLayoutState();
-      this.pendingAiColorPalette = this.aiColorPaletteSelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
-      this.pendingAiStylePack = this.pendingAiColorPalette;
-      await this.ensureAiLayoutSelectionState(previousState, {
-        layoutFamily: this.pendingAiLayoutFamily || ((_b2 = this.aiLayoutFamilySelect) == null ? void 0 : _b2.value) || ((_c2 = previousState == null ? void 0 : previousState.selection) == null ? void 0 : _c2.layoutFamily) || AI_LAYOUT_SELECTION_AUTO,
-        colorPalette: this.pendingAiColorPalette
-      });
-      if (this.aiPreviewApplied) {
-        this.applyAiLayoutToPreview();
-        return;
-      }
-      this.refreshAiLayoutPanel();
+    this.aiColorPaletteSelect.addEventListener("change", () => {
+      var _a2;
+      this.onAiColorPaletteChange(this.aiColorPaletteSelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO);
     });
     this.aiIncludeImagesNote = controlSection.createEl("div", {
       cls: "apple-ai-layout-mini-note",
@@ -11299,10 +11656,60 @@ var AppleStyleView = class extends ItemView {
     });
     this.refreshAiLayoutPanel();
   }
+  getAiCustomColor() {
+    var _a, _b;
+    return normalizeHexColor((_b = (_a = this.plugin.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.customColor, "#7c3aed");
+  }
+  getAiColorPaletteOverride(colorPaletteId = "") {
+    const targetPalette = colorPaletteId || this.getCurrentAiLayoutSelection().colorPalette;
+    if (targetPalette !== "custom")
+      return null;
+    return { customColor: this.getAiCustomColor() };
+  }
+  getAiRenderColorPalette(colorPaletteId = "") {
+    const targetPalette = colorPaletteId || this.getCurrentAiLayoutSelection().colorPalette || "tech-green";
+    return resolveColorPaletteForRender(targetPalette, this.getAiColorPaletteOverride(targetPalette));
+  }
+  updateAiColorPaletteControls() {
+    var _a, _b, _c, _d, _e;
+    const selectedValue = this.pendingAiColorPalette || ((_a = this.aiColorPaletteSelect) == null ? void 0 : _a.value) || ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
+    if (this.aiColorPaletteSelect && this.aiColorPaletteSelect.value !== selectedValue) {
+      this.aiColorPaletteSelect.value = selectedValue;
+    }
+    if (this.aiCustomColorInput) {
+      this.aiCustomColorInput.value = this.getAiCustomColor();
+    }
+    (_e = (_d = (_c = this.aiColorPaletteControls) == null ? void 0 : _c.querySelectorAll) == null ? void 0 : _d.call(_c, "button[data-value]")) == null ? void 0 : _e.forEach((button) => {
+      button.classList.toggle("active", button.dataset.value === selectedValue);
+    });
+  }
+  async onAiColorPaletteChange(value, { skipSave = false } = {}) {
+    var _a, _b, _c;
+    const nextValue = value || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
+    const previousState = this.getCurrentArticleLayoutState();
+    this.pendingAiColorPalette = nextValue;
+    this.pendingAiStylePack = this.pendingAiColorPalette;
+    if (this.aiColorPaletteSelect)
+      this.aiColorPaletteSelect.value = nextValue;
+    this.updateAiColorPaletteControls();
+    if (!skipSave && nextValue === "custom") {
+      this.plugin.settings.ai.customColor = this.getAiCustomColor();
+      await this.plugin.saveSettings();
+    }
+    await this.ensureAiLayoutSelectionState(previousState, {
+      layoutFamily: this.pendingAiLayoutFamily || ((_b = this.aiLayoutFamilySelect) == null ? void 0 : _b.value) || ((_c = previousState == null ? void 0 : previousState.selection) == null ? void 0 : _c.layoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: this.pendingAiColorPalette
+    });
+    if (this.aiPreviewApplied) {
+      this.applyAiLayoutToPreview();
+      return;
+    }
+    this.refreshAiLayoutPanel();
+  }
   applyAiLayoutPanelStylePack(colorPaletteId) {
     if (!this.aiLayoutOverlay)
       return;
-    const pack = getColorPaletteById(colorPaletteId || "tech-green");
+    const pack = this.getAiRenderColorPalette(colorPaletteId || "tech-green");
     const tokens = (pack == null ? void 0 : pack.tokens) || {};
     this.aiLayoutOverlay.style.setProperty("--ai-layout-accent", tokens.accent || "#0a84ff");
     this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-deep", tokens.accentDeep || tokens.accent || "#0a84ff");
@@ -11473,14 +11880,14 @@ var AppleStyleView = class extends ItemView {
   }
   getCurrentArticleLayoutState() {
     var _a;
-    const { sourcePath } = this.getCurrentLayoutContext();
+    const { sourcePath, sourceHash } = this.getCurrentLayoutContext();
     if (!sourcePath)
       return null;
     const selection = this.getCurrentAiLayoutSelection();
     if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
       const state = this.plugin.getArticleLayoutState(sourcePath, selection);
       if (state && (!(selection == null ? void 0 : selection.colorPalette) || selection.colorPalette === AI_LAYOUT_SELECTION_AUTO || state.stylePack === selection.colorPalette)) {
-        return state;
+        return this.preferFreshAiLayoutState(sourcePath, selection, state, sourceHash);
       }
       if (selection == null ? void 0 : selection.colorPalette) {
         const legacyState = this.plugin.getArticleLayoutState(sourcePath, selection.colorPalette);
@@ -11489,10 +11896,37 @@ var AppleStyleView = class extends ItemView {
         if (selection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && legacyState.stylePack !== selection.colorPalette) {
           return null;
         }
-        return legacyState;
+        return this.preferFreshAiLayoutState(sourcePath, selection, legacyState, sourceHash);
       }
     }
     return null;
+  }
+  preferFreshAiLayoutState(sourcePath = "", selection = {}, candidateState = null, sourceHash = "") {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+    if (!candidateState || !sourceHash || !candidateState.sourceHash || candidateState.sourceHash === sourceHash) {
+      return candidateState;
+    }
+    const normalizedSelection = normalizeLayoutSelection(selection || {}, {
+      layoutFamily: ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    const canUseAnyColor = normalizedSelection.colorPalette === AI_LAYOUT_SELECTION_AUTO;
+    if (!canUseAnyColor)
+      return candidateState;
+    const normalizedPath = normalizeVaultPath(sourcePath || "");
+    const entry = normalizeArticleLayoutCacheEntry((_f = (_e = (_d = (_c = this.plugin) == null ? void 0 : _c.settings) == null ? void 0 : _d.ai) == null ? void 0 : _e.articleLayoutsByPath) == null ? void 0 : _f[normalizedPath]);
+    const statesByKey = (entry == null ? void 0 : entry.selectionStates) || {};
+    const requestedKey = getArticleLayoutSelectionKey(normalizedSelection);
+    const exactState = statesByKey[requestedKey];
+    if ((exactState == null ? void 0 : exactState.sourceHash) === sourceHash && ((_h = (_g = exactState.layoutJson) == null ? void 0 : _g.blocks) == null ? void 0 : _h.length))
+      return exactState;
+    const lastState = statesByKey[entry == null ? void 0 : entry.lastSelectionKey];
+    if ((lastState == null ? void 0 : lastState.sourceHash) === sourceHash && ((_j = (_i = lastState.layoutJson) == null ? void 0 : _i.blocks) == null ? void 0 : _j.length))
+      return lastState;
+    return Object.values(statesByKey).find((state) => {
+      var _a2, _b2;
+      return (state == null ? void 0 : state.sourceHash) === sourceHash && ((_b2 = (_a2 = state.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b2.length);
+    }) || candidateState;
   }
   async recoverSourceFirstLayoutState(currentState = null, selection = null, context = null) {
     var _a, _b, _c, _d, _e, _f;
@@ -11675,6 +12109,9 @@ var AppleStyleView = class extends ItemView {
     if (!hasDoc || !aiFeatureEnabled) {
       return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: true };
     }
+    if (isStale) {
+      return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: !canGenerateForSelection };
+    }
     if (hasReusableLayout && hasLastAttemptFailure) {
       if (hasApplied) {
         return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: !canGenerateForSelection };
@@ -11682,6 +12119,9 @@ var AppleStyleView = class extends ItemView {
       return { mode: "apply", label: "\u5E94\u7528\u4E0A\u4E00\u7248", disabled: false };
     }
     if (((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length) && !hasApplied) {
+      if (canGenerateForSelection) {
+        return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
+      }
       return { mode: "apply", label: "\u5E94\u7528\u5F53\u524D\u7ED3\u679C", disabled: false };
     }
     if (!canGenerateForSelection) {
@@ -11689,9 +12129,6 @@ var AppleStyleView = class extends ItemView {
     }
     if (!state) {
       return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
-    }
-    if (isStale) {
-      return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
     }
     if (state.status === "error" || state.status === "schema-error") {
       return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
@@ -12102,6 +12539,7 @@ var AppleStyleView = class extends ItemView {
     this.pendingAiLayoutFamily = effectiveSelection.layoutFamily;
     this.pendingAiColorPalette = effectiveSelection.colorPalette;
     this.pendingAiStylePack = effectiveSelection.colorPalette;
+    this.updateAiColorPaletteControls();
     this.aiLayoutFamilySelect.disabled = !aiFeatureEnabled || isLoading;
     this.aiColorPaletteSelect.disabled = !aiFeatureEnabled || isLoading;
     if (this.aiStylePackSelect)
@@ -12448,7 +12886,7 @@ var AppleStyleView = class extends ItemView {
     }
   }
   applyAiLayoutToPreview() {
-    var _a, _b, _c;
+    var _a, _b, _c, _d, _e, _f;
     const context = this.getCurrentLayoutContext();
     const state = this.getCurrentArticleLayoutState();
     const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
@@ -12463,8 +12901,12 @@ var AppleStyleView = class extends ItemView {
     }
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
     const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || "");
-    const html = renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs, renderedSectionFragments });
-    const scrollTop = ((_c = this.previewContainer) == null ? void 0 : _c.scrollTop) || 0;
+    const html = renderArticleLayoutHtml(visibleSnapshot.layoutJson, {
+      imageRefs,
+      renderedSectionFragments,
+      colorPaletteOverride: this.getAiColorPaletteOverride(((_d = (_c = visibleSnapshot.layoutJson) == null ? void 0 : _c.resolved) == null ? void 0 : _d.colorPalette) || ((_e = visibleSnapshot.layoutJson) == null ? void 0 : _e.stylePack))
+    });
+    const scrollTop = ((_f = this.previewContainer) == null ? void 0 : _f.scrollTop) || 0;
     this.currentHtml = html;
     this.aiPreviewApplied = true;
     if (this.previewContainer) {
@@ -12476,7 +12918,7 @@ var AppleStyleView = class extends ItemView {
     this.refreshAiLayoutPanel();
   }
   getCurrentExportHtml() {
-    var _a, _b;
+    var _a, _b, _c, _d, _e;
     if (!this.currentHtml)
       return null;
     if (!this.aiPreviewApplied)
@@ -12492,7 +12934,12 @@ var AppleStyleView = class extends ItemView {
     }
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
     const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || "");
-    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, { imageRefs, mode: "draft", renderedSectionFragments });
+    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, {
+      imageRefs,
+      mode: "draft",
+      renderedSectionFragments,
+      colorPaletteOverride: this.getAiColorPaletteOverride(((_d = (_c = visibleSnapshot.layoutJson) == null ? void 0 : _c.resolved) == null ? void 0 : _d.colorPalette) || ((_e = visibleSnapshot.layoutJson) == null ? void 0 : _e.stylePack))
+    });
   }
   restoreBasePreview() {
     if (!this.baseRenderedHtml || !this.previewContainer)
@@ -12987,6 +13434,7 @@ var AppleStyleView = class extends ItemView {
       this.docTitleText.setText("\u672A\u9009\u62E9\u6587\u6863");
       this.docTitleText.style.color = "var(--apple-tertiary)";
     }
+    this.updateAiToolbarState();
   }
   /**
    * 设置占位符
