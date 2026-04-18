@@ -34,6 +34,10 @@
     - **导出自动转 PNG**：复制到公众号或同步到草稿箱时，会自动将 Mermaid 图表栅格化为 PNG，避免 SVG 过长导致微信拦截。
     - **保留图表原色**：导出时不会套用数学公式的改色逻辑，尽量保持 Mermaid 主题与连线配色。
 
+    <p align="center">
+      <img src="images/mermaid_render.png" alt="Mermaid 图表在转换器预览中的渲染效果" height="800" />
+    </p>
+    
 3.  **🚀 一键同步到微信草稿箱 (v2.2 增强)**
     - **极速并发上传**：图片上传速度提升 300%，支持多线程并发处理，大图文章秒传。
     - **智能重试机制**：自动处理网络抖动与 Token 过期，全程零人工干预，稳如泰山。
@@ -192,6 +196,19 @@
   - 当前 JSON 或错误详情
 - 如果重新生成失败，上一版成功结果仍然可以保留，方便你继续预览和比较。
 
+<table>
+  <tr>
+    <td align="center"><img src="images/AI.png" alt="AI 编排未生成状态" height="400" /><br/><sub>1. 配置 Provider 与 布局</sub></td>
+    <td align="center"><img src="images/AI_completed.png" alt="AI 编排已生成状态" height="400" /><br/><sub>2. 生成结果与缓存</sub></td>
+    <td align="center"><img src="images/AI_render.png" alt="AI 编排应用后的预览效果" height="400" /><br/><sub>3. 应用到预览区</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="images/AI_setup.png" alt="AI 编排设置界面" width="760" /><br/>
+  <sub>AI 编排全局设置（Provider 与 缓存策略管理）</sub>
+</p>
+
 ### 同步后自动清理（可选）
 
 - 入口：插件设置 → 高级设置
@@ -211,6 +228,9 @@
 - 当你执行“复制到公众号”或“一键同步到草稿箱”时，插件会自动把 Mermaid 图表栅格化为 PNG。
 - 这样做的目的不是改变样式，而是为了减少微信公众号对长 SVG、复杂 SVG 的清洗和拦截问题。
 - 导出链路会尽量保留 Mermaid 原本的颜色，不会套用数学公式那一套 SVG 清理逻辑。
+
+
+
 
 ## ✍️ 中文标点标准化规则
 

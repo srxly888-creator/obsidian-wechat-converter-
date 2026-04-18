@@ -17,7 +17,9 @@ zip -r "$ZIP_FILE" \
     manifest.json \
     styles.css \
     README.md \
+    README.zh-CN.md \
     LICENSE \
+    images \
     ai-layout-skills \
     -x "*.DS_Store*"
 

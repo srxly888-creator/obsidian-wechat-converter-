@@ -78,6 +78,19 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 - Review schema warnings, inspect layout JSON, or copy an AI debugging prompt before applying the result to preview.
 - If regeneration fails, the last successful layout can still remain available instead of forcing you back to the plain preview immediately.
 
+<table>
+  <tr>
+    <td align="center"><img src="images/AI.png" alt="AI layout panel before generation" height="400" /><br/><sub>1. Configure & Plan</sub></td>
+    <td align="center"><img src="images/AI_completed.png" alt="AI layout panel with cached result" height="400" /><br/><sub>2. Generate & Cache</sub></td>
+    <td align="center"><img src="images/AI_render.png" alt="AI layout applied to article preview" height="400" /><br/><sub>3. Apply to Preview</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="images/AI_setup.png" alt="AI layout settings" width="760" /><br/>
+  <sub>Global AI layout settings (Providers & Cache management)</sub>
+</p>
+
 ### Draft sync
 
 - Supports up to 5 WeChat Official Account profiles.
@@ -92,6 +105,10 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 - Mermaid diagrams rendered by Obsidian can stay visible in live preview.
 - During copy and draft sync, Mermaid diagrams are rasterized to PNG so WeChat receives a safer export format.
 - The export path tries to preserve the original Mermaid colors instead of applying math-specific SVG cleanup.
+
+<p align="center">
+  <img src="images/mermaid_render.png" alt="Mermaid diagram rendered in the converter preview" height="460" />
+</p>
 
 ### Quote and callout styles
 

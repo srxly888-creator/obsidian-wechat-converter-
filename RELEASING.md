@@ -30,7 +30,9 @@ This project now uses the standard Obsidian three-file runtime.
 - `manifest.json`
 - `styles.css`
 - `README.md`
+- `README.zh-CN.md`
 - `LICENSE`
+- `images/`
 
 ## Obsidian Community Plugins
 
