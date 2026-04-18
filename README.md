@@ -4,7 +4,7 @@
 
 Convert Obsidian Markdown into polished WeChat articles with live preview, copy-to-editor, and optional draft sync.
 
-![Version](https://img.shields.io/badge/version-2.6.9-blue)
+![Version](https://img.shields.io/badge/version-2.7.0-blue)
 ![Obsidian](https://img.shields.io/badge/Obsidian-1.0.0+-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -30,9 +30,10 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
   <img src="images/setting_panel_dark.png" alt="Settings panel (dark)" height="460" />
 </p>
 
-## What's New Since 2.6.9
+## What's New in 2.7.0
 
 - AI layout planning now lives inside the converter workflow, with provider management, connection testing, built-in layout families, color palette switching, schema validation, and reusable debug snapshots.
+- AI layout results can be reused per layout family, applied from cache, recolored without regenerating, and recovered after failed regeneration when a previous successful result exists.
 - Mermaid diagrams keep the Obsidian preview experience, then switch to PNG automatically during copy and draft sync so WeChat does not strip or choke on large SVG payloads.
 - Draft sync gained account-level publish defaults for supported WeChat fields, so each Official Account profile can keep its own source URL and comment preferences.
 - Quote and callout styling now includes a neutral gray mode for calmer reading, plus semantic accents for common callout types such as `note`, `tip`, `warning`, and `danger`.
@@ -71,8 +72,10 @@ This plugin is built for writers who publish from Obsidian to WeChat Official Ac
 - Configure AI providers from the plugin settings page. The current UI supports OpenAI-compatible, Gemini-compatible, and Anthropic-compatible endpoints.
 - Open `AI 编排` from the converter toolbar to generate layout suggestions for the current article.
 - Choose from three built-in layout families: `Source-first`, `Tutorial cards`, and `Editorial lite`.
+- Choose an automatic color recommendation or pick a specific palette before generation.
 - Switch color palettes after generation to reuse the current layout structure without rerunning the full layout plan.
-- Review schema warnings, inspect layout JSON, or copy a debug prompt snapshot before applying the result to preview.
+- Reopen cached results by layout family and apply them directly when the current article still matches the cached source.
+- Review schema warnings, inspect layout JSON, or copy an AI debugging prompt before applying the result to preview.
 - If regeneration fails, the last successful layout can still remain available instead of forcing you back to the plain preview immediately.
 
 ### Draft sync
