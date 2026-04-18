@@ -1,0 +1,156 @@
+[简体中文](./README.md) | English
+
+# Wechat Converter for Obsidian
+
+Convert Obsidian Markdown into polished WeChat articles with live preview, copy-to-editor, and optional draft sync.
+
+![Version](https://img.shields.io/badge/version-2.7.0-blue)
+![Obsidian](https://img.shields.io/badge/Obsidian-1.0.0+-purple)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+This plugin is built for writers who publish from Obsidian to WeChat Official Accounts. It focuses on the last mile of publishing: preserving layout, code blocks, math, images, and article metadata while keeping the workflow fast inside Obsidian.
+
+> This project is deeply refactored from [ai-writing-plugins](https://github.com/Ceeon/ai-writing-plugins). Proper attribution is retained in this repository.
+
+If this plugin saves you time when formatting, copying, or syncing WeChat articles, you can [support ongoing maintenance](./docs/support.md).
+
+## Highlights
+
+- Live article preview with fast side-by-side rendering.
+- Copy rich HTML directly into the WeChat editor.
+- Sync articles to the WeChat draft box with multi-account support.
+- Account-level draft defaults for source URL and comment settings.
+- Math rendering with SVG output for better WeChat compatibility.
+- Mermaid diagrams rendered by Obsidian preview, then rasterized to PNG on export for WeChat-safe copy and sync.
+- Local image handling for wiki links, relative paths, absolute paths, and GIFs.
+- Visual settings panel with theme, typography, preview, code block controls, and quote style options.
+- Experimental AI layout planning with provider profiles, built-in layout families, schema checks, and debug snapshots.
+- Chinese punctuation normalization for rendered output, with protection for code and technical tokens.
+
+<p align="center">
+  <img src="images/setting_panel_light.png" alt="Settings panel (light)" height="460" />
+  <img src="images/setting_panel_dark.png" alt="Settings panel (dark)" height="460" />
+</p>
+
+## What's New in 2.7.0
+
+- AI layout planning now lives inside the converter workflow, with provider management, connection testing, built-in layout families, color palette switching, schema validation, and reusable debug snapshots.
+- AI layout results can be reused per layout family, applied from cache, recolored without regenerating, and recovered after failed regeneration when a previous successful result exists.
+- Mermaid diagrams keep the Obsidian preview experience, then switch to PNG automatically during copy and draft sync so WeChat does not strip or choke on large SVG payloads.
+- Draft sync gained account-level publish defaults for supported WeChat fields, so each Official Account profile can keep its own source URL and comment preferences.
+- Quote and callout styling now includes a neutral gray mode for calmer reading, plus semantic accents for common callout types such as `note`, `tip`, `warning`, and `danger`.
+
+## Installation
+
+### Manual install
+
+1. Download the latest release from [GitHub Releases](https://github.com/DavidLam-oss/obsidian-wechat-converter/releases).
+2. Extract the plugin into your vault under `.obsidian/plugins/obsidian-wechat-converter/`.
+3. Make sure the folder contains:
+   - `main.js`
+   - `manifest.json`
+   - `styles.css`
+4. Reload Obsidian and enable the plugin.
+
+### BRAT
+
+1. Install and enable BRAT.
+2. Add the repository `DavidLam-oss/obsidian-wechat-converter`.
+3. After installation, do a quick smoke test:
+   - Open the converter panel
+   - Check preview rendering
+   - Copy once to WeChat
+   - Optionally test draft sync
+
+## Usage
+
+1. Open the plugin from the left ribbon icon or the command palette with `Open Wechat Converter`.
+2. Edit your Markdown note as usual. The right panel updates the article preview in real time.
+3. Click `Copy to WeChat` to paste rich HTML into the WeChat editor.
+4. Optionally click `Sync to Draft` after configuring your WeChat AppID and AppSecret in plugin settings.
+
+### Experimental AI layout planning
+
+- Configure AI providers from the plugin settings page. The current UI supports OpenAI-compatible, Gemini-compatible, and Anthropic-compatible endpoints.
+- Open `AI 编排` from the converter toolbar to generate layout suggestions for the current article.
+- Choose from three built-in layout families: `Source-first`, `Tutorial cards`, and `Editorial lite`.
+- Choose an automatic color recommendation or pick a specific palette before generation.
+- Switch color palettes after generation to reuse the current layout structure without rerunning the full layout plan.
+- Reopen cached results by layout family and apply them directly when the current article still matches the cached source.
+- Review schema warnings, inspect layout JSON, or copy an AI debugging prompt before applying the result to preview.
+- If regeneration fails, the last successful layout can still remain available instead of forcing you back to the plain preview immediately.
+
+<table>
+  <tr>
+    <td align="center"><img src="images/AI.png" alt="AI layout panel before generation" height="400" /><br/><sub>1. Configure & Plan</sub></td>
+    <td align="center"><img src="images/AI_completed.png" alt="AI layout panel with cached result" height="400" /><br/><sub>2. Generate & Cache</sub></td>
+    <td align="center"><img src="images/AI_render.png" alt="AI layout applied to article preview" height="400" /><br/><sub>3. Apply to Preview</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="images/AI_setup.png" alt="AI layout settings" width="760" /><br/>
+  <sub>Global AI layout settings (Providers & Cache management)</sub>
+</p>
+
+### Draft sync
+
+- Supports up to 5 WeChat Official Account profiles.
+- Each account can store draft defaults for `content_source_url`, comments, and fans-only comments.
+- These defaults are intentionally limited to fields supported by the current WeChat draft flow.
+- Uses `cover` and `excerpt` from frontmatter when available.
+- Falls back to the first body image and auto-generated excerpt when not provided.
+- Can optionally clean up a configured output directory after a successful sync.
+
+### Mermaid export
+
+- Mermaid diagrams rendered by Obsidian can stay visible in live preview.
+- During copy and draft sync, Mermaid diagrams are rasterized to PNG so WeChat receives a safer export format.
+- The export path tries to preserve the original Mermaid colors instead of applying math-specific SVG cleanup.
+
+<p align="center">
+  <img src="images/mermaid_render.png" alt="Mermaid diagram rendered in the converter preview" height="460" />
+</p>
+
+### Quote and callout styles
+
+- Built-in themes now support a lighter quote style workflow, including a neutral gray mode for blockquotes.
+- Callouts use semantic accent colors for common types such as `note`, `tip`, `warning`, and `danger`.
+- Unknown callout types fall back to an info-style treatment instead of reusing the current theme color.
+
+### Chinese punctuation normalization
+
+The right-side settings panel includes `正文标点标准化`.
+
+- Scope: preview, copy result, and draft sync output only.
+- Does not modify the original Markdown file.
+- Converts common ASCII punctuation into Chinese punctuation in Chinese writing context.
+- Protects inline code, fenced code blocks, URLs, emails, file paths, CLI tokens, environment variables, math-like expressions, and other technical tokens.
+
+### Cloudflare proxy
+
+If WeChat API IP allowlisting is a problem in your network, you can use a Cloudflare Worker proxy. Detailed deployment steps and worker code are available in the Chinese guide:
+
+- [Proxy setup in Chinese](./README.md#-代理设置解决-ip-白名单问题)
+
+## Screenshots
+
+<p align="center">
+  <img src="images/phone_style.png" alt="Phone preview" height="420" />
+  <img src="images/code_render.png" alt="Mac-style code block" height="420" />
+</p>
+
+## Who this is for
+
+- Obsidian users publishing to WeChat Official Accounts
+- Technical writers who need code, math, and image fidelity
+- Chinese-language creators who want a faster publishing workflow
+
+## More docs
+
+- Chinese documentation: [README.md](./README.md)
+- Release notes: [RELEASE_NOTES](./RELEASE_NOTES/)
+
+## License
+
+MIT
