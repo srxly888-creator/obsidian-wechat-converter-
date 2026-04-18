@@ -492,6 +492,7 @@ class AppleStyleView extends ItemView {
     this.aiLayoutBtn = null;
     this.settingsBtn = null;
     this.aiLayoutDebugMode = '';
+    this.aiLayoutActiveGenerationSelection = null;
   }
 
   getViewType() {
@@ -2293,8 +2294,8 @@ class AppleStyleView extends ItemView {
   }
 
   getAiColorPaletteLabel(value) {
-    if (value === AI_LAYOUT_SELECTION_AUTO) return '自动推荐';
-    return getColorPaletteById(value)?.label || value || '自动推荐';
+    if (value === AI_LAYOUT_SELECTION_AUTO) return '自动配色';
+    return getColorPaletteById(value)?.label || value || '自动配色';
   }
 
   getVisibleAiSchemaValidation(state) {
@@ -2840,9 +2841,15 @@ class AppleStyleView extends ItemView {
     const context = this.getCurrentLayoutContext();
     const storedState = this.getCurrentArticleLayoutState();
     const currentSelection = this.getCurrentAiLayoutSelection();
+    const activeGenerationSelection = this.aiLayoutLoading === true
+      ? normalizeLayoutSelection(this.aiLayoutActiveGenerationSelection || {}, {
+        layoutFamily: aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+        colorPalette: aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO,
+      })
+      : null;
     const effectiveSelection = {
-      layoutFamily: currentSelection.layoutFamily || storedState?.selection?.layoutFamily || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
-      colorPalette: currentSelection.colorPalette || storedState?.selection?.colorPalette || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO,
+      layoutFamily: activeGenerationSelection?.layoutFamily || currentSelection.layoutFamily || storedState?.selection?.layoutFamily || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: activeGenerationSelection?.colorPalette || currentSelection.colorPalette || storedState?.selection?.colorPalette || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO,
     };
     const state = storedState;
     if (
@@ -3055,7 +3062,7 @@ class AppleStyleView extends ItemView {
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (state?.status === 'schema-error') {
-      setSummary(hasReusableLayout ? '上一版结果仍可继续使用。' : '这次生成没有成功。');
+      setSummary(hasReusableLayout ? '上一版结果仍可继续使用。' : '');
       this.renderAiLayoutMetaChips([
         ...(providerLabel ? [`Provider ${providerLabel}`] : []),
         ...(modelLabel ? [`模型 ${modelLabel}`] : []),
@@ -3064,7 +3071,7 @@ class AppleStyleView extends ItemView {
       setMetaNote(hasReusableLayout ? '如果当前效果还能用，可以直接继续使用上一版。' : '可以重试一次；如仍失败，再到高级里查看具体原因。');
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if (state?.status === 'error' && state.lastError) {
-      setSummary(hasReusableLayout ? '上一版结果仍可继续使用。' : '生成失败，请稍后重试。');
+      setSummary(hasReusableLayout ? '上一版结果仍可继续使用。' : '');
       this.renderAiLayoutMetaChips([
         ...(providerLabel ? [`Provider ${providerLabel}`] : []),
         ...(modelLabel ? [`模型 ${modelLabel}`] : []),
@@ -3233,6 +3240,7 @@ class AppleStyleView extends ItemView {
     }
     const originalText = this.aiGenerateBtn?.textContent;
     try {
+      this.aiLayoutActiveGenerationSelection = selection;
       this.aiLayoutLoading = true;
       this.refreshAiLayoutPanel();
       if (this.aiGenerateBtn) {
@@ -3347,6 +3355,7 @@ class AppleStyleView extends ItemView {
       );
     } finally {
       this.aiLayoutLoading = false;
+      this.aiLayoutActiveGenerationSelection = null;
       if (this.aiGenerateBtn) {
         this.aiGenerateBtn.disabled = false;
         this.aiGenerateBtn.setText(originalText || '生成并应用');

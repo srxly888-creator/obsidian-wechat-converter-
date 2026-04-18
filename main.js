@@ -10621,6 +10621,7 @@ var AppleStyleView = class extends ItemView {
     this.aiLayoutBtn = null;
     this.settingsBtn = null;
     this.aiLayoutDebugMode = "";
+    this.aiLayoutActiveGenerationSelection = null;
   }
   getViewType() {
     return APPLE_STYLE_VIEW;
@@ -12201,8 +12202,8 @@ var AppleStyleView = class extends ItemView {
   getAiColorPaletteLabel(value) {
     var _a;
     if (value === AI_LAYOUT_SELECTION_AUTO)
-      return "\u81EA\u52A8\u63A8\u8350";
-    return ((_a = getColorPaletteById(value)) == null ? void 0 : _a.label) || value || "\u81EA\u52A8\u63A8\u8350";
+      return "\u81EA\u52A8\u914D\u8272";
+    return ((_a = getColorPaletteById(value)) == null ? void 0 : _a.label) || value || "\u81EA\u52A8\u914D\u8272";
   }
   getVisibleAiSchemaValidation(state) {
     var _a, _b;
@@ -12722,9 +12723,13 @@ var AppleStyleView = class extends ItemView {
     const context = this.getCurrentLayoutContext();
     const storedState = this.getCurrentArticleLayoutState();
     const currentSelection = this.getCurrentAiLayoutSelection();
+    const activeGenerationSelection = this.aiLayoutLoading === true ? normalizeLayoutSelection(this.aiLayoutActiveGenerationSelection || {}, {
+      layoutFamily: aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    }) : null;
     const effectiveSelection = {
-      layoutFamily: currentSelection.layoutFamily || ((_a = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _a.layoutFamily) || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
-      colorPalette: currentSelection.colorPalette || ((_b = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _b.colorPalette) || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+      layoutFamily: (activeGenerationSelection == null ? void 0 : activeGenerationSelection.layoutFamily) || currentSelection.layoutFamily || ((_a = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _a.layoutFamily) || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: (activeGenerationSelection == null ? void 0 : activeGenerationSelection.colorPalette) || currentSelection.colorPalette || ((_b = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _b.colorPalette) || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
     };
     const state = storedState;
     if (effectiveSelection.layoutFamily === "source-first" && context.sourcePath && (!state || (state.status === "error" || state.status === "schema-error") && !((_d = (_c = state.layoutJson) == null ? void 0 : _c.blocks) == null ? void 0 : _d.length))) {
@@ -12902,7 +12907,7 @@ var AppleStyleView = class extends ItemView {
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
-      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\u3002");
+      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "");
       this.renderAiLayoutMetaChips([
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
@@ -12911,7 +12916,7 @@ var AppleStyleView = class extends ItemView {
       setMetaNote(hasReusableLayout ? "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u53EF\u4EE5\u76F4\u63A5\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002" : "\u53EF\u4EE5\u91CD\u8BD5\u4E00\u6B21\uFF1B\u5982\u4ECD\u5931\u8D25\uFF0C\u518D\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u5177\u4F53\u539F\u56E0\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
-      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "\u751F\u6210\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5\u3002");
+      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "");
       this.renderAiLayoutMetaChips([
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
@@ -13071,6 +13076,7 @@ var AppleStyleView = class extends ItemView {
     }
     const originalText = (_a = this.aiGenerateBtn) == null ? void 0 : _a.textContent;
     try {
+      this.aiLayoutActiveGenerationSelection = selection;
       this.aiLayoutLoading = true;
       this.refreshAiLayoutPanel();
       if (this.aiGenerateBtn) {
@@ -13172,6 +13178,7 @@ var AppleStyleView = class extends ItemView {
       );
     } finally {
       this.aiLayoutLoading = false;
+      this.aiLayoutActiveGenerationSelection = null;
       if (this.aiGenerateBtn) {
         this.aiGenerateBtn.disabled = false;
         this.aiGenerateBtn.setText(originalText || "\u751F\u6210\u5E76\u5E94\u7528");

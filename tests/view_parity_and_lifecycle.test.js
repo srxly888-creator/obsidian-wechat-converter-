@@ -2170,6 +2170,10 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.lastResolvedSourcePath = 'notes/demo.md';
     view.lastResolvedMarkdown = '# demo';
     view.aiLayoutLoading = true;
+    view.aiLayoutActiveGenerationSelection = {
+      layoutFamily: 'auto',
+      colorPalette: 'tech-green',
+    };
 
     global.AppleTheme = {
       getThemeList: () => [{ value: 'github', label: '简约' }],
@@ -2182,6 +2186,7 @@ describe('AppleStyleView native render + lifecycle', () => {
 
     expect(container.querySelector('.apple-ai-layout-overlay')?.classList.contains('is-loading')).toBe(true);
     expect(container.querySelector('.apple-ai-layout-loading-mask')?.classList.contains('visible')).toBe(true);
+    expect(container.querySelector('.apple-ai-layout-loading-text')?.textContent).toContain('自动推荐 · 科技绿');
     expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('正在生成并应用新的编排');
   });
 
@@ -2599,12 +2604,82 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.refreshAiLayoutPanel();
 
     expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('生成失败');
-    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('这次生成没有成功');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('这次生成没有成功');
+    expect(container.querySelector('.apple-ai-layout-summary')?.hidden).toBe(true);
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '重新生成并应用' && button.disabled === false)).toBe(true);
     const advancedToggle = container.querySelector('.apple-ai-layout-advanced-toggle');
     advancedToggle.click();
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('Schema 2 项');
     expect(container.querySelector('.apple-ai-layout-issues')?.textContent).toContain('不支持的 block type');
+  });
+
+  it('refreshAiLayoutPanel should avoid duplicate copy on hard generation failure', () => {
+    const errorState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: '123',
+      providerId: 'provider-1',
+      model: 'deepseek-chat',
+      stylePack: 'tech-green',
+      status: 'error',
+      lastError: 'timeout',
+      lastAttemptStatus: 'error',
+      lastAttemptError: 'timeout',
+      layoutJson: { blocks: [] },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          defaultProviderId: 'provider-1',
+          providers: [{
+            id: 'provider-1',
+            name: 'DeepSeek',
+            kind: 'openai-compatible',
+            baseUrl: 'https://api.example.com/v1',
+            apiKey: 'secret',
+            model: 'deepseek-chat',
+            enabled: true,
+          }],
+          articleLayoutsByPath: {
+            'notes/demo.md': errorState,
+          },
+        },
+      },
+      saveSettings: vi.fn(),
+      getArticleLayoutState: vi.fn(() => errorState),
+    });
+    view.app = {
+      isMobile: false,
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.theme = { update: vi.fn() };
+    view.converter = { updateConfig: vi.fn() };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    errorState.sourceHash = String(view.simpleHash('# demo'));
+    view.lastResolvedSourceHash = errorState.sourceHash;
+
+    global.AppleTheme = {
+      getThemeList: () => [{ value: 'github', label: '简约' }],
+      getColorList: () => [{ value: 'blue', color: '#0366d6' }],
+    };
+
+    const container = createObsidianLikeElement();
+    view.createSettingsPanel(container);
+    view.refreshAiLayoutPanel();
+
+    const status = container.querySelector('.apple-ai-layout-status');
+    expect(status.querySelector('.apple-ai-layout-badge')?.textContent).toContain('生成失败');
+    expect(status.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('生成失败，请重试或检查 AI 设置');
+    expect(status.querySelector('.apple-ai-layout-summary')?.hidden).toBe(true);
+    expect(status.textContent.match(/生成失败/g)).toHaveLength(2);
   });
 
   it('refreshAiLayoutPanel should show schema warnings even when generation succeeds', () => {
