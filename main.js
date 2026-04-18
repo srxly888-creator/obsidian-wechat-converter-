@@ -10308,6 +10308,7 @@ var DEFAULT_SETTINGS = {
   ai: createDefaultAiSettings()
 };
 var MAX_ACCOUNTS = 5;
+var AI_LAYOUT_SOURCE_SWITCH_STALE_SUPPRESS_MS = 700;
 var DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS = Object.freeze({
   contentSourceUrl: "",
   openComment: true,
@@ -10611,6 +10612,10 @@ var AppleStyleView = class extends ItemView {
     this.lastResolvedMarkdown = "";
     this.lastResolvedSourcePath = "";
     this.lastResolvedSourceHash = "";
+    this.aiLayoutSourceSwitchPath = "";
+    this.aiLayoutStaleSuppressPath = "";
+    this.aiLayoutStaleSuppressUntil = 0;
+    this.aiLayoutStaleSuppressTimer = null;
     this.baseRenderedHtml = null;
     this.aiPreviewApplied = false;
     this.aiLayoutBtn = null;
@@ -10678,8 +10683,15 @@ var AppleStyleView = class extends ItemView {
         const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (activeView && activeView.file) {
           this.lastActiveFile = activeView.file;
+          const nextSourcePath = activeView.file.path || "";
+          if (nextSourcePath && nextSourcePath !== this.lastResolvedSourcePath) {
+            this.markAiLayoutSourceSwitch(nextSourcePath);
+          }
         }
         this.updateCurrentDoc();
+        if (this.shouldSyncAiLayoutUi()) {
+          this.refreshAiLayoutPanel();
+        }
         if (activeView) {
           this.registerScrollSync(activeView);
         }
@@ -10753,6 +10765,40 @@ var AppleStyleView = class extends ItemView {
     }
     this.previewContainer.removeClass("apple-preview-loading");
     delete this.previewContainer.dataset.loadingText;
+  }
+  markAiLayoutSourceSwitch(sourcePath = "") {
+    if (!sourcePath)
+      return;
+    this.aiLayoutSourceSwitchPath = sourcePath;
+    this.aiLayoutStaleSuppressPath = sourcePath;
+    this.aiLayoutStaleSuppressUntil = Date.now() + AI_LAYOUT_SOURCE_SWITCH_STALE_SUPPRESS_MS;
+    if (this.aiLayoutStaleSuppressTimer) {
+      clearTimeout(this.aiLayoutStaleSuppressTimer);
+    }
+    this.aiLayoutStaleSuppressTimer = setTimeout(() => {
+      this.aiLayoutStaleSuppressTimer = null;
+      if (this.aiLayoutStaleSuppressPath === sourcePath && Date.now() >= this.aiLayoutStaleSuppressUntil) {
+        this.aiLayoutStaleSuppressPath = "";
+        this.aiLayoutStaleSuppressUntil = 0;
+      }
+      if (this.shouldSyncAiLayoutUi()) {
+        this.refreshAiLayoutPanel();
+      }
+    }, AI_LAYOUT_SOURCE_SWITCH_STALE_SUPPRESS_MS + 40);
+  }
+  completeAiLayoutSourceSwitch(sourcePath = "") {
+    if (sourcePath && this.aiLayoutSourceSwitchPath === sourcePath) {
+      this.aiLayoutSourceSwitchPath = "";
+    }
+  }
+  isAiLayoutStaleSuppressedForPath(sourcePath = "") {
+    if (!sourcePath || this.aiLayoutStaleSuppressPath !== sourcePath)
+      return false;
+    if (Date.now() < this.aiLayoutStaleSuppressUntil)
+      return true;
+    this.aiLayoutStaleSuppressPath = "";
+    this.aiLayoutStaleSuppressUntil = 0;
+    return false;
   }
   /**
    * 注册同步滚动 (双向: Editor <-> Preview)
@@ -11564,7 +11610,11 @@ var AppleStyleView = class extends ItemView {
       text: "\u5C1A\u672A\u751F\u6210\u5F53\u524D\u6587\u7AE0\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002"
     });
     this.aiCachedLayoutList = this.aiLayoutStatusBody.createDiv({ cls: "apple-ai-layout-cache-list" });
-    const controlSection = area.createDiv({ cls: "apple-ai-layout-section" });
+    this.aiLayoutSummary = this.aiLayoutStatusBody.createDiv({
+      cls: "apple-ai-layout-summary",
+      text: "\u751F\u6210\u540E\u4F1A\u5728\u8FD9\u91CC\u5C55\u793A\u5F53\u524D\u7ED3\u679C\u7684\u7B80\u8981\u8BF4\u660E\u3002"
+    });
+    const controlSection = area.createDiv({ cls: "apple-ai-layout-section apple-ai-layout-controls-section" });
     const layoutControl = controlSection.createDiv({ cls: "apple-ai-layout-control" });
     layoutControl.createEl("label", { cls: "apple-setting-label", text: "\u5E03\u5C40" });
     this.aiLayoutFamilySelect = layoutControl.createEl("select", { cls: "apple-select" });
@@ -11656,14 +11706,10 @@ var AppleStyleView = class extends ItemView {
     this.aiResetBtn.addEventListener("click", () => this.restoreBasePreview());
     this.aiRestoreBlocksBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u5DF2\u79FB\u9664" });
     this.aiRestoreBlocksBtn.addEventListener("click", () => this.restoreRemovedAiLayoutBlocks());
-    const summarySection = area.createDiv({ cls: "apple-ai-layout-section" });
-    summarySection.createEl("label", { cls: "apple-setting-label", text: "\u7ED3\u679C\u6458\u8981" });
-    this.aiLayoutSummary = summarySection.createDiv({
-      cls: "apple-ai-layout-summary",
-      text: "\u751F\u6210\u540E\u4F1A\u5728\u8FD9\u91CC\u5C55\u793A\u5F53\u524D\u7ED3\u679C\u7684\u7B80\u8981\u8BF4\u660E\u3002"
-    });
-    this.aiLayoutMetaNote = summarySection.createDiv({ cls: "apple-ai-layout-mini-note" });
-    this.aiBlockList = area.createDiv({ cls: "apple-ai-layout-block-list" });
+    this.aiResultSection = area.createDiv({ cls: "apple-ai-layout-section apple-ai-layout-result-section" });
+    this.aiResultSection.createEl("label", { cls: "apple-setting-label", text: "\u533A\u5757" });
+    this.aiLayoutMetaNote = this.aiResultSection.createDiv({ cls: "apple-ai-layout-mini-note" });
+    this.aiBlockList = this.aiResultSection.createDiv({ cls: "apple-ai-layout-block-list" });
     const advancedSection = area.createDiv({ cls: "apple-ai-layout-section apple-ai-layout-advanced" });
     this.aiAdvancedToggleBtn = advancedSection.createEl("button", {
       cls: "apple-ai-layout-advanced-toggle",
@@ -11689,13 +11735,15 @@ var AppleStyleView = class extends ItemView {
     this.aiDebugPanelTitle = debugHeader.createDiv({ cls: "apple-ai-layout-debug-title", text: "\u8C03\u8BD5\u8F93\u51FA" });
     const debugTools = debugHeader.createDiv({ cls: "apple-ai-layout-debug-tools" });
     this.aiCopyPromptBtn = debugTools.createEl("button", {
-      cls: "apple-ai-layout-link apple-ai-layout-debug-copy",
-      text: "\u590D\u5236\u4E3A Prompt"
+      cls: "apple-ai-layout-debug-copy",
+      text: "\u590D\u5236\u7ED9 AI",
+      title: "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u6587\u7AE0\u6458\u5F55\u3001\u5E03\u5C40\u6458\u8981\u548C\u8C03\u8BD5\u4FE1\u606F\u7684\u6392\u67E5 Prompt"
     });
     this.aiCopyPromptBtn.addEventListener("click", () => this.copyAiLayoutPromptContext());
     this.aiCopyDebugBtn = debugTools.createEl("button", {
-      cls: "apple-ai-layout-link apple-ai-layout-debug-copy",
-      text: "\u590D\u5236\u5F53\u524D\u5FEB\u7167"
+      cls: "apple-ai-layout-debug-copy",
+      text: "\u590D\u5236\u5F53\u524D\u5185\u5BB9",
+      title: "\u590D\u5236\u5F53\u524D\u8C03\u8BD5\u9762\u677F\u5185\u5BB9"
     });
     this.aiCopyDebugBtn.addEventListener("click", () => this.copyAiLayoutDebugSnapshot());
     this.aiDebugPanelBody = this.aiDebugPanel.createEl("pre", { cls: "apple-ai-layout-debug-body" });
@@ -11948,15 +11996,25 @@ var AppleStyleView = class extends ItemView {
     this.refreshAiLayoutPanel();
   }
   getCurrentLayoutContext() {
-    var _a, _b, _c, _d, _e;
-    const sourcePath = this.lastResolvedSourcePath || ((_d = (_c = (_b = (_a = this.app) == null ? void 0 : _a.workspace) == null ? void 0 : _b.getActiveFile) == null ? void 0 : _c.call(_b)) == null ? void 0 : _d.path) || "";
-    const markdown = this.lastResolvedMarkdown || "";
+    var _a, _b, _c, _d;
+    const activeFile = ((_c = (_b = (_a = this.app) == null ? void 0 : _a.workspace) == null ? void 0 : _b.getActiveFile) == null ? void 0 : _c.call(_b)) || this.lastActiveFile || null;
+    const activePath = (activeFile == null ? void 0 : activeFile.path) || "";
+    const resolvedPath = this.lastResolvedSourcePath || "";
+    const canUseResolvedSource = !activePath || !resolvedPath || activePath === resolvedPath;
+    const sourcePath = canUseResolvedSource ? resolvedPath || activePath : activePath;
+    const markdown = canUseResolvedSource ? this.lastResolvedMarkdown || "" : "";
     const sourceHash = markdown ? String(this.simpleHash(markdown)) : "";
+    const isSourcePending = !!(activePath && resolvedPath && activePath !== resolvedPath);
+    const isSourceSwitching = !!(isSourcePending && this.aiLayoutSourceSwitchPath && this.aiLayoutSourceSwitchPath === activePath);
+    const isStaleSuppressed = this.isAiLayoutStaleSuppressedForPath(sourcePath);
     return {
       sourcePath,
       markdown,
       sourceHash,
-      title: ((_e = this.getPublishContextFile()) == null ? void 0 : _e.basename) || "\u672A\u547D\u540D\u6587\u7AE0"
+      isSourcePending,
+      isSourceSwitching,
+      isStaleSuppressed,
+      title: ((_d = activeFile || this.getPublishContextFile()) == null ? void 0 : _d.basename) || "\u672A\u547D\u540D\u6587\u7AE0"
     };
   }
   getCurrentAiLayoutSelection() {
@@ -12188,12 +12246,14 @@ var AppleStyleView = class extends ItemView {
       if (!((_b = (_a = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length))
         return null;
       const isCurrentContent = !!(context.sourceHash && state.sourceHash && state.sourceHash === context.sourceHash);
+      const isStaleContent = !!(!context.isStaleSuppressed && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
       const fromAuto = ((_c = state.selection) == null ? void 0 : _c.layoutFamily) === AI_LAYOUT_SELECTION_AUTO;
       return {
         layoutFamily,
         state,
         label: this.getAiLayoutFamilyLabel(layoutFamily),
         isCurrentContent,
+        isStaleContent,
         fromAuto,
         updatedAt: Number(state.updatedAt || 0)
       };
@@ -12214,12 +12274,12 @@ var AppleStyleView = class extends ItemView {
     const activeItem = items.find((item) => item.layoutFamily === currentLayoutFamily) || items[0];
     if (items.length === 1 && activeItem) {
       const inline = this.aiCachedLayoutList.createDiv({ cls: "apple-ai-layout-cache-inline" });
-      const sourceText = activeItem.fromAuto ? "\u7531\u81EA\u52A8\u63A8\u8350\u751F\u6210" : "\u5F53\u524D\u98CE\u683C";
+      const sourceText = activeItem.fromAuto ? "\u7531\u81EA\u52A8\u63A8\u8350\u751F\u6210" : "\u624B\u52A8\u9009\u62E9";
       inline.createEl("span", {
         cls: "apple-ai-layout-cache-name",
-        text: `${sourceText} \xB7 ${activeItem.label}`
+        text: `${activeItem.label} \xB7 ${sourceText}`
       });
-      if (!activeItem.isCurrentContent) {
+      if (activeItem.isStaleContent) {
         inline.createEl("span", { cls: "apple-ai-layout-cache-separator", text: "\xB7" });
         inline.createEl("span", {
           cls: "apple-ai-layout-cache-state is-stale",
@@ -12228,23 +12288,32 @@ var AppleStyleView = class extends ItemView {
       }
       return;
     }
-    this.aiCachedLayoutList.createEl("span", { cls: "apple-ai-layout-cache-caption", text: "\u5DF2\u7F13\u5B58" });
-    items.forEach((item) => {
-      const button = this.aiCachedLayoutList.createEl("button", {
-        cls: "apple-ai-layout-cache-chip",
-        title: item.isCurrentContent ? "\u9884\u89C8\u8FD9\u4EFD\u7F13\u5B58" : "\u9884\u89C8\u8FD9\u4EFD\u65E7\u5185\u5BB9\u7F13\u5B58"
+    const activeRow = this.aiCachedLayoutList.createDiv({ cls: "apple-ai-layout-cache-inline" });
+    const activeSourceText = (activeItem == null ? void 0 : activeItem.fromAuto) ? "\u7531\u81EA\u52A8\u63A8\u8350\u751F\u6210" : "\u624B\u52A8\u9009\u62E9";
+    activeRow.createEl("span", {
+      cls: "apple-ai-layout-cache-name",
+      text: `${(activeItem == null ? void 0 : activeItem.label) || this.getAiLayoutFamilyLabel(currentLayoutFamily)} \xB7 ${activeSourceText}`
+    });
+    if (activeItem == null ? void 0 : activeItem.isStaleContent) {
+      activeRow.createEl("span", { cls: "apple-ai-layout-cache-separator", text: "\xB7" });
+      activeRow.createEl("span", {
+        cls: "apple-ai-layout-cache-state is-stale",
+        text: "\u57FA\u4E8E\u65E7\u5185\u5BB9"
       });
-      button.classList.toggle("active", item.layoutFamily === currentLayoutFamily);
+    }
+    const switchRow = this.aiCachedLayoutList.createDiv({ cls: "apple-ai-layout-cache-switch-row" });
+    switchRow.createEl("span", { cls: "apple-ai-layout-cache-caption", text: "\u5207\u6362\u5230" });
+    items.filter((item) => item.layoutFamily !== (activeItem == null ? void 0 : activeItem.layoutFamily)).forEach((item) => {
+      const button = switchRow.createEl("button", {
+        cls: "apple-ai-layout-cache-chip",
+        title: item.isStaleContent ? "\u9884\u89C8\u8FD9\u4EFD\u57FA\u4E8E\u65E7\u5185\u5BB9\u7684\u7F13\u5B58" : "\u9884\u89C8\u8FD9\u4EFD\u7F13\u5B58"
+      });
       button.disabled = isLoading;
       button.dataset.layoutFamily = item.layoutFamily;
       button.createEl("span", { cls: "apple-ai-layout-cache-name", text: item.label });
-      if (item.fromAuto) {
-        button.createEl("span", { cls: "apple-ai-layout-cache-origin", text: "\u81EA\u52A8\u63A8\u8350\u751F\u6210" });
+      if (item.isStaleContent) {
+        button.createEl("span", { cls: "apple-ai-layout-cache-state is-stale", text: "\u57FA\u4E8E\u65E7\u5185\u5BB9" });
       }
-      button.createEl("span", {
-        cls: `apple-ai-layout-cache-state ${item.isCurrentContent ? "is-current" : "is-stale"}`,
-        text: item.isCurrentContent ? "\u5F53\u524D\u5185\u5BB9" : "\u65E7\u5185\u5BB9"
-      });
       button.addEventListener("click", () => this.previewCachedAiLayoutFamily(item.layoutFamily));
     });
   }
@@ -12608,6 +12677,14 @@ var AppleStyleView = class extends ItemView {
       this.aiDebugPanel.classList.remove("visible");
       this.aiDebugPanelTitle.setText("\u8C03\u8BD5\u8F93\u51FA");
       this.aiDebugPanelBody.setText("");
+      if (this.aiCopyPromptBtn) {
+        this.aiCopyPromptBtn.setText("\u590D\u5236\u7ED9 AI");
+        this.aiCopyPromptBtn.title = "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u6587\u7AE0\u6458\u5F55\u3001\u5E03\u5C40\u6458\u8981\u548C\u8C03\u8BD5\u4FE1\u606F\u7684\u6392\u67E5 Prompt";
+      }
+      if (this.aiCopyDebugBtn) {
+        this.aiCopyDebugBtn.setText("\u590D\u5236\u5F53\u524D\u5185\u5BB9");
+        this.aiCopyDebugBtn.title = "\u590D\u5236\u5F53\u524D\u8C03\u8BD5\u9762\u677F\u5185\u5BB9";
+      }
       if (this.aiCopyDebugBtn)
         this.aiCopyDebugBtn.disabled = true;
       return;
@@ -12615,16 +12692,28 @@ var AppleStyleView = class extends ItemView {
     this.aiDebugPanel.classList.add("visible");
     if (this.aiCopyDebugBtn)
       this.aiCopyDebugBtn.disabled = false;
+    if (this.aiCopyPromptBtn) {
+      this.aiCopyPromptBtn.setText("\u590D\u5236\u7ED9 AI");
+      this.aiCopyPromptBtn.title = this.aiLayoutDebugMode === "error" ? "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u9519\u8BEF\u8BE6\u60C5\u3001\u6587\u7AE0\u6458\u5F55\u548C\u5E03\u5C40\u6458\u8981\u7684\u6392\u67E5 Prompt" : "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u5E03\u5C40 JSON\u3001\u6587\u7AE0\u6458\u5F55\u548C\u5E03\u5C40\u6458\u8981\u7684\u6392\u67E5 Prompt";
+    }
     if (this.aiLayoutDebugMode === "json") {
       this.aiDebugPanelTitle.setText("\u5E03\u5C40 JSON");
+      if (this.aiCopyDebugBtn) {
+        this.aiCopyDebugBtn.setText("\u590D\u5236 JSON");
+        this.aiCopyDebugBtn.title = "\u53EA\u590D\u5236\u5F53\u524D\u5E03\u5C40 JSON \u8C03\u8BD5\u5185\u5BB9";
+      }
       this.aiDebugPanelBody.setText(this.buildAiLayoutDebugJson(state));
       return;
     }
     this.aiDebugPanelTitle.setText("\u9519\u8BEF\u8BE6\u60C5");
+    if (this.aiCopyDebugBtn) {
+      this.aiCopyDebugBtn.setText("\u590D\u5236\u9519\u8BEF\u8BE6\u60C5");
+      this.aiCopyDebugBtn.title = "\u53EA\u590D\u5236\u5F53\u524D\u9519\u8BEF\u8BE6\u60C5\u8C03\u8BD5\u5185\u5BB9";
+    }
     this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
   }
   refreshAiLayoutPanel() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
     if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
       return;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
@@ -12656,14 +12745,21 @@ var AppleStyleView = class extends ItemView {
     const hasProvider = !!provider;
     const canUseLocalLayout = effectiveSelection.layoutFamily === "source-first";
     const canGenerateForSelection = hasProvider || canUseLocalLayout;
-    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
-    const hasApplied = this.aiPreviewApplied === true && !!state && !isStale;
-    const isLoading = this.aiLayoutLoading === true;
+    const rawIsStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const isSourceSwitching = context.isSourceSwitching === true;
+    const isResolvingSourceState = isSourceSwitching || context.isStaleSuppressed === true && rawIsStale;
+    const isStale = rawIsStale && !isResolvingSourceState;
+    const hasApplied = this.aiPreviewApplied === true && !!state && !rawIsStale;
+    const isGenerating = this.aiLayoutLoading === true;
+    const isLoading = isGenerating || isResolvingSourceState;
     const hasVisibleLayout = !!((_f = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _f.length);
-    const canApplyVisibleLayout = hasVisibleLayout && !hasApplied && !isStale;
+    const canApplyVisibleLayout = hasVisibleLayout && !hasApplied && !rawIsStale;
     let badge = "\u672A\u751F\u6210";
     let statusText = hasDoc ? "\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709 AI \u7F16\u6392\u7ED3\u679C\u3002" : "\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u3002";
-    if (isLoading) {
+    if (isResolvingSourceState) {
+      badge = "\u8BFB\u53D6\u4E2D";
+      statusText = "\u6B63\u5728\u5207\u6362\u5230\u5F53\u524D\u6587\u7AE0\uFF0C\u8BF7\u7A0D\u5019\u3002";
+    } else if (isGenerating) {
       badge = "\u751F\u6210\u4E2D";
       statusText = "\u6B63\u5728\u751F\u6210\u5E76\u5E94\u7528\u65B0\u7684\u7F16\u6392\uFF0C\u8BF7\u7A0D\u5019\u3002";
     } else if (!aiFeatureEnabled) {
@@ -12675,7 +12771,7 @@ var AppleStyleView = class extends ItemView {
         statusText = configuredProviders > 0 ? "\u5F53\u524D\u5E03\u5C40\u9700\u8981\u53EF\u7528\u7684 AI Provider\uFF0C\u8BF7\u8865\u5168\u914D\u7F6E\u540E\u518D\u8BD5\u3002" : "\u5F53\u524D\u5E03\u5C40\u9700\u8981 AI Provider\uFF0C\u8BF7\u5148\u5230\u8BBE\u7F6E\u4E2D\u5B8C\u6210\u914D\u7F6E\u3002";
       } else {
         badge = "\u672A\u751F\u6210";
-        statusText = "\u9009\u62E9\u5E03\u5C40\u548C\u989C\u8272\u540E\uFF0C\u70B9\u51FB\u201C\u751F\u6210\u5E76\u5E94\u7528\u201D\u67E5\u770B\u6548\u679C\u3002";
+        statusText = "\u70B9\u51FB\u201C\u751F\u6210\u5E76\u5E94\u7528\u201D\u67E5\u770B\u6548\u679C\u3002";
       }
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
       badge = hasReusableLayout ? "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248" : "\u751F\u6210\u5931\u8D25";
@@ -12700,15 +12796,22 @@ var AppleStyleView = class extends ItemView {
     }
     this.aiLayoutStatusBadge.setText(badge);
     this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
-    this.aiLayoutStatusText.setText(statusText);
+    const hideSuccessStatusText = !!state && !isLoading && aiFeatureEnabled && !isStale && !hasLastAttemptFailure && state.status !== "error" && state.status !== "schema-error";
+    this.aiLayoutStatusText.hidden = hideSuccessStatusText;
+    this.aiLayoutStatusText.setText(hideSuccessStatusText ? "" : statusText);
     this.applyAiLayoutPanelStylePack(
       ((_g = state == null ? void 0 : state.resolved) == null ? void 0 : _g.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
     );
-    this.renderAiCachedLayoutFamilies({
-      context,
-      currentLayoutFamily: ((_h = state == null ? void 0 : state.resolved) == null ? void 0 : _h.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || effectiveSelection.layoutFamily,
-      isLoading
-    });
+    if (isResolvingSourceState && this.aiCachedLayoutList) {
+      this.aiCachedLayoutList.empty();
+      this.aiCachedLayoutList.hidden = true;
+    } else {
+      this.renderAiCachedLayoutFamilies({
+        context,
+        currentLayoutFamily: ((_h = state == null ? void 0 : state.resolved) == null ? void 0 : _h.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || effectiveSelection.layoutFamily,
+        isLoading
+      });
+    }
     this.aiLayoutFamilySelect.value = effectiveSelection.layoutFamily;
     this.aiColorPaletteSelect.value = effectiveSelection.colorPalette;
     if (this.aiStylePackSelect)
@@ -12742,7 +12845,7 @@ var AppleStyleView = class extends ItemView {
     if (this.aiLayoutLoadingMaskText) {
       const layoutLabel = this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily);
       const colorLabel = this.getAiColorPaletteLabel(effectiveSelection.colorPalette);
-      this.aiLayoutLoadingMaskText.setText(`\u6B63\u5728\u751F\u6210\u300C${layoutLabel} \xB7 ${colorLabel}\u300D\u7F16\u6392...`);
+      this.aiLayoutLoadingMaskText.setText(isResolvingSourceState ? "\u6B63\u5728\u5207\u6362\u6587\u7AE0\u9884\u89C8..." : `\u6B63\u5728\u751F\u6210\u300C${layoutLabel} \xB7 ${colorLabel}\u300D\u7F16\u6392...`);
     }
     const primaryAction = this.getAiPrimaryActionConfig({
       hasDoc,
@@ -12764,93 +12867,99 @@ var AppleStyleView = class extends ItemView {
       this.aiRegenerateBtn.hidden = !showRegenerate;
       this.aiRegenerateBtn.disabled = !showRegenerate;
     }
-    if (isLoading) {
-      this.aiLayoutSummary.setText(`\u6B63\u5728\u4E3A\u300C${context.title || "\u5F53\u524D\u6587\u7AE0"}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u6548\u679C\u3002`);
+    const setSummary = (text = "") => {
+      if (!this.aiLayoutSummary)
+        return;
+      const value = String(text || "").trim();
+      this.aiLayoutSummary.setText(value);
+      this.aiLayoutSummary.hidden = !value;
+    };
+    const setMetaNote = (text = "") => {
+      if (!this.aiLayoutMetaNote)
+        return;
+      const value = String(text || "").trim();
+      this.aiLayoutMetaNote.setText(value);
+      this.aiLayoutMetaNote.hidden = !value;
+    };
+    if (isResolvingSourceState) {
+      setSummary("\u6B63\u5728\u8BFB\u53D6\u5F53\u524D\u6587\u7AE0\u7684\u7F16\u6392\u72B6\u6001\u3002");
       this.renderAiLayoutMetaChips([]);
-      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u79FB\u9664\u4E0D\u9700\u8981\u7684\u533A\u5757\u3002");
+      setMetaNote("");
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (isGenerating) {
+      setSummary(`\u6B63\u5728\u4E3A\u300C${context.title || "\u5F53\u524D\u6587\u7AE0"}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u6548\u679C\u3002`);
+      this.renderAiLayoutMetaChips([]);
+      setMetaNote("");
       this.refreshAiSchemaIssuePanel(null);
     } else if (!aiFeatureEnabled) {
-      this.aiLayoutSummary.setText("\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u6839\u636E\u5F53\u524D\u6587\u7AE0\u751F\u6210\u7248\u5F0F\u7ED3\u679C\u3002");
-      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("AI \u7F16\u6392\u53EA\u8D1F\u8D23\u7ED3\u6784\u8C03\u6574\uFF0C\u6700\u7EC8\u89C6\u89C9\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
+      setSummary("\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u6839\u636E\u5F53\u524D\u6587\u7AE0\u751F\u6210\u7248\u5F0F\u7ED3\u679C\u3002");
+      setMetaNote("");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (!hasDoc) {
-      this.aiLayoutSummary.setText("\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u540E\uFF0C\u5C31\u53EF\u4EE5\u751F\u6210\u4E13\u5C5E\u7F16\u6392\u3002");
-      (_l = this.aiLayoutMetaNote) == null ? void 0 : _l.setText("\u5F53\u524D\u652F\u6301\u539F\u6587\u589E\u5F3A\u578B\u3001\u6559\u7A0B\u5361\u7247\u578B\u3001\u8F7B\u6742\u5FD7\u578B\u4E09\u79CD\u5E03\u5C40\u3002");
+      setSummary("\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u540E\uFF0C\u5C31\u53EF\u4EE5\u751F\u6210\u4E13\u5C5E\u7F16\u6392\u3002");
+      setMetaNote("");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
-      this.aiLayoutSummary.setText(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\u3002");
+      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\u3002");
       this.renderAiLayoutMetaChips([
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
         ...(schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0 ? [`Schema ${schemaValidation.issueCount} \u9879`] : []
       ]);
-      (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(hasReusableLayout ? "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u76F4\u63A5\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002" : "\u53EF\u4EE5\u91CD\u8BD5\u4E00\u6B21\uFF1B\u5982\u4ECD\u5931\u8D25\uFF0C\u518D\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u5177\u4F53\u539F\u56E0\u3002");
+      setMetaNote(hasReusableLayout ? "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u53EF\u4EE5\u76F4\u63A5\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002" : "\u53EF\u4EE5\u91CD\u8BD5\u4E00\u6B21\uFF1B\u5982\u4ECD\u5931\u8D25\uFF0C\u518D\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u5177\u4F53\u539F\u56E0\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
-      this.aiLayoutSummary.setText(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "\u751F\u6210\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5\u3002");
+      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "\u751F\u6210\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5\u3002");
       this.renderAiLayoutMetaChips([
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
       ]);
-      (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(hasReusableLayout ? "\u5F53\u524D\u4E0D\u4F1A\u5F71\u54CD\u4F60\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u5982\u679C\u53CD\u590D\u5931\u8D25\uFF0C\u53EF\u4EE5\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002");
+      setMetaNote(hasReusableLayout ? "\u5F53\u524D\u4E0D\u4F1A\u5F71\u54CD\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u5982\u679C\u53CD\u590D\u5931\u8D25\uFF0C\u53EF\u4EE5\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else if (hasReusableLayout && hasLastAttemptFailure) {
-      this.aiLayoutSummary.setText("\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002");
+      setSummary("\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002");
       this.renderAiLayoutMetaChips([
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
         state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u6821\u9A8C\u5931\u8D25" : "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25"
       ]);
-      (_o = this.aiLayoutMetaNote) == null ? void 0 : _o.setText(hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u5148\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002");
+      setMetaNote(hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "");
       this.refreshAiSchemaIssuePanel(state.lastAttemptStatus === "schema-error" ? schemaValidation : null);
     } else if (!state) {
       if (!hasProvider && !canUseLocalLayout) {
-        this.aiLayoutSummary.setText("\u5F53\u524D\u6240\u9009\u5E03\u5C40\u4F9D\u8D56 AI Provider\u3002");
-        (_p = this.aiLayoutMetaNote) == null ? void 0 : _p.setText("\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u76F4\u63A5\u751F\u6210\u5E76\u5E94\u7528\u3002");
+        setSummary("\u5F53\u524D\u6240\u9009\u5E03\u5C40\u4F9D\u8D56 AI Provider\u3002");
+        setMetaNote("");
         this.renderAiLayoutMetaChips([]);
       } else {
-        this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u7ED3\u679C\u3002`);
-        this.renderAiLayoutMetaChips([
-          `\u5E03\u5C40 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
-          `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`
-        ]);
-        (_q = this.aiLayoutMetaNote) == null ? void 0 : _q.setText("\u751F\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u518D\u51B3\u5B9A\u4FDD\u7559\u6216\u79FB\u9664\u54EA\u4E9B\u533A\u5757\u3002");
+        setSummary("");
+        this.renderAiLayoutMetaChips([]);
+        setMetaNote("");
       }
       this.refreshAiSchemaIssuePanel(null);
     } else if (state && isStale && !canGenerateForSelection) {
-      this.aiLayoutSummary.setText("\u5F53\u524D\u5DF2\u6709\u4E00\u7248\u65E7\u7ED3\u679C\uFF0C\u4F46\u8981\u91CD\u65B0\u751F\u6210\u9700\u8981\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002");
+      setSummary("\u5F53\u524D\u5DF2\u6709\u4E00\u7248\u65E7\u7ED3\u679C\uFF0C\u4F46\u8981\u91CD\u65B0\u751F\u6210\u9700\u8981\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002");
       this.renderAiLayoutMetaChips([
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
       ]);
-      (_r = this.aiLayoutMetaNote) == null ? void 0 : _r.setText(canApplyVisibleLayout ? "\u5F53\u524D\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u5E94\u7528\uFF1B\u5982\u679C\u8981\u66F4\u65B0\u5185\u5BB9\uFF0C\u8BF7\u5148\u6062\u590D Provider\u3002" : "\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u57FA\u4E8E\u6700\u65B0\u5185\u5BB9\u91CD\u65B0\u751F\u6210\u3002");
+      setMetaNote(canApplyVisibleLayout ? "\u5F53\u524D\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u5E94\u7528\uFF1B\u5982\u679C\u8981\u66F4\u65B0\u5185\u5BB9\uFF0C\u8BF7\u5148\u6062\u590D Provider\u3002" : "");
       this.refreshAiSchemaIssuePanel(null);
     } else {
-      const blockCount = ((_s = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _s.length) || 0;
-      this.aiLayoutSummary.setText(`\u5F53\u524D\u7ED3\u679C\u5171 ${blockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u76F4\u63A5\u5E94\u7528\uFF0C\u4E5F\u53EF\u4EE5\u79FB\u9664\u4E0D\u9700\u8981\u7684\u90E8\u5206\u3002`);
+      const blockCount = ((_j = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _j.length) || 0;
+      setSummary(`\u5171 ${blockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u79FB\u9664\u4E0D\u9700\u8981\u7684\u90E8\u5206\u3002`);
       const metaChips = [];
       if (providerLabel)
         metaChips.push(`Provider ${providerLabel}`);
       if (modelLabel)
         metaChips.push(`\u6A21\u578B ${modelLabel}`);
-      if (generationMeta == null ? void 0 : generationMeta.skillLabel)
-        metaChips.push(`\u6280\u80FD ${generationMeta.skillLabel}`);
-      if (generationMeta == null ? void 0 : generationMeta.skillVersion)
-        metaChips.push(`\u7248\u672C ${generationMeta.skillVersion}`);
-      if (generationMeta == null ? void 0 : generationMeta.layoutFamilyLabel)
-        metaChips.push(`\u5E03\u5C40 ${generationMeta.layoutFamilyLabel}`);
-      if (generationMeta == null ? void 0 : generationMeta.colorPaletteLabel)
-        metaChips.push(`\u989C\u8272 ${generationMeta.colorPaletteLabel}`);
       if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
         metaChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
       if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
         metaChips.push("\u672C\u5730\u515C\u5E95");
       } else if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
         metaChips.push(`\u8865\u5168 ${generationMeta.fallbackBlockCount} \u5757`);
-      } else if (generationMeta == null ? void 0 : generationMeta.finalBlockCount) {
-        metaChips.push("\u7EAF AI \u8F93\u51FA");
       }
       if (hiddenBlockCount > 0)
         metaChips.push(`\u5DF2\u79FB\u9664 ${hiddenBlockCount} \u5757`);
@@ -12860,13 +12969,16 @@ var AppleStyleView = class extends ItemView {
       this.renderAiLayoutMetaChips(metaChips);
       const hiddenText = hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "";
       if (hasLastAttemptFailure && state.lastAttemptError) {
-        (_t = this.aiLayoutMetaNote) == null ? void 0 : _t.setText(`\u4E0A\u4E00\u7248\u7ED3\u679C\u5DF2\u4FDD\u7559\u3002${hiddenText}`.trim());
+        setMetaNote(`\u4E0A\u4E00\u7248\u7ED3\u679C\u5DF2\u4FDD\u7559\u3002${hiddenText}`.trim());
       } else if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
-        (_u = this.aiLayoutMetaNote) == null ? void 0 : _u.setText(`\u5F53\u524D\u4F7F\u7528\u7684\u662F\u66F4\u7A33\u5B9A\u7684\u5FEB\u901F\u589E\u5F3A\u7ED3\u679C\u3002${hiddenText}`.trim());
+        setMetaNote(`\u5F53\u524D\u4F7F\u7528\u7684\u662F\u66F4\u7A33\u5B9A\u7684\u672C\u5730\u589E\u5F3A\u7ED3\u679C\u3002${hiddenText}`.trim());
       } else {
-        (_v = this.aiLayoutMetaNote) == null ? void 0 : _v.setText(hiddenText || "\u4F60\u53EF\u4EE5\u7EE7\u7EED\u5FAE\u8C03\u533A\u5757\uFF0C\u6216\u76F4\u63A5\u4FDD\u7559\u5F53\u524D\u7ED3\u679C\u3002");
+        setMetaNote(hiddenText);
       }
       this.refreshAiSchemaIssuePanel(schemaValidation);
+    }
+    if (this.aiResultSection) {
+      this.aiResultSection.hidden = !(isLoading || hasVisibleLayout || hiddenBlockCount > 0);
     }
     this.aiBlockList.empty();
     if (isLoading) {
@@ -12878,7 +12990,7 @@ var AppleStyleView = class extends ItemView {
         content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-meta" });
         item.createDiv({ cls: "apple-ai-layout-block-skeleton-badge" });
       }
-    } else if ((_w = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _w.length) {
+    } else if ((_k = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _k.length) {
       visibleLayout.blocks.forEach((block, index) => {
         const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
         const origin = (visibleBlockOrigins == null ? void 0 : visibleBlockOrigins[index]) || null;
@@ -13703,11 +13815,6 @@ var AppleStyleView = class extends ItemView {
     if (source.ok) {
       markdown = source.markdown || "";
       sourcePath = source.sourcePath || "";
-      if (markdown.trim()) {
-        this.lastResolvedMarkdown = markdown;
-        this.lastResolvedSourcePath = sourcePath;
-        this.lastResolvedSourceHash = String(this.simpleHash(markdown));
-      }
     } else if (this.lastResolvedMarkdown.trim()) {
       markdown = this.lastResolvedMarkdown;
       sourcePath = this.lastResolvedSourcePath || "";
@@ -13726,6 +13833,7 @@ var AppleStyleView = class extends ItemView {
     if (!markdown.trim()) {
       if (!silent)
         new Notice("\u5F53\u524D\u6587\u4EF6\u5185\u5BB9\u4E3A\u7A7A");
+      this.completeAiLayoutSourceSwitch(sourcePath);
       if (showLoading && this.loadingGeneration === generation) {
         if (this.loadingVisibilityTimer) {
           clearTimeout(this.loadingVisibilityTimer);
@@ -13741,6 +13849,10 @@ var AppleStyleView = class extends ItemView {
       const html = await this.renderMarkdownForPreview(markdown, sourcePath);
       if (generation !== this.renderGeneration)
         return;
+      this.lastResolvedMarkdown = markdown;
+      this.lastResolvedSourcePath = sourcePath;
+      this.lastResolvedSourceHash = String(this.simpleHash(markdown));
+      this.completeAiLayoutSourceSwitch(sourcePath);
       this.baseRenderedHtml = html;
       this.currentHtml = html;
       this.lastRenderError = "";
@@ -13776,6 +13888,7 @@ var AppleStyleView = class extends ItemView {
       this.currentHtml = null;
       this.baseRenderedHtml = null;
       this.aiPreviewApplied = false;
+      this.completeAiLayoutSourceSwitch(sourcePath);
       this.syncPreviewPresentationMode();
       this.lastRenderError = (error == null ? void 0 : error.message) || "\u672A\u77E5\u6E32\u67D3\u9519\u8BEF";
       this.showRenderFailurePlaceholder(this.lastRenderError);
@@ -14133,6 +14246,10 @@ var AppleStyleView = class extends ItemView {
     if (this.sidePaddingPreviewTimer) {
       clearTimeout(this.sidePaddingPreviewTimer);
       this.sidePaddingPreviewTimer = null;
+    }
+    if (this.aiLayoutStaleSuppressTimer) {
+      clearTimeout(this.aiLayoutStaleSuppressTimer);
+      this.aiLayoutStaleSuppressTimer = null;
     }
     this.setPreviewLoading(false);
     if (this.activeEditorScroller && this.editorScrollListener) {

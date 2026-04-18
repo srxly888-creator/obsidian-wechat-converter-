@@ -271,6 +271,44 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(view.currentHtml).toContain('# overridden');
   });
 
+  it('convertCurrent should not expose the new source hash before switched note rendering finishes', async () => {
+    const view = new AppleStyleView(null, { settings: {} });
+    view.previewContainer = createObsidianLikeElement();
+    view.lastResolvedSourcePath = 'fixtures/old.md';
+    view.lastResolvedMarkdown = '# old';
+    view.lastResolvedSourceHash = String(view.simpleHash('# old'));
+    view.app = {
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'fixtures/new.md', basename: 'new' })),
+        getActiveViewOfType: vi.fn(() => null),
+      },
+    };
+
+    let resolveRender;
+    vi.spyOn(view, 'renderMarkdownForPreview').mockImplementation(() => new Promise((resolve) => {
+      resolveRender = () => resolve('<section><p>new</p></section>');
+    }));
+
+    const renderPromise = view.convertCurrent(true, {
+      sourceOverride: {
+        markdown: '# new',
+        sourcePath: 'fixtures/new.md',
+      },
+    });
+
+    const pendingContext = view.getCurrentLayoutContext();
+    expect(pendingContext.sourcePath).toBe('fixtures/new.md');
+    expect(pendingContext.sourceHash).toBe('');
+    expect(pendingContext.isSourcePending).toBe(true);
+
+    resolveRender();
+    await renderPromise;
+
+    const settledContext = view.getCurrentLayoutContext();
+    expect(settledContext.sourceHash).toBe(String(view.simpleHash('# new')));
+    expect(settledContext.isSourcePending).toBe(false);
+  });
+
   it('convertCurrent should skip AI panel refresh when AI UI is inactive', async () => {
     const activeView = {
       editor: { getValue: () => '# 普通预览' },
@@ -357,6 +395,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.scheduleActiveLeafRender();
     view.scheduleSidePaddingPreview(120);
     view.loadingVisibilityTimer = setTimeout(() => {}, 200);
+    view.aiLayoutStaleSuppressTimer = setTimeout(() => {}, 200);
 
     await view.onClose();
     await vi.runAllTimersAsync();
@@ -365,6 +404,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(view.activeLeafRenderTimer).toBeNull();
     expect(view.sidePaddingPreviewTimer).toBeNull();
     expect(view.loadingVisibilityTimer).toBeNull();
+    expect(view.aiLayoutStaleSuppressTimer).toBeNull();
   });
 
   it('createSettingsPanel should keep mobile DOM state aligned (overlay + actions)', () => {
@@ -648,6 +688,10 @@ describe('AppleStyleView native render + lifecycle', () => {
       generationMeta: {
         providerName: 'DeepSeek',
         providerModel: 'deepseek-chat',
+        skillLabel: '教程卡片型',
+        skillVersion: '2026.03.25-alpha.1',
+        layoutFamilyLabel: '教程卡片型',
+        colorPaletteLabel: '科技绿',
         stylePackLabel: '科技绿',
         headingCount: 3,
         sectionCount: 2,
@@ -727,7 +771,9 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.createSettingsPanel(container);
     view.refreshAiLayoutPanel();
 
-    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 5 个区块');
+    expect(container.querySelector('.apple-ai-layout-status .apple-ai-layout-summary')?.textContent).toContain('共 5 个区块');
+    expect(container.querySelector('.apple-ai-layout-status')?.textContent).not.toContain('结果摘要');
+    expect(container.querySelector('.apple-ai-layout-result-section .apple-setting-label')?.textContent).toBe('区块');
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果')).toBe(true);
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '重新生成并应用')).toBe(true);
     expect(container.querySelector('.apple-ai-layout-advanced-body')?.hidden).toBe(true);
@@ -739,6 +785,11 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(container.querySelector('.apple-ai-layout-advanced-body')?.hidden).toBe(false);
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('Provider DeepSeek');
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('补全 2 块');
+    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).not.toContain('技能');
+    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).not.toContain('版本');
+    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).not.toContain('布局');
+    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).not.toContain('颜色');
+    expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).not.toContain('纯 AI 输出');
   });
 
   it('refreshAiLayoutPanel should keep cached layout available when only the selected color changes', () => {
@@ -831,10 +882,11 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.refreshAiLayoutPanel();
 
     expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('可应用');
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('可以直接应用到预览');
-    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 2 个区块');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.hidden).toBe(true);
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toBe('');
+    expect(container.querySelector('.apple-ai-layout-status .apple-ai-layout-summary')?.textContent).toContain('共 2 个区块');
     expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(2);
-    expect(container.querySelector('.apple-ai-layout-cache-inline')?.textContent).toContain('当前风格');
+    expect(container.querySelector('.apple-ai-layout-cache-inline')?.textContent).toContain('手动选择');
     expect(container.querySelector('.apple-ai-layout-cache-inline')?.textContent).toContain('教程卡片');
     expect(container.querySelector('.apple-ai-layout-cache-inline')?.textContent).not.toContain('当前内容');
     expect(container.querySelector('.apple-ai-layout-status .apple-ai-layout-cache-inline')).toBeTruthy();
@@ -842,6 +894,318 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(container.querySelector('.apple-ai-layout-cache-section')).toBeNull();
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果')).toBe(true);
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '重新生成并应用')).toBe(true);
+  });
+
+  it('refreshAiLayoutPanel should show cached layout families without current-content wording', () => {
+    const currentHash = String(new AppleStyleView(null, { settings: {} }).simpleHash('# demo'));
+    const tutorialState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: currentHash,
+      selection: { layoutFamily: 'auto', colorPalette: 'auto' },
+      resolved: { layoutFamily: 'tutorial-cards', colorPalette: 'tech-green' },
+      stylePack: 'tech-green',
+      status: 'ready',
+      lastAttemptStatus: 'success',
+      generationMeta: {
+        layoutFamilyLabel: '教程卡片型',
+        finalBlockCount: 1,
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '教程标题' }],
+      },
+      layoutJson: {
+        selection: { layoutFamily: 'auto', colorPalette: 'auto' },
+        resolved: { layoutFamily: 'tutorial-cards', colorPalette: 'tech-green' },
+        stylePack: 'tech-green',
+        blocks: [{ type: 'hero', title: '教程标题' }],
+      },
+    };
+    const sourceFirstState = {
+      ...tutorialState,
+      updatedAt: Date.now() - 1000,
+      selection: { layoutFamily: 'source-first', colorPalette: 'auto' },
+      resolved: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+      generationMeta: {
+        ...tutorialState.generationMeta,
+        layoutFamilyLabel: '原文增强型',
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '原文标题' }],
+      },
+      layoutJson: {
+        ...tutorialState.layoutJson,
+        selection: { layoutFamily: 'source-first', colorPalette: 'auto' },
+        resolved: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+        blocks: [{ type: 'hero', title: '原文标题' }],
+      },
+    };
+    const editorialState = {
+      ...tutorialState,
+      updatedAt: Date.now() - 2000,
+      sourceHash: 'old-hash',
+      selection: { layoutFamily: 'editorial-lite', colorPalette: 'auto' },
+      resolved: { layoutFamily: 'editorial-lite', colorPalette: 'tech-green' },
+      generationMeta: {
+        ...tutorialState.generationMeta,
+        layoutFamilyLabel: '轻杂志型',
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '轻杂志标题' }],
+      },
+      layoutJson: {
+        ...tutorialState.layoutJson,
+        selection: { layoutFamily: 'editorial-lite', colorPalette: 'auto' },
+        resolved: { layoutFamily: 'editorial-lite', colorPalette: 'tech-green' },
+        blocks: [{ type: 'hero', title: '轻杂志标题' }],
+      },
+    };
+    const cacheEntry = {
+      lastSelectionKey: 'auto',
+      familyStates: {
+        'tutorial-cards': tutorialState,
+        'source-first': sourceFirstState,
+        'editorial-lite': editorialState,
+      },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultLayoutFamily: 'auto',
+          defaultColorPalette: 'auto',
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          defaultProviderId: 'provider-1',
+          providers: [{
+            id: 'provider-1',
+            name: 'DeepSeek',
+            kind: 'openai-compatible',
+            baseUrl: 'https://api.example.com/v1',
+            apiKey: 'secret',
+            model: 'deepseek-chat',
+            enabled: true,
+          }],
+          articleLayoutsByPath: {
+            'notes/demo.md': cacheEntry,
+          },
+        },
+      },
+      saveSettings: vi.fn(),
+      getArticleLayoutState: vi.fn(() => tutorialState),
+    });
+    view.app = {
+      isMobile: false,
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/demo.md', basename: 'demo' })),
+      },
+    };
+    view.theme = { update: vi.fn() };
+    view.converter = { updateConfig: vi.fn() };
+    view.lastResolvedSourcePath = 'notes/demo.md';
+    view.lastResolvedMarkdown = '# demo';
+    view.lastResolvedSourceHash = currentHash;
+
+    global.AppleTheme = {
+      getThemeList: () => [{ value: 'github', label: '简约' }],
+      getColorList: () => [{ value: 'blue', color: '#0366d6' }],
+    };
+
+    const container = createObsidianLikeElement();
+    view.createSettingsPanel(container);
+    view.refreshAiLayoutPanel();
+
+    const status = container.querySelector('.apple-ai-layout-status');
+    const activeLine = status.querySelector('.apple-ai-layout-cache-inline');
+    const switchRow = status.querySelector('.apple-ai-layout-cache-switch-row');
+    const chips = Array.from(switchRow.querySelectorAll('.apple-ai-layout-cache-chip'));
+
+    expect(status.querySelector('.apple-ai-layout-status-text')?.hidden).toBe(true);
+    expect(status.textContent).not.toContain('当前内容');
+    expect(status.textContent).not.toContain('可以直接应用到预览');
+    expect(status.textContent).not.toContain('已应用到预览');
+    expect(activeLine.textContent).toContain('教程卡片型');
+    expect(activeLine.textContent).toContain('由自动推荐生成');
+    expect(switchRow.textContent).toContain('切换到');
+    expect(chips.map((chip) => chip.textContent)).toEqual(expect.arrayContaining([
+      expect.stringContaining('原文增强型'),
+      expect.stringContaining('轻杂志型'),
+    ]));
+    expect(chips.some((chip) => chip.textContent.includes('教程卡片型'))).toBe(false);
+    expect(chips.some((chip) => chip.textContent.includes('基于旧内容'))).toBe(true);
+  });
+
+  it('refreshAiLayoutPanel should not mark cached layout stale while the active source is still switching', () => {
+    const cachedState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: 'new-source-hash',
+      selection: { layoutFamily: 'source-first', colorPalette: 'auto' },
+      resolved: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+      stylePack: 'tech-green',
+      status: 'ready',
+      lastAttemptStatus: 'success',
+      generationMeta: {
+        layoutFamilyLabel: '原文增强型',
+        finalBlockCount: 1,
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '新文章标题' }],
+      },
+      layoutJson: {
+        selection: { layoutFamily: 'source-first', colorPalette: 'auto' },
+        resolved: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+        stylePack: 'tech-green',
+        blocks: [{ type: 'hero', title: '新文章标题' }],
+      },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultLayoutFamily: 'auto',
+          defaultColorPalette: 'auto',
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          defaultProviderId: 'provider-1',
+          providers: [{
+            id: 'provider-1',
+            name: 'DeepSeek',
+            kind: 'openai-compatible',
+            baseUrl: 'https://api.example.com/v1',
+            apiKey: 'secret',
+            model: 'deepseek-chat',
+            enabled: true,
+          }],
+          articleLayoutsByPath: {
+            'notes/new.md': {
+              lastLayoutFamily: 'source-first',
+              familyStates: {
+                'source-first': cachedState,
+              },
+            },
+          },
+        },
+      },
+      saveSettings: vi.fn(),
+      getArticleLayoutState: vi.fn((sourcePath) => (sourcePath === 'notes/new.md' ? cachedState : null)),
+    });
+    view.app = {
+      isMobile: false,
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/new.md', basename: 'new' })),
+      },
+    };
+    view.theme = { update: vi.fn() };
+    view.converter = { updateConfig: vi.fn() };
+    view.lastResolvedSourcePath = 'notes/old.md';
+    view.lastResolvedMarkdown = '# old';
+    view.lastResolvedSourceHash = String(view.simpleHash('# old'));
+    view.aiLayoutSourceSwitchPath = 'notes/new.md';
+
+    global.AppleTheme = {
+      getThemeList: () => [{ value: 'github', label: '简约' }],
+      getColorList: () => [{ value: 'blue', color: '#0366d6' }],
+    };
+
+    const container = createObsidianLikeElement();
+    view.createSettingsPanel(container);
+    view.refreshAiLayoutPanel();
+
+    const context = view.getCurrentLayoutContext();
+    expect(context.sourcePath).toBe('notes/new.md');
+    expect(context.sourceHash).toBe('');
+    expect(context.isSourcePending).toBe(true);
+    expect(context.isSourceSwitching).toBe(true);
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('读取中');
+    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('正在读取当前文章');
+    expect(container.querySelector('.apple-ai-layout-status')?.textContent).not.toContain('基于旧内容');
+    expect(container.querySelector('.apple-ai-layout-cache-inline')).toBeNull();
+  });
+
+  it('refreshAiLayoutPanel should suppress stale wording during the post-switch settle window', () => {
+    const staleState = {
+      version: 1,
+      updatedAt: Date.now(),
+      sourceHash: 'old-source-hash',
+      selection: { layoutFamily: 'source-first', colorPalette: 'auto' },
+      resolved: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+      stylePack: 'tech-green',
+      status: 'ready',
+      lastAttemptStatus: 'success',
+      generationMeta: {
+        layoutFamilyLabel: '原文增强型',
+        finalBlockCount: 1,
+        blockOrigins: [{ index: 0, type: 'hero', source: 'ai', label: '旧文章标题' }],
+      },
+      layoutJson: {
+        selection: { layoutFamily: 'source-first', colorPalette: 'auto' },
+        resolved: { layoutFamily: 'source-first', colorPalette: 'tech-green' },
+        stylePack: 'tech-green',
+        blocks: [{ type: 'hero', title: '旧文章标题' }],
+      },
+    };
+
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultLayoutFamily: 'auto',
+          defaultColorPalette: 'auto',
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+          defaultProviderId: 'provider-1',
+          providers: [{
+            id: 'provider-1',
+            name: 'DeepSeek',
+            kind: 'openai-compatible',
+            baseUrl: 'https://api.example.com/v1',
+            apiKey: 'secret',
+            model: 'deepseek-chat',
+            enabled: true,
+          }],
+          articleLayoutsByPath: {
+            'notes/new.md': {
+              lastLayoutFamily: 'source-first',
+              familyStates: {
+                'source-first': staleState,
+              },
+            },
+          },
+        },
+      },
+      saveSettings: vi.fn(),
+      getArticleLayoutState: vi.fn((sourcePath) => (sourcePath === 'notes/new.md' ? staleState : null)),
+    });
+    view.app = {
+      isMobile: false,
+      workspace: {
+        getActiveFile: vi.fn(() => ({ path: 'notes/new.md', basename: 'new' })),
+      },
+    };
+    view.theme = { update: vi.fn() };
+    view.converter = { updateConfig: vi.fn() };
+    view.lastResolvedSourcePath = 'notes/new.md';
+    view.lastResolvedMarkdown = '# new';
+    view.lastResolvedSourceHash = String(view.simpleHash('# new'));
+    view.aiLayoutStaleSuppressPath = 'notes/new.md';
+    view.aiLayoutStaleSuppressUntil = Date.now() + 1000;
+
+    global.AppleTheme = {
+      getThemeList: () => [{ value: 'github', label: '简约' }],
+      getColorList: () => [{ value: 'blue', color: '#0366d6' }],
+    };
+
+    const container = createObsidianLikeElement();
+    view.createSettingsPanel(container);
+    view.refreshAiLayoutPanel();
+
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('读取中');
+    expect(container.querySelector('.apple-ai-layout-status')?.textContent).not.toContain('基于旧内容');
+    expect(container.querySelector('.apple-ai-layout-cache-inline')).toBeNull();
+
+    view.aiLayoutStaleSuppressUntil = Date.now() - 1;
+    view.refreshAiLayoutPanel();
+
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('需更新');
+    expect(container.querySelector('.apple-ai-layout-status')?.textContent).toContain('基于旧内容');
   });
 
   it('refreshAiLayoutPanel should keep apply available for cached results even when the provider is unavailable', () => {
@@ -921,8 +1285,9 @@ describe('AppleStyleView native render + lifecycle', () => {
     const aiBtn = container.querySelector('.apple-icon-btn[aria-label="AI 编排"]');
     expect(aiBtn.hidden).toBe(false);
     expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('可应用');
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('可以直接应用到预览');
-    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 1 个区块');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.hidden).toBe(true);
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toBe('');
+    expect(container.querySelector('.apple-ai-layout-status .apple-ai-layout-summary')?.textContent).toContain('共 1 个区块');
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果' && button.disabled === false)).toBe(true);
   });
 
@@ -1913,14 +2278,21 @@ describe('AppleStyleView native render + lifecycle', () => {
     const errorBtn = container.querySelectorAll('.apple-ai-layout-debug-btn')[1];
     expect(jsonBtn?.textContent).toContain('查看布局 JSON');
     expect(errorBtn?.textContent).toContain('查看错误详情');
+    const copyButtons = Array.from(container.querySelectorAll('.apple-ai-layout-debug-copy'));
+    expect(copyButtons.map((button) => button.textContent)).toEqual(['复制给 AI', '复制当前内容']);
+    expect(copyButtons.some((button) => button.classList.contains('apple-ai-layout-link'))).toBe(false);
 
     jsonBtn.click();
     expect(container.querySelector('.apple-ai-layout-debug-panel')?.classList.contains('visible')).toBe(true);
     expect(container.querySelector('.apple-ai-layout-debug-title')?.textContent).toContain('布局 JSON');
+    expect(container.querySelectorAll('.apple-ai-layout-debug-copy')[0]?.textContent).toBe('复制给 AI');
+    expect(container.querySelectorAll('.apple-ai-layout-debug-copy')[1]?.textContent).toBe('复制 JSON');
     expect(container.querySelector('.apple-ai-layout-debug-body')?.textContent).toContain('"layoutJson"');
 
     errorBtn.click();
     expect(container.querySelector('.apple-ai-layout-debug-title')?.textContent).toContain('错误详情');
+    expect(container.querySelectorAll('.apple-ai-layout-debug-copy')[0]?.textContent).toBe('复制给 AI');
+    expect(container.querySelectorAll('.apple-ai-layout-debug-copy')[1]?.textContent).toBe('复制错误详情');
     expect(container.querySelector('.apple-ai-layout-debug-body')?.textContent).toContain('401 unauthorized');
     expect(container.querySelector('.apple-ai-layout-debug-body')?.textContent).toContain('"providerName": "DeepSeek"');
   });
