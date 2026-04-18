@@ -8,7 +8,7 @@
 
 只需一键，即可将您的 Markdown 笔记转换为符合微信生态美学、阅读体验极佳的 HTML，无论是代码块、引用、列表还是本地图片，都能完美呈现。
 
-![Version](https://img.shields.io/badge/version-2.6.9-blue)
+![Version](https://img.shields.io/badge/version-2.7.0-blue)
 ![Obsidian](https://img.shields.io/badge/Obsidian-1.0.0+-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -29,7 +29,16 @@
       <img src="images/math_render.png" alt="数学公式渲染" width="520" />
     </p>
 
-2.  **🚀 一键同步到微信草稿箱 (v2.2 增强)**
+2.  **📊 Mermaid 图表支持**
+    - **沿用 Obsidian 原生渲染**：在 Obsidian 里能正常显示的 Mermaid 图表，会在插件预览中继续显示。
+    - **导出自动转 PNG**：复制到公众号或同步到草稿箱时，会自动将 Mermaid 图表栅格化为 PNG，避免 SVG 过长导致微信拦截。
+    - **保留图表原色**：导出时不会套用数学公式的改色逻辑，尽量保持 Mermaid 主题与连线配色。
+
+    <p align="center">
+      <img src="images/mermaid_render.png" alt="Mermaid 图表在转换器预览中的渲染效果" height="800" />
+    </p>
+    
+3.  **🚀 一键同步到微信草稿箱 (v2.2 增强)**
     - **极速并发上传**：图片上传速度提升 300%，支持多线程并发处理，大图文章秒传。
     - **智能重试机制**：自动处理网络抖动与 Token 过期，全程零人工干预，稳如泰山。
     - **实时进度反馈**：新增精确的上传进度条 (e.g., "3/12")，让等待不再焦虑。
@@ -41,13 +50,14 @@
     - **目录支持变量**：清理目录支持 `{{note}}`，会自动替换成当前文档名，例如 `published/{{note}}_img`。
     - **可回收**：支持优先移动到系统回收站，误删可恢复。
     - **多账号管理**：支持最多 5 个公众号账号配置，快速切换同步。
+    - **账号级发布默认值**：可为每个公众号账号单独设置默认原文链接、留言开关和“仅粉丝可留言”。
     - **Cloudflare 代理支持**：解决 IP 白名单频繁变化问题，[查看部署指南](#-代理设置解决-ip-白名单问题)。
 
     <p align="center">
       <img src="images/wechat_sync_popup.png" alt="微信同步弹窗" width="520" />
     </p>
 
-3.  **🎛 全新可视化设置面板 (Settings Panel)**
+4.  **🎛 全新可视化设置面板 (Settings Panel)**
     - 告别繁琐的代码修改！我们内置了直观的设置面板，让您可以实时调整字体、字号、主题色等参数，一切尽在掌握。
 
     <table>
@@ -61,17 +71,19 @@
       </tr>
     </table>
 
-4.  **🎨 三大专家级主题 (Premade Themes)**
+5.  **🎨 三大专家级主题 (Premade Themes)**
     - 内置 **简约 (Simple)**、**经典 (Classic)**、**优雅 (Elegant)** 三款精心设计的主题，覆盖从技术博客到人文随笔的各种场景。
+    - 引用块支持更克制的**中性灰样式**，减少大面积主题色对正文阅读的干扰。
+    - Callout 支持按语义类型高亮，如 `note`、`tip`、`warning`、`danger` 等；未知类型会自动回退为信息类样式。
 
-5.  **🖼️ 强大的本地图片支持 (Local Image Support)**
+6.  **🖼️ 强大的本地图片支持 (Local Image Support)**
     - **打破图床限制**：完美支持 Obsidian 的本地图片引用（包括 `![[Wiki Link]]` 和 `![]()`）。
     - **头像上传**：支持直接上传本地图片作为作者头像，插件会自动转码为 Base64。
     - **强大的本地图片支持**：无论是相对路径、绝对路径还是 WikiLink，都能自动识别并压缩。
     - **GIF 动图支持**：针对 GIF 格式特别优化，自动绕过压缩流程，完美保留完整动画帧。
     - **温馨提示**：建议图片（尤其是 GIF）保持在 10MB 以内，以获得最佳的处理速度和公众号兼容性。超过 10MB 时插件会弹出提醒。
 
-6.  **⚡️ 实时渲染预览 (Live Preview)**
+7.  **⚡️ 实时渲染预览 (Live Preview)**
     - 右侧预览区实现了**毫秒级响应**的实时渲染。您在左侧 Markdown 编辑的每一个字符，都会即时反馈在右侧的公众号预览视图中。
     - **📱 双模预览 (Dual Mode Preview)** ⭐ v2.2 新增
         - **手机仿真模式 (默认)**：提供逼真的 iPhone X 边框与刘海屏效果，支持深色模式适配，还原最真实的读者视角。
@@ -89,13 +101,22 @@
       </tr>
     </table>
 
-7.  **💻 Mac 风格代码块与样式还原**
+8.  **💻 Mac 风格代码块与样式还原**
     - 重新设计了代码块样式，支持 macOS 窗口风格及行号显示。
     - **1:1 完美还原**：我们在 Obsidian 预览区看到的样式（包括间距、颜色、边框、阴影），复制到微信后台后将**分毫不差**。
 
     <p align="center">
       <img src="images/code_render.png" alt="Mac风格代码块" width="520" />
     </p>
+
+## 🆕 v2.7.0 新增了什么
+
+- **AI 编排进入主工作流**：现在可以直接在转换器顶部打开 `AI 编排`，配置 Provider、选择布局、切换颜色、查看 schema 校验结果，并导出调试快照。
+- **AI 编排缓存更好用**：按布局家族保留最新结果，重新打开面板后可以直接应用缓存；生成失败时也会尽量保留上一版成功结果。
+- **颜色选择更灵活**：AI 编排可以自动推荐颜色，也可以在生成前手动选择颜色；生成后切换颜色会复用当前布局结构，不需要完整重新生成。
+- **Mermaid 导出更稳**：在 Obsidian 预览里继续保留 Mermaid 图表，复制到公众号或同步草稿时自动转成 PNG，减少微信吞图或拦截 SVG 的概率。
+- **多账号发布默认值**：每个公众号账号都可以单独保存原文链接、留言开关和“仅粉丝可留言”，减少每次同步前的重复设置。
+- **引用 / Callout 风格更克制**：新增中性灰引用模式，常见 Callout 会按语义类型自动着色，未知类型统一回退为信息类样式。
 
 ## 🚀 安装
 
@@ -139,6 +160,10 @@
 4. **一键同步到微信草稿箱** ⭐ 新功能
    - 先在插件设置里填好公众号账号（AppID / AppSecret）。
    - 点击 **[🚀 一键同步]**，选择账号后即可发送。
+   - 每个公众号账号都可以单独配置发布默认值：
+     - 默认原文链接
+     - 默认开启留言
+     - 默认仅粉丝可留言
    - 默认值读取规则：
      - 摘要优先读 `excerpt`
      - 封面优先读 `cover`
@@ -146,6 +171,43 @@
      - 如果没有，就自动回退到插件默认逻辑（摘要自动截取、封面取正文首图）
    - 你在弹窗里手动上传封面、手动改摘要，始终优先于自动值。
    - 发送成功后，文章会出现在公众号后台草稿箱。
+
+### AI 编排（实验功能）
+
+- 入口有两处：
+  - 插件设置里的 `AI 编排`：用于配置 Provider、默认布局、默认颜色和缓存策略
+  - 转换器顶部工具栏里的 `AI 编排`：用于对当前文章生成和应用版式
+- 当前支持 3 类 Provider 接口：
+  - OpenAI 兼容接口
+  - Gemini 兼容格式
+  - Anthropic 兼容格式
+- 内置 3 套布局家族：
+  - `原文增强型`：最接近普通预览，正文连续性更强
+  - `教程卡片型`：更适合步骤拆解、清单、案例说明
+  - `轻杂志型`：更强调留白、图文节奏和编辑感
+- 可以选择 `自动配色`，也可以在生成前手动指定颜色方案。
+- 生成后可以继续手动切换颜色方案，复用当前布局结构，不必每次都重新生成。
+- 每个布局家族会保留当前文章最新的一份缓存；重新打开侧边栏后，可以直接应用匹配当前文章的缓存结果。
+- 面板里可以直接看：
+  - schema 校验提醒
+  - 布局 JSON
+  - 错误详情
+  - 复制给 AI 的排查 Prompt
+  - 当前 JSON 或错误详情
+- 如果重新生成失败，上一版成功结果仍然可以保留，方便你继续预览和比较。
+
+<table>
+  <tr>
+    <td align="center"><img src="images/AI.png" alt="AI 编排未生成状态" height="400" /><br/><sub>1. 配置 Provider 与 布局</sub></td>
+    <td align="center"><img src="images/AI_completed.png" alt="AI 编排已生成状态" height="400" /><br/><sub>2. 生成结果与缓存</sub></td>
+    <td align="center"><img src="images/AI_render.png" alt="AI 编排应用后的预览效果" height="400" /><br/><sub>3. 应用到预览区</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="images/AI_setup.png" alt="AI 编排设置界面" width="760" /><br/>
+  <sub>AI 编排全局设置（Provider 与 缓存策略管理）</sub>
+</p>
 
 ### 同步后自动清理（可选）
 
@@ -159,6 +221,16 @@
 - 建议开启“使用系统回收站”，这样删错也能找回。
 - 示例：`published/{{note}}_img`  
   如果当前文档名是 `post`，实际删除目录是 `published/post_img`。
+
+### Mermaid 图表导出说明
+
+- 在 Obsidian 预览里能正常显示的 Mermaid 图表，会尽量在插件预览里继续保持可见。
+- 当你执行“复制到公众号”或“一键同步到草稿箱”时，插件会自动把 Mermaid 图表栅格化为 PNG。
+- 这样做的目的不是改变样式，而是为了减少微信公众号对长 SVG、复杂 SVG 的清洗和拦截问题。
+- 导出链路会尽量保留 Mermaid 原本的颜色，不会套用数学公式那一套 SVG 清理逻辑。
+
+
+
 
 ## ✍️ 中文标点标准化规则
 
@@ -202,6 +274,16 @@
 - 像 `...` / `......` 这类省略号写法会保留原样，不会强制改写。
 - 像“并列词语之间把逗号改成顿号 `、`”这类规则目前**没有启用**，因为容易误改，后续如果要做，更适合放到 AI 精修能力里。
 
+## 🎨 引用与 Callout 样式
+
+- 入口：右侧排版 `setting panel` → 引用 / Callout 样式
+- 现在支持两种整体模式：
+  - `跟随主题`
+  - `中性灰（推荐）`
+- `中性灰` 模式更适合长文阅读，会明显减弱大面积主题色的存在感。
+- Callout 会按语义类型自动着色，例如 `note`、`tip`、`warning`、`danger`。
+- 对于插件还不认识的 Callout 类型，会统一回退为信息类样式，而不是随机继承当前主题色。
+
 ## 🔧 代理设置（解决 IP 白名单问题）
 
 微信公众号 API 需要 IP 白名单验证。如果你使用 VPN 或动态 IP，可以通过 Cloudflare Worker 代理解决。
@@ -220,10 +302,39 @@
    ```javascript
    export default {
      async fetch(request, env) {
+       const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+       const ALLOWED_METHODS = new Set(['GET', 'POST', 'UPLOAD']);
        const corsHeaders = {
          'Access-Control-Allow-Origin': '*',
          'Access-Control-Allow-Methods': 'POST, OPTIONS',
          'Access-Control-Allow-Headers': 'Content-Type',
+       };
+
+       const jsonResponse = (payload, status = 200) =>
+         new Response(JSON.stringify(payload), {
+           status,
+           headers: {
+             ...corsHeaders,
+             'Content-Type': 'application/json; charset=utf-8',
+           },
+         });
+
+       const isAllowedWechatUrl = (rawUrl) => {
+         try {
+           const parsed = new URL(rawUrl);
+           return parsed.protocol === 'https:' && parsed.hostname === 'api.weixin.qq.com';
+         } catch {
+           return false;
+         }
+       };
+
+       const toUint8Array = (base64) => {
+         const binary = atob(base64);
+         const bytes = new Uint8Array(binary.length);
+         for (let i = 0; i < binary.length; i++) {
+           bytes[i] = binary.charCodeAt(i);
+         }
+         return bytes;
        };
    
        // 处理 CORS 预检请求
@@ -232,50 +343,80 @@
        }
    
        if (request.method !== 'POST') {
-         return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+         return jsonResponse({ error: 'Method Not Allowed' }, 405);
        }
    
        try {
          const body = await request.json();
-         const { url, method = 'GET', data, fileData, fileName, mimeType, fieldName } = body;
-         
-         // === Debug Logging ===
-         console.log('Received URL:', url);
+         const { url, method = 'GET', data, fileData, fileName, mimeType } = body;
+         const normalizedMethod = String(method || 'GET').toUpperCase();
          
          // 安全校验：只允许访问微信 API
-         if (!url || !url.startsWith('https://api.weixin.qq.com/')) {
-           const errorMsg = `Invalid URL. Expected: starts with https://api.weixin.qq.com/. FLASH: Received [${typeof url}]: ${url}`;
-           return new Response(JSON.stringify({ error: errorMsg, receivedBody: body }), { status: 400, headers: corsHeaders });
+         if (typeof url !== 'string' || !isAllowedWechatUrl(url)) {
+           return jsonResponse({ error: 'Invalid URL. Only https://api.weixin.qq.com/ is allowed.' }, 400);
+         }
+
+         if (!ALLOWED_METHODS.has(normalizedMethod)) {
+           return jsonResponse({ error: 'Invalid method. Only GET, POST, and UPLOAD are allowed.' }, 400);
          }
    
          let response;
-         if (method === 'UPLOAD' && fileData) {
+         if (normalizedMethod === 'UPLOAD') {
+           if (typeof fileData !== 'string' || fileData.length === 0) {
+             return jsonResponse({ error: 'Missing fileData for upload.' }, 400);
+           }
+
+           const approxBytes = Math.floor(fileData.length * 3 / 4);
+           if (approxBytes > MAX_UPLOAD_BYTES) {
+             return jsonResponse({ error: 'Upload too large. Maximum size is 10 MB.' }, 413);
+           }
+
+           const safeMimeType =
+             typeof mimeType === 'string' && mimeType.startsWith('image/')
+               ? mimeType
+               : 'application/octet-stream';
+           const safeFileName =
+             typeof fileName === 'string' && /^[\w.\-]+$/.test(fileName)
+               ? fileName
+               : 'image';
+
            // 文件上传处理：Base64 -> Binary -> FormData
-           const binary = atob(fileData);
-           const bytes = new Uint8Array(binary.length);
-           for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-           
+           const bytes = toUint8Array(fileData);
            const formData = new FormData();
-           formData.append(fieldName || 'media', new Blob([bytes], { type: mimeType }), fileName);
+           formData.append('media', new Blob([bytes], { type: safeMimeType }), safeFileName);
            response = await fetch(url, { method: 'POST', body: formData });
          } else {
            // 普通 JSON 请求
-           const opts = { method, headers: { 'Content-Type': 'application/json' } };
-           if (method !== 'GET' && data) opts.body = JSON.stringify(data);
+           const opts = { method: normalizedMethod };
+           if (normalizedMethod === 'POST') {
+             opts.headers = { 'Content-Type': 'application/json' };
+             if (data !== undefined) opts.body = JSON.stringify(data);
+           }
            response = await fetch(url, opts);
          }
    
-         const result = await response.json();
-         return new Response(JSON.stringify(result), {
-           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-         });
+         const responseText = await response.text();
+         let result;
+         try {
+           result = responseText ? JSON.parse(responseText) : {};
+         } catch {
+           return jsonResponse({ error: 'Upstream returned a non-JSON response.' }, 502);
+         }
+
+         return jsonResponse(result, response.status);
        } catch (error) {
-         return new Response(JSON.stringify({ error: `Server Error: ${error.message}`, stack: error.stack }), { status: 500, headers: corsHeaders });
+         return jsonResponse({ error: 'Proxy request failed.' }, 500);
        }
      }
    };
    ```
 
+   这个版本比旧示例更适合直接公开在文档里：
+   - 不记录请求 URL，避免把 `appid`、`secret`、`access_token` 写进日志。
+   - 不回显原始请求体和异常堆栈，减少敏感信息暴露。
+   - 只允许 `GET`、`POST`、`UPLOAD`，并且只允许访问 `https://api.weixin.qq.com/`。
+   - 上传大小限制为 10 MB，避免异常大文件拖垮 Worker。
+   - 上传字段固定为 `media`，与插件当前行为保持一致。
 
 3. **配置微信 IP 白名单**
 
@@ -294,6 +435,8 @@
    ```
    https://wechat-proxy.your-account.workers.dev
    ```
+
+   该代理仅建议自用，请不要公开分享 Worker 地址，也不要将其部署为公共服务。
 
 
 ## 🤝 贡献 (Contributing)

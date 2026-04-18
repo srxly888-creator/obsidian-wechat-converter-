@@ -6,6 +6,7 @@ const {
   preprocessMarkdownForTriplet,
   injectHardBreaksForLegacyParity,
   shouldObserveAsyncEmbedWindow,
+  shouldObserveMermaidRenderWindow,
   waitForTripletDomToSettle,
   renderByObsidianMarkdownRenderer,
   renderObsidianTripletMarkdown,
@@ -226,6 +227,13 @@ describe('Obsidian Triplet Renderer', () => {
     expect(shouldObserveAsyncEmbedWindow('![ref][img]\n[img]: https://example.com/a.png "title"')).toBe(false);
   });
 
+  it('should detect Mermaid fences for async observe window', () => {
+    expect(shouldObserveMermaidRenderWindow('纯文本')).toBe(false);
+    expect(shouldObserveMermaidRenderWindow('```mermaid\ngraph TD\nA-->B\n```')).toBe(true);
+    expect(shouldObserveMermaidRenderWindow('~~~mermaid\nflowchart LR\nA-->B\n~~~')).toBe(true);
+    expect(shouldObserveMermaidRenderWindow('````markdown\n```mermaid\ngraph TD\nA-->B\n```\n````')).toBe(false);
+  });
+
   it('should render with renderMarkdown API and serialize output', async () => {
     const renderMarkdown = vi.fn(async (markdown, el) => {
       el.innerHTML = `<p>${markdown}</p>`;
@@ -426,6 +434,130 @@ describe('Obsidian Triplet Renderer', () => {
     expect(html).toContain('<img');
   });
 
+  it('should rasterize rendered Mermaid diagrams before serialization', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<div class="mermaid"><svg id="mermaid-1"></svg></div>';
+    });
+    const mermaidRasterizer = vi.fn(async (root) => {
+      const svg = root.querySelector('svg#mermaid-1');
+      const img = document.createElement('img');
+      img.setAttribute('src', 'data:image/png;base64,mermaid');
+      img.setAttribute('class', 'mermaid-diagram-image');
+      svg.replaceWith(img);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidRasterizer,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidRasterizer).toHaveBeenCalledTimes(1);
+    expect(html).toContain('mermaid-diagram-image');
+    expect(html).not.toContain('<svg');
+  });
+
+  it('should render Mermaid code fences before rasterization when MarkdownRenderer leaves them as code blocks', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<pre><code class="language-mermaid">graph TD\\nA-->B</code></pre>';
+    });
+    const mermaidApi = {
+      render: vi.fn(async () => ({
+        svg: '<svg id="rendered-from-code"></svg>',
+      })),
+    };
+    const mermaidRasterizer = vi.fn(async (root) => {
+      const svg = root.querySelector('svg#rendered-from-code');
+      if (!svg) return;
+      const img = document.createElement('img');
+      img.setAttribute('src', 'data:image/png;base64,rendered-from-code');
+      img.setAttribute('class', 'mermaid-diagram-image');
+      svg.replaceWith(img);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidApi,
+      mermaidRasterizer,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidApi.render).toHaveBeenCalledTimes(1);
+    expect(mermaidRasterizer).toHaveBeenCalledTimes(1);
+    expect(html).toContain('mermaid-diagram-image');
+    expect(html).not.toContain('language-mermaid');
+  });
+
+  it('should keep raw Mermaid svg when preview path disables rasterization', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<pre><code class="language-mermaid">graph TD\\nA-->B</code></pre>';
+    });
+    const mermaidApi = {
+      render: vi.fn(async () => ({
+        svg: '<svg id="preview-mermaid" viewBox="0 0 100 60"><rect width="100" height="60"></rect></svg>',
+      })),
+    };
+    const mermaidRasterizer = vi.fn(async () => {});
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidApi,
+      mermaidRasterizer,
+      rasterizeMermaid: false,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidApi.render).toHaveBeenCalledTimes(1);
+    expect(mermaidRasterizer).not.toHaveBeenCalled();
+    expect(html).toContain('preview-mermaid');
+    expect(html).toContain('<svg');
+    expect(html).toContain('max-width: 100%');
+    expect(html).toContain('width: 100%');
+  });
+
+  it('should wait for delayed Mermaid svg injection before rasterization and serialization', async () => {
+    const renderMarkdown = vi.fn(async (_markdown, el) => {
+      el.innerHTML = '<p>placeholder</p>';
+      setTimeout(() => {
+        el.innerHTML = '<div class="mermaid"><svg id="late-mermaid"></svg></div>';
+      }, 80);
+    });
+    const mermaidRasterizer = vi.fn(async (root) => {
+      const svg = root.querySelector('svg#late-mermaid');
+      if (!svg) return;
+      const img = document.createElement('img');
+      img.setAttribute('src', 'data:image/png;base64,late-mermaid');
+      img.setAttribute('class', 'mermaid-diagram-image');
+      svg.replaceWith(img);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter: {},
+      markdown: '```mermaid\ngraph TD\nA-->B\n```',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      mermaidRasterizer,
+      serializer: ({ root }) => root.innerHTML,
+    });
+
+    expect(mermaidRasterizer).toHaveBeenCalledTimes(1);
+    expect(html).toContain('mermaid-diagram-image');
+    expect(html).not.toContain('placeholder');
+  });
+
   it('should keep observe window for reference-style local image and wait delayed embed injection', async () => {
     const renderMarkdown = vi.fn(async (_markdown, el) => {
       el.innerHTML = '<p>start</p>';
@@ -493,6 +625,7 @@ describe('Obsidian Triplet Renderer', () => {
 
     // Block math should render to mjx-container or section with SVG
     expect(html).toMatch(/mjx-container|<svg/);
+    expect(html).toContain('text-align:center');
   });
 
   it('should render blockquote block math without quote marker artifacts', async () => {
@@ -603,6 +736,27 @@ describe('Obsidian Triplet Renderer', () => {
     expect(html).toContain('Before');
     expect(html).toContain('after');
     expect(html).toMatch(/mjx-container|<svg/);
+  });
+
+  it('should nudge inline math formulas upward in preview output', async () => {
+    const converter = await createLegacyConverter();
+
+    const renderMarkdown = vi.fn(async (markdown, el) => {
+      el.innerHTML = converter.md.render(markdown);
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter,
+      markdown: 'Energy $E=mc^2$ test',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+      rasterizeMermaid: false,
+      preserveSvgStyleTags: true,
+    });
+
+    expect(html).toContain('vertical-align:middle');
+    expect(html).toContain('translateY(-0.12em)');
   });
 
   it('should handle empty or invalid math gracefully', async () => {

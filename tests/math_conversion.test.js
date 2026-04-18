@@ -125,8 +125,11 @@ describe('AppleStyleView - Math Formula Processing', () => {
 
     const outputHtml = await view.processMathFormulas(inputHtml, mockApi);
 
-    // The img tag should inherit styles, appended to our default styles
-    expect(outputHtml).toContain('style="display: inline-block; margin: 0 2px;vertical-align: -0.5ex; margin: 10px;"');
+    // Inline formulas should use our WeChat-friendly alignment rather than
+    // inheriting MathJax's lower baseline offset.
+    expect(outputHtml).toContain('class="math-formula-image"');
+    expect(outputHtml).toContain('vertical-align:middle; transform:translateY(-0.12em); margin:0 1px;');
+    expect(outputHtml).not.toContain('vertical-align: -0.5ex');
   });
 
   // === New Tests for Cache & Side Effects ===

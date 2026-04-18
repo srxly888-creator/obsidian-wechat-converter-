@@ -39,11 +39,11 @@ window.AppleTheme = class AppleTheme {
    * 📐 字体大小系统 - 5档
    */
   static FONT_SIZES = {
-    1: { base: 14, h1: 30, h2: 24, h3: 18, h4: 16, h5: 14, h6: 14, code: 12, caption: 12 },
-    2: { base: 15, h1: 32, h2: 26, h3: 20, h4: 17, h5: 15, h6: 15, code: 13, caption: 12 },
-    3: { base: 16, h1: 34, h2: 28, h3: 22, h4: 18, h5: 16, h6: 16, code: 14, caption: 13 }, // 推荐
-    4: { base: 17, h1: 38, h2: 30, h3: 24, h4: 20, h5: 17, h6: 17, code: 15, caption: 14 },
-    5: { base: 18, h1: 42, h2: 34, h3: 26, h4: 22, h5: 18, h6: 18, code: 16, caption: 14 },
+    1: { base: 14, h1: 26, h2: 20, h3: 16, h4: 14, h5: 14, h6: 14, code: 12, caption: 12 },
+    2: { base: 15, h1: 28, h2: 21, h3: 17, h4: 15, h5: 15, h6: 15, code: 13, caption: 12 },
+    3: { base: 16, h1: 30, h2: 22, h3: 18, h4: 16, h5: 16, h6: 16, code: 14, caption: 13 }, // 推荐
+    4: { base: 17, h1: 32, h2: 24, h3: 19, h4: 17, h5: 17, h6: 17, code: 15, caption: 14 },
+    5: { base: 18, h1: 34, h2: 26, h3: 20, h4: 18, h5: 18, h6: 18, code: 16, caption: 14 },
   };
 
   /**
@@ -132,6 +132,9 @@ window.AppleTheme = class AppleTheme {
     lg: 12,
   };
 
+  static QUOTE_CALLOUT_NEUTRAL_BG = '#f9f9f9';
+  static QUOTE_NEUTRAL_BORDER = '#d9d9d9';
+
   /**
    * 当前配置
    */
@@ -139,6 +142,7 @@ window.AppleTheme = class AppleTheme {
     this.themeName = options.theme || 'github';
     this.themeColor = options.themeColor || 'blue';
     this.customColor = options.customColor || null;
+    this.quoteCalloutStyleMode = options.quoteCalloutStyleMode || 'theme';
     this.fontFamily = options.fontFamily || 'sans-serif';
     this.fontSize = options.fontSize || 3;
     this.macCodeBlock = options.macCodeBlock !== false;
@@ -225,6 +229,10 @@ window.AppleTheme = class AppleTheme {
     return AppleTheme.FONTS[this.fontFamily] || AppleTheme.FONTS['sans-serif'];
   }
 
+  getQuoteCalloutStyleMode() {
+    return this.quoteCalloutStyleMode === 'neutral' ? 'neutral' : 'theme';
+  }
+
   /**
    * 获取元素样式
    * @param {string} tagName - HTML 标签名
@@ -235,6 +243,7 @@ window.AppleTheme = class AppleTheme {
     const sizes = this.getSizes();
     const font = this.getFontFamily();
     const color = this.getThemeColorValue();
+    const quoteCalloutStyleMode = this.getQuoteCalloutStyleMode();
     const s = AppleTheme.SPACING;
     const r = AppleTheme.RADIUS;
 
@@ -266,8 +275,18 @@ window.AppleTheme = class AppleTheme {
 
       case 'blockquote':
         if (config.blockquoteStyle === 'center') {
-          // Centered Blockquote: Now using theme color tint (1F) instead of purely grey, for continuity
-          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${config.blockquoteBg || color + '1F'}; margin: 30px 60px; padding: 20px; text-align: center; border: none; position: relative; border-radius: 4px;`;
+          const centeredBackground = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG
+            : (config.blockquoteBg || color + '1F');
+          const centeredRadius = quoteCalloutStyleMode === 'neutral' ? r.md : r.sm;
+          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${centeredBackground}; margin: 30px 60px; padding: 20px; text-align: center; border: none; position: relative; border-radius: ${centeredRadius}px;`;
+        }
+
+        if (quoteCalloutStyleMode === 'neutral') {
+          const neutralBorderWidth = this.themeName === 'wechat'
+            ? 3
+            : (config.blockquoteBorderWidth || 4);
+          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${neutralBorderWidth}px solid ${AppleTheme.QUOTE_NEUTRAL_BORDER}; border-radius: ${r.sm}px;`;
         }
 
         // 经典主题（wechat）：使用更细的边框和更浅的颜色，与 H3 区分
@@ -374,17 +393,17 @@ window.AppleTheme = class AppleTheme {
   }
 
   getH2Style(type, color, fontSize, font, headingColor) {
-    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 40px auto 20px; text-align: center; color: ${headingColor}; line-height: 1.25;`;
+    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 32px auto 16px; text-align: center; color: ${headingColor}; line-height: 1.25;`;
     switch (type) {
       case 'editorial-h1': // Golden Line (Shifted from H1)
-        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 40px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 32px auto 16px; color: ${headingColor}; text-align: center; line-height: 1.2;
           background-image: linear-gradient(to right, transparent, ${color}, transparent);
           background-size: 100px 1px;
           background-repeat: no-repeat;
           background-position: bottom center;
           padding-bottom: 20px; letter-spacing: 1px;`;
       case 'editorial-h2': // Magazine Subtitle
-        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 40px auto 20px; text-align: center; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 32px auto 16px; text-align: center; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;
       case 'bottom-line':
         // Pure CSS centered short line (thinner/shorter for H2)
         return `${base}
@@ -403,12 +422,12 @@ window.AppleTheme = class AppleTheme {
   }
 
   getH3Style(type, color, fontSize, font, headingColor) {
-    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 24px 0 16px; text-align: left; color: ${headingColor}; line-height: 1.3;`;
+    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 20px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.3;`;
     switch (type) {
       case 'editorial-h2': // Italic Serif (Left Aligned for H3)
-        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 30px 0 16px; text-align: left; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 24px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;
       case 'editorial-h3': // Magazine Section: Forced Serif + Left Underline
-        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px 0 16px; text-align: left; color: ${headingColor}; line-height: 1.3;
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 24px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.3;
            border-bottom: 1px solid ${color}; padding-bottom: 4px; display: inline-block; width: auto; letter-spacing: 0.5px;`;
       case 'left-border':
         return `${base} border-left: 4px solid ${color}; padding-left: 10px;`;
@@ -445,6 +464,7 @@ window.AppleTheme = class AppleTheme {
     if (options.theme !== undefined) this.themeName = options.theme;
     if (options.themeColor !== undefined) this.themeColor = options.themeColor;
     if (options.customColor !== undefined) this.customColor = options.customColor;
+    if (options.quoteCalloutStyleMode !== undefined) this.quoteCalloutStyleMode = options.quoteCalloutStyleMode;
     if (options.fontFamily !== undefined) this.fontFamily = options.fontFamily;
     if (options.fontSize !== undefined) this.fontSize = options.fontSize;
     if (options.macCodeBlock !== undefined) this.macCodeBlock = options.macCodeBlock;

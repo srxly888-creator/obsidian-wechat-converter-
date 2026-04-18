@@ -96,4 +96,185 @@ describe('AppleStylePlugin - Settings Migration', () => {
 
     expect(plugin.saveData).not.toHaveBeenCalled();
   });
+
+  it('should normalize partial ai settings without forcing a save when field is missing', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      cleanupDirTemplate: '',
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.ai).toBeTruthy();
+    expect(plugin.settings.ai.enabled).toBe(true);
+    expect(plugin.settings.ai.defaultStylePack).toBe('tech-green');
+    expect(plugin.settings.ai.providers).toEqual([]);
+    expect(plugin.settings.ai.articleLayoutsByPath).toEqual({});
+    expect(plugin.settings.quoteCalloutStyleMode).toBe('theme');
+    expect(plugin.saveData).not.toHaveBeenCalled();
+  });
+
+  it('should keep legacy wechat accounts unchanged until publish defaults are explicitly saved', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [{
+        id: 'acc-1',
+        name: '公众号 A',
+        appId: 'wx123',
+        appSecret: 'sec',
+        author: '作者',
+      }],
+      defaultAccountId: 'acc-1',
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('contentSourceUrl');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('enableOriginal');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('allowReprint');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('openComment');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('onlyFansCanComment');
+    expect(plugin.saveData).not.toHaveBeenCalled();
+  });
+
+  it('should remove deprecated originality and reprint flags from stored wechat accounts', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [{
+        id: 'acc-1',
+        name: '公众号 A',
+        appId: 'wx123',
+        appSecret: 'sec',
+        author: '作者',
+        enableOriginal: true,
+        allowReprint: false,
+        openComment: true,
+      }],
+      defaultAccountId: 'acc-1',
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('enableOriginal');
+    expect(plugin.settings.wechatAccounts[0]).not.toHaveProperty('allowReprint');
+    expect(plugin.settings.wechatAccounts[0].openComment).toBe(true);
+    expect(plugin.saveData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should preserve explicit disabled ai setting during normalization', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: false,
+        providers: [],
+        articleLayoutsByPath: {},
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.ai.enabled).toBe(false);
+    expect(plugin.saveData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should normalize stored ai settings when provider metadata is incomplete', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: true,
+        defaultProviderId: 'p1',
+        providers: [{ id: 'p1', apiKey: 'secret' }],
+        articleLayoutsByPath: {
+          'notes/demo.md': {
+            layoutJson: { articleType: 'tutorial', stylePack: 'tech-green', blocks: [{ type: 'lead-quote', text: 'hello' }] }
+          }
+        }
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.settings.ai.providers[0].name).toBe('未命名 Provider');
+    expect(plugin.settings.ai.providers[0].model).toBe('gpt-4.1-mini');
+    expect(plugin.settings.ai.articleLayoutsByPath['notes/demo.md']).toBeTruthy();
+    expect(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].stylePackStates['tech-green'].lastAttemptStatus).toBe('idle');
+    expect(plugin.saveData).toHaveBeenCalledTimes(1);
+  });
+
+  it('should let auto selection reuse migrated legacy stylePack cache', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: true,
+        providers: [],
+        articleLayoutsByPath: {
+          'notes/demo.md': {
+            updatedAt: Date.now(),
+            stylePack: 'tech-green',
+            layoutJson: {
+              articleType: 'tutorial',
+              stylePack: 'tech-green',
+              blocks: [{ type: 'hero', title: 'legacy cache' }],
+            },
+          },
+        },
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    expect(plugin.getArticleLayoutState('notes/demo.md', {
+      layoutFamily: 'auto',
+      colorPalette: 'auto',
+    })?.layoutJson?.blocks?.[0]?.title).toBe('legacy cache');
+    expect(plugin.getArticleLayoutState('notes/demo.md', {
+      layoutFamily: 'auto',
+      colorPalette: 'tech-green',
+    })?.stylePack).toBe('tech-green');
+  });
+
+  it('should keep one cached layout per note layout family across style packs', async () => {
+    const plugin = new AppleStylePlugin();
+    plugin.loadData = vi.fn().mockResolvedValue({
+      wechatAccounts: [],
+      defaultAccountId: '',
+      ai: {
+        enabled: true,
+        defaultStylePack: 'tech-green',
+        providers: [],
+        articleLayoutsByPath: {},
+      },
+    });
+    plugin.saveData = vi.fn().mockResolvedValue(undefined);
+
+    await plugin.loadSettings();
+
+    await plugin.saveArticleLayoutState('notes/demo.md', {
+      layoutJson: { articleType: 'tutorial', stylePack: 'tech-green', blocks: [{ type: 'hero', title: 'green' }] },
+      stylePack: 'tech-green',
+    });
+
+    await plugin.saveArticleLayoutState('notes/demo.md', {
+      layoutJson: { articleType: 'tutorial', stylePack: 'ocean-blue', blocks: [{ type: 'hero', title: 'blue' }] },
+      stylePack: 'ocean-blue',
+    });
+
+    expect(plugin.getArticleLayoutState('notes/demo.md', 'tech-green')?.layoutJson?.blocks?.[0]?.title).toBe('blue');
+    expect(plugin.getArticleLayoutState('notes/demo.md', 'ocean-blue')?.layoutJson?.blocks?.[0]?.title).toBe('blue');
+    expect(Object.keys(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].familyStates)).toEqual(['tutorial-cards']);
+  });
 });

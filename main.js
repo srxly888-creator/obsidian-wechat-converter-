@@ -1362,8 +1362,8 @@ juice/lib/utils.js:
    *)
 */
 `,
-        "theme": "/**\n * \u{1F34E} Apple Style \u591A\u4E3B\u9898\u7CFB\u7EDF\n * \u652F\u6301\u591A\u79CD\u4E3B\u9898\u98CE\u683C\uFF1A\u7B80\u7EA6\u3001\u7ECF\u5178\u3001\u6C34\u58A8\u3001\u6781\u5149\u7B49\n * \u8BBE\u8BA1\u7406\u5FF5\uFF1A\u514B\u5236\u3001\u4F18\u96C5\u3001\u6CE8\u91CD\u7EC6\u8282\n */\n\n// Use assignment expression to avoid \"Identifier has already been declared\" errors if re-eval'd\nwindow.AppleTheme = class AppleTheme {\n  /**\n   * \u{1F3A8} \u4E3B\u9898\u8272\u677F - 8\u79CD\u9884\u8BBE\u989C\u8272\n   */\n  static THEME_COLORS = {\n    blue: '#0366d6',\n    green: '#28a745',\n    purple: '#6f42c1',\n    orange: '#fd7e14',\n    teal: '#20c997',\n    rose: '#e83e8c',\n    ruby: '#dc3545',\n    slate: '#6c757d',\n  };\n\n  /**\n   * \u{1F3A8} \u6807\u9898\u4E13\u7528\u6DF1\u8272\u677F (Tone-on-Tone)\n   * \u76F8\u6BD4\u4E3B\u9898\u8272\u52A0\u6DF1 15-20%\uFF0C\u7528\u4E8E\u6807\u9898\u4EE5\u589E\u52A0\u89C6\u89C9\u7A33\u91CD\u611F\uFF0C\u907F\u514D\u4E0E\u6B63\u6587\u9AD8\u4EAE\u8272\u51B2\u7A81\n   */\n  static THEME_COLORS_DEEP = {\n    blue: '#004795',    // Deep Blue\n    green: '#1e7e34',   // Deep Green\n    purple: '#4a2b82',  // Deep Purple\n    orange: '#c75e0b',  // Deep Orange\n    teal: '#158765',    // Deep Teal\n    rose: '#b81f66',    // Deep Rose\n    ruby: '#a81825',    // Deep Ruby\n    slate: '#495057',   // Deep Slate\n  };\n\n  /**\n   * \u{1F4D0} \u5B57\u4F53\u5927\u5C0F\u7CFB\u7EDF - 5\u6863\n   */\n  static FONT_SIZES = {\n    1: { base: 14, h1: 30, h2: 24, h3: 18, h4: 16, h5: 14, h6: 14, code: 12, caption: 12 },\n    2: { base: 15, h1: 32, h2: 26, h3: 20, h4: 17, h5: 15, h6: 15, code: 13, caption: 12 },\n    3: { base: 16, h1: 34, h2: 28, h3: 22, h4: 18, h5: 16, h6: 16, code: 14, caption: 13 }, // \u63A8\u8350\n    4: { base: 17, h1: 38, h2: 30, h3: 24, h4: 20, h5: 17, h6: 17, code: 15, caption: 14 },\n    5: { base: 18, h1: 42, h2: 34, h3: 26, h4: 22, h5: 18, h6: 18, code: 16, caption: 14 },\n  };\n\n  /**\n   * \u{1F524} \u5B57\u4F53\u6808\n   */\n  static FONTS = {\n    'sans-serif': `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif`,\n    'serif': `'Times New Roman', Georgia, 'SimSun', serif`,\n    'monospace': `'SF Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace`,\n  };\n\n  /**\n   * \u{1F3A8} \u4E3B\u9898\u914D\u7F6E - \u6BCF\u79CD\u4E3B\u9898\u7684\u72EC\u7279\u914D\u8272\u548C\u89C4\u5219\n   */\n  static THEME_CONFIGS = {\n\n    github: {\n      name: '\u7B80\u7EA6',\n      lineHeight: 1.8,\n      paragraphGap: 20,\n      h1Decoration: 'none',\n      h2Decoration: 'none',\n      h3Decoration: 'none',\n      h4Decoration: 'none',\n      headingWeight: 800,\n      headingLetterSpacing: -0.5,\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n\n      linkDecoration: 'underline',\n      blockquoteBorderWidth: 4,\n      // Removed blockquoteBorderColor to allow theme color (was #d0d7de)\n      // Removed blockquoteBg to allow theme color tint (was #ffffff)\n    },\n    wechat: {\n      name: '\u7ECF\u5178',\n      lineHeight: 1.8,\n      paragraphGap: 24,\n      h1Decoration: 'bottom-line',       // \u5E95\u90E8\u77ED\u7EBF\n      h2Decoration: 'bottom-line',       // \u5E95\u90E8\u77ED\u7EBF (\u539F\u80F6\u56CA)\n      h3Decoration: 'left-border',       // \u5DE6\u8FB9\u6846\n      h4Decoration: 'light-bg',          // \u6D45\u8272\u80CC\u666F\n      headingWeight: 700,\n      headingLetterSpacing: 0,\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 4,\n    },\n    serif: {\n      name: '\u4F18\u96C5',\n      lineHeight: 1.8,\n      paragraphGap: 20,\n      h1Decoration: 'editorial-h1',      // \u6742\u5FD7\u5927\u6807\u9898 (\u91D1\u7EBF)\n      h2Decoration: 'editorial-h1',      // H2 \u6B64\u65F6\u4E5F\u662F\u91D1\u7EBF (Level 2 = Level 1)\n      h3Decoration: 'editorial-h2',      // H3 \u4F7F\u7528\u539F H2 \u6837\u5F0F (\u659C\u4F53\uFF0C\u73B0\u5728\u7684 helper \u5DF2\u5F3A\u5236\u5DE6\u5BF9\u9F50)\n      h4Decoration: 'editorial-h3',      // H4 \u4F7F\u7528\u539F H3 (\u5DE6\u5BF9\u9F50\u4E0B\u5212\u7EBF)\n      headingWeight: 700,\n      headingLetterSpacing: 1,           // \u4F18\u96C5\u4E3B\u9898\u589E\u52A0\u5B57\u95F4\u8DDD\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 0,          // \u5C45\u4E2D\u6837\u5F0F\u4E0D\u9700\u8981\u5DE6\u8FB9\u6846\n      blockquoteStyle: 'center',         // \u65B0\u589E\uFF1A\u5C45\u4E2D\u5F15\u7528\n    },\n  };\n\n  /**\n   * \u{1F4D0} \u95F4\u8DDD\u7CFB\u7EDF - 8px \u57FA\u51C6\n   */\n  static SPACING = {\n    xs: 4,\n    sm: 8,\n    md: 16,\n    lg: 24,\n    xl: 32,\n    xxl: 48,\n  };\n\n  /**\n   * \u{1F3AF} \u5706\u89D2\u7CFB\u7EDF\n   */\n  static RADIUS = {\n    sm: 4,\n    md: 8,\n    lg: 12,\n  };\n\n  /**\n   * \u5F53\u524D\u914D\u7F6E\n   */\n  constructor(options = {}) {\n    this.themeName = options.theme || 'github';\n    this.themeColor = options.themeColor || 'blue';\n    this.customColor = options.customColor || null;\n    this.fontFamily = options.fontFamily || 'sans-serif';\n    this.fontSize = options.fontSize || 3;\n    this.macCodeBlock = options.macCodeBlock !== false;\n    this.codeLineNumber = options.codeLineNumber || false;\n    // \u4FA7\u8FB9\u8DDD\u8BBE\u7F6E (\u9ED8\u8BA4 16px)\n    this.sidePadding = options.sidePadding !== undefined ? options.sidePadding : 16;\n    // \u6807\u9898\u67D3\u8272\u8BBE\u7F6E\n    this.coloredHeader = options.coloredHeader || false;\n  }\n\n  /**\n   * \u83B7\u53D6\u5F53\u524D\u4E3B\u9898\u8272\u503C\n   */\n  getThemeColorValue() {\n    if (this.themeColor === 'custom' && this.customColor) {\n      return this.customColor;\n    }\n    return AppleTheme.THEME_COLORS[this.themeColor] || AppleTheme.THEME_COLORS.blue;\n  }\n\n  /**\n   * \u83B7\u53D6\u6807\u9898\u4E13\u7528\u6DF1\u8272\u503C\n   */\n  getHeadingColorValue() {\n    // 1. \u5982\u679C\u672A\u5F00\u542F\u6807\u9898\u67D3\u8272\uFF0C\u8FD4\u56DE\u9ED8\u8BA4\u6DF1\u7070\n    if (!this.coloredHeader) {\n      return '#3e3e3e';\n    }\n\n    // 2. \u81EA\u5B9A\u4E49\u989C\u8272\uFF1A\u81EA\u52A8\u8BA1\u7B97\u53D8\u6DF1 20%\n    if (this.themeColor === 'custom' && this.customColor) {\n      return this.adjustColorBrightness(this.customColor, -20);\n    }\n\n    // 3. \u9884\u8BBE\u989C\u8272\uFF1A\u8FD4\u56DE\u6DF1\u8272\u677F\u5BF9\u5E94\u503C\n    return AppleTheme.THEME_COLORS_DEEP[this.themeColor] || AppleTheme.THEME_COLORS_DEEP.blue;\n  }\n\n  /**\n   * \u8F85\u52A9\uFF1A\u8C03\u6574 Hex \u989C\u8272\u4EAE\u5EA6\n   * @param {string} hex - #RRGGBB\n   * @param {number} percent - -100 to 100\n   */\n  adjustColorBrightness(hex, percent) {\n    hex = hex.replace(/^#/, '');\n    let r = parseInt(hex.substring(0, 2), 16);\n    let g = parseInt(hex.substring(2, 4), 16);\n    let b = parseInt(hex.substring(4, 6), 16);\n\n    r = Math.round(r * (100 + percent) / 100);\n    g = Math.round(g * (100 + percent) / 100);\n    b = Math.round(b * (100 + percent) / 100);\n\n    r = (r < 255) ? r : 255;\n    g = (g < 255) ? g : 255;\n    b = (b < 255) ? b : 255;\n\n    // Pad with 0 if necessary\n    const rr = ((r.toString(16).length === 1) ? '0' + r.toString(16) : r.toString(16));\n    const gg = ((g.toString(16).length === 1) ? '0' + g.toString(16) : g.toString(16));\n    const bb = ((b.toString(16).length === 1) ? '0' + b.toString(16) : b.toString(16));\n\n    return `#${rr}${gg}${bb}`;\n  }\n\n  /**\n   * \u83B7\u53D6\u5F53\u524D\u4E3B\u9898\u914D\u7F6E\n   */\n  getThemeConfig() {\n    return AppleTheme.THEME_CONFIGS[this.themeName] || AppleTheme.THEME_CONFIGS.github;\n  }\n\n  /**\n   * \u83B7\u53D6\u5B57\u4F53\u5C3A\u5BF8\u914D\u7F6E\n   */\n  getSizes() {\n    return AppleTheme.FONT_SIZES[this.fontSize] || AppleTheme.FONT_SIZES[3];\n  }\n\n  /**\n   * \u83B7\u53D6\u5B57\u4F53\u6808\n   */\n  getFontFamily() {\n    return AppleTheme.FONTS[this.fontFamily] || AppleTheme.FONTS['sans-serif'];\n  }\n\n  /**\n   * \u83B7\u53D6\u5143\u7D20\u6837\u5F0F\n   * @param {string} tagName - HTML \u6807\u7B7E\u540D\n   * @returns {string} - CSS \u6837\u5F0F\u5B57\u7B26\u4E32\n   */\n  getStyle(tagName) {\n    const config = this.getThemeConfig();\n    const sizes = this.getSizes();\n    const font = this.getFontFamily();\n    const color = this.getThemeColorValue();\n    const s = AppleTheme.SPACING;\n    const r = AppleTheme.RADIUS;\n\n    // \u6807\u9898\u989C\u8272\u903B\u8F91\uFF1A\u4F7F\u7528\u4E13\u95E8\u7684\u6DF1\u8272\u7CFB\u6807\u9898\u8272\n    // \u6CE8\u610F\uFF1A\u67D0\u4E9B\u7279\u6B8A\u4E3B\u9898\u88C5\u9970(h1Decoration)\u53EF\u80FD\u5DF2\u7ECF\u5305\u542B\u4E86\u989C\u8272\u8BBE\u7F6E\uFF0C\u8FD9\u91CC\u4E3B\u8981\u9488\u5BF9\u6587\u5B57\u672C\u8EAB\n    const headingColor = this.getHeadingColorValue();\n\n    switch (tagName) {\n      case 'section':\n        // \u4F7F\u7528\u914D\u7F6E\u7684 sidePadding\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; padding: 20px ${this.sidePadding}px; background: #ffffff; max-width: 100%; word-wrap: break-word; text-align: justify;`;\n\n      case 'h1': return this.getH1Style(config.h1Decoration, color, sizes.h1, font, headingColor);\n      case 'h2': return this.getH2Style(config.h2Decoration, color, sizes.h2, font, headingColor);\n      case 'h3': return this.getH3Style(config.h3Decoration, color, sizes.h3, font, headingColor);\n      case 'h4': return this.getH4Style(config.h4Decoration, color, sizes.h4, font, headingColor);\n\n      case 'h5':\n        return `font-family: ${font}; font-size: ${sizes.h5}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;\n      case 'h6':\n        return `font-family: ${font}; font-size: ${sizes.h6}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;\n\n      case 'p':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 0 0 ${config.paragraphGap}px 0; text-align: justify; letter-spacing: 0;`;\n\n\n\n\n\n      case 'blockquote':\n        if (config.blockquoteStyle === 'center') {\n          // Centered Blockquote: Now using theme color tint (1F) instead of purely grey, for continuity\n          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${config.blockquoteBg || color + '1F'}; margin: 30px 60px; padding: 20px; text-align: center; border: none; position: relative; border-radius: 4px;`;\n        }\n\n        // \u7ECF\u5178\u4E3B\u9898\uFF08wechat\uFF09\uFF1A\u4F7F\u7528\u66F4\u7EC6\u7684\u8FB9\u6846\u548C\u66F4\u6D45\u7684\u989C\u8272\uFF0C\u4E0E H3 \u533A\u5206\n        // H3: 4px \u4E3B\u9898\u8272 100% \u5DE6\u8FB9\u6846\uFF0C\u9876\u683C\n        // \u5F15\u7528\u5757: 3px \u4E3B\u9898\u8272 60% \u5DE6\u8FB9\u6846\uFF0C\u7F29\u8FDB 4px\n        if (this.themeName === 'wechat') {\n          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${config.blockquoteBg || color + '1F'}; margin: ${s.md}px 0 ${s.md}px 4px; padding: ${s.md}px; border-left: 3px solid ${color}99; border-radius: 3px;`;\n        }\n\n        // Standard Blockquote: Restoring Italic and adjusting padding/background to match the screenshot\n        // Background: Light opacity of theme color (1F) for better visibility\n        // Border: Solid theme color\n        // Font: Normal (removed italic) for better legibility on mobile\n        return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${config.blockquoteBg || color + '1F'}; margin: ${s.md}px 0; padding: ${s.md}px; border-left: ${config.blockquoteBorderWidth}px solid ${config.blockquoteBorderColor || color}; border-radius: 3px;`;\n\n      case 'pre':\n        return `background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: ${r.md}px; padding: ${s.md}px; margin: ${s.md}px 0; overflow-x: auto; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px; line-height: 1.6; color: #24292e;`;\n\n      case 'code':\n        return `background: ${color}1A; color: ${color}; padding: 2px 4px; border-radius: 3px; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px;`;\n\n      case 'ul':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 12px 0; padding-left: 20px; list-style-type: disc;`;\n      case 'ol':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 12px 0; padding-left: 20px; list-style-type: decimal;`;\n      case 'li':\n        return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 4px 0;`;\n      case 'li p':\n        return `margin: 0; padding: 0; line-height: ${config.lineHeight};`;\n\n\n\n\n      case 'figure':\n        // Fix: Restoring wireframe (border/padding) & balanced spacing (20px top/bottom)\n        // No shadow for cleaner look\n        return `display: block; margin: 20px 0; text-align: center; border: 1px solid #e1e4e8; border-radius: ${r.md}px; padding: 10px;`;\n\n      case 'figcaption':\n        return `font-size: ${sizes.caption}px; color: #999; text-align: center; margin-top: ${s.sm}px;`;\n\n      case 'img':\n        return `display: block; margin: 0 auto; max-width: 100%; border-radius: 4px;`;\n\n      case 'a':\n        return `color: ${color}; text-decoration: ${config.linkDecoration}; border-bottom: ${config.linkDecoration === 'none' ? `1px dashed ${color}` : 'none'};`;\n\n      case 'table':\n        return `border-collapse: collapse; width: 100%; margin: ${s.md}px 0; border: 1px solid #e1e4e8;`;\n      case 'th':\n        return `background: ${color}1F; font-weight: bold; color: ${config.textColor}; border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;\n      case 'td':\n        return `border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;\n      case 'thead':\n        return `background: #f6f8fa;`;\n\n      case 'hr':\n        return `border: 0; border-top: 1px solid rgba(0,0,0,0.08); margin: 40px 0;`;\n\n      case 'strong':\n        return `font-weight: bold; color: ${color};`;\n      case 'em':\n        return `font-style: italic;`;\n      case 'del':\n        return `text-decoration: line-through; color: #999;`;\n\n      case 'avatar-header':\n        return `margin: 0 0 ${s.sm}px 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; width: 100%; flex-direction: row !important; flex-wrap: nowrap !important; text-align: left !important;`;\n      case 'avatar':\n        return `display: inline-block !important; vertical-align: middle !important; margin: 0 !important; width: 32px !important; height: 32px !important; border-radius: 50%; object-fit: cover; border: 1px solid #e8e8ed; flex-shrink: 0;`;\n      case 'avatar-caption':\n        return `display: inline-block !important; vertical-align: middle !important; font-size: ${sizes.caption}px; color: #666; margin-left: 10px; line-height: 1.4; text-align: left !important;`;\n\n      default:\n        return '';\n    }\n  }\n\n  // === Helper Methods ===\n\n  getH1Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;`;\n    switch (type) {\n      case 'editorial-h1': // Magazine Style: Forced Serif + Golden Line\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;\n          background-image: linear-gradient(to right, transparent, ${color}, transparent);\n          background-size: 100px 1px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 20px; letter-spacing: 1px;`;\n      case 'bottom-line':\n        // Pure CSS centered short line using linear-gradient (simulating image)\n        return `${base}\n          background-image: linear-gradient(to right, ${color}, ${color});\n          background-size: 80px 3px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 15px;`;\n      case 'border-box':\n        return `${base} border: 1px solid ${color}; padding: 10px 20px; border-radius: 4px; display: inline-block; width: auto;`;\n      default: // none or unknown\n        return base;\n    }\n  }\n\n  getH2Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 40px auto 20px; text-align: center; color: ${headingColor}; line-height: 1.25;`;\n    switch (type) {\n      case 'editorial-h1': // Golden Line (Shifted from H1)\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 40px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;\n          background-image: linear-gradient(to right, transparent, ${color}, transparent);\n          background-size: 100px 1px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 20px; letter-spacing: 1px;`;\n      case 'editorial-h2': // Magazine Subtitle\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 40px auto 20px; text-align: center; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;\n      case 'bottom-line':\n        // Pure CSS centered short line (thinner/shorter for H2)\n        return `${base}\n           background-image: linear-gradient(to right, ${color}, ${color});\n           background-size: 50px 2px;\n           background-repeat: no-repeat;\n           background-position: bottom center;\n           padding-bottom: 12px;`;\n      case 'filled-pill':\n        return `${base} background-color: ${color}; color: #fff; padding: 5px 20px; border-radius: 20px; display: inline-block; width: auto;`;\n      case 'bottom-line-center':\n        return `${base} display: inline-block; border-bottom: 1px solid ${color}; padding-bottom: 5px; width: auto;`;\n      default:\n        return base;\n    }\n  }\n\n  getH3Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 24px 0 16px; text-align: left; color: ${headingColor}; line-height: 1.3;`;\n    switch (type) {\n      case 'editorial-h2': // Italic Serif (Left Aligned for H3)\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 30px 0 16px; text-align: left; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;\n      case 'editorial-h3': // Magazine Section: Forced Serif + Left Underline\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px 0 16px; text-align: left; color: ${headingColor}; line-height: 1.3;\n           border-bottom: 1px solid ${color}; padding-bottom: 4px; display: inline-block; width: auto; letter-spacing: 0.5px;`;\n      case 'left-border':\n        return `${base} border-left: 4px solid ${color}; padding-left: 10px;`;\n      case 'bottom-line-left':\n        return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;\n      default:\n        return base;\n    }\n  }\n\n  getH4Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 15px 0 10px; text-align: left; color: ${headingColor}; line-height: 1.35;`;\n    switch (type) {\n      case 'editorial-h3': // Inherit H3 style for H4\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 15px 0 10px; text-align: left; color: ${headingColor}; line-height: 1.35;\n           border-bottom: 1px solid ${color}; padding-bottom: 3px; display: inline-block; width: auto; letter-spacing: 0.5px;`;\n      case 'simple': // Simple Bold (User Font)\n        // Use headingColor (Deep) instead of color (Bright)\n        return `${base}`;\n      case 'light-bg':\n        // Background uses bright color tint (low opacity), Text uses deep headingColor\n        return `${base} background-color: ${color}15; padding: 4px 8px; border-radius: 4px; display: inline-block;`;\n      case 'italic-serif':\n        return `${base} font-style: italic; font-family: serif; border-bottom: 1px dashed #ccc; display: inline-block; padding-bottom: 2px;`;\n      default:\n        return base;\n    }\n  }\n\n  /**\n   * \u66F4\u65B0\u914D\u7F6E\n   */\n  update(options) {\n    if (options.theme !== undefined) this.themeName = options.theme;\n    if (options.themeColor !== undefined) this.themeColor = options.themeColor;\n    if (options.customColor !== undefined) this.customColor = options.customColor;\n    if (options.fontFamily !== undefined) this.fontFamily = options.fontFamily;\n    if (options.fontSize !== undefined) this.fontSize = options.fontSize;\n    if (options.macCodeBlock !== undefined) this.macCodeBlock = options.macCodeBlock;\n    if (options.codeLineNumber !== undefined) this.codeLineNumber = options.codeLineNumber;\n    if (options.sidePadding !== undefined) this.sidePadding = options.sidePadding;\n    if (options.coloredHeader !== undefined) this.coloredHeader = options.coloredHeader;\n  }\n\n  /**\n   * \u83B7\u53D6\u4E3B\u9898\u5217\u8868\n   */\n  static getThemeList() {\n    return Object.entries(AppleTheme.THEME_CONFIGS).map(([key, config]) => ({\n      value: key,\n      label: config.name,\n    }));\n  }\n\n  /**\n   * \u83B7\u53D6\u4E3B\u9898\u8272\u5217\u8868\n   */\n  static getColorList() {\n    return Object.entries(AppleTheme.THEME_COLORS).map(([key, value]) => ({\n      value: key,\n      color: value,\n    }));\n  }\n}\n\n// \u5BFC\u51FA\u5230\u5168\u5C40\u4F5C\u7528\u57DF\nwindow.AppleTheme = AppleTheme;\n",
-        "converter": "/**\n * \u{1F34E} Apple Style Markdown \u8F6C\u6362\u5668\n * \u76F4\u63A5\u7167\u6284 wechat-tool \u7684\u4EE3\u7801\u5757\u5B9E\u73B0\n * \u9488\u5BF9\u5FAE\u4FE1\u516C\u4F17\u53F7\u4F18\u5316\uFF1A\u4F7F\u7528 section \u7ED3\u6784\uFF0C\u589E\u5F3A\u517C\u5BB9\u6027\n */\n\n// Callout \u56FE\u6807\u914D\u7F6E\uFF08\u989C\u8272\u8DDF\u968F\u4E3B\u9898\u8272\uFF09\nconst CALLOUT_ICONS = {\n  // \u4FE1\u606F\u7C7B\n  note: { icon: '\u2139\uFE0F', label: '\u5907\u6CE8' },\n  info: { icon: '\u2139\uFE0F', label: '\u4FE1\u606F' },\n  todo: { icon: '\u2611\uFE0F', label: '\u5F85\u529E' },\n  // \u6458\u8981\u7C7B\n  abstract: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  summary: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  tldr: { icon: '\u{1F4C4}', label: 'TL;DR' },\n  // \u63D0\u793A\u7C7B\n  tip: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  hint: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  important: { icon: '\u{1F4A1}', label: '\u91CD\u8981' },\n  // \u6210\u529F\u7C7B\n  success: { icon: '\u2705', label: '\u6210\u529F' },\n  check: { icon: '\u2705', label: '\u5B8C\u6210' },\n  done: { icon: '\u2705', label: '\u5B8C\u6210' },\n  // \u95EE\u9898\u7C7B\n  question: { icon: '\u2753', label: '\u95EE\u9898' },\n  help: { icon: '\u2753', label: '\u5E2E\u52A9' },\n  faq: { icon: '\u2753', label: 'FAQ' },\n  // \u8B66\u544A\u7C7B\n  warning: { icon: '\u26A0\uFE0F', label: '\u8B66\u544A' },\n  caution: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  attention: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  // \u5931\u8D25/\u5371\u9669\u7C7B\n  failure: { icon: '\u274C', label: '\u5931\u8D25' },\n  fail: { icon: '\u274C', label: '\u5931\u8D25' },\n  missing: { icon: '\u274C', label: '\u7F3A\u5931' },\n  danger: { icon: '\u{1F6A8}', label: '\u5371\u9669' },\n  error: { icon: '\u274C', label: '\u9519\u8BEF' },\n  bug: { icon: '\u{1F41B}', label: 'Bug' },\n  // \u5F15\u7528\u7C7B\n  quote: { icon: '\u{1F4AC}', label: '\u5F15\u7528' },\n  cite: { icon: '\u{1F4DD}', label: '\u5F15\u7528' },\n  // \u793A\u4F8B\u7C7B\n  example: { icon: '\u{1F4CB}', label: '\u793A\u4F8B' },\n};\n\nwindow.AppleStyleConverter = class AppleStyleConverter {\n  constructor(theme, avatarUrl = '', showImageCaption = true, app = null, sourcePath = '') {\n    this.theme = theme;\n    this.avatarUrl = avatarUrl;\n    this.showImageCaption = showImageCaption;\n    this.app = app; // Obsidian App instance\n    this.sourcePath = sourcePath; // Current file path for relative resolution\n    this.md = null;\n    this.hljs = null;\n  }\n\n  async initMarkdownIt() {\n    if (this.md) return;\n    if (typeof markdownit === 'undefined') throw new Error('markdown-it \u672A\u52A0\u8F7D');\n    this.hljs = typeof hljs !== 'undefined' ? hljs : null;\n    this.md = markdownit({ html: true, breaks: true, linkify: true, typographer: true });\n\n    // Enable MathJax if available\n    if (window.ObsidianWechatMath) {\n      window.ObsidianWechatMath(this.md);\n    }\n\n    this.setupRenderRules();\n  }\n\n  reinit() { this.md = null; }\n\n  updateConfig(config) {\n    if (config.showImageCaption !== undefined) {\n      this.showImageCaption = config.showImageCaption;\n    }\n    if (config.avatarUrl !== undefined) {\n      this.avatarUrl = config.avatarUrl;\n    }\n  }\n\n  updateSourcePath(path) {\n    this.sourcePath = path;\n  }\n\n  resolveImagePath(src) {\n    if (!this.app) return src;\n    // IF remote url, bypass\n    if (/^(https?:\\/\\/|data:)/i.test(src)) return src;\n\n    try {\n      // Markdown-it might encode the URL (e.g. %20 for space), but Obsidian expects decoded paths\n      const linkPath = decodeURI(src);\n      const sourcePath = this.sourcePath;\n      // Resolve using Obsidian's standard API\n      const tFile = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);\n      if (tFile) {\n        return this.app.vault.getResourcePath(tFile);\n      }\n    } catch (e) {\n      console.error('Image resolution failed:', src, e);\n    }\n    return src;\n  }\n\n  setupRenderRules() {\n    // Callout & Blockquote \u667A\u80FD\u68C0\u6D4B\u6E32\u67D3\n    this.md.renderer.rules.blockquote_open = (tokens, idx, options, env, self) => {\n      // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A\u6587\u672C\u5185\u5BB9\uFF0C\u68C0\u6D4B\u662F\u5426\u4E3A callout \u8BED\u6CD5\n      const calloutInfo = this.detectCallout(tokens, idx);\n\n      // \u4F7F\u7528\u6808\u7BA1\u7406 callout \u72B6\u6001\uFF0C\u652F\u6301\u5D4C\u5957\n      if (!env._calloutStack) env._calloutStack = [];\n      env._calloutStack.push(calloutInfo);\n\n      if (calloutInfo) {\n        return this.renderCalloutOpen(calloutInfo);\n      }\n      // \u666E\u901A blockquote\n      return `<blockquote style=\"${this.getInlineStyle('blockquote')}\">`;\n    };\n\n    this.md.renderer.rules.blockquote_close = (tokens, idx, options, env, self) => {\n      const calloutInfo = env._calloutStack ? env._calloutStack.pop() : null;\n      if (calloutInfo) {\n        return `</section></section>`; // \u5173\u95ED\u5185\u5BB9\u533A\u548C\u5916\u5C42\u5BB9\u5668\n      }\n      return `</blockquote>`;\n    };\n\n    this.md.renderer.rules.paragraph_open = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `<p style=\"${this.getInlineStyle('p')}\">`;\n    };\n\n    this.md.renderer.rules.paragraph_close = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `</p>`;\n    };\n    this.md.renderer.rules.heading_open = (tokens, idx) => `<${tokens[idx].tag} style=\"${this.getInlineStyle(tokens[idx].tag)}\">`;\n    this.md.renderer.rules.bullet_list_open = () => `<ul style=\"${this.getInlineStyle('ul')}\">`;\n    this.md.renderer.rules.ordered_list_open = () => `<ol style=\"${this.getInlineStyle('ol')}\">`;\n    this.md.renderer.rules.list_item_open = () => `<li style=\"${this.getInlineStyle('li')}\">`;\n\n    this.md.renderer.rules.code_inline = (tokens, idx) =>\n      `<code style=\"${this.getInlineStyle('code')}\">${this.escapeHtml(tokens[idx].content)}</code>`;\n\n    this.md.renderer.rules.fence = (tokens, idx) => {\n      const content = tokens[idx].content;\n      const lang = tokens[idx].info || 'text';\n      return this.createCodeBlock(content, lang);\n    };\n\n    this.md.renderer.rules.link_open = (tokens, idx) => {\n      const href = tokens[idx].attrGet('href');\n      const safeHref = this.validateLink(href);\n      return `<a href=\"${safeHref}\" style=\"${this.getInlineStyle('a')}\">`;\n    };\n    this.md.renderer.rules.strong_open = () => `<strong style=\"${this.getInlineStyle('strong')}\">`;\n    this.md.renderer.rules.em_open = () => `<em style=\"${this.getInlineStyle('em')}\">`;\n    this.md.renderer.rules.s_open = () => `<del style=\"${this.getInlineStyle('del')}\">`;\n\n    this.md.renderer.rules.image = (tokens, idx) => {\n      let src = tokens[idx].attrGet('src');\n      const alt = tokens[idx].content;\n\n      // Resolve Local Path for Preview\n      src = this.resolveImagePath(src);\n\n\n      let caption = '';\n\n      if (!alt) {\n        // Logic 1: ![]() -> Extract filename, clean query/ext\n        caption = decodeURIComponent(this.extractFileName(src));\n        caption = caption.replace(/\\?.*$/, '');\n        caption = caption.replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');\n      } else {\n        // Logic 2: ![alt]() -> Use alt, clean resize/ext\n        caption = alt;\n        caption = caption.replace(/\\|\\s*\\d+(x\\d+)?\\s*$/, '');\n        caption = caption.replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');\n      }\n\n\n      if (this.avatarUrl) {\n        // \u6C34\u5370\u6A21\u5F0F\uFF1A\u663E\u793A\u5934\u50CF + \u56FE\u7247\u540D\u79F0\uFF0C\u4F7F\u7528\u5E26\u8FB9\u6846\u7684\u6837\u5F0F\n        const avatarHeaderStyle = this.getInlineStyle('avatar-header');\n        const spacerStyle = 'display:block;height:8px;line-height:8px;font-size:0;';\n        // Fix: Force text-align: left for the figure container in watermark mode to prevent centering\n        // We strip the default text-align: center from the figure style and add text-align: left\n        let figureStyle = this.getInlineStyle('figure');\n        figureStyle = figureStyle.replace('text-align: center;', 'text-align: left;');\n\n        return `<figure style=\"${figureStyle}\"><div style=\"${avatarHeaderStyle}\"><img src=\"${this.avatarUrl}\" alt=\"logo\" style=\"${this.getInlineStyle('avatar')}\"><span style=\"${this.getInlineStyle('avatar-caption')}\">${caption}</span></div><section style=\"${spacerStyle}\">&nbsp;</section><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n\n      // \u975E\u6C34\u5370\u6A21\u5F0F\uFF1A\u65E0\u8FB9\u6846\u6837\u5F0F\n      const simpleFigureStyle = 'display:block;margin:16px 0;text-align:center;';\n      if (this.showImageCaption) {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"><figcaption style=\"${this.getInlineStyle('figcaption')}\">${caption}</figcaption></figure>`;\n      } else {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n    };\n\n    this.md.renderer.rules.hr = () => `<hr style=\"${this.getInlineStyle('hr')}\">`;\n    this.md.renderer.rules.table_open = () => `<table style=\"${this.getInlineStyle('table')}\">`;\n    this.md.renderer.rules.thead_open = () => `<thead style=\"${this.getInlineStyle('thead')}\">`;\n    this.md.renderer.rules.th_open = () => `<th style=\"${this.getInlineStyle('th')}\">`;\n    this.md.renderer.rules.td_open = () => `<td style=\"${this.getInlineStyle('td')}\">`;\n  }\n\n  /**\n   * \u68C0\u6D4B blockquote \u662F\u5426\u4E3A Callout \u8BED\u6CD5\n   * \u5E76\u6E05\u7406 marker \u6807\u8BC6\u7B26\n   * @param {Array} tokens - markdown-it tokens\n   * @param {number} idx - blockquote_open \u7684\u7D22\u5F15\n   * @returns {Object|null} - callout \u4FE1\u606F { type, title, icon, label } \u6216 null\n   */\n  detectCallout(tokens, idx) {\n    // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A inline token\n    for (let i = idx + 1; i < tokens.length; i++) {\n      if (tokens[i].type === 'blockquote_close') break;\n      if (tokens[i].type === 'inline' && tokens[i].content) {\n        // \u53EA\u53D6\u7B2C\u4E00\u884C\u5185\u5BB9\u8FDB\u884C\u5339\u914D\n        const firstLine = tokens[i].content.split('\\n')[0];\n        // \u652F\u6301\u81EA\u5B9A\u4E49 callout \u7C7B\u578B\uFF08\u5305\u542B\u4E2D\u6587\u3001\u8FDE\u5B57\u7B26\u7B49\uFF09\uFF0C\u4F8B\u5982 [!\u5B66\u4E60\u7814\u7A76] / [!custom-type]\n        const match = firstLine.match(/^\\[!\\s*([^\\]\\r\\n]+?)\\s*\\](?:\\s+(.*))?/);\n        if (match) {\n          const rawType = match[1].trim();\n          if (!rawType || !/\\S/u.test(rawType)) return null;\n          const type = rawType.toLowerCase();\n          const customTitle = match[2] ? match[2].trim() : null;\n          const config = CALLOUT_ICONS[type] || { icon: '\u{1F4CC}', label: type };\n          const defaultTitle = type.charAt(0).toUpperCase() + type.slice(1);\n\n          // --- \u5728 Token \u9636\u6BB5\u6E05\u7406 Marker ---\n          // 1. \u66F4\u65B0 content\uFF1A\u79FB\u9664\u5305\u542B marker \u7684\u7B2C\u4E00\u884C\n          const lines = tokens[i].content.split('\\n');\n          lines.shift();\n          tokens[i].content = lines.join('\\n');\n\n          // 2. \u66F4\u65B0 children\uFF1A\u540C\u6B65\u79FB\u9664\u7B2C\u4E00\u884C\u5BF9\u5E94\u7684 tokens\n          if (tokens[i].children) {\n            const breakIdx = tokens[i].children.findIndex(c => c.type === 'softbreak' || c.type === 'hardbreak');\n            if (breakIdx !== -1) {\n              // \u79FB\u9664\u7B2C\u4E00\u4E2A\u6362\u884C\u7B26\u53CA\u5176\u4E4B\u524D\u7684\u6240\u6709\u5185\u5BB9\n              tokens[i].children = tokens[i].children.slice(breakIdx + 1);\n            } else {\n              // \u53EA\u6709\u4E00\u884C\uFF0C\u76F4\u63A5\u6E05\u7A7A\n              tokens[i].children = [];\n            }\n          }\n\n          // 3. \u5982\u679C\u8BE5\u6BB5\u843D\u53D8\u4E3A\u7A7A\uFF08\u8BF4\u660E marker \u72EC\u5360\u4E00\u884C\uFF09\uFF0C\u9690\u85CF\u8BE5\u6BB5\u843D\u5BB9\u5668\n          if (tokens[i].content.trim() === '') {\n            if (i > 0 && tokens[i-1].type === 'paragraph_open') tokens[i-1].hidden = true;\n            tokens[i].hidden = true; // \u9690\u85CF inline token \u672C\u8EAB\n            if (i < tokens.length - 1 && tokens[i+1].type === 'paragraph_close') tokens[i+1].hidden = true;\n          }\n\n          return {\n            type,\n            title: customTitle || defaultTitle,\n            icon: config.icon,\n            label: config.label,\n          };\n        }\n        break; // \u53EA\u68C0\u67E5\u7B2C\u4E00\u4E2A inline\n      }\n    }\n    return null;\n  }\n\n  /**\n   * \u6E32\u67D3 Callout \u5F00\u59CB\u6807\u7B7E\n   * @param {Object} calloutInfo - { type, title, icon }\n   * @returns {string} - HTML \u5B57\u7B26\u4E32\n   */\n  renderCalloutOpen(calloutInfo) {\n    const color = this.theme.getThemeColorValue();\n    const sizes = this.theme.getSizes();\n    const font = this.theme.getFontFamily();\n    const themeName = this.theme.themeName;\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n\n    // \u4F18\u96C5\u4E3B\u9898\uFF1A\u5C45\u4E2D\u6837\u5F0F\uFF08\u4E0E\u5176\u5F15\u7528\u5757\u98CE\u683C\u4E00\u81F4\uFF09\n    if (themeName === 'serif') {\n      return this.renderCalloutOpenCentered(calloutInfo, color, sizes, font);\n    }\n\n    // \u7B80\u7EA6/\u7ECF\u5178\u4E3B\u9898\uFF1A\u5DE6\u8FB9\u6846\u6837\u5F0F\n    const isWechat = themeName === 'wechat';\n    const marginLeft = isWechat ? '4px' : '0';\n    const borderWidth = isWechat ? '3px' : '4px';\n    const borderColor = isWechat ? `${color}99` : color;\n\n    // \u5916\u5C42\u5BB9\u5668\uFF1A\u5DE6\u8FB9\u6846\u98CE\u683C\n    const containerStyle = `\n      margin: 16px 0 16px ${marginLeft};\n      border-left: ${borderWidth} solid ${borderColor};\n      background: ${color}1A;\n      border-radius: 3px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    // \u6807\u9898\u680F\uFF1A\u6DF1\u8272\u80CC\u666F + \u56FE\u6807 + \u6807\u9898\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 8px 12px;\n      background: ${color}26;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: #333;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px;`;\n    const titleStyle = `flex: 1;`;\n\n    // \u5185\u5BB9\u533A\uFF1A\u6B63\u6587\u5185\u5BB9\n    const contentStyle = `\n      padding: 12px 16px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #595959;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"${iconStyle}\">${calloutInfo.icon}</span>\n        <span style=\"${titleStyle}\">${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  /**\n   * \u6E32\u67D3\u5C45\u4E2D\u6837\u5F0F\u7684 Callout\uFF08\u7528\u4E8E\u4F18\u96C5\u4E3B\u9898\uFF09\n   * @param {Object} calloutInfo - { type, title, icon }\n   * @param {string} color - \u4E3B\u9898\u8272\n   * @param {Object} sizes - \u5B57\u4F53\u5C3A\u5BF8\u914D\u7F6E\n   * @param {string} font - \u5B57\u4F53\u65CF\n   * @returns {string} - HTML \u5B57\u7B26\u4E32\n   */\n  renderCalloutOpenCentered(calloutInfo, color, sizes, font) {\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    // \u5C45\u4E2D\u6837\u5F0F\uFF1A\u65E0\u5DE6\u8FB9\u6846\uFF0C\u6C34\u5E73\u5C45\u4E2D\uFF0C\u5706\u89D2\u8FB9\u6846\n    const containerStyle = `\n      margin: 30px 60px;\n      background: ${color}1F;\n      border-radius: 4px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    // \u6807\u9898\u680F\uFF1A\u9760\u5DE6\u5BF9\u9F50\uFF0C\u4E0E\u5176\u4ED6\u4E3B\u9898\u4FDD\u6301\u4E00\u81F4\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 12px 20px;\n      background: ${color}26;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: #333;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const contentStyle = `\n      padding: 16px 20px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #555;\n      text-align: center;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"margin-right: 8px;\">${calloutInfo.icon}</span>\n        <span>${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  highlightCode(code, lang) {\n    if (!this.hljs) return this.escapeHtml(code);\n    try {\n      if (lang && this.hljs.getLanguage(lang)) return this.hljs.highlight(code, { language: lang }).value;\n      return this.hljs.highlightAuto(code).value;\n    } catch (e) { return this.escapeHtml(code); }\n  }\n\n  /**\n   * \u683C\u5F0F\u5316\u9AD8\u4EAE\u4EE3\u7801\uFF08\u53C2\u8003 wechat-tool formatHighlightedCode\uFF09\n   */\n  formatHighlightedCode(html, preserveNewlines = false) {\n    let formatted = html;\n    // \u5C06 span \u4E4B\u95F4\u7684\u7A7A\u683C\u79FB\u5230 span \u5185\u90E8\n    formatted = formatted.replace(/(<span[^>]*>[^<]*<\\/span>)(\\s+)(<span[^>]*>[^<]*<\\/span>)/g,\n      (_, span1, spaces, span2) => span1 + span2.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    formatted = formatted.replace(/(\\s+)(<span[^>]*>)/g,\n      (_, spaces, span) => span.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    // \u66FF\u6362\u5236\u8868\u7B26\u4E3A4\u4E2A\u7A7A\u683C\n    formatted = formatted.replace(/\\t/g, '    ');\n\n    // wechat-tool \u7684\u903B\u8F91\uFF1A\u5982\u679C\u662F lineNumbers \u6A21\u5F0F\uFF08preserveNewlines=false\uFF09\uFF0C\u5C06\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    // \u5982\u679C\u4E0D\u662F\uFF08preserveNewlines=true\uFF09\uFF0C\u5C06\u6362\u884C\u8F6C\u4E3A <br/> \u4E14\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    if (preserveNewlines) {\n      formatted = formatted\n        .replace(/\\r\\n/g, '<br/>')\n        .replace(/\\n/g, '<br/>')\n        .replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    } else {\n      formatted = formatted.replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    }\n    return formatted;\n  }\n\n  inlineHighlightStyles(html) {\n    const map = {\n      'hljs-keyword': 'color:#ff7b72 !important;', 'hljs-built_in': 'color:#ffa657 !important;',\n      'hljs-type': 'color:#ffa657 !important;', 'hljs-literal': 'color:#79c0ff !important;',\n      'hljs-number': 'color:#79c0ff !important;', 'hljs-string': 'color:#a5d6ff !important;',\n      'hljs-symbol': 'color:#a5d6ff !important;', 'hljs-comment': 'color:#8b949e !important;font-style:italic !important;',\n      'hljs-doctag': 'color:#8b949e !important;', 'hljs-meta': 'color:#ffa657 !important;',\n      'hljs-attr': 'color:#79c0ff !important;', 'hljs-attribute': 'color:#79c0ff !important;',\n      'hljs-name': 'color:#7ee787 !important;', 'hljs-tag': 'color:#7ee787 !important;',\n      'hljs-selector-tag': 'color:#7ee787 !important;', 'hljs-selector-class': 'color:#d2a8ff !important;',\n      'hljs-selector-id': 'color:#79c0ff !important;', 'hljs-variable': 'color:#ffa657 !important;',\n      'hljs-template-variable': 'color:#ffa657 !important;', 'hljs-params': 'color:#e6e6e6 !important;',\n      'hljs-function': 'color:#d2a8ff !important;', 'hljs-title': 'color:#d2a8ff !important;',\n      'hljs-punctuation': 'color:#e6e6e6 !important;', 'hljs-property': 'color:#79c0ff !important;',\n      'hljs-operator': 'color:#ff7b72 !important;', 'hljs-regexp': 'color:#a5d6ff !important;',\n      'hljs-subst': 'color:#e6e6e6 !important;',\n    };\n\n    // \u6539\u8FDB\uFF1A\u5904\u7406 class \u5C5E\u6027\u5305\u542B\u591A\u4E2A\u7C7B\u540D\u7684\u60C5\u51B5\n    return html.replace(/class=\"([^\"]*)\"/g, (match, classNames) => {\n      const classes = classNames.split(/\\s+/);\n      let styles = '';\n      for (const cls of classes) {\n        if (map[cls]) {\n          styles += map[cls];\n        }\n      }\n      return styles ? `style=\"${styles}\"` : match;\n    }).replace(/class=\"[^\"]*\"/g, ''); // \u518D\u6B21\u6E05\u7406\u672A\u5339\u914D\u7684 class\n  }\n\n  /**\n   * \u521B\u5EFA\u4EE3\u7801\u5757 - \u7167\u6284 wechat-tool \u7684\u5B9E\u73B0\n   * \u4F7F\u7528 wechat-tool \u7684\u989C\u8272\u548C\u7ED3\u6784\n   */\n  createCodeBlock(content, lang) {\n    const showMac = this.theme.macCodeBlock;\n    const showLineNum = this.theme.codeLineNumber;\n\n    // wechat-tool \u7684\u989C\u8272\u914D\u7F6E\uFF08GitHub Dark \u4E3B\u9898\uFF09\n    const background = '#0d1117';  // GitHub Dark \u80CC\u666F\n    const color = '#f0f6fc';       // GitHub Dark \u6587\u5B57\n    const barBackground = '#161b22'; // \u5DE5\u5177\u680F\u80CC\u666F\n    const borderColor = '#30363d';   // \u8FB9\u6846\u989C\u8272\n\n    let lines = content.replace(/\\r\\n/g, '\\n').split('\\n');\n    while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();\n\n    // Mac \u5934\u90E8\n    // \u5173\u952E\u4FEE\u6B63\uFF1A\u4F7F\u7528 section \u800C\u4E0D\u662F div\uFF0C\u589E\u5F3A\u5728\u516C\u4F17\u53F7\u4E2D\u7684\u517C\u5BB9\u6027\n    const macHeader = showMac ? `<section style=\"display:block !important;background:${barBackground} !important;padding:10px !important;border:none !important;border-bottom:1px solid ${borderColor} !important;border-radius:8px 8px 0 0 !important;line-height:1 !important;\">\n      <span style=\"display:inline-block !important;width:12px !important;height:12px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:8px !important;\"></span>\n      <span style=\"display:inline-block !important;width:12px !important;height:12px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:8px !important;\"></span>\n      <span style=\"display:inline-block !important;width:12px !important;height:12px !important;border-radius:50% !important;background:#28c840 !important;\"></span>\n    </section>` : '';\n\n    // \u7EDF\u4E00\u884C\u9AD8\u548C\u5B57\u4F53\u53D8\u91CF\n    const lineHeight = '1.75';\n    // const fontSize = '13px';\n\n    let codeHtml;\n\n    if (showLineNum) {\n      // \u5E26\u884C\u53F7\uFF1A\u9010\u884C\u5904\u7406\n      const highlightedLines = lines.map(lineRaw => {\n        const lineHtml = this.highlightCode(lineRaw, lang);\n        const styled = this.inlineHighlightStyles(lineHtml);\n        // \u6CE8\u610F\uFF1A\u8FD9\u91CC formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false\uFF0C\u4E0D\u5305\u542B <br>\uFF0C\u4E0D\u5305\u542B &nbsp; (\u9664\u975E\u5185\u90E8\u903B\u8F91\u5904\u7406)\n        // \u5B9E\u9645\u4E0A formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false \u65F6\uFF0C\u53EA\u505A\u7A7A\u683C\u5904\u7406\n        // wechat-tool \u4E2D\uFF1A return formatted === '' ? '&nbsp;' : formatted\n        const formatted = this.formatHighlightedCode(styled, false);\n        return formatted === '' ? '&nbsp;' : formatted;\n      });\n\n      // \u884C\u53F7\u5217\n      const lineNumbersHtml = highlightedLines.map((_, idx) =>\n        `<section style=\"height:1.75em !important;line-height:${lineHeight} !important;padding:0 12px 0 12px !important;font-size:13px !important;color:#95989C !important;text-align:right !important;white-space:nowrap !important;vertical-align:top !important;margin:0 !important;\">${idx + 1}</section>`\n      ).join('');\n\n      // \u4EE3\u7801\u5185\u5BB9\n      // \u5173\u952E\u6539\u52A8\uFF1A\u56DE\u5F52 wechat-tool \u539F\u59CB\u65B9\u6848 \u2014\u2014 \u4F7F\u7528 <br> \u62FC\u63A5\u4EE3\u7801\u884C\uFF0C\u800C\u4E0D\u662F div \u5206\u5272\n      // \u8FD9\u6837\u53F3\u4FA7\u5C31\u662F\u4E00\u4E2A\u5355\u4E00\u7684\u6587\u672C\u6D41\uFF0C\u9AD8\u5EA6\u4E25\u683C\u7531 line-height \u63A7\u5236\n      const codeInnerHtml = highlightedLines.join('<br/>');\n\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;line-height:${lineHeight} !important;font-size:13px !important;\">${codeInnerHtml}</section>`;\n\n      // \u884C\u53F7\u5217\u5BB9\u5668\u6837\u5F0F\n      const lineNumberColumnStyles = `text-align:right !important;padding:12px 0 12px 0 !important;border-right:1px solid rgba(255,255,255,0.1) !important;user-select:none !important;background:transparent !important;flex:0 0 auto !important;min-width:3.5em !important;margin:0 !important;`;\n\n      // \u6CE8\u610F flex \u5BB9\u5668\u7684 padding 0\uFF0C\u5185\u90E8 padding \u5206\u522B\u5728 lineNumberColumn \u548C code section\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"${lineNumberColumnStyles}\">${lineNumbersHtml}</section>\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px 12px 12px 16px !important;margin:0 !important;min-width:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    } else {\n      // \u65E0\u884C\u53F7\n      const highlighted = this.highlightCode(lines.join('\\n'), lang);\n      const styled = this.inlineHighlightStyles(highlighted);\n      // preserveNewlines=true -> \u5305\u542B <br>\n      const formatted = this.formatHighlightedCode(styled, true);\n      // \u6539\u52A8\uFF1Awhite-space: nowrap !important\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;word-break:keep-all !important;overflow-wrap:normal !important;line-height:${lineHeight} !important;font-size:13px !important;margin:0 !important;\">${formatted}</section>`;\n\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px !important;min-width:0 !important;margin:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    }\n\n    // \u5916\u5C42\u5BB9\u5668\n    return `<section class=\"code-snippet__fix\" style=\"width:100% !important;margin:12px 0 !important;background:${background} !important;border:1px solid ${borderColor} !important;border-radius:8px !important;overflow:hidden !important;box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;display:block !important;\">\n${macHeader}\n<section style=\"padding:0 !important;border:none !important;background:${background} !important;color:${color} !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:${lineHeight} !important;white-space:nowrap !important;overflow-x:auto !important;display:block !important;\">\n<pre style=\"margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:${color} !important;white-space:nowrap !important;overflow-x:visible !important;display:inline-block !important;min-width:100% !important;\">${codeHtml}</pre>\n</section>\n</section>`;\n  }\n\n  getInlineStyle(tagName) { return this.theme.getStyle(tagName); }\n  stripFrontmatter(md) { return md.replace(/^---\\n[\\s\\S]*?\\n---\\n?/, ''); }\n\n\n  async convert(markdown) {\n    if (!this.md) await this.initMarkdownIt();\n\n    // \u4FEE\u590D\uFF1A\u79FB\u9664\u5757\u7EA7\u516C\u5F0F $$ \u524D\u9762\u7684\u7F29\u8FDB\uFF0C\u907F\u514D\u88AB\u8BEF\u8BC6\u522B\u4E3A\u4EE3\u7801\u5757\n    // \u4EC5\u5339\u914D\u884C\u9996\u7684\u7A7A\u767D + $$\uFF0C\u4E0D\u5F71\u54CD\u5176\u4ED6\u7F29\u8FDB\n    markdown = markdown.replace(/^[\\t ]+(\\$\\$)/gm, '$1');\n\n    // Pre-process: Convert Wiki-links ![[...]] to standard images ![](...)\n    // Regex: ![[path|alt]] or ![[path]]\n    // Fix: Use more robust regex preventing greedy capture and encoding URI for paths with spaces\n    markdown = markdown.replace(/!\\[\\[([^\\[\\]|]+)(?:\\|([^\\[\\]]+))?\\]\\]/g, (match, path, alt) => {\n      // Must encodeURI to handle spaces in filenames which are valid in WikiLinks but break standard Markdown images\n      // trimmed path to avoid leading/trailing spaces breaking the link\n      return `![${alt || ''}](${encodeURI(path.trim())})`;\n    });\n\n\n\n    let html = this.md.render(this.stripFrontmatter(markdown));\n    html = this.fixListParagraphs(html);\n    html = this.unwrapFigures(html); // Fix: Remove <p> wrappers from <figure> to prevent empty lines\n    html = this.removeBlockquoteParagraphMargins(html); // Fix: Remove margins from <p> inside <blockquote> for vertical centering\n    html = this.fixMathJaxTags(html); // Fix: Replace <mjx-container> with WeChat-compatible tags\n    html = this.sanitizeHtml(html); // Final security pass: Neutralize XSS and dangerous tags\n    return `<section style=\"${this.getInlineStyle('section')}\">${html}</section>`;\n  }\n\n  fixMathJaxTags(html) {\n    if (!html.includes('mjx-container')) return html;\n\n    // Fix: Remove assistive MathML (hidden text that shows up in WeChat)\n    html = html.replace(/<mjx-assistive-mml[^>]*>[\\s\\S]*?<\\/mjx-assistive-mml>/gi, '');\n\n    // Replace <mjx-container> with <section> (block) or <span> (inline)\n    // WeChat strips custom tags like mjx-container but keeps SVG content\n    return html.replace(/<mjx-container([^>]*)>(.*?)<\\/mjx-container>/gs, (match, attrs, content) => {\n      // Check for block display mode\n      // MathJax 3 usually adds display=\"true\" or class=\"MathJax CtxtMenu_Attached_0\" with separate style\n      const isBlock = attrs.includes('display=\"true\"') || attrs.includes('display: true');\n\n      const tag = isBlock ? 'section' : 'span';\n\n      // Inline math needs vertical alignment adjustment\n      // Block math needs centering and scaling (not scrolling) as per WeChat behavior\n      const style = isBlock\n        ? 'display: block; margin: 1em 0; text-align: center; max-width: 100%;'\n        : 'display: inline-block; vertical-align: -0.1em; margin: 0 1px;';\n\n      // \u5173\u952E\u4FEE\u590D\uFF1A\u7ED9\u5757\u7EA7\u516C\u5F0F\u7684 SVG \u6DFB\u52A0 max-width: 100% \u548C height: auto\n      // \u8FD9\u6837\u5728\u624B\u673A\u4E0A\u9884\u89C8\u65F6\uFF0C\u516C\u5F0F\u4F1A\u6309\u6BD4\u4F8B\u7F29\u5C0F\u4EE5\u9002\u5E94\u5C4F\u5E55\uFF0C\u800C\u4E0D\u662F\u88AB\u906E\u6321\u6216\u9700\u8981\u6EDA\u52A8\n      // \u8FD9\u7B26\u5408\u5FAE\u4FE1\u516C\u4F17\u53F7\u7684\u9ED8\u8BA4\u6E32\u67D3\u884C\u4E3A\n      if (isBlock) {\n        content = content.replace(/<svg([^>]*)>/, (m, svgAttrs) => {\n          if (svgAttrs.includes('style=\"')) {\n            return `<svg${svgAttrs.replace('style=\"', 'style=\"max-width: 100%; height: auto; ')}>`;\n          } else {\n            return `<svg${svgAttrs} style=\"max-width: 100%; height: auto;\">`;\n          }\n        });\n      }\n\n      return `<${tag} style=\"${style}\">${content}</${tag}>`;\n    });\n  }\n\n  fixListParagraphs(html) {\n    const style = this.getInlineStyle('li p');\n    return html.replace(/<li[^>]*>[\\s\\S]*?<\\/li>/g, m => m.replace(/<p style=\"[^\"]*\">/g, `<p style=\"${style}\">`));\n  }\n\n  /**\n   * Fix: Remove margins from <p> inside <blockquote>\n   * Blockquotes use padding for spacing. If <p> inside has margin-bottom (default),\n   * the text appears top-aligned instead of centered.\n   */\n  removeBlockquoteParagraphMargins(html) {\n    return html.replace(/<blockquote[^>]*>([\\s\\S]*?)<\\/blockquote>/g, (match, content) => {\n      // Replace margin: ... with margin: 0 in <p> styles\n      const newContent = content.replace(/<p style=\"([^\"]*)margin:[^;\"]*(;?)/g, '<p style=\"$1margin: 0$2');\n      // Also handle case where margin is not present yet (less likely if style plugin is used)\n      // or if we want to force it.\n      // Since we know our theme adds margin to all p, we just override it.\n      // Actually, regex replace above handles \"margin:...\" replacement.\n      // If margin is at the end or middle.\n      return match.replace(content, newContent);\n    });\n  }\n\n  /**\n   * Fix: Unwrap <figure> from <p> tags\n   * Markdown-it wraps images in <p> by default, but <figure> inside <p> is invalid.\n   * Browsers (and WeChat) handle this by splitting the <p> into two empty <p>s above and below,\n   * causing unwanted empty lines. This regex removes the wrapping <p>.\n   */\n  unwrapFigures(html) {\n    // Logic: Match <p ...> <figure>...</figure> </p> and replace with <figure>...</figure>\n    return html.replace(/<p[^>]*>\\s*(<figure[\\s\\S]*?<\\/figure>)\\s*<\\/p>/gi, '$1');\n  }\n\n  validateLink(url, isImage = false) {\n    if (!url) return '#';\n    const value = String(url).trim();\n    if (!value) return '#';\n\n    // Keep legacy parity: allow raw data:image src in image context.\n    // Non-image data: remains blocked.\n    if (/^data:/i.test(value)) {\n      if (!isImage) return '#unsafe';\n      return /^data:image\\//i.test(value) ? value : '#';\n    }\n\n    // Allow safe protocols\n    const safeProtocols = ['http:', 'https:', 'obsidian:', 'mailto:', 'tel:', 'app:', 'capacitor:'];\n\n    try {\n      // URL constructor might fail for some internal links or malformed data URIs\n      const parsed = new URL(value);\n      if (safeProtocols.includes(parsed.protocol)) {\n        return value;\n      }\n    } catch (e) {\n      // Handle relative paths or Obsidian internal links that URL() can't parse\n      if (value.startsWith('#') || value.startsWith('/') || !value.includes(':')) return value;\n    }\n    return '#'; // Block javascript: and other dangerous protocols\n  }\n\n  sanitizeHtml(html) {\n    // 1. Remove dangerous tags and their content\n    let sanitized = html.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*>[\\s\\S]*?<\\/\\1>/gi, '');\n    // 2. Remove self-closing dangerous tags\n    sanitized = sanitized.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*\\/?>/gi, '');\n    // 3. Remove all on* event handlers (e.g., onerror, onclick)\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*\"[^\"]*\"/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*'[^']*'/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*[^\\s>]+/gi, '');\n\n    // 4. Sanitize href and src in remaining HTML tags to prevent protocol bypass (e.g. <a href=\"javascript:...\")\n    sanitized = sanitized.replace(/<(a|img|source|video|audio|area)\\b([^>]*)>/gi, (match, tag, attrs) => {\n      const isImageTag = /^(img|source)$/i.test(tag);\n      let newAttrs = attrs.replace(/\\b(href|src)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))/gi, (attrMatch, attrName, qVal, sqVal, uVal) => {\n        const val = qVal || sqVal || uVal || '';\n        const safeVal = this.validateLink(val, isImageTag);\n        const quote = qVal !== undefined ? '\"' : (sqVal !== undefined ? \"'\" : '\"');\n        return `${attrName}=${quote}${safeVal}${quote}`;\n      });\n      return `<${tag}${newAttrs}>`;\n    });\n\n    return sanitized;\n  }\n\n  escapeHtml(text) {\n    return text.replace(/[&<>\"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#039;' }[m]));\n  }\n\n  extractFileName(src) {\n    if (!src) return '\u56FE\u7247';\n    return src.split('/').pop().split('\\\\').pop().replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '') || '\u56FE\u7247';\n  }\n}\n\nwindow.AppleStyleConverter = AppleStyleConverter;\n"
+        "theme": "/**\n * \u{1F34E} Apple Style \u591A\u4E3B\u9898\u7CFB\u7EDF\n * \u652F\u6301\u591A\u79CD\u4E3B\u9898\u98CE\u683C\uFF1A\u7B80\u7EA6\u3001\u7ECF\u5178\u3001\u6C34\u58A8\u3001\u6781\u5149\u7B49\n * \u8BBE\u8BA1\u7406\u5FF5\uFF1A\u514B\u5236\u3001\u4F18\u96C5\u3001\u6CE8\u91CD\u7EC6\u8282\n */\n\n// Use assignment expression to avoid \"Identifier has already been declared\" errors if re-eval'd\nwindow.AppleTheme = class AppleTheme {\n  /**\n   * \u{1F3A8} \u4E3B\u9898\u8272\u677F - 8\u79CD\u9884\u8BBE\u989C\u8272\n   */\n  static THEME_COLORS = {\n    blue: '#0366d6',\n    green: '#28a745',\n    purple: '#6f42c1',\n    orange: '#fd7e14',\n    teal: '#20c997',\n    rose: '#e83e8c',\n    ruby: '#dc3545',\n    slate: '#6c757d',\n  };\n\n  /**\n   * \u{1F3A8} \u6807\u9898\u4E13\u7528\u6DF1\u8272\u677F (Tone-on-Tone)\n   * \u76F8\u6BD4\u4E3B\u9898\u8272\u52A0\u6DF1 15-20%\uFF0C\u7528\u4E8E\u6807\u9898\u4EE5\u589E\u52A0\u89C6\u89C9\u7A33\u91CD\u611F\uFF0C\u907F\u514D\u4E0E\u6B63\u6587\u9AD8\u4EAE\u8272\u51B2\u7A81\n   */\n  static THEME_COLORS_DEEP = {\n    blue: '#004795',    // Deep Blue\n    green: '#1e7e34',   // Deep Green\n    purple: '#4a2b82',  // Deep Purple\n    orange: '#c75e0b',  // Deep Orange\n    teal: '#158765',    // Deep Teal\n    rose: '#b81f66',    // Deep Rose\n    ruby: '#a81825',    // Deep Ruby\n    slate: '#495057',   // Deep Slate\n  };\n\n  /**\n   * \u{1F4D0} \u5B57\u4F53\u5927\u5C0F\u7CFB\u7EDF - 5\u6863\n   */\n  static FONT_SIZES = {\n    1: { base: 14, h1: 26, h2: 20, h3: 16, h4: 14, h5: 14, h6: 14, code: 12, caption: 12 },\n    2: { base: 15, h1: 28, h2: 21, h3: 17, h4: 15, h5: 15, h6: 15, code: 13, caption: 12 },\n    3: { base: 16, h1: 30, h2: 22, h3: 18, h4: 16, h5: 16, h6: 16, code: 14, caption: 13 }, // \u63A8\u8350\n    4: { base: 17, h1: 32, h2: 24, h3: 19, h4: 17, h5: 17, h6: 17, code: 15, caption: 14 },\n    5: { base: 18, h1: 34, h2: 26, h3: 20, h4: 18, h5: 18, h6: 18, code: 16, caption: 14 },\n  };\n\n  /**\n   * \u{1F524} \u5B57\u4F53\u6808\n   */\n  static FONTS = {\n    'sans-serif': `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif`,\n    'serif': `'Times New Roman', Georgia, 'SimSun', serif`,\n    'monospace': `'SF Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace`,\n  };\n\n  /**\n   * \u{1F3A8} \u4E3B\u9898\u914D\u7F6E - \u6BCF\u79CD\u4E3B\u9898\u7684\u72EC\u7279\u914D\u8272\u548C\u89C4\u5219\n   */\n  static THEME_CONFIGS = {\n\n    github: {\n      name: '\u7B80\u7EA6',\n      lineHeight: 1.8,\n      paragraphGap: 20,\n      h1Decoration: 'none',\n      h2Decoration: 'none',\n      h3Decoration: 'none',\n      h4Decoration: 'none',\n      headingWeight: 800,\n      headingLetterSpacing: -0.5,\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n\n      linkDecoration: 'underline',\n      blockquoteBorderWidth: 4,\n      // Removed blockquoteBorderColor to allow theme color (was #d0d7de)\n      // Removed blockquoteBg to allow theme color tint (was #ffffff)\n    },\n    wechat: {\n      name: '\u7ECF\u5178',\n      lineHeight: 1.8,\n      paragraphGap: 24,\n      h1Decoration: 'bottom-line',       // \u5E95\u90E8\u77ED\u7EBF\n      h2Decoration: 'bottom-line',       // \u5E95\u90E8\u77ED\u7EBF (\u539F\u80F6\u56CA)\n      h3Decoration: 'left-border',       // \u5DE6\u8FB9\u6846\n      h4Decoration: 'light-bg',          // \u6D45\u8272\u80CC\u666F\n      headingWeight: 700,\n      headingLetterSpacing: 0,\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 4,\n    },\n    serif: {\n      name: '\u4F18\u96C5',\n      lineHeight: 1.8,\n      paragraphGap: 20,\n      h1Decoration: 'editorial-h1',      // \u6742\u5FD7\u5927\u6807\u9898 (\u91D1\u7EBF)\n      h2Decoration: 'editorial-h1',      // H2 \u6B64\u65F6\u4E5F\u662F\u91D1\u7EBF (Level 2 = Level 1)\n      h3Decoration: 'editorial-h2',      // H3 \u4F7F\u7528\u539F H2 \u6837\u5F0F (\u659C\u4F53\uFF0C\u73B0\u5728\u7684 helper \u5DF2\u5F3A\u5236\u5DE6\u5BF9\u9F50)\n      h4Decoration: 'editorial-h3',      // H4 \u4F7F\u7528\u539F H3 (\u5DE6\u5BF9\u9F50\u4E0B\u5212\u7EBF)\n      headingWeight: 700,\n      headingLetterSpacing: 1,           // \u4F18\u96C5\u4E3B\u9898\u589E\u52A0\u5B57\u95F4\u8DDD\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 0,          // \u5C45\u4E2D\u6837\u5F0F\u4E0D\u9700\u8981\u5DE6\u8FB9\u6846\n      blockquoteStyle: 'center',         // \u65B0\u589E\uFF1A\u5C45\u4E2D\u5F15\u7528\n    },\n  };\n\n  /**\n   * \u{1F4D0} \u95F4\u8DDD\u7CFB\u7EDF - 8px \u57FA\u51C6\n   */\n  static SPACING = {\n    xs: 4,\n    sm: 8,\n    md: 16,\n    lg: 24,\n    xl: 32,\n    xxl: 48,\n  };\n\n  /**\n   * \u{1F3AF} \u5706\u89D2\u7CFB\u7EDF\n   */\n  static RADIUS = {\n    sm: 4,\n    md: 8,\n    lg: 12,\n  };\n\n  static QUOTE_CALLOUT_NEUTRAL_BG = '#f9f9f9';\n  static QUOTE_NEUTRAL_BORDER = '#d9d9d9';\n\n  /**\n   * \u5F53\u524D\u914D\u7F6E\n   */\n  constructor(options = {}) {\n    this.themeName = options.theme || 'github';\n    this.themeColor = options.themeColor || 'blue';\n    this.customColor = options.customColor || null;\n    this.quoteCalloutStyleMode = options.quoteCalloutStyleMode || 'theme';\n    this.fontFamily = options.fontFamily || 'sans-serif';\n    this.fontSize = options.fontSize || 3;\n    this.macCodeBlock = options.macCodeBlock !== false;\n    this.codeLineNumber = options.codeLineNumber || false;\n    // \u4FA7\u8FB9\u8DDD\u8BBE\u7F6E (\u9ED8\u8BA4 16px)\n    this.sidePadding = options.sidePadding !== undefined ? options.sidePadding : 16;\n    // \u6807\u9898\u67D3\u8272\u8BBE\u7F6E\n    this.coloredHeader = options.coloredHeader || false;\n  }\n\n  /**\n   * \u83B7\u53D6\u5F53\u524D\u4E3B\u9898\u8272\u503C\n   */\n  getThemeColorValue() {\n    if (this.themeColor === 'custom' && this.customColor) {\n      return this.customColor;\n    }\n    return AppleTheme.THEME_COLORS[this.themeColor] || AppleTheme.THEME_COLORS.blue;\n  }\n\n  /**\n   * \u83B7\u53D6\u6807\u9898\u4E13\u7528\u6DF1\u8272\u503C\n   */\n  getHeadingColorValue() {\n    // 1. \u5982\u679C\u672A\u5F00\u542F\u6807\u9898\u67D3\u8272\uFF0C\u8FD4\u56DE\u9ED8\u8BA4\u6DF1\u7070\n    if (!this.coloredHeader) {\n      return '#3e3e3e';\n    }\n\n    // 2. \u81EA\u5B9A\u4E49\u989C\u8272\uFF1A\u81EA\u52A8\u8BA1\u7B97\u53D8\u6DF1 20%\n    if (this.themeColor === 'custom' && this.customColor) {\n      return this.adjustColorBrightness(this.customColor, -20);\n    }\n\n    // 3. \u9884\u8BBE\u989C\u8272\uFF1A\u8FD4\u56DE\u6DF1\u8272\u677F\u5BF9\u5E94\u503C\n    return AppleTheme.THEME_COLORS_DEEP[this.themeColor] || AppleTheme.THEME_COLORS_DEEP.blue;\n  }\n\n  /**\n   * \u8F85\u52A9\uFF1A\u8C03\u6574 Hex \u989C\u8272\u4EAE\u5EA6\n   * @param {string} hex - #RRGGBB\n   * @param {number} percent - -100 to 100\n   */\n  adjustColorBrightness(hex, percent) {\n    hex = hex.replace(/^#/, '');\n    let r = parseInt(hex.substring(0, 2), 16);\n    let g = parseInt(hex.substring(2, 4), 16);\n    let b = parseInt(hex.substring(4, 6), 16);\n\n    r = Math.round(r * (100 + percent) / 100);\n    g = Math.round(g * (100 + percent) / 100);\n    b = Math.round(b * (100 + percent) / 100);\n\n    r = (r < 255) ? r : 255;\n    g = (g < 255) ? g : 255;\n    b = (b < 255) ? b : 255;\n\n    // Pad with 0 if necessary\n    const rr = ((r.toString(16).length === 1) ? '0' + r.toString(16) : r.toString(16));\n    const gg = ((g.toString(16).length === 1) ? '0' + g.toString(16) : g.toString(16));\n    const bb = ((b.toString(16).length === 1) ? '0' + b.toString(16) : b.toString(16));\n\n    return `#${rr}${gg}${bb}`;\n  }\n\n  /**\n   * \u83B7\u53D6\u5F53\u524D\u4E3B\u9898\u914D\u7F6E\n   */\n  getThemeConfig() {\n    return AppleTheme.THEME_CONFIGS[this.themeName] || AppleTheme.THEME_CONFIGS.github;\n  }\n\n  /**\n   * \u83B7\u53D6\u5B57\u4F53\u5C3A\u5BF8\u914D\u7F6E\n   */\n  getSizes() {\n    return AppleTheme.FONT_SIZES[this.fontSize] || AppleTheme.FONT_SIZES[3];\n  }\n\n  /**\n   * \u83B7\u53D6\u5B57\u4F53\u6808\n   */\n  getFontFamily() {\n    return AppleTheme.FONTS[this.fontFamily] || AppleTheme.FONTS['sans-serif'];\n  }\n\n  getQuoteCalloutStyleMode() {\n    return this.quoteCalloutStyleMode === 'neutral' ? 'neutral' : 'theme';\n  }\n\n  /**\n   * \u83B7\u53D6\u5143\u7D20\u6837\u5F0F\n   * @param {string} tagName - HTML \u6807\u7B7E\u540D\n   * @returns {string} - CSS \u6837\u5F0F\u5B57\u7B26\u4E32\n   */\n  getStyle(tagName) {\n    const config = this.getThemeConfig();\n    const sizes = this.getSizes();\n    const font = this.getFontFamily();\n    const color = this.getThemeColorValue();\n    const quoteCalloutStyleMode = this.getQuoteCalloutStyleMode();\n    const s = AppleTheme.SPACING;\n    const r = AppleTheme.RADIUS;\n\n    // \u6807\u9898\u989C\u8272\u903B\u8F91\uFF1A\u4F7F\u7528\u4E13\u95E8\u7684\u6DF1\u8272\u7CFB\u6807\u9898\u8272\n    // \u6CE8\u610F\uFF1A\u67D0\u4E9B\u7279\u6B8A\u4E3B\u9898\u88C5\u9970(h1Decoration)\u53EF\u80FD\u5DF2\u7ECF\u5305\u542B\u4E86\u989C\u8272\u8BBE\u7F6E\uFF0C\u8FD9\u91CC\u4E3B\u8981\u9488\u5BF9\u6587\u5B57\u672C\u8EAB\n    const headingColor = this.getHeadingColorValue();\n\n    switch (tagName) {\n      case 'section':\n        // \u4F7F\u7528\u914D\u7F6E\u7684 sidePadding\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; padding: 20px ${this.sidePadding}px; background: #ffffff; max-width: 100%; word-wrap: break-word; text-align: justify;`;\n\n      case 'h1': return this.getH1Style(config.h1Decoration, color, sizes.h1, font, headingColor);\n      case 'h2': return this.getH2Style(config.h2Decoration, color, sizes.h2, font, headingColor);\n      case 'h3': return this.getH3Style(config.h3Decoration, color, sizes.h3, font, headingColor);\n      case 'h4': return this.getH4Style(config.h4Decoration, color, sizes.h4, font, headingColor);\n\n      case 'h5':\n        return `font-family: ${font}; font-size: ${sizes.h5}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;\n      case 'h6':\n        return `font-family: ${font}; font-size: ${sizes.h6}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;\n\n      case 'p':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 0 0 ${config.paragraphGap}px 0; text-align: justify; letter-spacing: 0;`;\n\n\n\n\n\n      case 'blockquote':\n        if (config.blockquoteStyle === 'center') {\n          const centeredBackground = quoteCalloutStyleMode === 'neutral'\n            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG\n            : (config.blockquoteBg || color + '1F');\n          const centeredRadius = quoteCalloutStyleMode === 'neutral' ? r.md : r.sm;\n          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${centeredBackground}; margin: 30px 60px; padding: 20px; text-align: center; border: none; position: relative; border-radius: ${centeredRadius}px;`;\n        }\n\n        if (quoteCalloutStyleMode === 'neutral') {\n          const neutralBorderWidth = this.themeName === 'wechat'\n            ? 3\n            : (config.blockquoteBorderWidth || 4);\n          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${neutralBorderWidth}px solid ${AppleTheme.QUOTE_NEUTRAL_BORDER}; border-radius: ${r.sm}px;`;\n        }\n\n        // \u7ECF\u5178\u4E3B\u9898\uFF08wechat\uFF09\uFF1A\u4F7F\u7528\u66F4\u7EC6\u7684\u8FB9\u6846\u548C\u66F4\u6D45\u7684\u989C\u8272\uFF0C\u4E0E H3 \u533A\u5206\n        // H3: 4px \u4E3B\u9898\u8272 100% \u5DE6\u8FB9\u6846\uFF0C\u9876\u683C\n        // \u5F15\u7528\u5757: 3px \u4E3B\u9898\u8272 60% \u5DE6\u8FB9\u6846\uFF0C\u7F29\u8FDB 4px\n        if (this.themeName === 'wechat') {\n          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${config.blockquoteBg || color + '1F'}; margin: ${s.md}px 0 ${s.md}px 4px; padding: ${s.md}px; border-left: 3px solid ${color}99; border-radius: 3px;`;\n        }\n\n        // Standard Blockquote: Restoring Italic and adjusting padding/background to match the screenshot\n        // Background: Light opacity of theme color (1F) for better visibility\n        // Border: Solid theme color\n        // Font: Normal (removed italic) for better legibility on mobile\n        return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${config.blockquoteBg || color + '1F'}; margin: ${s.md}px 0; padding: ${s.md}px; border-left: ${config.blockquoteBorderWidth}px solid ${config.blockquoteBorderColor || color}; border-radius: 3px;`;\n\n      case 'pre':\n        return `background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: ${r.md}px; padding: ${s.md}px; margin: ${s.md}px 0; overflow-x: auto; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px; line-height: 1.6; color: #24292e;`;\n\n      case 'code':\n        return `background: ${color}1A; color: ${color}; padding: 2px 4px; border-radius: 3px; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px;`;\n\n      case 'ul':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 12px 0; padding-left: 20px; list-style-type: disc;`;\n      case 'ol':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 12px 0; padding-left: 20px; list-style-type: decimal;`;\n      case 'li':\n        return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 4px 0;`;\n      case 'li p':\n        return `margin: 0; padding: 0; line-height: ${config.lineHeight};`;\n\n\n\n\n      case 'figure':\n        // Fix: Restoring wireframe (border/padding) & balanced spacing (20px top/bottom)\n        // No shadow for cleaner look\n        return `display: block; margin: 20px 0; text-align: center; border: 1px solid #e1e4e8; border-radius: ${r.md}px; padding: 10px;`;\n\n      case 'figcaption':\n        return `font-size: ${sizes.caption}px; color: #999; text-align: center; margin-top: ${s.sm}px;`;\n\n      case 'img':\n        return `display: block; margin: 0 auto; max-width: 100%; border-radius: 4px;`;\n\n      case 'a':\n        return `color: ${color}; text-decoration: ${config.linkDecoration}; border-bottom: ${config.linkDecoration === 'none' ? `1px dashed ${color}` : 'none'};`;\n\n      case 'table':\n        return `border-collapse: collapse; width: 100%; margin: ${s.md}px 0; border: 1px solid #e1e4e8;`;\n      case 'th':\n        return `background: ${color}1F; font-weight: bold; color: ${config.textColor}; border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;\n      case 'td':\n        return `border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;\n      case 'thead':\n        return `background: #f6f8fa;`;\n\n      case 'hr':\n        return `border: 0; border-top: 1px solid rgba(0,0,0,0.08); margin: 40px 0;`;\n\n      case 'strong':\n        return `font-weight: bold; color: ${color};`;\n      case 'em':\n        return `font-style: italic;`;\n      case 'del':\n        return `text-decoration: line-through; color: #999;`;\n\n      case 'avatar-header':\n        return `margin: 0 0 ${s.sm}px 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; width: 100%; flex-direction: row !important; flex-wrap: nowrap !important; text-align: left !important;`;\n      case 'avatar':\n        return `display: inline-block !important; vertical-align: middle !important; margin: 0 !important; width: 32px !important; height: 32px !important; border-radius: 50%; object-fit: cover; border: 1px solid #e8e8ed; flex-shrink: 0;`;\n      case 'avatar-caption':\n        return `display: inline-block !important; vertical-align: middle !important; font-size: ${sizes.caption}px; color: #666; margin-left: 10px; line-height: 1.4; text-align: left !important;`;\n\n      default:\n        return '';\n    }\n  }\n\n  // === Helper Methods ===\n\n  getH1Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;`;\n    switch (type) {\n      case 'editorial-h1': // Magazine Style: Forced Serif + Golden Line\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;\n          background-image: linear-gradient(to right, transparent, ${color}, transparent);\n          background-size: 100px 1px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 20px; letter-spacing: 1px;`;\n      case 'bottom-line':\n        // Pure CSS centered short line using linear-gradient (simulating image)\n        return `${base}\n          background-image: linear-gradient(to right, ${color}, ${color});\n          background-size: 80px 3px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 15px;`;\n      case 'border-box':\n        return `${base} border: 1px solid ${color}; padding: 10px 20px; border-radius: 4px; display: inline-block; width: auto;`;\n      default: // none or unknown\n        return base;\n    }\n  }\n\n  getH2Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 32px auto 16px; text-align: center; color: ${headingColor}; line-height: 1.25;`;\n    switch (type) {\n      case 'editorial-h1': // Golden Line (Shifted from H1)\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 32px auto 16px; color: ${headingColor}; text-align: center; line-height: 1.2;\n          background-image: linear-gradient(to right, transparent, ${color}, transparent);\n          background-size: 100px 1px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 20px; letter-spacing: 1px;`;\n      case 'editorial-h2': // Magazine Subtitle\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 32px auto 16px; text-align: center; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;\n      case 'bottom-line':\n        // Pure CSS centered short line (thinner/shorter for H2)\n        return `${base}\n           background-image: linear-gradient(to right, ${color}, ${color});\n           background-size: 50px 2px;\n           background-repeat: no-repeat;\n           background-position: bottom center;\n           padding-bottom: 12px;`;\n      case 'filled-pill':\n        return `${base} background-color: ${color}; color: #fff; padding: 5px 20px; border-radius: 20px; display: inline-block; width: auto;`;\n      case 'bottom-line-center':\n        return `${base} display: inline-block; border-bottom: 1px solid ${color}; padding-bottom: 5px; width: auto;`;\n      default:\n        return base;\n    }\n  }\n\n  getH3Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 20px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.3;`;\n    switch (type) {\n      case 'editorial-h2': // Italic Serif (Left Aligned for H3)\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 24px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;\n      case 'editorial-h3': // Magazine Section: Forced Serif + Left Underline\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 24px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.3;\n           border-bottom: 1px solid ${color}; padding-bottom: 4px; display: inline-block; width: auto; letter-spacing: 0.5px;`;\n      case 'left-border':\n        return `${base} border-left: 4px solid ${color}; padding-left: 10px;`;\n      case 'bottom-line-left':\n        return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;\n      default:\n        return base;\n    }\n  }\n\n  getH4Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 15px 0 10px; text-align: left; color: ${headingColor}; line-height: 1.35;`;\n    switch (type) {\n      case 'editorial-h3': // Inherit H3 style for H4\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 15px 0 10px; text-align: left; color: ${headingColor}; line-height: 1.35;\n           border-bottom: 1px solid ${color}; padding-bottom: 3px; display: inline-block; width: auto; letter-spacing: 0.5px;`;\n      case 'simple': // Simple Bold (User Font)\n        // Use headingColor (Deep) instead of color (Bright)\n        return `${base}`;\n      case 'light-bg':\n        // Background uses bright color tint (low opacity), Text uses deep headingColor\n        return `${base} background-color: ${color}15; padding: 4px 8px; border-radius: 4px; display: inline-block;`;\n      case 'italic-serif':\n        return `${base} font-style: italic; font-family: serif; border-bottom: 1px dashed #ccc; display: inline-block; padding-bottom: 2px;`;\n      default:\n        return base;\n    }\n  }\n\n  /**\n   * \u66F4\u65B0\u914D\u7F6E\n   */\n  update(options) {\n    if (options.theme !== undefined) this.themeName = options.theme;\n    if (options.themeColor !== undefined) this.themeColor = options.themeColor;\n    if (options.customColor !== undefined) this.customColor = options.customColor;\n    if (options.quoteCalloutStyleMode !== undefined) this.quoteCalloutStyleMode = options.quoteCalloutStyleMode;\n    if (options.fontFamily !== undefined) this.fontFamily = options.fontFamily;\n    if (options.fontSize !== undefined) this.fontSize = options.fontSize;\n    if (options.macCodeBlock !== undefined) this.macCodeBlock = options.macCodeBlock;\n    if (options.codeLineNumber !== undefined) this.codeLineNumber = options.codeLineNumber;\n    if (options.sidePadding !== undefined) this.sidePadding = options.sidePadding;\n    if (options.coloredHeader !== undefined) this.coloredHeader = options.coloredHeader;\n  }\n\n  /**\n   * \u83B7\u53D6\u4E3B\u9898\u5217\u8868\n   */\n  static getThemeList() {\n    return Object.entries(AppleTheme.THEME_CONFIGS).map(([key, config]) => ({\n      value: key,\n      label: config.name,\n    }));\n  }\n\n  /**\n   * \u83B7\u53D6\u4E3B\u9898\u8272\u5217\u8868\n   */\n  static getColorList() {\n    return Object.entries(AppleTheme.THEME_COLORS).map(([key, value]) => ({\n      value: key,\n      color: value,\n    }));\n  }\n}\n\n// \u5BFC\u51FA\u5230\u5168\u5C40\u4F5C\u7528\u57DF\nwindow.AppleTheme = AppleTheme;\n",
+        "converter": "/**\n * \u{1F34E} Apple Style Markdown \u8F6C\u6362\u5668\n * \u76F4\u63A5\u7167\u6284 wechat-tool \u7684\u4EE3\u7801\u5757\u5B9E\u73B0\n * \u9488\u5BF9\u5FAE\u4FE1\u516C\u4F17\u53F7\u4F18\u5316\uFF1A\u4F7F\u7528 section \u7ED3\u6784\uFF0C\u589E\u5F3A\u517C\u5BB9\u6027\n */\n\n// Callout \u56FE\u6807\u914D\u7F6E\uFF08\u989C\u8272\u8DDF\u968F\u4E3B\u9898\u8272\uFF09\nconst CALLOUT_ICONS = {\n  // \u4FE1\u606F\u7C7B\n  note: { icon: '\u2139\uFE0F', label: '\u5907\u6CE8' },\n  info: { icon: '\u2139\uFE0F', label: '\u4FE1\u606F' },\n  todo: { icon: '\u2611\uFE0F', label: '\u5F85\u529E' },\n  // \u6458\u8981\u7C7B\n  abstract: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  summary: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  tldr: { icon: '\u{1F4C4}', label: 'TL;DR' },\n  // \u63D0\u793A\u7C7B\n  tip: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  hint: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  important: { icon: '\u{1F4A1}', label: '\u91CD\u8981' },\n  // \u6210\u529F\u7C7B\n  success: { icon: '\u2705', label: '\u6210\u529F' },\n  check: { icon: '\u2705', label: '\u5B8C\u6210' },\n  done: { icon: '\u2705', label: '\u5B8C\u6210' },\n  // \u95EE\u9898\u7C7B\n  question: { icon: '\u2753', label: '\u95EE\u9898' },\n  help: { icon: '\u2753', label: '\u5E2E\u52A9' },\n  faq: { icon: '\u2753', label: 'FAQ' },\n  // \u8B66\u544A\u7C7B\n  warning: { icon: '\u26A0\uFE0F', label: '\u8B66\u544A' },\n  caution: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  attention: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  // \u5931\u8D25/\u5371\u9669\u7C7B\n  failure: { icon: '\u274C', label: '\u5931\u8D25' },\n  fail: { icon: '\u274C', label: '\u5931\u8D25' },\n  missing: { icon: '\u274C', label: '\u7F3A\u5931' },\n  danger: { icon: '\u{1F6A8}', label: '\u5371\u9669' },\n  error: { icon: '\u274C', label: '\u9519\u8BEF' },\n  bug: { icon: '\u{1F41B}', label: 'Bug' },\n  // \u5F15\u7528\u7C7B\n  quote: { icon: '\u{1F4AC}', label: '\u5F15\u7528' },\n  cite: { icon: '\u{1F4DD}', label: '\u5F15\u7528' },\n  // \u793A\u4F8B\u7C7B\n  example: { icon: '\u{1F4CB}', label: '\u793A\u4F8B' },\n};\n\nconst CALLOUT_SEMANTIC_GROUPS = {\n  note: 'info',\n  info: 'info',\n  todo: 'info',\n  abstract: 'info',\n  summary: 'info',\n  tldr: 'info',\n  tip: 'tip',\n  hint: 'tip',\n  important: 'tip',\n  success: 'success',\n  check: 'success',\n  done: 'success',\n  question: 'question',\n  help: 'question',\n  faq: 'question',\n  warning: 'warning',\n  caution: 'warning',\n  attention: 'warning',\n  failure: 'danger',\n  fail: 'danger',\n  missing: 'danger',\n  danger: 'danger',\n  error: 'danger',\n  bug: 'danger',\n  quote: 'quote',\n  cite: 'quote',\n  example: 'quote',\n};\n\nconst CALLOUT_SEMANTIC_COLORS = {\n  info: '#2f6fdd',\n  tip: '#1f8c7a',\n  success: '#2d8a4a',\n  question: '#7251b5',\n  warning: '#b26a00',\n  danger: '#c44747',\n  quote: '#5f6b7a',\n};\n\nfunction resolveCalloutSemanticColor(type, fallbackColor) {\n  const key = String(type || '').trim().toLowerCase();\n  const group = CALLOUT_SEMANTIC_GROUPS[key] || 'info';\n  return CALLOUT_SEMANTIC_COLORS[group] || fallbackColor;\n}\n\nwindow.AppleStyleConverter = class AppleStyleConverter {\n  constructor(theme, avatarUrl = '', showImageCaption = true, app = null, sourcePath = '') {\n    this.theme = theme;\n    this.avatarUrl = avatarUrl;\n    this.showImageCaption = showImageCaption;\n    this.app = app; // Obsidian App instance\n    this.sourcePath = sourcePath; // Current file path for relative resolution\n    this.md = null;\n    this.hljs = null;\n  }\n\n  async initMarkdownIt() {\n    if (this.md) return;\n    if (typeof markdownit === 'undefined') throw new Error('markdown-it \u672A\u52A0\u8F7D');\n    this.hljs = typeof hljs !== 'undefined' ? hljs : null;\n    this.md = markdownit({ html: true, breaks: true, linkify: true, typographer: true });\n\n    // Enable MathJax if available\n    if (window.ObsidianWechatMath) {\n      window.ObsidianWechatMath(this.md);\n    }\n\n    this.setupRenderRules();\n  }\n\n  reinit() { this.md = null; }\n\n  updateConfig(config) {\n    if (config.showImageCaption !== undefined) {\n      this.showImageCaption = config.showImageCaption;\n    }\n    if (config.avatarUrl !== undefined) {\n      this.avatarUrl = config.avatarUrl;\n    }\n  }\n\n  updateSourcePath(path) {\n    this.sourcePath = path;\n  }\n\n  resolveImagePath(src) {\n    if (!this.app) return src;\n    // IF remote url, bypass\n    if (/^(https?:\\/\\/|data:)/i.test(src)) return src;\n\n    try {\n      // Markdown-it might encode the URL (e.g. %20 for space), but Obsidian expects decoded paths\n      const linkPath = decodeURI(src);\n      const sourcePath = this.sourcePath;\n      // Resolve using Obsidian's standard API\n      const tFile = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);\n      if (tFile) {\n        return this.app.vault.getResourcePath(tFile);\n      }\n    } catch (e) {\n      console.error('Image resolution failed:', src, e);\n    }\n    return src;\n  }\n\n  setupRenderRules() {\n    // Callout & Blockquote \u667A\u80FD\u68C0\u6D4B\u6E32\u67D3\n    this.md.renderer.rules.blockquote_open = (tokens, idx, options, env, self) => {\n      // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A\u6587\u672C\u5185\u5BB9\uFF0C\u68C0\u6D4B\u662F\u5426\u4E3A callout \u8BED\u6CD5\n      const calloutInfo = this.detectCallout(tokens, idx);\n\n      // \u4F7F\u7528\u6808\u7BA1\u7406 callout \u72B6\u6001\uFF0C\u652F\u6301\u5D4C\u5957\n      if (!env._calloutStack) env._calloutStack = [];\n      env._calloutStack.push(calloutInfo);\n\n      if (calloutInfo) {\n        return this.renderCalloutOpen(calloutInfo);\n      }\n      // \u666E\u901A blockquote\n      return `<blockquote style=\"${this.getInlineStyle('blockquote')}\">`;\n    };\n\n    this.md.renderer.rules.blockquote_close = (tokens, idx, options, env, self) => {\n      const calloutInfo = env._calloutStack ? env._calloutStack.pop() : null;\n      if (calloutInfo) {\n        return `</section></section>`; // \u5173\u95ED\u5185\u5BB9\u533A\u548C\u5916\u5C42\u5BB9\u5668\n      }\n      return `</blockquote>`;\n    };\n\n    this.md.renderer.rules.paragraph_open = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `<p style=\"${this.getInlineStyle('p')}\">`;\n    };\n\n    this.md.renderer.rules.paragraph_close = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `</p>`;\n    };\n    this.md.renderer.rules.heading_open = (tokens, idx) => `<${tokens[idx].tag} style=\"${this.getInlineStyle(tokens[idx].tag)}\">`;\n    this.md.renderer.rules.bullet_list_open = () => `<ul style=\"${this.getInlineStyle('ul')}\">`;\n    this.md.renderer.rules.ordered_list_open = () => `<ol style=\"${this.getInlineStyle('ol')}\">`;\n    this.md.renderer.rules.list_item_open = () => `<li style=\"${this.getInlineStyle('li')}\">`;\n\n    this.md.renderer.rules.code_inline = (tokens, idx) =>\n      `<code style=\"${this.getInlineStyle('code')}\">${this.escapeHtml(tokens[idx].content)}</code>`;\n\n    this.md.renderer.rules.fence = (tokens, idx) => {\n      const content = tokens[idx].content;\n      const lang = tokens[idx].info || 'text';\n      return this.createCodeBlock(content, lang);\n    };\n\n    this.md.renderer.rules.link_open = (tokens, idx) => {\n      const href = tokens[idx].attrGet('href');\n      const safeHref = this.validateLink(href);\n      return `<a href=\"${safeHref}\" style=\"${this.getInlineStyle('a')}\">`;\n    };\n    this.md.renderer.rules.strong_open = () => `<strong style=\"${this.getInlineStyle('strong')}\">`;\n    this.md.renderer.rules.em_open = () => `<em style=\"${this.getInlineStyle('em')}\">`;\n    this.md.renderer.rules.s_open = () => `<del style=\"${this.getInlineStyle('del')}\">`;\n\n    this.md.renderer.rules.image = (tokens, idx) => {\n      let src = tokens[idx].attrGet('src');\n      const alt = tokens[idx].content;\n\n      // Resolve Local Path for Preview\n      src = this.resolveImagePath(src);\n\n\n      let caption = '';\n\n      if (!alt) {\n        // Logic 1: ![]() -> Extract filename, clean query/ext\n        caption = decodeURIComponent(this.extractFileName(src));\n        caption = caption.replace(/\\?.*$/, '');\n        caption = caption.replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');\n      } else {\n        // Logic 2: ![alt]() -> Use alt, clean resize/ext\n        caption = alt;\n        caption = caption.replace(/\\|\\s*\\d+(x\\d+)?\\s*$/, '');\n        caption = caption.replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');\n      }\n\n\n      if (this.avatarUrl) {\n        // \u6C34\u5370\u6A21\u5F0F\uFF1A\u663E\u793A\u5934\u50CF + \u56FE\u7247\u540D\u79F0\uFF0C\u4F7F\u7528\u5E26\u8FB9\u6846\u7684\u6837\u5F0F\n        const avatarHeaderStyle = this.getInlineStyle('avatar-header');\n        const spacerStyle = 'display:block;height:8px;line-height:8px;font-size:0;';\n        // Fix: Force text-align: left for the figure container in watermark mode to prevent centering\n        // We strip the default text-align: center from the figure style and add text-align: left\n        let figureStyle = this.getInlineStyle('figure');\n        figureStyle = figureStyle.replace('text-align: center;', 'text-align: left;');\n\n        return `<figure style=\"${figureStyle}\"><div style=\"${avatarHeaderStyle}\"><img src=\"${this.avatarUrl}\" alt=\"logo\" style=\"${this.getInlineStyle('avatar')}\"><span style=\"${this.getInlineStyle('avatar-caption')}\">${caption}</span></div><section style=\"${spacerStyle}\">&nbsp;</section><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n\n      // \u975E\u6C34\u5370\u6A21\u5F0F\uFF1A\u65E0\u8FB9\u6846\u6837\u5F0F\n      const simpleFigureStyle = 'display:block;margin:16px 0;text-align:center;';\n      if (this.showImageCaption) {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"><figcaption style=\"${this.getInlineStyle('figcaption')}\">${caption}</figcaption></figure>`;\n      } else {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n    };\n\n    this.md.renderer.rules.hr = () => `<hr style=\"${this.getInlineStyle('hr')}\">`;\n    this.md.renderer.rules.table_open = () => `<table style=\"${this.getInlineStyle('table')}\">`;\n    this.md.renderer.rules.thead_open = () => `<thead style=\"${this.getInlineStyle('thead')}\">`;\n    this.md.renderer.rules.th_open = () => `<th style=\"${this.getInlineStyle('th')}\">`;\n    this.md.renderer.rules.td_open = () => `<td style=\"${this.getInlineStyle('td')}\">`;\n  }\n\n  /**\n   * \u68C0\u6D4B blockquote \u662F\u5426\u4E3A Callout \u8BED\u6CD5\n   * \u5E76\u6E05\u7406 marker \u6807\u8BC6\u7B26\n   * @param {Array} tokens - markdown-it tokens\n   * @param {number} idx - blockquote_open \u7684\u7D22\u5F15\n   * @returns {Object|null} - callout \u4FE1\u606F { type, title, icon, label } \u6216 null\n   */\n  detectCallout(tokens, idx) {\n    // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A inline token\n    for (let i = idx + 1; i < tokens.length; i++) {\n      if (tokens[i].type === 'blockquote_close') break;\n      if (tokens[i].type === 'inline' && tokens[i].content) {\n        // \u53EA\u53D6\u7B2C\u4E00\u884C\u5185\u5BB9\u8FDB\u884C\u5339\u914D\n        const firstLine = tokens[i].content.split('\\n')[0];\n        // \u652F\u6301\u81EA\u5B9A\u4E49 callout \u7C7B\u578B\uFF08\u5305\u542B\u4E2D\u6587\u3001\u8FDE\u5B57\u7B26\u7B49\uFF09\uFF0C\u4F8B\u5982 [!\u5B66\u4E60\u7814\u7A76] / [!custom-type]\n        const match = firstLine.match(/^\\[!\\s*([^\\]\\r\\n]+?)\\s*\\](?:\\s+(.*))?/);\n        if (match) {\n          const rawType = match[1].trim();\n          if (!rawType || !/\\S/u.test(rawType)) return null;\n          const type = rawType.toLowerCase();\n          const customTitle = match[2] ? match[2].trim() : null;\n          const mappedConfig = CALLOUT_ICONS[type];\n          const config = mappedConfig || { icon: CALLOUT_ICONS.note.icon, label: type };\n          const defaultTitle = type.charAt(0).toUpperCase() + type.slice(1);\n\n          // --- \u5728 Token \u9636\u6BB5\u6E05\u7406 Marker ---\n          // 1. \u66F4\u65B0 content\uFF1A\u79FB\u9664\u5305\u542B marker \u7684\u7B2C\u4E00\u884C\n          const lines = tokens[i].content.split('\\n');\n          lines.shift();\n          tokens[i].content = lines.join('\\n');\n\n          // 2. \u66F4\u65B0 children\uFF1A\u540C\u6B65\u79FB\u9664\u7B2C\u4E00\u884C\u5BF9\u5E94\u7684 tokens\n          if (tokens[i].children) {\n            const breakIdx = tokens[i].children.findIndex(c => c.type === 'softbreak' || c.type === 'hardbreak');\n            if (breakIdx !== -1) {\n              // \u79FB\u9664\u7B2C\u4E00\u4E2A\u6362\u884C\u7B26\u53CA\u5176\u4E4B\u524D\u7684\u6240\u6709\u5185\u5BB9\n              tokens[i].children = tokens[i].children.slice(breakIdx + 1);\n            } else {\n              // \u53EA\u6709\u4E00\u884C\uFF0C\u76F4\u63A5\u6E05\u7A7A\n              tokens[i].children = [];\n            }\n          }\n\n          // 3. \u5982\u679C\u8BE5\u6BB5\u843D\u53D8\u4E3A\u7A7A\uFF08\u8BF4\u660E marker \u72EC\u5360\u4E00\u884C\uFF09\uFF0C\u9690\u85CF\u8BE5\u6BB5\u843D\u5BB9\u5668\n          if (tokens[i].content.trim() === '') {\n            if (i > 0 && tokens[i-1].type === 'paragraph_open') tokens[i-1].hidden = true;\n            tokens[i].hidden = true; // \u9690\u85CF inline token \u672C\u8EAB\n            if (i < tokens.length - 1 && tokens[i+1].type === 'paragraph_close') tokens[i+1].hidden = true;\n          }\n\n          return {\n            type,\n            title: customTitle || defaultTitle,\n            icon: config.icon,\n            label: config.label,\n          };\n        }\n        break; // \u53EA\u68C0\u67E5\u7B2C\u4E00\u4E2A inline\n      }\n    }\n    return null;\n  }\n\n  /**\n   * \u6E32\u67D3 Callout \u5F00\u59CB\u6807\u7B7E\n   * @param {Object} calloutInfo - { type, title, icon }\n   * @returns {string} - HTML \u5B57\u7B26\u4E32\n   */\n  renderCalloutOpen(calloutInfo) {\n    const color = this.theme.getThemeColorValue();\n    const sizes = this.theme.getSizes();\n    const font = this.theme.getFontFamily();\n    const themeName = this.theme.themeName;\n    const quoteCalloutStyleMode = typeof this.theme.getQuoteCalloutStyleMode === 'function'\n      ? this.theme.getQuoteCalloutStyleMode()\n      : 'theme';\n\n    // \u4F18\u96C5\u4E3B\u9898\uFF1A\u5C45\u4E2D\u6837\u5F0F\uFF08\u4E0E\u5176\u5F15\u7528\u5757\u98CE\u683C\u4E00\u81F4\uFF09\n    if (themeName === 'serif') {\n      return this.renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode);\n    }\n\n    if (quoteCalloutStyleMode === 'neutral') {\n      return this.renderCalloutOpenNeutral(calloutInfo, color, sizes, font);\n    }\n\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    // \u7B80\u7EA6/\u7ECF\u5178\u4E3B\u9898\uFF1A\u5DE6\u8FB9\u6846\u6837\u5F0F\n    const isWechat = themeName === 'wechat';\n    const marginLeft = isWechat ? '4px' : '0';\n    const borderWidth = isWechat ? '3px' : '4px';\n    const borderColor = isWechat ? `${color}99` : color;\n\n    // \u5916\u5C42\u5BB9\u5668\uFF1A\u5DE6\u8FB9\u6846\u98CE\u683C\n    const containerStyle = `\n      margin: 16px 0 16px ${marginLeft};\n      border-left: ${borderWidth} solid ${borderColor};\n      background: ${color}1A;\n      border-radius: 3px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    // \u6807\u9898\u680F\uFF1A\u6DF1\u8272\u80CC\u666F + \u56FE\u6807 + \u6807\u9898\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 8px 12px;\n      background: ${color}26;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: #333;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px;`;\n    const titleStyle = `flex: 1;`;\n\n    // \u5185\u5BB9\u533A\uFF1A\u6B63\u6587\u5185\u5BB9\n    const contentStyle = `\n      padding: 12px 16px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #595959;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"${iconStyle}\">${calloutInfo.icon}</span>\n        <span style=\"${titleStyle}\">${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  renderCalloutOpenNeutral(calloutInfo, themeColor, sizes, font) {\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, themeColor);\n\n    const containerStyle = `\n      margin: 16px 0 16px 8px;\n      background: #f9f9f9;\n      border: 1px solid ${accentColor}24;\n      border-radius: 4px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 8px 12px;\n      background: ${accentColor}14;\n      border-bottom: 1px solid ${accentColor}24;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: ${accentColor};\n    `.replace(/\\s+/g, ' ').trim();\n\n    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;\n    const titleStyle = `flex: 1; color: ${accentColor};`;\n    const contentStyle = `\n      padding: 12px 16px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #595959;\n      background: #f9f9f9;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"${iconStyle}\">${calloutInfo.icon}</span>\n        <span style=\"${titleStyle}\">${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  /**\n   * \u6E32\u67D3\u5C45\u4E2D\u6837\u5F0F\u7684 Callout\uFF08\u7528\u4E8E\u4F18\u96C5\u4E3B\u9898\uFF09\n   * @param {Object} calloutInfo - { type, title, icon }\n   * @param {string} color - \u4E3B\u9898\u8272\n   * @param {Object} sizes - \u5B57\u4F53\u5C3A\u5BF8\u914D\u7F6E\n   * @param {string} font - \u5B57\u4F53\u65CF\n   * @param {string} quoteCalloutStyleMode - \u5F15\u7528/Callout \u98CE\u683C\u6A21\u5F0F\n   * @returns {string} - HTML \u5B57\u7B26\u4E32\n   */\n  renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode = 'theme') {\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);\n    const isNeutral = quoteCalloutStyleMode === 'neutral';\n    // \u5C45\u4E2D\u6837\u5F0F\uFF1A\u65E0\u5DE6\u8FB9\u6846\uFF0C\u6C34\u5E73\u5C45\u4E2D\uFF0C\u5706\u89D2\u8FB9\u6846\n    const containerStyle = `\n      margin: 30px 60px;\n      background: ${isNeutral ? '#f9f9f9' : `${color}1F`};\n      border-radius: ${isNeutral ? '8px' : '4px'};\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    // \u6807\u9898\u680F\uFF1A\u9760\u5DE6\u5BF9\u9F50\uFF0C\u4E0E\u5176\u4ED6\u4E3B\u9898\u4FDD\u6301\u4E00\u81F4\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 12px 20px;\n      background: ${isNeutral ? `${accentColor}12` : `${color}26`};\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: ${isNeutral ? accentColor : '#333'};\n    `.replace(/\\s+/g, ' ').trim();\n\n    const contentStyle = `\n      padding: 16px 20px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #555;\n      text-align: center;\n      background: ${isNeutral ? '#f9f9f9' : 'transparent'};\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"margin-right: 8px; color: ${isNeutral ? accentColor : '#333'};\">${calloutInfo.icon}</span>\n        <span>${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  highlightCode(code, lang) {\n    if (!this.hljs) return this.escapeHtml(code);\n    try {\n      if (lang && this.hljs.getLanguage(lang)) return this.hljs.highlight(code, { language: lang }).value;\n      return this.hljs.highlightAuto(code).value;\n    } catch (e) { return this.escapeHtml(code); }\n  }\n\n  /**\n   * \u683C\u5F0F\u5316\u9AD8\u4EAE\u4EE3\u7801\uFF08\u53C2\u8003 wechat-tool formatHighlightedCode\uFF09\n   */\n  formatHighlightedCode(html, preserveNewlines = false) {\n    let formatted = html;\n    // \u5C06 span \u4E4B\u95F4\u7684\u7A7A\u683C\u79FB\u5230 span \u5185\u90E8\n    formatted = formatted.replace(/(<span[^>]*>[^<]*<\\/span>)(\\s+)(<span[^>]*>[^<]*<\\/span>)/g,\n      (_, span1, spaces, span2) => span1 + span2.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    formatted = formatted.replace(/(\\s+)(<span[^>]*>)/g,\n      (_, spaces, span) => span.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    // \u66FF\u6362\u5236\u8868\u7B26\u4E3A4\u4E2A\u7A7A\u683C\n    formatted = formatted.replace(/\\t/g, '    ');\n\n    // wechat-tool \u7684\u903B\u8F91\uFF1A\u5982\u679C\u662F lineNumbers \u6A21\u5F0F\uFF08preserveNewlines=false\uFF09\uFF0C\u5C06\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    // \u5982\u679C\u4E0D\u662F\uFF08preserveNewlines=true\uFF09\uFF0C\u5C06\u6362\u884C\u8F6C\u4E3A <br/> \u4E14\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    if (preserveNewlines) {\n      formatted = formatted\n        .replace(/\\r\\n/g, '<br/>')\n        .replace(/\\n/g, '<br/>')\n        .replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    } else {\n      formatted = formatted.replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    }\n    return formatted;\n  }\n\n  inlineHighlightStyles(html) {\n    const map = {\n      'hljs-keyword': 'color:#ff7b72 !important;', 'hljs-built_in': 'color:#ffa657 !important;',\n      'hljs-type': 'color:#ffa657 !important;', 'hljs-literal': 'color:#79c0ff !important;',\n      'hljs-number': 'color:#79c0ff !important;', 'hljs-string': 'color:#a5d6ff !important;',\n      'hljs-symbol': 'color:#a5d6ff !important;', 'hljs-comment': 'color:#8b949e !important;font-style:italic !important;',\n      'hljs-doctag': 'color:#8b949e !important;', 'hljs-meta': 'color:#ffa657 !important;',\n      'hljs-attr': 'color:#79c0ff !important;', 'hljs-attribute': 'color:#79c0ff !important;',\n      'hljs-name': 'color:#7ee787 !important;', 'hljs-tag': 'color:#7ee787 !important;',\n      'hljs-selector-tag': 'color:#7ee787 !important;', 'hljs-selector-class': 'color:#d2a8ff !important;',\n      'hljs-selector-id': 'color:#79c0ff !important;', 'hljs-variable': 'color:#ffa657 !important;',\n      'hljs-template-variable': 'color:#ffa657 !important;', 'hljs-params': 'color:#e6e6e6 !important;',\n      'hljs-function': 'color:#d2a8ff !important;', 'hljs-title': 'color:#d2a8ff !important;',\n      'hljs-punctuation': 'color:#e6e6e6 !important;', 'hljs-property': 'color:#79c0ff !important;',\n      'hljs-operator': 'color:#ff7b72 !important;', 'hljs-regexp': 'color:#a5d6ff !important;',\n      'hljs-subst': 'color:#e6e6e6 !important;',\n    };\n\n    // \u6539\u8FDB\uFF1A\u5904\u7406 class \u5C5E\u6027\u5305\u542B\u591A\u4E2A\u7C7B\u540D\u7684\u60C5\u51B5\n    return html.replace(/class=\"([^\"]*)\"/g, (match, classNames) => {\n      const classes = classNames.split(/\\s+/);\n      let styles = '';\n      for (const cls of classes) {\n        if (map[cls]) {\n          styles += map[cls];\n        }\n      }\n      return styles ? `style=\"${styles}\"` : match;\n    }).replace(/class=\"[^\"]*\"/g, ''); // \u518D\u6B21\u6E05\u7406\u672A\u5339\u914D\u7684 class\n  }\n\n  /**\n   * \u521B\u5EFA\u4EE3\u7801\u5757 - \u7167\u6284 wechat-tool \u7684\u5B9E\u73B0\n   * \u4F7F\u7528 wechat-tool \u7684\u989C\u8272\u548C\u7ED3\u6784\n   */\n  createCodeBlock(content, lang) {\n    const showMac = this.theme.macCodeBlock;\n    const showLineNum = this.theme.codeLineNumber;\n\n    // wechat-tool \u7684\u989C\u8272\u914D\u7F6E\uFF08GitHub Dark \u4E3B\u9898\uFF09\n    const background = '#0d1117';  // GitHub Dark \u80CC\u666F\n    const color = '#f0f6fc';       // GitHub Dark \u6587\u5B57\n    const barBackground = '#161b22'; // \u5DE5\u5177\u680F\u80CC\u666F\n    const borderColor = '#30363d';   // \u8FB9\u6846\u989C\u8272\n\n    let lines = content.replace(/\\r\\n/g, '\\n').split('\\n');\n    while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();\n\n    // Mac \u5934\u90E8\n    // \u5173\u952E\u4FEE\u6B63\uFF1A\u4F7F\u7528 section \u800C\u4E0D\u662F div\uFF0C\u589E\u5F3A\u5728\u516C\u4F17\u53F7\u4E2D\u7684\u517C\u5BB9\u6027\n    const macHeader = showMac ? `<section style=\"display:block !important;background:${barBackground} !important;padding:6px 10px 6px 10px !important;border:none !important;border-bottom:1px solid ${borderColor} !important;border-radius:8px 8px 0 0 !important;line-height:1 !important;\">\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#28c840 !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n    </section>` : '';\n\n    // \u7EDF\u4E00\u884C\u9AD8\u548C\u5B57\u4F53\u53D8\u91CF\n    const lineHeight = '1.75';\n    // const fontSize = '13px';\n\n    let codeHtml;\n\n    if (showLineNum) {\n      // \u5E26\u884C\u53F7\uFF1A\u9010\u884C\u5904\u7406\n      const highlightedLines = lines.map(lineRaw => {\n        const lineHtml = this.highlightCode(lineRaw, lang);\n        const styled = this.inlineHighlightStyles(lineHtml);\n        // \u6CE8\u610F\uFF1A\u8FD9\u91CC formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false\uFF0C\u4E0D\u5305\u542B <br>\uFF0C\u4E0D\u5305\u542B &nbsp; (\u9664\u975E\u5185\u90E8\u903B\u8F91\u5904\u7406)\n        // \u5B9E\u9645\u4E0A formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false \u65F6\uFF0C\u53EA\u505A\u7A7A\u683C\u5904\u7406\n        // wechat-tool \u4E2D\uFF1A return formatted === '' ? '&nbsp;' : formatted\n        const formatted = this.formatHighlightedCode(styled, false);\n        return formatted === '' ? '&nbsp;' : formatted;\n      });\n\n      // \u884C\u53F7\u5217\n      const lineNumbersHtml = highlightedLines.map((_, idx) =>\n        `<section style=\"height:1.75em !important;line-height:${lineHeight} !important;padding:0 12px 0 12px !important;font-size:13px !important;color:#95989C !important;text-align:right !important;white-space:nowrap !important;vertical-align:top !important;margin:0 !important;\">${idx + 1}</section>`\n      ).join('');\n\n      // \u4EE3\u7801\u5185\u5BB9\n      // \u5173\u952E\u6539\u52A8\uFF1A\u56DE\u5F52 wechat-tool \u539F\u59CB\u65B9\u6848 \u2014\u2014 \u4F7F\u7528 <br> \u62FC\u63A5\u4EE3\u7801\u884C\uFF0C\u800C\u4E0D\u662F div \u5206\u5272\n      // \u8FD9\u6837\u53F3\u4FA7\u5C31\u662F\u4E00\u4E2A\u5355\u4E00\u7684\u6587\u672C\u6D41\uFF0C\u9AD8\u5EA6\u4E25\u683C\u7531 line-height \u63A7\u5236\n      const codeInnerHtml = highlightedLines.join('<br/>');\n\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;line-height:${lineHeight} !important;font-size:13px !important;\">${codeInnerHtml}</section>`;\n\n      // \u884C\u53F7\u5217\u5BB9\u5668\u6837\u5F0F\n      const lineNumberColumnStyles = `text-align:right !important;padding:12px 0 12px 0 !important;border-right:1px solid rgba(255,255,255,0.1) !important;user-select:none !important;background:transparent !important;flex:0 0 auto !important;min-width:3.5em !important;margin:0 !important;`;\n\n      // \u6CE8\u610F flex \u5BB9\u5668\u7684 padding 0\uFF0C\u5185\u90E8 padding \u5206\u522B\u5728 lineNumberColumn \u548C code section\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"${lineNumberColumnStyles}\">${lineNumbersHtml}</section>\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px 12px 12px 16px !important;margin:0 !important;min-width:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    } else {\n      // \u65E0\u884C\u53F7\n      const highlighted = this.highlightCode(lines.join('\\n'), lang);\n      const styled = this.inlineHighlightStyles(highlighted);\n      // preserveNewlines=true -> \u5305\u542B <br>\n      const formatted = this.formatHighlightedCode(styled, true);\n      // \u6539\u52A8\uFF1Awhite-space: nowrap !important\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;word-break:keep-all !important;overflow-wrap:normal !important;line-height:${lineHeight} !important;font-size:13px !important;margin:0 !important;\">${formatted}</section>`;\n\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px !important;min-width:0 !important;margin:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    }\n\n    // \u5916\u5C42\u5BB9\u5668\n    return `<section class=\"code-snippet__fix\" style=\"width:100% !important;margin:12px 0 !important;background:${background} !important;border:1px solid ${borderColor} !important;border-radius:8px !important;overflow:hidden !important;box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;display:block !important;\">\n${macHeader}\n<section style=\"padding:0 !important;border:none !important;background:${background} !important;color:${color} !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:${lineHeight} !important;white-space:nowrap !important;overflow-x:auto !important;display:block !important;\">\n<pre style=\"margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:${color} !important;white-space:nowrap !important;overflow-x:visible !important;display:inline-block !important;min-width:100% !important;\">${codeHtml}</pre>\n</section>\n</section>`;\n  }\n\n  getInlineStyle(tagName) { return this.theme.getStyle(tagName); }\n  stripFrontmatter(md) { return md.replace(/^---\\n[\\s\\S]*?\\n---\\n?/, ''); }\n\n\n  async convert(markdown) {\n    if (!this.md) await this.initMarkdownIt();\n\n    // \u4FEE\u590D\uFF1A\u79FB\u9664\u5757\u7EA7\u516C\u5F0F $$ \u524D\u9762\u7684\u7F29\u8FDB\uFF0C\u907F\u514D\u88AB\u8BEF\u8BC6\u522B\u4E3A\u4EE3\u7801\u5757\n    // \u4EC5\u5339\u914D\u884C\u9996\u7684\u7A7A\u767D + $$\uFF0C\u4E0D\u5F71\u54CD\u5176\u4ED6\u7F29\u8FDB\n    markdown = markdown.replace(/^[\\t ]+(\\$\\$)/gm, '$1');\n\n    // Pre-process: Convert Wiki-links ![[...]] to standard images ![](...)\n    // Regex: ![[path|alt]] or ![[path]]\n    // Fix: Use more robust regex preventing greedy capture and encoding URI for paths with spaces\n    markdown = markdown.replace(/!\\[\\[([^\\[\\]|]+)(?:\\|([^\\[\\]]+))?\\]\\]/g, (match, path, alt) => {\n      // Must encodeURI to handle spaces in filenames which are valid in WikiLinks but break standard Markdown images\n      // trimmed path to avoid leading/trailing spaces breaking the link\n      return `![${alt || ''}](${encodeURI(path.trim())})`;\n    });\n\n\n\n    let html = this.md.render(this.stripFrontmatter(markdown));\n    html = this.fixListParagraphs(html);\n    html = this.unwrapFigures(html); // Fix: Remove <p> wrappers from <figure> to prevent empty lines\n    html = this.removeBlockquoteParagraphMargins(html); // Fix: Remove margins from <p> inside <blockquote> for vertical centering\n    html = this.fixMathJaxTags(html); // Fix: Replace <mjx-container> with WeChat-compatible tags\n    html = this.sanitizeHtml(html); // Final security pass: Neutralize XSS and dangerous tags\n    return `<section style=\"${this.getInlineStyle('section')}\">${html}</section>`;\n  }\n\n  fixMathJaxTags(html) {\n    if (!html.includes('mjx-container')) return html;\n\n    // Fix: Remove assistive MathML (hidden text that shows up in WeChat)\n    html = html.replace(/<mjx-assistive-mml[^>]*>[\\s\\S]*?<\\/mjx-assistive-mml>/gi, '');\n\n    const normalizeMathPositionStyles = (markup) => String(markup || '').replace(\n      /style=\"([^\"]*)\"/gi,\n      (_match, styleText) => {\n        let style = String(styleText || '');\n        let topValue = null;\n        style = style.replace(/(^|;)\\s*top\\s*:\\s*([^;\"]+)\\s*;?/i, (_m, prefix, value) => {\n          topValue = String(value || '').trim();\n          return prefix || '';\n        });\n        if (!topValue) return `style=\"${style}\"`;\n\n        if (/transform\\s*:/i.test(style)) {\n          style = style.replace(\n            /transform\\s*:\\s*([^;\"]+)/i,\n            (_m, value) => `transform:${String(value || '').trim()} translateY(${topValue})`\n          );\n        } else {\n          style = `${style}${style.trim().endsWith(';') || !style.trim() ? '' : ';'}transform: translateY(${topValue});`;\n        }\n        return `style=\"${style}\"`;\n      }\n    );\n\n    const appendSvgStyle = (markup, extraStyle) => String(markup || '').replace(/<svg([^>]*)>/i, (_m, svgAttrs) => {\n      if (svgAttrs.includes('style=\"')) {\n        return `<svg${svgAttrs.replace('style=\"', `style=\"${extraStyle}`)}>`;\n      }\n      return `<svg${svgAttrs} style=\"${extraStyle}\">`;\n    });\n\n    // Replace <mjx-container> with <section> (block) or <span> (inline)\n    // WeChat strips custom tags like mjx-container but keeps SVG content\n    return html.replace(/<mjx-container([^>]*)>(.*?)<\\/mjx-container>/gs, (match, attrs, content) => {\n      // Check for block display mode\n      // MathJax 3 usually adds display=\"true\" or class=\"MathJax CtxtMenu_Attached_0\" with separate style\n      const isBlock = attrs.includes('display=\"true\"') || attrs.includes('display: true');\n\n      const tag = isBlock ? 'section' : 'span';\n\n      // Inline math needs vertical alignment adjustment\n      // Block math needs centering and scaling (not scrolling) as per WeChat behavior\n      const style = isBlock\n        ? 'display:block; width:100%; margin:1em auto; text-align:center; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;'\n        : 'display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px; line-height:1;';\n\n      content = normalizeMathPositionStyles(content);\n\n      // \u5173\u952E\u4FEE\u590D\uFF1A\u7ED9\u5757\u7EA7\u516C\u5F0F\u7684 SVG \u6DFB\u52A0 max-width: 100% \u548C height: auto\n      // \u8FD9\u6837\u5728\u624B\u673A\u4E0A\u9884\u89C8\u65F6\uFF0C\u516C\u5F0F\u4F1A\u6309\u6BD4\u4F8B\u7F29\u5C0F\u4EE5\u9002\u5E94\u5C4F\u5E55\uFF0C\u800C\u4E0D\u662F\u88AB\u906E\u6321\u6216\u9700\u8981\u6EDA\u52A8\n      // \u8FD9\u7B26\u5408\u5FAE\u4FE1\u516C\u4F17\u53F7\u7684\u9ED8\u8BA4\u6E32\u67D3\u884C\u4E3A\n      if (isBlock) {\n        content = appendSvgStyle(content, 'display:block; margin:0 auto; max-width:100%; height:auto; ');\n      } else {\n        content = content.replace(/vertical-align\\s*:\\s*[^;\"]+;?/gi, '');\n        content = appendSvgStyle(content, 'display:inline-block; max-width:300vw !important; height:auto; vertical-align:middle; ');\n      }\n\n      return `<${tag} data-owc-math=\"${isBlock ? 'block' : 'inline'}\" style=\"${style}\">${content}</${tag}>`;\n    });\n  }\n\n  fixListParagraphs(html) {\n    const style = this.getInlineStyle('li p');\n    return html.replace(/<li[^>]*>[\\s\\S]*?<\\/li>/g, m => m.replace(/<p style=\"[^\"]*\">/g, `<p style=\"${style}\">`));\n  }\n\n  /**\n   * Fix: Remove margins from <p> inside <blockquote>\n   * Blockquotes use padding for spacing. If <p> inside has margin-bottom (default),\n   * the text appears top-aligned instead of centered.\n   */\n  removeBlockquoteParagraphMargins(html) {\n    return html.replace(/<blockquote[^>]*>([\\s\\S]*?)<\\/blockquote>/g, (match, content) => {\n      // Replace margin: ... with margin: 0 in <p> styles\n      const newContent = content.replace(/<p style=\"([^\"]*)margin:[^;\"]*(;?)/g, '<p style=\"$1margin: 0$2');\n      // Also handle case where margin is not present yet (less likely if style plugin is used)\n      // or if we want to force it.\n      // Since we know our theme adds margin to all p, we just override it.\n      // Actually, regex replace above handles \"margin:...\" replacement.\n      // If margin is at the end or middle.\n      return match.replace(content, newContent);\n    });\n  }\n\n  /**\n   * Fix: Unwrap <figure> from <p> tags\n   * Markdown-it wraps images in <p> by default, but <figure> inside <p> is invalid.\n   * Browsers (and WeChat) handle this by splitting the <p> into two empty <p>s above and below,\n   * causing unwanted empty lines. This regex removes the wrapping <p>.\n   */\n  unwrapFigures(html) {\n    // Logic: Match <p ...> <figure>...</figure> </p> and replace with <figure>...</figure>\n    return html.replace(/<p[^>]*>\\s*(<figure[\\s\\S]*?<\\/figure>)\\s*<\\/p>/gi, '$1');\n  }\n\n  validateLink(url, isImage = false) {\n    if (!url) return '#';\n    const value = String(url).trim();\n    if (!value) return '#';\n\n    // Keep legacy parity: allow raw data:image src in image context.\n    // Non-image data: remains blocked.\n    if (/^data:/i.test(value)) {\n      if (!isImage) return '#unsafe';\n      return /^data:image\\//i.test(value) ? value : '#';\n    }\n\n    // Allow safe protocols\n    const safeProtocols = ['http:', 'https:', 'obsidian:', 'mailto:', 'tel:', 'app:', 'capacitor:'];\n\n    try {\n      // URL constructor might fail for some internal links or malformed data URIs\n      const parsed = new URL(value);\n      if (safeProtocols.includes(parsed.protocol)) {\n        return value;\n      }\n    } catch (e) {\n      // Handle relative paths or Obsidian internal links that URL() can't parse\n      if (value.startsWith('#') || value.startsWith('/') || !value.includes(':')) return value;\n    }\n    return '#'; // Block javascript: and other dangerous protocols\n  }\n\n  sanitizeHtml(html) {\n    // 1. Remove dangerous tags and their content\n    let sanitized = html.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*>[\\s\\S]*?<\\/\\1>/gi, '');\n    // 2. Remove self-closing dangerous tags\n    sanitized = sanitized.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*\\/?>/gi, '');\n    // 3. Remove all on* event handlers (e.g., onerror, onclick)\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*\"[^\"]*\"/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*'[^']*'/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*[^\\s>]+/gi, '');\n\n    // 4. Sanitize href and src in remaining HTML tags to prevent protocol bypass (e.g. <a href=\"javascript:...\")\n    sanitized = sanitized.replace(/<(a|img|source|video|audio|area)\\b([^>]*)>/gi, (match, tag, attrs) => {\n      const isImageTag = /^(img|source)$/i.test(tag);\n      let newAttrs = attrs.replace(/\\b(href|src)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))/gi, (attrMatch, attrName, qVal, sqVal, uVal) => {\n        const val = qVal || sqVal || uVal || '';\n        const safeVal = this.validateLink(val, isImageTag);\n        const quote = qVal !== undefined ? '\"' : (sqVal !== undefined ? \"'\" : '\"');\n        return `${attrName}=${quote}${safeVal}${quote}`;\n      });\n      return `<${tag}${newAttrs}>`;\n    });\n\n    return sanitized;\n  }\n\n  escapeHtml(text) {\n    return text.replace(/[&<>\"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#039;' }[m]));\n  }\n\n  extractFileName(src) {\n    if (!src) return '\u56FE\u7247';\n    return src.split('/').pop().split('\\\\').pop().replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '') || '\u56FE\u7247';\n  }\n}\n\nwindow.AppleStyleConverter = AppleStyleConverter;\n"
       }
     };
   }
@@ -1383,6 +1383,7 @@ var require_dependency_loader = __commonJS({
         theme: settings.theme,
         themeColor: settings.themeColor,
         customColor: settings.customColor,
+        quoteCalloutStyleMode: settings.quoteCalloutStyleMode,
         fontFamily: settings.fontFamily,
         fontSize: settings.fontSize,
         macCodeBlock: settings.macCodeBlock,
@@ -1636,8 +1637,8 @@ var require_obsidian_triplet_serializer = __commonJS({
     function resolveLegacyCalloutIcon(type) {
       const key = String(type || "").trim().toLowerCase();
       if (!key)
-        return "\u{1F4CC}";
-      return LEGACY_CALLOUT_ICON_BY_TYPE[key] || "\u{1F4CC}";
+        return "\u2139\uFE0F";
+      return LEGACY_CALLOUT_ICON_BY_TYPE[key] || "\u2139\uFE0F";
     }
     function convertObsidianCalloutsToLegacy(container, converter) {
       if (!container || !converter)
@@ -1706,7 +1707,9 @@ var require_obsidian_triplet_serializer = __commonJS({
       if (tagName === "section") {
         keep = classes.filter((cls) => cls === "code-snippet__fix");
       } else if (tagName === "img") {
-        keep = classes.filter((cls) => cls === "math-formula-image");
+        keep = classes.filter((cls) => cls === "math-formula-image" || cls === "mermaid-diagram-image");
+      } else if (tagName === "svg") {
+        keep = classes.filter((cls) => cls === "owc-mermaid-diagram");
       } else if (!finalStage && (tagName === "pre" || tagName === "code")) {
         keep = classes.filter((cls) => cls.startsWith("language-"));
       }
@@ -1719,6 +1722,79 @@ var require_obsidian_triplet_serializer = __commonJS({
     function pruneObsidianOnlyAttributes(container, { finalStage = false } = {}) {
       if (!container)
         return;
+      const SVG_ALLOWED_ATTRS = /* @__PURE__ */ new Set([
+        "style",
+        "class",
+        "xmlns",
+        "viewbox",
+        "width",
+        "height",
+        "x",
+        "y",
+        "cx",
+        "cy",
+        "rx",
+        "ry",
+        "r",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "d",
+        "points",
+        "transform",
+        "fill",
+        "stroke",
+        "stroke-width",
+        "stroke-linecap",
+        "stroke-linejoin",
+        "stroke-dasharray",
+        "stroke-dashoffset",
+        "opacity",
+        "fill-opacity",
+        "stroke-opacity",
+        "font-size",
+        "font-family",
+        "font-weight",
+        "text-anchor",
+        "dominant-baseline",
+        "preserveaspectratio",
+        "marker-start",
+        "marker-mid",
+        "marker-end",
+        "markerwidth",
+        "markerheight",
+        "refx",
+        "refy",
+        "orient",
+        "pathlength",
+        "role",
+        "focusable",
+        "aria-hidden",
+        "xmlns:xlink",
+        "xlink:href"
+      ]);
+      const SVG_TAGS = /* @__PURE__ */ new Set([
+        "svg",
+        "g",
+        "path",
+        "rect",
+        "circle",
+        "ellipse",
+        "line",
+        "polyline",
+        "polygon",
+        "text",
+        "tspan",
+        "defs",
+        "marker",
+        "foreignobject",
+        "clippath",
+        "pattern",
+        "mask",
+        "symbol",
+        "use"
+      ]);
       const getAllowedAttrs = (tagName) => {
         if (tagName === "a")
           return /* @__PURE__ */ new Set(["href", "style"]);
@@ -1728,6 +1804,8 @@ var require_obsidian_triplet_serializer = __commonJS({
           return /* @__PURE__ */ new Set(["style", "class"]);
         if (!finalStage && (tagName === "pre" || tagName === "code"))
           return /* @__PURE__ */ new Set(["style", "class"]);
+        if (SVG_TAGS.has(tagName))
+          return SVG_ALLOWED_ATTRS;
         return /* @__PURE__ */ new Set(["style"]);
       };
       Array.from(container.querySelectorAll("*")).forEach((el) => {
@@ -2090,6 +2168,15 @@ var require_obsidian_triplet_serializer = __commonJS({
           continue;
         if (img.classList.contains("math-formula-image"))
           continue;
+        if (img.classList.contains("mermaid-diagram-image")) {
+          const src2 = img.getAttribute("src") || "";
+          const safeSrc2 = converter && typeof converter.validateLink === "function" ? converter.validateLink(src2, true) : src2;
+          img.setAttribute("src", safeSrc2);
+          if (!img.getAttribute("style")) {
+            img.setAttribute("style", "display:block;max-width:100%;height:auto;margin:16px auto;");
+          }
+          continue;
+        }
         let src = img.getAttribute("src") || "";
         src = normalizeObsidianImageSrcForLegacyParity(src);
         const safeSrc = converter && typeof converter.validateLink === "function" ? converter.validateLink(src, true) : src;
@@ -2267,10 +2354,134 @@ var require_obsidian_triplet_serializer = __commonJS({
         container.querySelectorAll("li > p").forEach((p) => setInlineStyleIfMissing(p, liPStyle));
       }
     }
-    function stripDangerousTags(container) {
+    function stripDangerousTags(container, { preserveSvgStyleTags = false } = {}) {
       if (!container)
         return;
-      container.querySelectorAll("script,iframe,object,embed,form,input,button,style").forEach((el) => el.remove());
+      container.querySelectorAll("script,iframe,object,embed,form,input,button,style").forEach((el) => {
+        var _a, _b, _c;
+        if (preserveSvgStyleTags && ((_b = (_a = el.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) === "style" && ((_c = el.closest) == null ? void 0 : _c.call(el, "svg"))) {
+          return;
+        }
+        el.remove();
+      });
+    }
+    function protectSvgStyleTags(html) {
+      if (typeof html !== "string" || !html.includes("<style")) {
+        return { html, placeholders: [] };
+      }
+      const placeholders = [];
+      let index = 0;
+      const protectedHtml = html.replace(/<svg\b[\s\S]*?<\/svg>/gi, (svgMarkup) => {
+        return svgMarkup.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, (styleMarkup) => {
+          const token = `__OWC_SVG_STYLE_${index}__`;
+          placeholders.push({ token, styleMarkup });
+          index += 1;
+          return token;
+        });
+      });
+      return { html: protectedHtml, placeholders };
+    }
+    function restoreSvgStyleTags(html, placeholders = []) {
+      let result = String(html || "");
+      placeholders.forEach(({ token, styleMarkup }) => {
+        result = result.split(token).join(styleMarkup);
+      });
+      return result;
+    }
+    function looksLikeMathSvg(svg) {
+      var _a, _b, _c, _d;
+      if (!svg || ((_b = (_a = svg.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) !== "svg")
+        return false;
+      if (svg.getAttribute("role") === "img")
+        return true;
+      if (svg.getAttribute("focusable") === "false")
+        return true;
+      if ((_c = svg.classList) == null ? void 0 : _c.contains("MathJax"))
+        return true;
+      return !!((_d = svg.closest) == null ? void 0 : _d.call(svg, "mjx-container,mjx-math,.MathJax"));
+    }
+    function normalizeMathPresentation(container) {
+      if (!container || typeof document === "undefined")
+        return;
+      const blockStyle = "display:block; width:100%; margin:1em auto; text-align:center; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;";
+      const inlineStyle = "display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px; line-height:1;";
+      const normalizeTopOffsets = (el) => {
+        if (!el || typeof el.getAttribute !== "function" || typeof el.setAttribute !== "function")
+          return;
+        const style = String(el.getAttribute("style") || "");
+        if (!/\btop\s*:/i.test(style))
+          return;
+        let topValue = null;
+        let nextStyle = style.replace(/(^|;)\s*top\s*:\s*([^;]+)\s*;?/i, (_m, prefix, value) => {
+          topValue = String(value || "").trim();
+          return prefix || "";
+        });
+        if (!topValue)
+          return;
+        if (/transform\s*:/i.test(nextStyle)) {
+          nextStyle = nextStyle.replace(
+            /transform\s*:\s*([^;]+)/i,
+            (_m, value) => `transform:${String(value || "").trim()} translateY(${topValue})`
+          );
+        } else {
+          nextStyle = `${nextStyle}${nextStyle.trim().endsWith(";") || !nextStyle.trim() ? "" : ";"}transform: translateY(${topValue});`;
+        }
+        el.setAttribute("style", nextStyle);
+      };
+      container.querySelectorAll("mjx-container").forEach((mjx) => {
+        const attrs = `${mjx.getAttribute("display") || ""} ${mjx.getAttribute("style") || ""}`.toLowerCase();
+        const isBlock = attrs.includes("true") || attrs.includes("display: block") || attrs.includes("display:block");
+        const existing = String(mjx.getAttribute("style") || "");
+        const normalized = existing ? `${existing}${existing.trim().endsWith(";") ? "" : ";"}` : "";
+        mjx.setAttribute("style", `${normalized}${isBlock ? blockStyle : inlineStyle}`);
+      });
+      container.querySelectorAll("svg").forEach((svg) => {
+        var _a, _b;
+        if (!looksLikeMathSvg(svg))
+          return;
+        const svgStyle = String(svg.getAttribute("style") || "");
+        let normalizedSvgStyle = svgStyle ? `${svgStyle}${svgStyle.trim().endsWith(";") ? "" : ";"}` : "";
+        normalizedSvgStyle = normalizedSvgStyle.replace(/vertical-align\s*:\s*[^;]+;?/gi, "");
+        if (!/max-width\s*:/i.test(normalizedSvgStyle)) {
+          normalizedSvgStyle = `${normalizedSvgStyle}max-width: 100%; height: auto;`;
+        }
+        svg.setAttribute("style", `${normalizedSvgStyle}display:inline-block;vertical-align:middle;`);
+        const parent = svg.parentElement;
+        if (!parent)
+          return;
+        const parentTag = parent.tagName.toLowerCase();
+        const mathParent = parentTag === "mjx-container" ? parent : null;
+        const blockHint = String((mathParent == null ? void 0 : mathParent.getAttribute("display")) || (mathParent == null ? void 0 : mathParent.getAttribute("style")) || "").toLowerCase();
+        const wrapperMathMode = parent.getAttribute("data-owc-math");
+        const hostMathMode = parentTag !== "mjx-container" ? (_b = (_a = parent.closest) == null ? void 0 : _a.call(parent, "[data-owc-math]")) == null ? void 0 : _b.getAttribute("data-owc-math") : null;
+        const isBlockMath = wrapperMathMode === "block" || hostMathMode === "block" || blockHint.includes("true") || blockHint.includes("display: block") || blockHint.includes("display:block");
+        if (isBlockMath) {
+          const host = parentTag === "section" ? parent : parentTag === "p" && parent.childNodes.length === 1 ? parent : null;
+          if (host) {
+            host.setAttribute("style", blockStyle);
+          }
+          svg.setAttribute(
+            "style",
+            `${svg.getAttribute("style") || ""}${String(svg.getAttribute("style") || "").trim().endsWith(";") || !svg.getAttribute("style") ? "" : ";"}display:block;margin:0 auto;`
+          );
+        } else if (parentTag === "span" || parentTag === "mjx-container") {
+          const existing = String(parent.getAttribute("style") || "");
+          const normalized = existing ? `${existing}${existing.trim().endsWith(";") ? "" : ";"}` : "";
+          parent.setAttribute("style", `${normalized}${inlineStyle}`);
+        }
+        normalizeTopOffsets(svg);
+        Array.from(svg.querySelectorAll('[style*="top:"], [style*="top: "]')).forEach(normalizeTopOffsets);
+      });
+      container.querySelectorAll('[data-owc-math="block"]').forEach((el) => {
+        const existing = String(el.getAttribute("style") || "");
+        const normalized = existing ? `${existing}${existing.trim().endsWith(";") ? "" : ";"}` : "";
+        el.setAttribute("style", `${normalized}${blockStyle}`);
+      });
+      container.querySelectorAll('[data-owc-math="inline"]').forEach((el) => {
+        const existing = String(el.getAttribute("style") || "");
+        const normalized = existing ? `${existing}${existing.trim().endsWith(";") ? "" : ";"}` : "";
+        el.setAttribute("style", `${normalized}${inlineStyle}`);
+      });
     }
     function applyLegacyTypographerParity(container, converter) {
       if (!container || !converter || !converter.md)
@@ -2434,7 +2645,12 @@ var require_obsidian_triplet_serializer = __commonJS({
       }
       return result;
     }
-    function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }) {
+    function serializeObsidianRenderedHtml({
+      root,
+      converter,
+      preRenderedMath = [],
+      preserveSvgStyleTags = false
+    }) {
       if (typeof document === "undefined") {
         throw new Error("Triplet serializer requires DOM environment");
       }
@@ -2446,11 +2662,12 @@ var require_obsidian_triplet_serializer = __commonJS({
       pruneObsidianOnlyAttributes(container, { finalStage: false });
       normalizeLegacyTagAliases(container);
       normalizeLegacyDeleteNesting(container);
-      stripDangerousTags(container);
+      stripDangerousTags(container, { preserveSvgStyleTags });
       renderUnresolvedMathFormulas(container, converter);
       applyLegacyLinkifyParity(container, converter);
       applyLegacyTypographerParity(container, converter);
       sanitizeAnchorAndImageLinks(container, converter);
+      normalizeMathPresentation(container);
       convertPreBlocks(container, converter);
       convertStandaloneImages(container, converter);
       applyThemeInlineStyles(container, converter);
@@ -2472,8 +2689,16 @@ var require_obsidian_triplet_serializer = __commonJS({
       if (converter && typeof converter.fixMathJaxTags === "function") {
         html = converter.fixMathJaxTags(html);
       }
+      let svgStyleProtection = { html, placeholders: [] };
+      if (preserveSvgStyleTags) {
+        svgStyleProtection = protectSvgStyleTags(html);
+        html = svgStyleProtection.html;
+      }
       if (converter && typeof converter.sanitizeHtml === "function") {
         html = converter.sanitizeHtml(html);
+      }
+      if (preserveSvgStyleTags) {
+        html = restoreSvgStyleTags(html, svgStyleProtection.placeholders);
       }
       html = normalizeLegacyDeleteNestingInHtml(html);
       const sectionStyle = getTagStyle(converter, "section");
@@ -2802,12 +3027,774 @@ var require_chinese_punctuation = __commonJS({
   }
 });
 
+// services/svg-rasterizer.js
+var require_svg_rasterizer = __commonJS({
+  "services/svg-rasterizer.js"(exports2, module2) {
+    function isMathJaxSvg(svgElement) {
+      var _a, _b;
+      if (!svgElement || typeof svgElement.getAttribute !== "function")
+        return false;
+      if (svgElement.getAttribute("role") === "img")
+        return true;
+      if (svgElement.getAttribute("focusable") === "false")
+        return true;
+      if ((_a = svgElement.classList) == null ? void 0 : _a.contains("MathJax"))
+        return true;
+      return !!((_b = svgElement.closest) == null ? void 0 : _b.call(svgElement, "mjx-container,mjx-math,.MathJax"));
+    }
+    var SVG_INLINE_STYLE_PROPS = [
+      "color",
+      "fill",
+      "fill-opacity",
+      "stroke",
+      "stroke-opacity",
+      "stroke-width",
+      "stroke-dasharray",
+      "stroke-dashoffset",
+      "stroke-linecap",
+      "stroke-linejoin",
+      "opacity",
+      "background",
+      "background-color",
+      "font",
+      "font-size",
+      "font-family",
+      "font-weight",
+      "line-height",
+      "text-anchor",
+      "dominant-baseline",
+      "letter-spacing",
+      "word-spacing",
+      "white-space"
+    ];
+    function appendInlineStyle(el, declarations = {}) {
+      if (!el || typeof el.setAttribute !== "function")
+        return;
+      const current = String(el.getAttribute("style") || "").trim();
+      const nextParts = [];
+      Object.entries(declarations).forEach(([key, value]) => {
+        const normalized = String(value || "").trim();
+        if (!normalized)
+          return;
+        nextParts.push(`${key}:${normalized}`);
+      });
+      if (!nextParts.length)
+        return;
+      const joined = current ? `${current}${current.endsWith(";") ? "" : ";"}${nextParts.join(";")};` : `${nextParts.join(";")};`;
+      el.setAttribute("style", joined);
+    }
+    function inlineSvgComputedStyles(sourceSvg, clonedSvg) {
+      if (!sourceSvg || !clonedSvg || typeof window === "undefined" || typeof window.getComputedStyle !== "function") {
+        return;
+      }
+      const sourceElements = [sourceSvg, ...Array.from(sourceSvg.querySelectorAll("*"))];
+      const clonedElements = [clonedSvg, ...Array.from(clonedSvg.querySelectorAll("*"))];
+      const pairCount = Math.min(sourceElements.length, clonedElements.length);
+      for (let index = 0; index < pairCount; index += 1) {
+        const sourceEl = sourceElements[index];
+        const clonedEl = clonedElements[index];
+        if (!sourceEl || !clonedEl)
+          continue;
+        const computed = window.getComputedStyle(sourceEl);
+        const styleMap = {};
+        SVG_INLINE_STYLE_PROPS.forEach((prop) => {
+          const value = computed.getPropertyValue(prop);
+          if (!value)
+            return;
+          const trimmed = String(value).trim();
+          if (!trimmed || trimmed === "none" || trimmed === "normal")
+            return;
+          styleMap[prop] = trimmed;
+        });
+        if (styleMap.fill && !clonedEl.getAttribute("fill"))
+          clonedEl.setAttribute("fill", styleMap.fill);
+        if (styleMap.stroke && !clonedEl.getAttribute("stroke"))
+          clonedEl.setAttribute("stroke", styleMap.stroke);
+        if (styleMap["stroke-width"] && !clonedEl.getAttribute("stroke-width"))
+          clonedEl.setAttribute("stroke-width", styleMap["stroke-width"]);
+        appendInlineStyle(clonedEl, styleMap);
+      }
+    }
+    function getSvgLogicalSize(svgElement) {
+      var _a, _b, _c, _d;
+      const rect = typeof (svgElement == null ? void 0 : svgElement.getBoundingClientRect) === "function" ? svgElement.getBoundingClientRect() : { width: 0, height: 0 };
+      let logicalWidth = Number(rect == null ? void 0 : rect.width) || 0;
+      let logicalHeight = Number(rect == null ? void 0 : rect.height) || 0;
+      const rawWidth = ((_a = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _a.call(svgElement, "width")) || "";
+      const rawHeight = ((_b = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _b.call(svgElement, "height")) || "";
+      const rawStyle = ((_c = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _c.call(svgElement, "style")) || "";
+      const viewBox = ((_d = svgElement == null ? void 0 : svgElement.getAttribute) == null ? void 0 : _d.call(svgElement, "viewBox")) || "";
+      if (logicalWidth === 0 || logicalHeight === 0) {
+        logicalWidth = parseFloat(rawWidth) || logicalWidth;
+        logicalHeight = parseFloat(rawHeight) || logicalHeight;
+      }
+      if ((logicalWidth === 0 || logicalHeight === 0) && viewBox) {
+        const parts = viewBox.trim().split(/[\s,]+/).map((value) => parseFloat(value));
+        if (parts.length === 4) {
+          if (logicalWidth === 0 && Number.isFinite(parts[2]) && parts[2] > 0) {
+            logicalWidth = parts[2];
+          }
+          if (logicalHeight === 0 && Number.isFinite(parts[3]) && parts[3] > 0) {
+            logicalHeight = parts[3];
+          }
+        }
+      }
+      if (logicalWidth === 0)
+        logicalWidth = 100;
+      if (logicalHeight === 0)
+        logicalHeight = 20;
+      return {
+        logicalWidth,
+        logicalHeight,
+        rawStyle
+      };
+    }
+    function prepareSvgClone(svgElement) {
+      const clonedSvg = svgElement.cloneNode(true);
+      const { logicalWidth, logicalHeight, rawStyle } = getSvgLogicalSize(svgElement);
+      inlineSvgComputedStyles(svgElement, clonedSvg);
+      if (isMathJaxSvg(svgElement)) {
+        clonedSvg.setAttribute("fill", "#333333");
+        if (clonedSvg.style) {
+          clonedSvg.style.color = "#333333";
+        }
+        clonedSvg.querySelectorAll("*").forEach((el) => {
+          if (el.getAttribute("fill") === "currentColor" || !el.getAttribute("fill")) {
+            el.setAttribute("fill", "#333333");
+          }
+          if (el.getAttribute("stroke") === "currentColor") {
+            el.setAttribute("stroke", "#333333");
+          }
+        });
+      }
+      return {
+        clonedSvg,
+        logicalWidth,
+        logicalHeight,
+        rawStyle
+      };
+    }
+    async function rasterizeSvg(svgElement, options = {}) {
+      const { scale = 3, output = "blob" } = options;
+      return new Promise((resolve, reject) => {
+        try {
+          const {
+            clonedSvg,
+            logicalWidth,
+            logicalHeight,
+            rawStyle
+          } = prepareSvgClone(svgElement);
+          const serializer = new XMLSerializer();
+          const svgString = serializer.serializeToString(clonedSvg);
+          const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+          const url = URL.createObjectURL(svgBlob);
+          const image = new Image();
+          image.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = logicalWidth * scale;
+              canvas.height = logicalHeight * scale;
+              const ctx = canvas.getContext("2d");
+              if (!ctx) {
+                URL.revokeObjectURL(url);
+                reject(new Error("Canvas context unavailable"));
+                return;
+              }
+              ctx.scale(scale, scale);
+              ctx.drawImage(image, 0, 0, logicalWidth, logicalHeight);
+              URL.revokeObjectURL(url);
+              if (output === "dataUrl") {
+                resolve({
+                  dataUrl: canvas.toDataURL("image/png"),
+                  width: logicalWidth,
+                  height: logicalHeight,
+                  style: rawStyle
+                });
+                return;
+              }
+              canvas.toBlob((blob) => {
+                if (!blob) {
+                  reject(new Error("Canvas toBlob failed"));
+                  return;
+                }
+                resolve({
+                  blob,
+                  width: logicalWidth,
+                  height: logicalHeight,
+                  style: rawStyle
+                });
+              }, "image/png");
+            } catch (error) {
+              URL.revokeObjectURL(url);
+              reject(error);
+            }
+          };
+          image.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("SVG image load failed"));
+          };
+          image.src = url;
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+    async function rasterizeSvgToPngBlob2(svgElement, options = {}) {
+      return rasterizeSvg(svgElement, { ...options, output: "blob" });
+    }
+    async function rasterizeSvgToPngDataUrl(svgElement, options = {}) {
+      return rasterizeSvg(svgElement, { ...options, output: "dataUrl" });
+    }
+    module2.exports = {
+      isMathJaxSvg,
+      getSvgLogicalSize,
+      rasterizeSvgToPngBlob: rasterizeSvgToPngBlob2,
+      rasterizeSvgToPngDataUrl
+    };
+  }
+});
+
+// services/rendered-mermaid.js
+var require_rendered_mermaid = __commonJS({
+  "services/rendered-mermaid.js"(exports2, module2) {
+    var { isMathJaxSvg, rasterizeSvgToPngDataUrl } = require_svg_rasterizer();
+    var MERMAID_COMPAT_THEME = {
+      theme: "base",
+      flowchart: {
+        htmlLabels: false,
+        useMaxWidth: true,
+        curve: "basis"
+      },
+      themeVariables: {
+        background: "#ffffff",
+        primaryColor: "#efeaff",
+        primaryBorderColor: "#b197fc",
+        primaryTextColor: "#2f2f2f",
+        secondaryColor: "#efeaff",
+        secondaryBorderColor: "#b197fc",
+        secondaryTextColor: "#2f2f2f",
+        tertiaryColor: "#fff7cc",
+        tertiaryBorderColor: "#d6c978",
+        tertiaryTextColor: "#2f2f2f",
+        clusterBkg: "#fff7cc",
+        clusterBorder: "#d6c978",
+        lineColor: "#555555",
+        defaultLinkColor: "#555555",
+        edgeLabelBackground: "#ffffff",
+        mainBkg: "#efeaff",
+        nodeBorder: "#b197fc",
+        textColor: "#2f2f2f",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+      }
+    };
+    function hasMermaidInitDirective(source) {
+      return /^\s*%%\{init:/m.test(String(source || ""));
+    }
+    function buildMermaidCompatSource(source) {
+      const normalized = String(source || "").trim();
+      if (!normalized)
+        return "";
+      if (hasMermaidInitDirective(normalized))
+        return normalized;
+      return `%%{init: ${JSON.stringify(MERMAID_COMPAT_THEME)}}%%
+${normalized}`;
+    }
+    function normalizeMermaidPreviewHost(host) {
+      if (!host || typeof host.setAttribute !== "function")
+        return;
+      host.style.display = "block";
+      host.style.width = "100%";
+      host.style.maxWidth = "100%";
+      host.style.margin = "16px auto";
+      host.style.overflow = "hidden";
+      host.style.textAlign = "center";
+    }
+    function normalizeMermaidPreviewSvg(svg) {
+      var _a, _b;
+      if (!svg || typeof svg.setAttribute !== "function")
+        return;
+      (_b = (_a = svg.classList) == null ? void 0 : _a.add) == null ? void 0 : _b.call(_a, "owc-mermaid-diagram");
+      svg.style.display = "block";
+      svg.style.width = "100%";
+      svg.style.maxWidth = "100%";
+      svg.style.height = "auto";
+      svg.style.margin = "0 auto";
+    }
+    function appendInlineStyle(el, declarations) {
+      if (!el || !declarations)
+        return;
+      const current = String(el.getAttribute("style") || "").trim();
+      const normalized = current ? current.endsWith(";") ? current : `${current};` : "";
+      el.setAttribute("style", `${normalized}${declarations}`);
+    }
+    function normalizeMermaidRuleSelector(selector, svg) {
+      var _a;
+      const raw = String(selector || "").trim();
+      if (!raw || raw.startsWith("@"))
+        return null;
+      const svgId = String(((_a = svg == null ? void 0 : svg.getAttribute) == null ? void 0 : _a.call(svg, "id")) || "").trim();
+      let normalized = raw;
+      if (svgId) {
+        const escapedId = svgId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        normalized = normalized.replace(new RegExp(`#${escapedId}\\b`, "g"), "").trim();
+      }
+      normalized = normalized.replace(/^svg\b/i, "").replace(/^:root\b/i, "").replace(/^\s*>\s*/, "").trim();
+      if (!normalized)
+        return ":scope";
+      return normalized;
+    }
+    function inlineMermaidSvgStyles(svg) {
+      if (!svg || typeof svg.querySelectorAll !== "function")
+        return 0;
+      const styleNodes = Array.from(svg.querySelectorAll("style"));
+      if (styleNodes.length === 0)
+        return 0;
+      let appliedCount = 0;
+      for (const styleNode of styleNodes) {
+        const cssText = String(styleNode.textContent || "");
+        const ruleRegex = /([^{}]+)\{([^{}]+)\}/g;
+        let match;
+        while (match = ruleRegex.exec(cssText)) {
+          const selectorGroup = String(match[1] || "").trim();
+          const declarations = String(match[2] || "").trim();
+          if (!selectorGroup || !declarations)
+            continue;
+          const selectors = selectorGroup.split(",").map((selector) => normalizeMermaidRuleSelector(selector, svg)).filter(Boolean);
+          for (const selector of selectors) {
+            let targets = [];
+            try {
+              if (selector === ":scope") {
+                targets = [svg];
+              } else {
+                targets = Array.from(svg.querySelectorAll(selector));
+              }
+            } catch (error) {
+              continue;
+            }
+            for (const target of targets) {
+              appendInlineStyle(target, declarations);
+              appliedCount += 1;
+            }
+          }
+        }
+        styleNode.remove();
+      }
+      return appliedCount;
+    }
+    function getForeignObjectNumericAttr(el, name, fallback = 0) {
+      var _a;
+      const raw = String(((_a = el == null ? void 0 : el.getAttribute) == null ? void 0 : _a.call(el, name)) || "").trim();
+      if (!raw)
+        return fallback;
+      const value = parseFloat(raw);
+      return Number.isFinite(value) ? value : fallback;
+    }
+    function parseCssDecl(styleText, property) {
+      const match = String(styleText || "").match(new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([^;]+)`, "i"));
+      return match ? String(match[1] || "").trim() : "";
+    }
+    function estimateMermaidTextUnits(text) {
+      let units = 0;
+      for (const ch of String(text || "")) {
+        if (/\s/.test(ch)) {
+          units += 0.35;
+        } else if (/[\x00-\x7F]/.test(ch)) {
+          units += /[A-Z0-9]/.test(ch) ? 0.72 : 0.58;
+        } else {
+          units += 1;
+        }
+      }
+      return units;
+    }
+    function wrapMermaidLabelText(text, maxUnits) {
+      const normalized = String(text || "").replace(/\s+/g, " ").trim();
+      if (!normalized)
+        return [];
+      const limit = Math.max(2, maxUnits || 2);
+      const lines = [];
+      let current = "";
+      let currentUnits = 0;
+      const pushLine = () => {
+        const value = current.trim();
+        if (value)
+          lines.push(value);
+        current = "";
+        currentUnits = 0;
+      };
+      for (const ch of normalized) {
+        const unit = estimateMermaidTextUnits(ch);
+        if (current && currentUnits + unit > limit) {
+          pushLine();
+        }
+        current += ch;
+        currentUnits += unit;
+      }
+      pushLine();
+      return lines.filter(Boolean);
+    }
+    function flattenMermaidForeignObjectLabels(svg) {
+      var _a;
+      if (!svg || typeof svg.querySelectorAll !== "function" || typeof document === "undefined")
+        return 0;
+      const foreignObjects = Array.from(svg.querySelectorAll("foreignObject"));
+      let flattened = 0;
+      for (const foreignObject of foreignObjects) {
+        const textContent = String(foreignObject.textContent || "").replace(/\s+/g, " ").trim();
+        if (!textContent) {
+          foreignObject.remove();
+          continue;
+        }
+        const x = getForeignObjectNumericAttr(foreignObject, "x", 0);
+        const y = getForeignObjectNumericAttr(foreignObject, "y", 0);
+        const width = getForeignObjectNumericAttr(foreignObject, "width", 0);
+        const height = getForeignObjectNumericAttr(foreignObject, "height", 0);
+        const centerX = x + width / 2;
+        const centerY = y + height / 2;
+        const sampleTextNode = foreignObject.querySelector("p,span,div") || foreignObject;
+        const sampleStyle = String(((_a = sampleTextNode.getAttribute) == null ? void 0 : _a.call(sampleTextNode, "style")) || "");
+        const fill = parseCssDecl(sampleStyle, "color") || parseCssDecl(sampleStyle, "fill") || "#333333";
+        const fontSizeRaw = parseCssDecl(sampleStyle, "font-size") || "16px";
+        const fontWeight = parseCssDecl(sampleStyle, "font-weight") || "500";
+        const fontFamily = parseCssDecl(sampleStyle, "font-family") || '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+        const fontSize = Math.max(10, Math.min(16, parseFloat(fontSizeRaw) || 16));
+        const maxUnits = width > 0 ? Math.max(2, Math.floor(width / (fontSize * 0.72))) : 12;
+        const lines = wrapMermaidLabelText(textContent, maxUnits);
+        const lineHeight = Math.max(fontSize * 1.2, 14);
+        const startY = centerY - (lines.length - 1) * lineHeight / 2;
+        const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textEl.setAttribute("x", String(centerX));
+        textEl.setAttribute("text-anchor", "middle");
+        textEl.setAttribute("fill", fill);
+        textEl.setAttribute("font-size", `${fontSize}px`);
+        textEl.setAttribute("font-weight", fontWeight);
+        textEl.setAttribute("font-family", fontFamily);
+        textEl.setAttribute("style", "paint-order:stroke fill;stroke:none !important;");
+        lines.forEach((line, index) => {
+          const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+          tspan.setAttribute("x", String(centerX));
+          tspan.setAttribute("y", String(startY + index * lineHeight + fontSize * 0.35));
+          tspan.textContent = line;
+          textEl.appendChild(tspan);
+        });
+        foreignObject.replaceWith(textEl);
+        flattened += 1;
+      }
+      return flattened;
+    }
+    function normalizeRenderedMermaidDiagrams(root) {
+      var _a, _b;
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      let normalizedCount = 0;
+      const svgs = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg);
+      for (const svg of svgs) {
+        inlineMermaidSvgStyles(svg);
+        const host = (_a = svg.closest) == null ? void 0 : _a.call(svg, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+        if (host) {
+          normalizeMermaidPreviewHost(host);
+        }
+        normalizeMermaidPreviewSvg(svg);
+        normalizedCount += 1;
+      }
+      const images = Array.from(root.querySelectorAll("img.mermaid-diagram-image"));
+      for (const img of images) {
+        const host = (_b = img.closest) == null ? void 0 : _b.call(img, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+        if (host) {
+          normalizeMermaidPreviewHost(host);
+        }
+        if (!img.getAttribute("style")) {
+          const maxWidthStyle = img.getAttribute("width") ? `${Math.round(Number(img.getAttribute("width")) || 0)}px` : "100%";
+          img.setAttribute(
+            "style",
+            `display:block;width:100%;max-width:${maxWidthStyle};height:auto;margin:0 auto;`
+          );
+        }
+        normalizedCount += 1;
+      }
+      return normalizedCount;
+    }
+    function unwrapMermaidHtmlLabelParagraphs(svg) {
+      if (!svg || typeof svg.querySelectorAll !== "function")
+        return 0;
+      const labels = Array.from(svg.querySelectorAll(".nodeLabel p, .edgeLabel p"));
+      let count = 0;
+      for (const paragraph of labels) {
+        const parent = paragraph.parentElement;
+        if (!parent)
+          continue;
+        while (paragraph.firstChild) {
+          parent.insertBefore(paragraph.firstChild, paragraph);
+        }
+        paragraph.remove();
+        count += 1;
+      }
+      return count;
+    }
+    function enforceMermaidTextReadability(svg) {
+      if (!svg || typeof svg.querySelectorAll !== "function")
+        return 0;
+      let count = 0;
+      Array.from(svg.querySelectorAll("tspan, text, .nodeLabel, .edgeLabel, foreignObject section, foreignObject span, foreignObject div")).forEach((node) => {
+        appendInlineStyle(
+          node,
+          'fill:#333333 !important;color:#333333 !important;stroke:none !important;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;'
+        );
+        count += 1;
+      });
+      return count;
+    }
+    function prepareRenderedMermaidDiagramsForWechat(root) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      normalizeRenderedMermaidDiagrams(root);
+      let processed = 0;
+      const svgs = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg);
+      for (const svg of svgs) {
+        unwrapMermaidHtmlLabelParagraphs(svg);
+        flattenMermaidForeignObjectLabels(svg);
+        enforceMermaidTextReadability(svg);
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        appendInlineStyle(svg, "overflow:visible;max-width:100%;height:auto;");
+        processed += 1;
+      }
+      return processed;
+    }
+    function buildMermaidImageStyle(width, height) {
+      const numericWidth = Number(width) || 0;
+      const numericHeight = Number(height) || 0;
+      const isPortrait = numericWidth > 0 && numericHeight > numericWidth * 1.08;
+      const widthPercent = isPortrait ? "78%" : "100%";
+      const maxWidthStyle = numericWidth > 0 ? `${Math.round(numericWidth)}px` : "100%";
+      return `display:block;width:${widthPercent};max-width:${maxWidthStyle};height:auto;margin:0 auto;`;
+    }
+    function getSerializedMermaidCacheKey(svg, scale, simpleHash) {
+      const serializer = typeof XMLSerializer !== "undefined" ? new XMLSerializer() : null;
+      const svgMarkup = serializer ? serializer.serializeToString(svg) : (svg == null ? void 0 : svg.outerHTML) || "";
+      const payload = `${svgMarkup}::scale:${scale}`;
+      return typeof simpleHash === "function" ? simpleHash(payload) : payload;
+    }
+    async function convertRenderedMermaidDiagramsToImages2(root, options = {}) {
+      var _a;
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      const {
+        rasterizeSvg = rasterizeSvgToPngDataUrl,
+        scale = 3,
+        simpleHash = null,
+        mermaidImageCache = null
+      } = options;
+      normalizeRenderedMermaidDiagrams(root);
+      const svgs = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg);
+      let convertedCount = 0;
+      for (const svg of svgs) {
+        try {
+          const cacheKey = getSerializedMermaidCacheKey(svg, scale, simpleHash);
+          let result = (mermaidImageCache == null ? void 0 : mermaidImageCache.get(cacheKey)) || null;
+          if (!result) {
+            try {
+              result = await rasterizeSvg(svg, { scale });
+            } catch (firstError) {
+              if (!svg.querySelector("foreignObject")) {
+                throw firstError;
+              }
+              flattenMermaidForeignObjectLabels(svg);
+              result = await rasterizeSvg(svg, { scale });
+            }
+            if (mermaidImageCache && (result == null ? void 0 : result.dataUrl)) {
+              mermaidImageCache.set(cacheKey, result);
+            }
+          }
+          if (!(result == null ? void 0 : result.dataUrl))
+            continue;
+          const img = document.createElement("img");
+          img.setAttribute("src", result.dataUrl);
+          img.setAttribute("alt", "Mermaid diagram");
+          img.setAttribute("class", "mermaid-diagram-image");
+          if (result.width)
+            img.setAttribute("width", String(Math.round(result.width)));
+          if (result.height)
+            img.setAttribute("height", String(Math.round(result.height)));
+          img.setAttribute("style", buildMermaidImageStyle(result.width, result.height));
+          const host = (_a = svg.closest) == null ? void 0 : _a.call(svg, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+          if (host && host !== root) {
+            normalizeMermaidPreviewHost(host);
+            host.replaceChildren(img);
+          } else {
+            svg.replaceWith(img);
+          }
+          convertedCount += 1;
+        } catch (error) {
+          console.error("Mermaid \u56FE\u8868\u5BFC\u51FA\u4E3A\u56FE\u7247\u5931\u8D25\uFF0C\u4FDD\u7559\u539F\u59CB SVG:", error);
+        }
+      }
+      return convertedCount;
+    }
+    function hasMermaidMarker(el) {
+      if (!el || el.nodeType !== Node.ELEMENT_NODE)
+        return false;
+      const values = [
+        el.getAttribute("class"),
+        el.getAttribute("id"),
+        el.getAttribute("data-type"),
+        el.getAttribute("aria-label"),
+        el.getAttribute("aria-roledescription")
+      ].filter(Boolean).join(" ").toLowerCase();
+      return values.includes("mermaid");
+    }
+    function looksLikeMermaidSvg(svg) {
+      var _a, _b;
+      if (!svg || ((_b = (_a = svg.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) !== "svg")
+        return false;
+      if (isMathJaxSvg(svg))
+        return false;
+      if (svg.closest(".callout-icon"))
+        return false;
+      if (hasMermaidMarker(svg))
+        return true;
+      let cursor = svg.parentElement;
+      let depth = 0;
+      while (cursor && depth < 5) {
+        if (hasMermaidMarker(cursor))
+          return true;
+        cursor = cursor.parentElement;
+        depth += 1;
+      }
+      return !!svg.querySelector(
+        "g.node,g.edgePath,g.cluster,g.edgeLabel,g.messageText,g.actor,.node,.edgePath,.cluster,.edgeLabel"
+      );
+    }
+    function isMermaidCodeBlock(codeEl) {
+      var _a, _b;
+      if (!codeEl || ((_b = (_a = codeEl.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) !== "code")
+        return false;
+      const className = String(codeEl.getAttribute("class") || "").toLowerCase();
+      if (className.split(/\s+/).includes("language-mermaid"))
+        return true;
+      if (className.includes("language-mermaid"))
+        return true;
+      return !!codeEl.closest(".block-language-mermaid");
+    }
+    function resolveMermaidApi(options = {}) {
+      if (options.mermaidApi && typeof options.mermaidApi.render === "function") {
+        return options.mermaidApi;
+      }
+      const globalApi = (globalThis == null ? void 0 : globalThis.mermaid) || (typeof window !== "undefined" ? window.mermaid : null);
+      if (globalApi && typeof globalApi.render === "function") {
+        return globalApi;
+      }
+      return null;
+    }
+    var mermaidRenderNonce = 0;
+    async function renderMermaidCodeBlocks(root, options = {}) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      const mermaidApi = resolveMermaidApi(options);
+      if (!mermaidApi)
+        return 0;
+      const codeBlocks = Array.from(root.querySelectorAll("pre > code")).filter(isMermaidCodeBlock);
+      let renderedCount = 0;
+      for (const codeEl of codeBlocks) {
+        const source = String(codeEl.textContent || "").trim();
+        if (!source)
+          continue;
+        try {
+          mermaidRenderNonce += 1;
+          const renderSource = buildMermaidCompatSource(source);
+          const renderResult = await mermaidApi.render(`obsidian-wechat-mermaid-${mermaidRenderNonce}`, renderSource);
+          const svg = typeof renderResult === "string" ? renderResult : (renderResult == null ? void 0 : renderResult.svg) || "";
+          if (!svg)
+            continue;
+          const host = document.createElement("div");
+          host.setAttribute("class", "mermaid");
+          host.setAttribute("data-obsidian-wechat-mermaid", "true");
+          host.innerHTML = svg;
+          normalizeRenderedMermaidDiagrams(host);
+          if (typeof (renderResult == null ? void 0 : renderResult.bindFunctions) === "function") {
+            renderResult.bindFunctions(host);
+          }
+          const pre = codeEl.closest("pre");
+          (pre || codeEl).replaceWith(host);
+          renderedCount += 1;
+        } catch (error) {
+          console.error("Mermaid \u4EE3\u7801\u5757\u6E32\u67D3\u5931\u8D25\uFF0C\u4FDD\u7559\u539F\u59CB\u4EE3\u7801\u5757:", error);
+        }
+      }
+      return renderedCount;
+    }
+    async function rasterizeRenderedMermaidDiagrams(root, options = {}) {
+      var _a;
+      if (!root || typeof root.querySelectorAll !== "function")
+        return;
+      const {
+        rasterizeSvg = rasterizeSvgToPngDataUrl,
+        scale = 3
+      } = options;
+      normalizeRenderedMermaidDiagrams(root);
+      const svgs = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg);
+      for (const svg of svgs) {
+        try {
+          let result;
+          try {
+            result = await rasterizeSvg(svg, { scale });
+          } catch (firstError) {
+            if (!svg.querySelector("foreignObject")) {
+              throw firstError;
+            }
+            flattenMermaidForeignObjectLabels(svg);
+            result = await rasterizeSvg(svg, { scale });
+          }
+          const img = document.createElement("img");
+          img.setAttribute("src", result.dataUrl);
+          img.setAttribute("alt", "Mermaid diagram");
+          img.setAttribute("class", "mermaid-diagram-image");
+          if (result.width)
+            img.setAttribute("width", String(Math.round(result.width)));
+          if (result.height)
+            img.setAttribute("height", String(Math.round(result.height)));
+          const maxWidthStyle = result.width ? `${Math.round(result.width)}px` : "100%";
+          img.setAttribute(
+            "style",
+            `display:block;width:100%;max-width:${maxWidthStyle};height:auto;margin:0 auto;`
+          );
+          const host = (_a = svg.closest) == null ? void 0 : _a.call(svg, '.mermaid,[data-obsidian-wechat-mermaid="true"]');
+          if (host && host !== root) {
+            normalizeMermaidPreviewHost(host);
+            host.replaceChildren(img);
+          } else {
+            svg.replaceWith(img);
+          }
+        } catch (error) {
+          console.error("Mermaid \u56FE\u8868\u6805\u683C\u5316\u5931\u8D25\uFF0C\u4FDD\u7559\u539F\u59CB SVG:", error);
+        }
+      }
+    }
+    module2.exports = {
+      hasMermaidMarker,
+      looksLikeMermaidSvg,
+      isMermaidCodeBlock,
+      buildMermaidCompatSource,
+      normalizeRenderedMermaidDiagrams,
+      prepareRenderedMermaidDiagramsForWechat,
+      convertRenderedMermaidDiagramsToImages: convertRenderedMermaidDiagramsToImages2,
+      renderMermaidCodeBlocks,
+      rasterizeRenderedMermaidDiagrams
+    };
+  }
+});
+
 // services/obsidian-triplet-renderer.js
 var require_obsidian_triplet_renderer = __commonJS({
   "services/obsidian-triplet-renderer.js"(exports2, module2) {
     var { MarkdownRenderer } = require("obsidian");
     var { serializeObsidianRenderedHtml } = require_obsidian_triplet_serializer();
     var { normalizeRenderedDomPunctuation } = require_chinese_punctuation();
+    var {
+      hasMermaidMarker,
+      renderMermaidCodeBlocks,
+      looksLikeMermaidSvg,
+      normalizeRenderedMermaidDiagrams,
+      rasterizeRenderedMermaidDiagrams
+    } = require_rendered_mermaid();
     function isFencedBlockDelimiter(line) {
       return /^\s{0,3}(?:`{3,}|~{3,})/.test(String(line || ""));
     }
@@ -3264,6 +4251,65 @@ var require_obsidian_triplet_renderer = __commonJS({
       }
       return unresolved;
     }
+    function shouldObserveMermaidRenderWindow(markdown) {
+      const lines = String(markdown || "").split("\n");
+      let fenceState = null;
+      for (const line of lines) {
+        const delimiter = parseFencedBlockDelimiter(line);
+        if (!delimiter)
+          continue;
+        if (!fenceState) {
+          const infoString = String(line || "").replace(/^\s{0,3}(?:`{3,}|~{3,})/, "").trim().toLowerCase();
+          if (infoString === "mermaid" || infoString.startsWith("mermaid ")) {
+            return true;
+          }
+          fenceState = delimiter;
+          continue;
+        }
+        if (delimiter.marker === fenceState.marker && delimiter.length >= fenceState.length) {
+          fenceState = null;
+        }
+      }
+      return false;
+    }
+    function collectMermaidHostElements(root) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return [];
+      const elements = Array.from(root.querySelectorAll("*")).filter((el) => hasMermaidMarker(el));
+      return elements.filter((el) => {
+        var _a, _b;
+        if (el.closest("mjx-container"))
+          return false;
+        const tagName = (_b = (_a = el.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a);
+        if (tagName === "pre" || tagName === "code")
+          return false;
+        return true;
+      });
+    }
+    function countRenderedMermaidDiagrams(root) {
+      if (!root || typeof root.querySelectorAll !== "function")
+        return 0;
+      const svgCount = Array.from(root.querySelectorAll("svg")).filter(looksLikeMermaidSvg).length;
+      const imageCount = root.querySelectorAll("img.mermaid-diagram-image").length;
+      return svgCount + imageCount;
+    }
+    function countPendingMermaidHosts(root) {
+      var _a, _b, _c, _d;
+      const hosts = collectMermaidHostElements(root);
+      let pending = 0;
+      for (const host of hosts) {
+        if (((_b = (_a = host.tagName) == null ? void 0 : _a.toLowerCase) == null ? void 0 : _b.call(_a)) === "svg")
+          continue;
+        if (((_d = (_c = host.tagName) == null ? void 0 : _c.toLowerCase) == null ? void 0 : _d.call(_c)) === "img" && host.classList.contains("mermaid-diagram-image"))
+          continue;
+        const hasRenderedSvg = Array.from(host.querySelectorAll("svg")).some(looksLikeMermaidSvg);
+        const hasRenderedImage = !!host.querySelector("img.mermaid-diagram-image");
+        if (!hasRenderedSvg && !hasRenderedImage) {
+          pending += 1;
+        }
+      }
+      return pending;
+    }
     function normalizeReferenceLabel(label) {
       return String(label || "").trim().replace(/\s+/g, " ").toLowerCase();
     }
@@ -3342,26 +4388,36 @@ var require_obsidian_triplet_renderer = __commonJS({
         return;
       const timeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : 500;
       const intervalMs = Number.isFinite(options.intervalMs) ? options.intervalMs : 16;
+      const observeMermaid = options.observeMermaid === true;
       const minObserveMs = Number.isFinite(options.minObserveMs) ? Math.max(0, Math.floor(options.minObserveMs)) : Math.min(48, timeoutMs);
+      const mermaidObserveMs = observeMermaid ? Number.isFinite(options.mermaidObserveMs) ? Math.max(0, Math.floor(options.mermaidObserveMs)) : Math.min(180, timeoutMs) : 0;
       const start = Date.now();
       let unresolved = countUnresolvedImageEmbeds(root);
-      if (unresolved === 0 && minObserveMs <= 0) {
+      let renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+      let pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+      const initialObserveMs = Math.max(minObserveMs, mermaidObserveMs);
+      if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0 && initialObserveMs <= 0) {
         return;
       }
-      if (unresolved === 0 && minObserveMs > 0) {
-        while (Date.now() - start < minObserveMs) {
+      if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0 && initialObserveMs > 0) {
+        while (Date.now() - start < initialObserveMs) {
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
           unresolved = countUnresolvedImageEmbeds(root);
-          if (unresolved > 0)
+          renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+          pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+          if (unresolved > 0 || renderedMermaid > 0 || pendingMermaid > 0)
             break;
         }
-        if (unresolved === 0)
+        if (unresolved === 0 && renderedMermaid === 0 && pendingMermaid === 0)
           return;
       }
       let stableCount = 0;
       while (Date.now() - start < timeoutMs) {
         unresolved = countUnresolvedImageEmbeds(root);
-        if (unresolved === 0) {
+        renderedMermaid = observeMermaid ? countRenderedMermaidDiagrams(root) : 0;
+        pendingMermaid = observeMermaid ? countPendingMermaidHosts(root) : 0;
+        const mermaidReady = !observeMermaid || (pendingMermaid === 0 && renderedMermaid > 0 || pendingMermaid === 0 && renderedMermaid === 0 && Date.now() - start >= mermaidObserveMs);
+        if (unresolved === 0 && mermaidReady) {
           stableCount += 1;
           if (stableCount >= 2)
             return;
@@ -3402,7 +4458,12 @@ var require_obsidian_triplet_renderer = __commonJS({
       component = null,
       settings = {},
       markdownRenderer = MarkdownRenderer,
-      serializer = serializeObsidianRenderedHtml
+      serializer = serializeObsidianRenderedHtml,
+      mermaidCodeRenderer = renderMermaidCodeBlocks,
+      mermaidRasterizer = rasterizeRenderedMermaidDiagrams,
+      mermaidApi = null,
+      rasterizeMermaid = true,
+      preserveSvgStyleTags = false
     }) {
       if (typeof document === "undefined") {
         throw new Error("Triplet renderer requires DOM environment");
@@ -3413,6 +4474,7 @@ var require_obsidian_triplet_renderer = __commonJS({
       const container = document.createElement("div");
       const { markdown: preparedMarkdown, mathFormulas } = preprocessMarkdownForTriplet(markdown, converter);
       const shouldObserveWindow = shouldObserveAsyncEmbedWindow(preparedMarkdown);
+      const shouldObserveMermaid = shouldObserveMermaidRenderWindow(preparedMarkdown);
       await renderByObsidianMarkdownRenderer({
         app,
         markdown: preparedMarkdown,
@@ -3421,7 +4483,15 @@ var require_obsidian_triplet_renderer = __commonJS({
         component,
         markdownRenderer
       });
-      await waitForTripletDomToSettle(container, shouldObserveWindow ? {} : { minObserveMs: 0 });
+      await waitForTripletDomToSettle(container, {
+        minObserveMs: shouldObserveWindow ? void 0 : 0,
+        observeMermaid: shouldObserveMermaid
+      });
+      await mermaidCodeRenderer(container, { mermaidApi });
+      normalizeRenderedMermaidDiagrams(container);
+      if (rasterizeMermaid !== false) {
+        await mermaidRasterizer(container);
+      }
       normalizeRenderedDomPunctuation(container, {
         enabled: settings.normalizeChinesePunctuation === true
       });
@@ -3430,7 +4500,8 @@ var require_obsidian_triplet_renderer = __commonJS({
         converter,
         sourcePath,
         app,
-        preRenderedMath: mathFormulas
+        preRenderedMath: mathFormulas,
+        preserveSvgStyleTags
       });
       return serializedHtml;
     }
@@ -3441,9 +4512,4769 @@ var require_obsidian_triplet_renderer = __commonJS({
       injectHardBreaksForLegacyParity,
       normalizeRenderedDomPunctuation,
       shouldObserveAsyncEmbedWindow,
+      shouldObserveMermaidRenderWindow,
       waitForTripletDomToSettle,
       renderByObsidianMarkdownRenderer,
       renderObsidianTripletMarkdown: renderObsidianTripletMarkdown2
+    };
+  }
+});
+
+// services/ai-layout-runtime/generated-skills.js
+var require_generated_skills = __commonJS({
+  "services/ai-layout-runtime/generated-skills.js"(exports2, module2) {
+    module2.exports = {
+      "shared": {
+        "colorPalettes": {
+          "version": "2026.03.25-alpha.1",
+          "defaultColorPalette": "tech-green",
+          "colorPalettes": [
+            {
+              "id": "tech-green",
+              "label": "\u79D1\u6280\u7EFF",
+              "description": "\u4FE1\u606F\u5361\u4E0E\u6848\u4F8B\u6559\u7A0B\u98CE\u683C\uFF0C\u9002\u5408\u4EA7\u54C1\u4ECB\u7ECD\u3001\u64CD\u4F5C\u6307\u5357\u548C\u6848\u4F8B\u62C6\u89E3\u3002",
+              "recommendedFor": [
+                "tutorial",
+                "case-study",
+                "product-intro"
+              ],
+              "tokens": {
+                "accent": "#14b37d",
+                "accentDeep": "#0f8f64",
+                "accentSoft": "#e8faf4",
+                "text": "#24323d",
+                "muted": "#66737f",
+                "border": "#dbe7e1",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f5f8f7",
+                "quoteBg": "#f4f7f6"
+              }
+            },
+            {
+              "id": "ocean-blue",
+              "label": "\u6DF1\u6D77\u84DD",
+              "description": "\u66F4\u51B7\u9759\u7684\u79D1\u6280\u4FE1\u606F\u98CE\u683C\uFF0C\u9002\u5408\u6559\u7A0B\u3001\u77E5\u8BC6\u5361\u7247\u548C\u4EA7\u54C1\u66F4\u65B0\u3002",
+              "recommendedFor": [
+                "tutorial",
+                "knowledge-card",
+                "release-note"
+              ],
+              "tokens": {
+                "accent": "#2c6bed",
+                "accentDeep": "#1f4fb2",
+                "accentSoft": "#edf4ff",
+                "text": "#223047",
+                "muted": "#5e718f",
+                "border": "#d8e2f2",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f6f9fd",
+                "quoteBg": "#f2f6fc"
+              }
+            },
+            {
+              "id": "sunset-amber",
+              "label": "\u6696\u7802\u91D1",
+              "description": "\u66F4\u504F\u5185\u5BB9\u6742\u5FD7\u611F\u7684\u6696\u8272\u98CE\u683C\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u6E05\u5355\u548C\u7ECF\u9A8C\u5206\u4EAB\u3002",
+              "recommendedFor": [
+                "essay",
+                "checklist",
+                "experience"
+              ],
+              "tokens": {
+                "accent": "#d8892b",
+                "accentDeep": "#a66218",
+                "accentSoft": "#fff5e8",
+                "text": "#3a2b1f",
+                "muted": "#7b6756",
+                "border": "#eadfce",
+                "surface": "#fffdf9",
+                "surfaceSoft": "#faf6f0",
+                "quoteBg": "#f8f2ea"
+              }
+            },
+            {
+              "id": "graphite-rose",
+              "label": "\u77F3\u58A8\u73AB\u7470",
+              "description": "\u504F\u7F16\u8F91\u611F\u7684\u7070\u7C89\u4E2D\u6027\u8272\uFF0C\u9002\u5408\u6848\u4F8B\u62C6\u89E3\u548C\u54C1\u724C\u5185\u5BB9\u3002",
+              "recommendedFor": [
+                "case-study",
+                "brand-story",
+                "editorial"
+              ],
+              "tokens": {
+                "accent": "#cc5f82",
+                "accentDeep": "#9f4764",
+                "accentSoft": "#fff0f5",
+                "text": "#2e2c33",
+                "muted": "#6f6874",
+                "border": "#e7dce3",
+                "surface": "#fffefe",
+                "surfaceSoft": "#faf7f9",
+                "quoteBg": "#f8f2f5"
+              }
+            },
+            {
+              "id": "basic-blue",
+              "label": "\u7ECF\u5178\u84DD",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u901A\u7528\u77E5\u8BC6\u6587\u7AE0\u548C\u5DE5\u5177\u8BF4\u660E\u3002",
+              "recommendedFor": [
+                "article",
+                "tutorial",
+                "knowledge-card"
+              ],
+              "tokens": {
+                "accent": "#2c6bed",
+                "accentDeep": "#1f4fb2",
+                "accentSoft": "#edf4ff",
+                "text": "#223047",
+                "muted": "#5e718f",
+                "border": "#d8e2f2",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f6f9fd",
+                "quoteBg": "#f2f6fc"
+              }
+            },
+            {
+              "id": "basic-green",
+              "label": "\u6E05\u723D\u7EFF",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u6D41\u7A0B\u3001\u7ECF\u9A8C\u548C\u6548\u7387\u4E3B\u9898\u3002",
+              "recommendedFor": [
+                "workflow",
+                "experience",
+                "tutorial"
+              ],
+              "tokens": {
+                "accent": "#28a745",
+                "accentDeep": "#1e7e34",
+                "accentSoft": "#edf9f0",
+                "text": "#24332a",
+                "muted": "#63746a",
+                "border": "#d8e7dc",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f6faf7",
+                "quoteBg": "#f2f8f4"
+              }
+            },
+            {
+              "id": "basic-purple",
+              "label": "\u7075\u611F\u7D2B",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u521B\u4F5C\u3001\u7075\u611F\u548C\u65B9\u6CD5\u8BBA\u5185\u5BB9\u3002",
+              "recommendedFor": [
+                "essay",
+                "creative",
+                "method"
+              ],
+              "tokens": {
+                "accent": "#7c3aed",
+                "accentDeep": "#5b21b6",
+                "accentSoft": "#f3edff",
+                "text": "#302942",
+                "muted": "#716780",
+                "border": "#e1d8f2",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f9f6fd",
+                "quoteBg": "#f5f0fb"
+              }
+            },
+            {
+              "id": "basic-orange",
+              "label": "\u6D3B\u529B\u6A59",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u6E05\u5355\u3001\u63A8\u8350\u548C\u8FD0\u8425\u590D\u76D8\u3002",
+              "recommendedFor": [
+                "checklist",
+                "recommendation",
+                "operation"
+              ],
+              "tokens": {
+                "accent": "#f97316",
+                "accentDeep": "#c2410c",
+                "accentSoft": "#fff2e8",
+                "text": "#3f2b20",
+                "muted": "#7c6759",
+                "border": "#ecd9ca",
+                "surface": "#fffefe",
+                "surfaceSoft": "#fff8f3",
+                "quoteBg": "#fbf1ea"
+              }
+            },
+            {
+              "id": "basic-teal",
+              "label": "\u6E56\u6C34\u9752",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u4EA7\u54C1\u3001\u6570\u636E\u548C\u8F7B\u79D1\u6280\u5185\u5BB9\u3002",
+              "recommendedFor": [
+                "product-intro",
+                "data",
+                "tech"
+              ],
+              "tokens": {
+                "accent": "#0f9f9a",
+                "accentDeep": "#0b756f",
+                "accentSoft": "#e8f8f7",
+                "text": "#213737",
+                "muted": "#5f7474",
+                "border": "#d2e7e5",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f4faf9",
+                "quoteBg": "#eef8f7"
+              }
+            },
+            {
+              "id": "basic-rose",
+              "label": "\u67D4\u548C\u73AB\u7470",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u54C1\u724C\u3001\u751F\u6D3B\u65B9\u5F0F\u548C\u6848\u4F8B\u6545\u4E8B\u3002",
+              "recommendedFor": [
+                "brand-story",
+                "lifestyle",
+                "case-study"
+              ],
+              "tokens": {
+                "accent": "#e83e8c",
+                "accentDeep": "#b81f66",
+                "accentSoft": "#fff0f7",
+                "text": "#3a2832",
+                "muted": "#766672",
+                "border": "#ead8e3",
+                "surface": "#fffefe",
+                "surfaceSoft": "#fff7fb",
+                "quoteBg": "#faf0f6"
+              }
+            },
+            {
+              "id": "basic-ruby",
+              "label": "\u9192\u76EE\u7EA2",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u91CD\u70B9\u63D0\u9192\u3001\u89C2\u70B9\u8868\u8FBE\u548C\u53D1\u5E03\u8BF4\u660E\u3002",
+              "recommendedFor": [
+                "announcement",
+                "opinion",
+                "release-note"
+              ],
+              "tokens": {
+                "accent": "#dc3545",
+                "accentDeep": "#a81825",
+                "accentSoft": "#fff0f2",
+                "text": "#3b282b",
+                "muted": "#766367",
+                "border": "#ead8da",
+                "surface": "#fffefe",
+                "surfaceSoft": "#fff7f8",
+                "quoteBg": "#faf0f1"
+              }
+            },
+            {
+              "id": "basic-slate",
+              "label": "\u514B\u5236\u7070",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u57FA\u7840\u8272\uFF0C\u9002\u5408\u957F\u6587\u3001\u8BF4\u660E\u6587\u548C\u504F\u4E13\u4E1A\u5185\u5BB9\u3002",
+              "recommendedFor": [
+                "article",
+                "documentation",
+                "professional"
+              ],
+              "tokens": {
+                "accent": "#64748b",
+                "accentDeep": "#475569",
+                "accentSoft": "#f1f5f9",
+                "text": "#27313f",
+                "muted": "#687386",
+                "border": "#dbe2ea",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f8fafc",
+                "quoteBg": "#f3f6f9"
+              }
+            },
+            {
+              "id": "custom",
+              "label": "\u81EA\u5B9A\u4E49",
+              "description": "AI \u7F16\u6392\u72EC\u7ACB\u81EA\u5B9A\u4E49\u8272\uFF0C\u4F1A\u6839\u636E\u4F60\u9009\u62E9\u7684\u989C\u8272\u81EA\u52A8\u6D3E\u751F\u6DF1\u8272\u3001\u6D45\u5E95\u548C\u8FB9\u6846\u3002",
+              "recommendedFor": [
+                "custom"
+              ],
+              "tokens": {
+                "accent": "#7c3aed",
+                "accentDeep": "#5b21b6",
+                "accentSoft": "#f3edff",
+                "text": "#302942",
+                "muted": "#716780",
+                "border": "#e1d8f2",
+                "surface": "#ffffff",
+                "surfaceSoft": "#f9f6fd",
+                "quoteBg": "#f5f0fb"
+              }
+            }
+          ]
+        },
+        "blockCatalog": {
+          "version": "2026.03.25-alpha.1",
+          "selectionAutoValue": "auto",
+          "outputFields": [
+            "articleType",
+            "selection",
+            "resolved",
+            "recommendedLayoutFamily",
+            "recommendedColorPalette",
+            "title",
+            "summary",
+            "blocks"
+          ],
+          "blocks": [
+            {
+              "type": "hero",
+              "fields": [
+                "eyebrow",
+                "title",
+                "subtitle",
+                "coverImageId",
+                "variant"
+              ],
+              "description": "\u6587\u7AE0\u5C01\u9762\u5361\uFF0C\u9002\u5408\u6807\u9898\u3001\u5BFC\u8BED\u548C\u5C01\u9762\u56FE\u3002"
+            },
+            {
+              "type": "part-nav",
+              "fields": [
+                "items[{label,text}]"
+              ],
+              "description": "\u7AE0\u8282\u5BFC\u822A\u5361\uFF0C\u9002\u5408\u76EE\u5F55\u6216\u5206\u6BB5\u5BFC\u8BFB\u3002"
+            },
+            {
+              "type": "lead-quote",
+              "fields": [
+                "text",
+                "note"
+              ],
+              "description": "\u5BFC\u8BED\u6458\u8981\u5361\uFF0C\u9002\u5408\u91D1\u53E5\u3001\u603B\u7ED3\u6216\u5F00\u573A\u91CD\u70B9\u3002"
+            },
+            {
+              "type": "case-block",
+              "fields": [
+                "caseLabel",
+                "title",
+                "summary",
+                "bullets",
+                "imageIds",
+                "highlight"
+              ],
+              "description": "\u6848\u4F8B/\u6559\u7A0B\u4E3B\u4F53\u533A\u5757\uFF0C\u9002\u5408\u5206\u7AE0\u8282\u627F\u8F7D\u6B63\u6587\u3002"
+            },
+            {
+              "type": "section-block",
+              "fields": [
+                "sectionIndex",
+                "sectionLabel",
+                "headingLevel",
+                "title",
+                "paragraphs",
+                "bulletGroups",
+                "callouts",
+                "subsections[{title,level,paragraphs,bulletGroups,callouts}]",
+                "imageIds"
+              ],
+              "description": "\u6B63\u6587\u4FDD\u771F\u533A\u5757\uFF0C\u6309 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u5185\u5BB9\uFF0C\u4E0D\u6539\u5199\u6B63\u6587\uFF1B\u9ED8\u8BA4\u7531 H2 \u7EA7\u4E3B\u7AE0\u8282\u627F\u8F7D\uFF0CH3/H4 \u7559\u5728\u5757\u5185\u505A subsection\uFF0C\u5E76\u5C3D\u91CF\u4FDD\u7559 callout\u3001\u4EE3\u7801\u5757\u3001\u8868\u683C\u548C\u5D4C\u5957\u5217\u8868\u7B49\u7279\u6B8A\u7ED3\u6784\u3002"
+            },
+            {
+              "type": "phone-frame",
+              "fields": [
+                "imageId",
+                "caption"
+              ],
+              "description": "\u624B\u673A\u622A\u56FE\u5C55\u793A\u5757\uFF0C\u9002\u5408 App \u754C\u9762\u6216\u804A\u5929\u622A\u56FE\u3002"
+            },
+            {
+              "type": "cta-card",
+              "fields": [
+                "title",
+                "body",
+                "buttonText",
+                "note"
+              ],
+              "description": "\u6536\u5C3E CTA \u533A\u5757\uFF0C\u9002\u5408\u603B\u7ED3\u3001\u5F15\u5BFC\u6216\u540E\u7EED\u52A8\u4F5C\u3002"
+            }
+          ]
+        },
+        "wechatSafeStylePrimitives": {
+          "version": "2026.03.25-alpha.1",
+          "typography": {
+            "bodyFontFamily": '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif',
+            "editorialDisplayFont": 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif',
+            "bodyFontSize": 16,
+            "bodyLineHeight": 1.8,
+            "paragraphGap": 20,
+            "letterSpacing": "0"
+          },
+          "image": {
+            "borderRadius": 14,
+            "captionFontSize": 12
+          },
+          "sectionLabels": {
+            "source-first": "Section",
+            "tutorial-cards": "SECTION",
+            "editorial-lite": "Part"
+          },
+          "profiles": {
+            "source-first": {
+              "wrapperPadding": "20px 16px 28px",
+              "cardRadius": 10,
+              "cardPadding": "0",
+              "cardMargin": 8,
+              "cardShadow": "none",
+              "hero": {
+                "eyebrowSize": 11,
+                "eyebrowLetterSpacing": 1.2,
+                "titleSize": 26,
+                "subtitleSize": 16,
+                "subtitleLineHeight": 1.8,
+                "footerMode": "divider",
+                "imageRadius": 18
+              },
+              "partNav": {
+                "gap": 16,
+                "direction": "row",
+                "useCard": false,
+                "useDivider": true
+              },
+              "leadQuote": {
+                "background": "transparent",
+                "borderLeft": true,
+                "fontSize": 16,
+                "fontWeight": 600
+              },
+              "caseBlock": {
+                "useCard": false,
+                "indexSize": 22,
+                "titleSize": 20
+              },
+              "subsection": {
+                "titleSize": 16,
+                "titleWeight": 700,
+                "useCard": false,
+                "useBorderLeft": true,
+                "spacingTop": 14
+              }
+            },
+            "tutorial-cards": {
+              "wrapperPadding": "26px 18px 34px",
+              "cardRadius": 18,
+              "cardPadding": "18px",
+              "cardMargin": 18,
+              "cardShadow": "0 10px 30px -24px rgba(0,0,0,0.18)",
+              "hero": {
+                "eyebrowSize": 11,
+                "eyebrowLetterSpacing": 1.2,
+                "titleSize": 28,
+                "subtitleSize": 14,
+                "subtitleLineHeight": 1.7,
+                "footerMode": "accent-bar",
+                "imageRadius": 18
+              },
+              "partNav": {
+                "gap": 10,
+                "direction": "row",
+                "useCard": true,
+                "useDivider": false
+              },
+              "leadQuote": {
+                "background": "quoteBg",
+                "borderLeft": false,
+                "fontSize": 18,
+                "fontWeight": 700
+              },
+              "caseBlock": {
+                "useCard": true,
+                "indexSize": 28,
+                "titleSize": 22
+              },
+              "subsection": {
+                "titleSize": 15,
+                "titleWeight": 700,
+                "useCard": true,
+                "useBorderLeft": true,
+                "spacingTop": 16
+              }
+            },
+            "editorial-lite": {
+              "wrapperPadding": "30px 22px 40px",
+              "cardRadius": 0,
+              "cardPadding": "0",
+              "cardMargin": 30,
+              "cardShadow": "none",
+              "hero": {
+                "eyebrowSize": 10,
+                "eyebrowLetterSpacing": 2,
+                "titleSize": 36,
+                "subtitleSize": 17,
+                "subtitleLineHeight": 1.88,
+                "footerMode": "editorial-divider",
+                "imageRadius": 28
+              },
+              "partNav": {
+                "gap": 10,
+                "direction": "column",
+                "useCard": false,
+                "useDivider": true
+              },
+              "leadQuote": {
+                "background": "transparent",
+                "borderLeft": false,
+                "fontSize": 26,
+                "fontWeight": 600
+              },
+              "caseBlock": {
+                "useCard": false,
+                "indexSize": 14,
+                "titleSize": 26
+              },
+              "subsection": {
+                "titleSize": 18,
+                "titleWeight": 600,
+                "useCard": false,
+                "useBorderLeft": false,
+                "spacingTop": 18
+              }
+            }
+          },
+          "allowedCssNotes": [
+            "\u4EC5\u5141\u8BB8 inline style",
+            "\u4F18\u5148\u4F7F\u7528 section/p/figure/img/figcaption/span \u7B49\u7A33\u5B9A\u6807\u7B7E",
+            "\u5141\u8BB8\u6709\u9650 flex\uFF0C\u4F46\u4E0D\u80FD\u4F9D\u8D56\u590D\u6742 class \u9009\u62E9\u5668",
+            "\u7981\u6B62 style \u6807\u7B7E\u4E0E\u5916\u90E8 class \u9A71\u52A8\u6837\u5F0F"
+          ]
+        },
+        "schema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "$id": "obsidian-wechat-converter/article-layout.schema.json",
+          "title": "WeChat Article Layout",
+          "type": "object",
+          "required": [
+            "articleType",
+            "title",
+            "summary",
+            "selection",
+            "resolved",
+            "blocks"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "articleType": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            },
+            "selection": {
+              "type": "object",
+              "required": [
+                "layoutFamily",
+                "colorPalette"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "layoutFamily": {
+                  "enum": [
+                    "auto",
+                    "source-first",
+                    "tutorial-cards",
+                    "editorial-lite"
+                  ]
+                },
+                "colorPalette": {
+                  "enum": [
+                    "auto",
+                    "tech-green",
+                    "ocean-blue",
+                    "sunset-amber",
+                    "graphite-rose",
+                    "basic-blue",
+                    "basic-green",
+                    "basic-purple",
+                    "basic-orange",
+                    "basic-teal",
+                    "basic-rose",
+                    "basic-ruby",
+                    "basic-slate",
+                    "custom"
+                  ]
+                }
+              }
+            },
+            "resolved": {
+              "type": "object",
+              "required": [
+                "layoutFamily",
+                "colorPalette"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "layoutFamily": {
+                  "enum": [
+                    "source-first",
+                    "tutorial-cards",
+                    "editorial-lite"
+                  ]
+                },
+                "colorPalette": {
+                  "enum": [
+                    "tech-green",
+                    "ocean-blue",
+                    "sunset-amber",
+                    "graphite-rose",
+                    "basic-blue",
+                    "basic-green",
+                    "basic-purple",
+                    "basic-orange",
+                    "basic-teal",
+                    "basic-rose",
+                    "basic-ruby",
+                    "basic-slate",
+                    "custom"
+                  ]
+                }
+              }
+            },
+            "recommendedLayoutFamily": {
+              "enum": [
+                "source-first",
+                "tutorial-cards",
+                "editorial-lite"
+              ]
+            },
+            "recommendedColorPalette": {
+              "enum": [
+                "tech-green",
+                "ocean-blue",
+                "sunset-amber",
+                "graphite-rose",
+                "basic-blue",
+                "basic-green",
+                "basic-purple",
+                "basic-orange",
+                "basic-teal",
+                "basic-rose",
+                "basic-ruby",
+                "basic-slate",
+                "custom"
+              ]
+            },
+            "stylePack": {
+              "type": "string",
+              "description": "\u517C\u5BB9\u65E7\u7248\u672C\u5B57\u6BB5\uFF1B\u8FD0\u884C\u65F6\u5E94\u4EE5 resolved.colorPalette \u4E3A\u51C6\u3002"
+            },
+            "blocks": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 24,
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "title"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "const": "hero"
+                      },
+                      "eyebrow": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "subtitle": {
+                        "type": "string"
+                      },
+                      "coverImageId": {
+                        "type": "string"
+                      },
+                      "variant": {
+                        "enum": [
+                          "cover-right",
+                          "cover-left"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "items"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "const": "part-nav"
+                      },
+                      "items": {
+                        "type": "array",
+                        "maxItems": 6,
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "label",
+                            "text"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "text"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "const": "lead-quote"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "const": "case-block"
+                      },
+                      "caseLabel": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "summary": {
+                        "type": "string"
+                      },
+                      "bullets": {
+                        "type": "array",
+                        "maxItems": 6,
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "imageIds": {
+                        "type": "array",
+                        "maxItems": 4,
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "highlight": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "sectionIndex"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "const": "section-block"
+                      },
+                      "sectionIndex": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          }
+                        ]
+                      },
+                      "sectionLabel": {
+                        "type": "string"
+                      },
+                      "headingLevel": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 6
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "paragraphs": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "bulletGroups": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "callouts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "body": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "subsections": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "title"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "title": {
+                              "type": "string"
+                            },
+                            "level": {
+                              "type": "integer",
+                              "minimum": 3,
+                              "maximum": 6
+                            },
+                            "paragraphs": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "bulletGroups": {
+                              "type": "array",
+                              "items": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "callouts": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  },
+                                  "body": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "imageIds": {
+                        "type": "array",
+                        "maxItems": 3,
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "imageId"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "const": "phone-frame"
+                      },
+                      "imageId": {
+                        "type": "string"
+                      },
+                      "caption": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "type"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "const": "cta-card"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "body": {
+                        "type": "string"
+                      },
+                      "buttonText": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "template": {
+          "articleType": "tutorial",
+          "selection": {
+            "layoutFamily": "auto",
+            "colorPalette": "auto"
+          },
+          "resolved": {
+            "layoutFamily": "tutorial-cards",
+            "colorPalette": "tech-green"
+          },
+          "recommendedLayoutFamily": "tutorial-cards",
+          "recommendedColorPalette": "tech-green",
+          "title": "\u6587\u7AE0\u6807\u9898",
+          "summary": "\u4E00\u53E5\u6458\u8981",
+          "blocks": [
+            {
+              "type": "hero",
+              "eyebrow": "AI Layout Draft",
+              "title": "\u6587\u7AE0\u6807\u9898",
+              "subtitle": "\u5C01\u9762\u5BFC\u8BED",
+              "coverImageId": "image-1",
+              "variant": "cover-right"
+            },
+            {
+              "type": "lead-quote",
+              "text": "\u4E00\u6BB5\u9002\u5408\u505A\u5BFC\u8BED\u7684\u91CD\u70B9\u6458\u8981\u3002",
+              "note": "\u8865\u5145\u8BF4\u660E\u6216\u4E0A\u4E0B\u6587\u3002"
+            },
+            {
+              "type": "section-block",
+              "sectionIndex": 0,
+              "sectionLabel": "PART 01",
+              "headingLevel": 2,
+              "title": "\u7B2C\u4E00\u90E8\u5206",
+              "paragraphs": [
+                "\u8FD9\u91CC\u662F\u627F\u63A5\u539F\u6587\u7AE0\u8282\u7684\u6B63\u6587\u3002"
+              ],
+              "bulletGroups": [],
+              "callouts": [
+                {
+                  "type": "tip",
+                  "title": "\u8865\u5145\u63D0\u793A",
+                  "body": "\u8FD9\u91CC\u662F\u4FDD\u7559\u5728 section-block \u5185\u7684 callout\u3002"
+                }
+              ],
+              "subsections": [
+                {
+                  "title": "\u5B50\u8282\u4E00",
+                  "level": 3,
+                  "paragraphs": [
+                    "\u8FD9\u91CC\u662F\u5757\u5185 subsection \u7684\u6B63\u6587\u3002"
+                  ],
+                  "bulletGroups": [],
+                  "callouts": [
+                    {
+                      "type": "note",
+                      "title": "\u5B50\u8282\u8BF4\u660E",
+                      "body": "\u8FD9\u91CC\u662F subsection \u5185\u7684 callout\u3002"
+                    }
+                  ]
+                }
+              ],
+              "imageIds": [
+                "image-1"
+              ]
+            }
+          ]
+        },
+        "version": "2026.03.25-alpha.1"
+      },
+      "skills": [
+        {
+          "id": "source-first",
+          "manifest": {
+            "id": "source-first",
+            "label": "\u539F\u6587\u589E\u5F3A\u578B",
+            "order": 1,
+            "version": "2026.03.25-alpha.1",
+            "selectionValue": "source-first",
+            "defaultColorPalette": "tech-green",
+            "promptMode": "source-first",
+            "fallbackPolicy": "source-first-preserve",
+            "renderProfile": "source-first",
+            "allowedBlocks": [
+              "hero",
+              "part-nav",
+              "lead-quote",
+              "case-block",
+              "section-block",
+              "phone-frame",
+              "cta-card"
+            ],
+            "supportsImages": true,
+            "providerStrategy": "prefer-ai-fallback-local",
+            "recommendedArticleTypes": [
+              "article",
+              "essay",
+              "note",
+              "knowledge-base"
+            ],
+            "description": "\u6700\u63A5\u8FD1\u666E\u901A\u9884\u89C8\uFF0C\u6B63\u6587\u5C3D\u91CF\u8FDE\u7EED\u6D41\u52A8\uFF0C\u53EA\u505A\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\u3002"
+          },
+          "prompt": "\u4F60\u6B63\u5728\u751F\u6210\u201C\u539F\u6587\u589E\u5F3A\u578B\u201D\u516C\u4F17\u53F7\u6392\u7248\u3002\n\n\u76EE\u6807\uFF1A\n- AI \u53EA\u505A\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\uFF0C\u4E0D\u6539\u5199\u4F5C\u8005\u89C2\u70B9\u3002\n- \u6B63\u6587\u4E3B\u4F53\u4F18\u5148\u4F7F\u7528 section-block\uFF0C\u901A\u8FC7 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u3002\n- \u9664\u975E\u539F\u6587\u975E\u5E38\u9002\u5408\uFF0C\u5426\u5219\u4E0D\u8981\u4E3B\u52A8\u751F\u6210\u6559\u7A0B\u611F\u5F88\u5F3A\u7684 hero\u3001part-nav\u3001phone-frame\u3001cta-card\u3002\n- \u5982\u679C\u8981\u7ED9\u51FA lead-quote\uFF0C\u4F18\u5148\u6458\u53D6\u539F\u6587\u4E2D\u7684\u5BFC\u8BED\u3001\u89C2\u70B9\u53E5\u6216\u603B\u7ED3\u53E5\uFF0C\u4E0D\u8981\u91CD\u65B0\u5199\u4E00\u6BB5\u65B0\u6587\u6848\u3002\n- \u5982\u679C\u539F\u6587\u7AE0\u8282\u91CC\u5DF2\u7ECF\u6709 callout\u3001\u4EE3\u7801\u5757\u3001\u8868\u683C\u3001\u5D4C\u5957\u5217\u8868\u7B49\u7279\u6B8A\u7ED3\u6784\uFF0C\u4F18\u5148\u4FDD\u7559\u5728\u5BF9\u5E94 section-block / subsection \u4E2D\uFF0C\u4E0D\u8981\u538B\u5E73\u6210\u666E\u901A\u6BB5\u843D\u3002\n\n\u98CE\u683C\u539F\u5219\uFF1A\n- \u66F4\u50CF\u201C\u666E\u901A\u9884\u89C8\u7684\u5347\u7EA7\u7248\u201D\uFF0C\u4E0D\u662F\u6559\u7A0B\u6A21\u677F\u3002\n- \u4FDD\u7559\u539F\u6587\u8282\u594F\u548C\u7AE0\u8282\u987A\u5E8F\u3002\n- \u5141\u8BB8\u8F7B\u5FAE\u5BFC\u8BED\u589E\u5F3A\u548C\u56FE\u7247\u4E0A\u63D0\uFF0C\u4F46\u4E0D\u80FD\u727A\u7272\u6B63\u6587\u5B8C\u6574\u6027\u3002",
+          "blocks": {
+            "preferredIntroBlocks": [
+              "lead-quote"
+            ],
+            "optionalIntroBlocks": [
+              "hero",
+              "part-nav"
+            ],
+            "preferredBodyBlocks": [
+              "section-block"
+            ],
+            "optionalBodyBlocks": [
+              "case-block"
+            ],
+            "optionalTailBlocks": [
+              "cta-card"
+            ],
+            "imageStrategy": "conservative"
+          },
+          "fallback": {
+            "includeHero": false,
+            "includePartNav": false,
+            "includeLeadQuote": true,
+            "includePhoneFrame": false,
+            "includeCta": false,
+            "heroVariant": "cover-right",
+            "heroEyebrow": "AI Article Layout",
+            "galleryCaseLabel": "GALLERY",
+            "galleryTitle": "\u914D\u56FE\u8865\u5145",
+            "preferSectionBlocks": true,
+            "remainingImageStrategy": "sections-first",
+            "maxSectionBlocks": 6
+          },
+          "skillDoc": "---\nname: source-first-layout\ndescription: \u539F\u6587\u589E\u5F3A\u578B skill\u3002\u5F3A\u8C03\u6B63\u6587\u4FDD\u771F\u3001\u8F7B\u91CF\u7ED3\u6784\u589E\u5F3A\u3001AI \u5931\u8D25\u65F6\u672C\u5730\u515C\u5E95\u3002\n---\n\n# Source-First Layout Skill\n\n\u8FD9\u4E2A skill \u7528\u4E8E\u628A\u6587\u7AE0\u6392\u6210\u201C\u6700\u63A5\u8FD1\u666E\u901A\u9884\u89C8\u201D\u7684\u516C\u4F17\u53F7\u7248\u5F0F\u3002\n\n## Guardrails\n\n- \u4F18\u5148\u4F7F\u7528 `section-block`\n- \u4E0D\u91CD\u5199\u6B63\u6587\n- \u4E0D\u9ED8\u8BA4\u8FFD\u52A0 CTA\n- \u4E0D\u9ED8\u8BA4\u52A0\u5165\u6559\u7A0B\u5F0F\u5BFC\u822A\n- \u56FE\u7247\u53EA\u505A\u8F7B\u5EA6\u4E0A\u63D0\uFF0C\u4E0D\u5F3A\u884C\u624B\u673A\u58F3\n- \u539F\u6587\u91CC\u7684 `callout`\u3001\u4EE3\u7801\u5757\u3001\u8868\u683C\u3001\u5D4C\u5957\u5217\u8868\u7B49\u7279\u6B8A\u7ED3\u6784\u5E94\u5C3D\u91CF\u4FDD\u7559\u5728\u5BF9\u5E94\u7684 `section-block / subsection` \u4E2D\uFF0C\u4E0D\u8981\u538B\u5E73\u6210\u666E\u901A\u6BB5\u843D",
+          "examples": [
+            {
+              "name": "article.json",
+              "value": {
+                "articleType": "article",
+                "selection": {
+                  "layoutFamily": "source-first",
+                  "colorPalette": "tech-green"
+                },
+                "resolved": {
+                  "layoutFamily": "source-first",
+                  "colorPalette": "tech-green"
+                },
+                "recommendedLayoutFamily": "source-first",
+                "recommendedColorPalette": "tech-green",
+                "title": "\u517B\u597D\u4E00\u4E2A\u5B69\u5B50\uFF0C\u4ECE\u653E\u8FC7\u81EA\u5DF1\u5F00\u59CB\uFF01",
+                "summary": "\u4FDD\u7559\u539F\u6587\u8282\u594F\uFF0C\u53EA\u505A\u8F7B\u91CF\u589E\u5F3A\u3002",
+                "blocks": [
+                  {
+                    "type": "lead-quote",
+                    "text": "\u5148\u653E\u8FC7\u81EA\u5DF1\uFF0C\u5F88\u591A\u6559\u80B2\u7126\u8651\u624D\u4F1A\u771F\u6B63\u677E\u5F00\u3002",
+                    "note": "\u6458\u81EA\u539F\u6587\u5BFC\u8BED"
+                  },
+                  {
+                    "type": "section-block",
+                    "sectionIndex": 0,
+                    "callouts": [
+                      {
+                        "type": "tip",
+                        "title": "\u4F5C\u8005\u63D0\u9192",
+                        "body": "\u8FD9\u7C7B\u63D0\u9192\u5E94\u4FDD\u7559\u5728\u6B63\u6587\u5BF9\u5E94 section \u91CC\uFF0C\u800C\u4E0D\u662F\u6539\u5199\u6210\u666E\u901A\u6BB5\u843D\u3002"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "tutorial-cards",
+          "manifest": {
+            "id": "tutorial-cards",
+            "label": "\u6559\u7A0B\u5361\u7247\u578B",
+            "order": 2,
+            "version": "2026.03.25-alpha.1",
+            "selectionValue": "tutorial-cards",
+            "defaultColorPalette": "ocean-blue",
+            "promptMode": "tutorial-cards",
+            "fallbackPolicy": "tutorial-structured",
+            "renderProfile": "tutorial-cards",
+            "allowedBlocks": [
+              "hero",
+              "part-nav",
+              "lead-quote",
+              "case-block",
+              "section-block",
+              "phone-frame",
+              "cta-card"
+            ],
+            "supportsImages": true,
+            "providerStrategy": "require-ai",
+            "recommendedArticleTypes": [
+              "tutorial",
+              "case-study",
+              "product-intro",
+              "workflow"
+            ],
+            "description": "\u66F4\u5F3A\u8C03\u7AE0\u8282\u7F16\u53F7\u3001\u4FE1\u606F\u5361\u4E0E\u622A\u56FE\u5C55\u793A\uFF0C\u9002\u5408\u6559\u7A0B\u3001\u6E05\u5355\u548C\u6848\u4F8B\u62C6\u89E3\u3002"
+          },
+          "prompt": "\u4F60\u6B63\u5728\u751F\u6210\u201C\u6559\u7A0B\u5361\u7247\u578B\u201D\u516C\u4F17\u53F7\u6392\u7248\u3002\n\n\u76EE\u6807\uFF1A\n- \u5F3A\u5316\u7ED3\u6784\u611F\u3001\u6B65\u9AA4\u611F\u3001\u6848\u4F8B\u611F\u3002\n- \u53EF\u4EE5\u79EF\u6781\u4F7F\u7528 hero\u3001part-nav\u3001lead-quote\u3001case-block\u3002\n- section-block \u4ECD\u7136\u4F18\u5148\u627F\u8F7D\u6B63\u6587\uFF0C\u4F46\u6574\u4F53\u9700\u8981\u66F4\u50CF\u201C\u6559\u7A0B\u7CBE\u4FEE\u7A3F\u201D\u3002\n- \u5982\u679C\u6709\u622A\u56FE\u6216\u754C\u9762\u56FE\uFF0C\u4F18\u5148\u8003\u8651 hero \u5C01\u9762\u548C phone-frame\u3002\n- \u5373\u4F7F\u7ED3\u6784\u66F4\u5F3A\u5316\uFF0C\u4E5F\u8981\u5C3D\u91CF\u4FDD\u7559\u539F\u6587\u7AE0\u8282\u4E2D\u7684 callout\u3001\u4EE3\u7801\u5757\u3001\u8868\u683C\u3001\u5D4C\u5957\u5217\u8868\u7B49\u7279\u6B8A\u7ED3\u6784\uFF0C\u4E0D\u8981\u4E3A\u4E86\u5361\u7247\u5316\u800C\u628A\u5B83\u4EEC\u538B\u5E73\u3002\n\n\u98CE\u683C\u539F\u5219\uFF1A\n- \u7528\u6237\u5E94\u8BE5\u4E00\u773C\u770B\u51FA\u8FD9\u662F\u4E00\u7BC7\u6559\u7A0B\u6216\u6848\u4F8B\u62C6\u89E3\u3002\n- \u53EF\u4EE5\u589E\u52A0\u7ED3\u6784\u6027\u5757\uFF0C\u4F46\u4E0D\u8981\u9057\u6F0F\u540E\u534A\u6BB5\u5185\u5BB9\u3002\n- \u4F18\u5148\u505A\u201C\u5C01\u9762\u6982\u89C8 -> \u5BFC\u8BED\u6458\u8981 -> \u5206\u7AE0\u8282\u6B63\u6587 -> \u53EF\u9009\u622A\u56FE\u5757\u201D\u3002",
+          "blocks": {
+            "preferredIntroBlocks": [
+              "hero",
+              "part-nav",
+              "lead-quote"
+            ],
+            "optionalIntroBlocks": [],
+            "preferredBodyBlocks": [
+              "section-block",
+              "case-block"
+            ],
+            "optionalBodyBlocks": [
+              "phone-frame"
+            ],
+            "optionalTailBlocks": [
+              "cta-card"
+            ],
+            "imageStrategy": "tutorial-forward"
+          },
+          "fallback": {
+            "includeHero": true,
+            "includePartNav": true,
+            "includeLeadQuote": true,
+            "includePhoneFrame": true,
+            "includeCta": false,
+            "heroVariant": "cover-right",
+            "heroEyebrow": "AI Layout Draft",
+            "galleryCaseLabel": "GALLERY",
+            "galleryTitle": "\u914D\u56FE\u8865\u5145",
+            "preferSectionBlocks": true,
+            "remainingImageStrategy": "sections-first",
+            "maxSectionBlocks": 8
+          },
+          "skillDoc": "---\nname: tutorial-cards-layout\ndescription: \u6559\u7A0B\u5361\u7247\u578B skill\u3002\u5F3A\u8C03\u7AE0\u8282\u7F16\u53F7\u3001\u7ED3\u6784\u5316\u5361\u7247\u3001\u622A\u56FE\u5C55\u793A\u548C\u4FE1\u606F\u626B\u63CF\u6548\u7387\u3002\n---\n\n# Tutorial Cards Layout Skill\n\n\u8FD9\u4E2A skill \u7528\u4E8E\u628A\u6587\u7AE0\u6392\u6210\u201C\u6559\u7A0B\u7CBE\u4FEE\u7A3F\u201D\u7684\u6837\u5B50\u3002\n\n## Guardrails\n\n- \u53EF\u4EE5\u5F3A\u5316\u7ED3\u6784\uFF0C\u4E0D\u53EF\u4EE5\u4E22\u6B63\u6587\n- \u53EF\u4EE5\u7528 hero / part-nav / phone-frame\n- \u6B63\u6587\u4ECD\u4F18\u5148 section-block\n- CTA \u53EA\u80FD\u6309\u9700\u751F\u6210\uFF0C\u4E0D\u80FD\u9ED8\u8BA4\u52A0\n- `section-block` \u91CC\u7684\u7279\u6B8A\u5185\u5BB9\u8981\u5C3D\u91CF\u4FDD\u7559\uFF0C\u5305\u62EC `callout`\u3001\u4EE3\u7801\u5757\u3001\u8868\u683C\u3001\u5D4C\u5957\u5217\u8868\uFF1B\u53EF\u4EE5\u589E\u5F3A\u7ED3\u6784\uFF0C\u4F46\u4E0D\u8981\u628A\u8FD9\u4E9B\u5185\u5BB9\u538B\u5E73\u6210\u666E\u901A\u6BB5\u843D",
+          "examples": [
+            {
+              "name": "tutorial.json",
+              "value": {
+                "articleType": "tutorial",
+                "selection": {
+                  "layoutFamily": "tutorial-cards",
+                  "colorPalette": "ocean-blue"
+                },
+                "resolved": {
+                  "layoutFamily": "tutorial-cards",
+                  "colorPalette": "ocean-blue"
+                },
+                "recommendedLayoutFamily": "tutorial-cards",
+                "recommendedColorPalette": "ocean-blue",
+                "title": "Obsidian \u5165\u95E8\uFF1A\u7ED9\u7B14\u8BB0\u6253\u6807\u7B7E",
+                "summary": "\u50CF\u6559\u7A0B\u7CBE\u4FEE\u7A3F\u4E00\u6837\u7ED3\u6784\u6E05\u6670\u3002",
+                "blocks": [
+                  {
+                    "type": "hero",
+                    "eyebrow": "AI Layout Draft",
+                    "title": "Obsidian \u5165\u95E8\uFF1A\u7ED9\u7B14\u8BB0\u6253\u6807\u7B7E",
+                    "subtitle": "\u8BA9\u5185\u5BB9\u81EA\u5DF1\u8DF3\u51FA\u6765",
+                    "coverImageId": "image-1",
+                    "variant": "cover-right"
+                  },
+                  {
+                    "type": "part-nav",
+                    "items": [
+                      {
+                        "label": "PART 01",
+                        "text": "\u6807\u7B7E\u662F\u4EC0\u4E48"
+                      },
+                      {
+                        "label": "PART 02",
+                        "text": "\u600E\u4E48\u7528"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "section-block",
+                    "sectionIndex": 0,
+                    "sectionLabel": "PART 01",
+                    "title": "\u6807\u7B7E\u662F\u4EC0\u4E48",
+                    "callouts": [
+                      {
+                        "type": "tip",
+                        "title": "\u5148\u7406\u89E3\u518D\u64CD\u4F5C",
+                        "body": "\u6559\u7A0B\u578B\u5E03\u5C40\u53EF\u4EE5\u5F3A\u5316\u7ED3\u6784\uFF0C\u4F46\u539F\u6587\u91CC\u7684\u63D0\u793A\u4FE1\u606F\u4ECD\u5E94\u4F5C\u4E3A callout \u4FDD\u7559\u3002"
+                      }
+                    ],
+                    "subsections": [
+                      {
+                        "title": "\u5E38\u89C1\u8BEF\u533A",
+                        "level": 3,
+                        "callouts": [
+                          {
+                            "type": "note",
+                            "title": "\u6CE8\u610F",
+                            "body": "\u4E0D\u8981\u628A\u6240\u6709\u63D0\u793A\u5185\u5BB9\u90FD\u538B\u5E73\u6210\u666E\u901A\u5B50\u6BB5\u843D\u3002"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "editorial-lite",
+          "manifest": {
+            "id": "editorial-lite",
+            "label": "\u8F7B\u6742\u5FD7\u578B",
+            "order": 3,
+            "version": "2026.03.25-alpha.1",
+            "selectionValue": "editorial-lite",
+            "defaultColorPalette": "graphite-rose",
+            "promptMode": "editorial-lite",
+            "fallbackPolicy": "editorial-flow",
+            "renderProfile": "editorial-lite",
+            "allowedBlocks": [
+              "hero",
+              "part-nav",
+              "lead-quote",
+              "case-block",
+              "section-block",
+              "phone-frame",
+              "cta-card"
+            ],
+            "supportsImages": true,
+            "providerStrategy": "require-ai",
+            "recommendedArticleTypes": [
+              "editorial",
+              "brand-story",
+              "opinion"
+            ],
+            "description": "\u504F\u7F16\u8F91\u611F\u7684\u7559\u767D\u4E0E\u56FE\u6587\u8282\u594F\uFF0C\u9002\u5408\u89C2\u70B9\u3001\u7ECF\u9A8C\u4E0E\u54C1\u724C\u8868\u8FBE\u7C7B\u5185\u5BB9\u3002"
+          },
+          "prompt": "\u4F60\u6B63\u5728\u751F\u6210\u201C\u8F7B\u6742\u5FD7\u578B\u201D\u516C\u4F17\u53F7\u6392\u7248\u3002\n\n\u76EE\u6807\uFF1A\n- \u8BA9\u6587\u7AE0\u66F4\u50CF\u7F16\u8F91\u6392\u7248\u8FC7\u7684\u5185\u5BB9\u7A3F\uFF0C\u800C\u4E0D\u662F\u6559\u7A0B\u6A21\u677F\u3002\n- \u4F18\u5148\u4F53\u73B0\u6807\u9898\u6C14\u8D28\u3001\u5BFC\u8BED\u8282\u594F\u3001\u7559\u767D\u548C\u56FE\u6587\u547C\u5438\u611F\u3002\n- \u5F31\u5316\u6559\u7A0B\u5F0F\u5BFC\u822A\u548C\u624B\u673A\u6846\u3002\n- \u5982\u679C\u539F\u6587\u9002\u5408\uFF0C\u53EF\u7528\u5F3A lead-quote\u3001masthead \u5F0F hero\u3001\u8F83\u8F7B\u7684\u7AE0\u8282\u8282\u594F\u3002\n- \u6B63\u6587\u533A\u5757\u4F9D\u7136\u8981\u4FDD\u771F\uFF0C\u539F\u6587\u91CC\u7684 callout\u3001\u4EE3\u7801\u5757\u3001\u8868\u683C\u3001\u5D4C\u5957\u5217\u8868\u7B49\u7279\u6B8A\u7ED3\u6784\u5E94\u4F18\u5148\u4FDD\u7559\u5728\u5BF9\u5E94 section-block / subsection \u4E2D\u3002\n\n\u98CE\u683C\u539F\u5219\uFF1A\n- \u66F4\u5C11\u6559\u7A0B\u611F\uFF0C\u66F4\u5F3A editorial \u611F\u3002\n- \u4E0D\u8981\u628A\u6BCF\u4E00\u6BB5\u90FD\u5361\u7247\u5316\u3002\n- \u5141\u8BB8\u56FE\u6587\u7A7F\u63D2\uFF0C\u4F46\u4E0D\u727A\u7272\u6B63\u6587\u5B8C\u6574\u6027\u3002",
+          "blocks": {
+            "preferredIntroBlocks": [
+              "hero",
+              "lead-quote"
+            ],
+            "optionalIntroBlocks": [
+              "part-nav"
+            ],
+            "preferredBodyBlocks": [
+              "section-block",
+              "case-block"
+            ],
+            "optionalBodyBlocks": [],
+            "optionalTailBlocks": [
+              "cta-card"
+            ],
+            "imageStrategy": "editorial-forward"
+          },
+          "fallback": {
+            "includeHero": true,
+            "includePartNav": false,
+            "includeLeadQuote": true,
+            "includePhoneFrame": false,
+            "includeCta": false,
+            "heroVariant": "cover-left",
+            "heroEyebrow": "Editorial Layout",
+            "galleryCaseLabel": "IMAGES",
+            "galleryTitle": "\u56FE\u50CF\u6458\u5F55",
+            "preferSectionBlocks": true,
+            "remainingImageStrategy": "sections-first",
+            "maxSectionBlocks": 5
+          },
+          "skillDoc": "---\nname: editorial-lite-layout\ndescription: \u8F7B\u6742\u5FD7\u578B skill\u3002\u5F3A\u8C03\u5BFC\u8BED\u3001\u7559\u767D\u3001\u7F16\u8F91\u611F\u8282\u594F\u548C\u66F4\u514B\u5236\u7684\u56FE\u6587\u5173\u7CFB\u3002\n---\n\n# Editorial Lite Layout Skill\n\n\u8FD9\u4E2A skill \u7528\u4E8E\u628A\u6587\u7AE0\u6392\u6210\u201C\u8F7B\u6742\u5FD7\u578B\u201D\u7684\u5185\u5BB9\u7A3F\u3002\n\n## Guardrails\n\n- \u5F3A\u8C03\u8282\u594F\u548C\u7559\u767D\uFF0C\u4E0D\u8981\u6BCF\u6BB5\u90FD\u5361\u7247\u5316\n- \u4E0D\u9ED8\u8BA4\u6559\u7A0B\u5BFC\u822A\n- \u4E0D\u9ED8\u8BA4\u624B\u673A\u58F3\n- lead-quote \u53EF\u4EE5\u66F4\u5F3A\uFF0C\u4F46\u4E0D\u80FD\u6539\u5199\u89C2\u70B9\n- `section-block` \u4F9D\u7136\u8981\u627F\u62C5\u6B63\u6587\u4FDD\u771F\u804C\u8D23\uFF1B\u539F\u6587\u91CC\u7684 `callout`\u3001\u4EE3\u7801\u5757\u3001\u8868\u683C\u3001\u5D4C\u5957\u5217\u8868\u7B49\u7279\u6B8A\u7ED3\u6784\u5E94\u5C3D\u91CF\u4FDD\u7559\uFF0C\u4E0D\u8981\u4E3A\u4E86 editorial \u8282\u594F\u628A\u5B83\u4EEC\u538B\u5E73\u6210\u666E\u901A\u6587\u5B57",
+          "examples": [
+            {
+              "name": "editorial.json",
+              "value": {
+                "articleType": "article",
+                "selection": {
+                  "layoutFamily": "editorial-lite",
+                  "colorPalette": "graphite-rose"
+                },
+                "resolved": {
+                  "layoutFamily": "editorial-lite",
+                  "colorPalette": "graphite-rose"
+                },
+                "recommendedLayoutFamily": "editorial-lite",
+                "recommendedColorPalette": "graphite-rose",
+                "title": "\u5199\u4F5C\u7ECF\u9A8C\u590D\u76D8",
+                "summary": "\u66F4\u6709\u547C\u5438\u611F\u3001\u66F4\u50CF\u7F16\u8F91\u7A3F\u3002",
+                "blocks": [
+                  {
+                    "type": "hero",
+                    "eyebrow": "Editorial Layout",
+                    "title": "\u5199\u4F5C\u7ECF\u9A8C\u590D\u76D8",
+                    "subtitle": "\u66F4\u8F7B\u3001\u66F4\u6709\u547C\u5438\u611F\u7684\u7248\u5F0F",
+                    "coverImageId": "image-1",
+                    "variant": "cover-left"
+                  },
+                  {
+                    "type": "lead-quote",
+                    "text": "\u5199\u4F5C\u7684\u771F\u6B63\u96BE\u70B9\uFF0C\u4ECE\u6765\u4E0D\u662F\u8868\u8FBE\uFF0C\u800C\u662F\u5220\u6539\u3002",
+                    "note": "\u6458\u81EA\u539F\u6587\u89C2\u70B9\u53E5"
+                  },
+                  {
+                    "type": "section-block",
+                    "sectionIndex": 0,
+                    "title": "\u5220\u6539\u6BD4\u843D\u7B14\u66F4\u91CD\u8981",
+                    "callouts": [
+                      {
+                        "type": "note",
+                        "title": "\u7F16\u8005\u6309",
+                        "body": "\u5373\u4F7F\u662F\u8F7B\u6742\u5FD7\u578B\uFF0C\u4E5F\u5E94\u4FDD\u7559\u539F\u6587\u91CC\u7684\u63D0\u793A\u3001\u8BF4\u660E\u548C\u6CE8\u8BB0\uFF0C\u800C\u4E0D\u662F\u628A\u5B83\u4EEC\u6539\u5199\u6210\u666E\u901A\u6B63\u6587\u3002"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    };
+  }
+});
+
+// services/ai-layout-runtime/registry.js
+var require_registry = __commonJS({
+  "services/ai-layout-runtime/registry.js"(exports2, module2) {
+    var generatedSkills = require_generated_skills();
+    var cachedRegistry = null;
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+    function loadAiLayoutSkillRegistry() {
+      if (cachedRegistry)
+        return cachedRegistry;
+      cachedRegistry = {
+        root: "embedded://ai-layout-skills",
+        shared: clone(generatedSkills.shared),
+        skills: clone(generatedSkills.skills)
+      };
+      return cachedRegistry;
+    }
+    function getAiLayoutSkillById(id) {
+      const registry = loadAiLayoutSkillRegistry();
+      return registry.skills.find((skill) => skill.id === id) || null;
+    }
+    function getAiLayoutSkillList() {
+      return loadAiLayoutSkillRegistry().skills.slice();
+    }
+    function getAiLayoutSharedResources() {
+      return loadAiLayoutSkillRegistry().shared;
+    }
+    module2.exports = {
+      loadAiLayoutSkillRegistry,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources
+    };
+  }
+});
+
+// services/ai-layout-skill-bundle.js
+var require_ai_layout_skill_bundle = __commonJS({
+  "services/ai-layout-skill-bundle.js"(exports2, module2) {
+    var {
+      loadAiLayoutSkillRegistry,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources
+    } = require_registry();
+    var AI_LAYOUT_SELECTION_AUTO2 = "auto";
+    var registry = loadAiLayoutSkillRegistry();
+    var shared = getAiLayoutSharedResources();
+    var AI_LAYOUT_SKILL_VERSION = shared.version || "2026.03.25-alpha.1";
+    var AI_LAYOUT_FAMILIES = getAiLayoutSkillList().map((skill) => skill.id);
+    var _a;
+    var AI_LAYOUT_COLOR_PALETTES = (((_a = shared.colorPalettes) == null ? void 0 : _a.colorPalettes) || []).map((item) => item.id);
+    var _a2;
+    var AI_LAYOUT_ALLOWED_BLOCKS = (((_a2 = shared.blockCatalog) == null ? void 0 : _a2.blocks) || []).map((block) => ({ ...block }));
+    var _a3;
+    var AI_LAYOUT_OUTPUT_FIELDS = Array.isArray((_a3 = shared.blockCatalog) == null ? void 0 : _a3.outputFields) ? shared.blockCatalog.outputFields.slice() : [
+      "articleType",
+      "selection",
+      "resolved",
+      "recommendedLayoutFamily",
+      "recommendedColorPalette",
+      "title",
+      "summary",
+      "blocks"
+    ];
+    var AI_LAYOUT_SKILL_SYSTEM_LINES = [
+      "\u4F60\u662F\u5FAE\u4FE1\u516C\u4F17\u53F7\u6392\u7248\u52A9\u624B\u3002",
+      "\u4F60\u7684\u804C\u8D23\u662F\u628A\u6587\u7AE0\u5185\u5BB9\u6620\u5C04\u4E3A\u7ED3\u6784\u5316\u7684\u6392\u7248 JSON\u3002",
+      "\u4E0D\u8981\u8F93\u51FA Markdown\uFF0C\u4E0D\u8981\u8F93\u51FA HTML\uFF0C\u4E0D\u8981\u89E3\u91CA\uFF0C\u53EA\u8F93\u51FA\u4E00\u4E2A JSON \u5BF9\u8C61\u3002",
+      `\u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B block type: ${AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type).join(", ")}\u3002`,
+      `layoutFamily \u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B\u503C: ${AI_LAYOUT_FAMILIES.join(", ")}\u3002`,
+      `colorPalette \u53EA\u5141\u8BB8\u4F7F\u7528\u8FD9\u4E9B\u503C: ${AI_LAYOUT_COLOR_PALETTES.join(", ")}\u3002`,
+      "block \u5185\u4E0D\u8981\u675C\u64B0\u56FE\u7247 URL\uFF0C\u53EA\u80FD\u4F7F\u7528\u63D0\u4F9B\u7684 image id\u3002",
+      "\u5C3D\u91CF\u4FDD\u7559\u539F\u6587\u4FE1\u606F\uFF0C\u4E0D\u8981\u6539\u5199\u4F5C\u8005\u89C2\u70B9\uFF0C\u4E0D\u8981\u7F16\u9020\u6570\u636E\u3002",
+      "\u4F18\u5148\u8986\u76D6\u5168\u6587\u4E3B\u8981\u7AE0\u8282\uFF0C\u4FDD\u771F\u4F18\u5148\u4E8E\u82B1\u54E8\u7F16\u6392\u3002",
+      "selection \u8868\u793A\u7528\u6237\u5F53\u524D\u9009\u62E9\uFF1Bresolved \u8868\u793A\u672C\u6B21\u6700\u7EC8\u91C7\u7528\u7684\u5E03\u5C40\u548C\u989C\u8272\u3002",
+      "\u5982\u679C selection \u4E3A auto\uFF0C\u8BF7\u6839\u636E\u5185\u5BB9\u63A8\u8350 recommendedLayoutFamily \u548C recommendedColorPalette\uFF0C\u5E76\u5199\u5165 resolved\u3002",
+      "\u5982\u679C selection \u5DF2\u6307\u5B9A\u5177\u4F53\u5E03\u5C40\u6216\u989C\u8272\uFF0Cresolved \u5FC5\u987B\u5C0A\u91CD\u8BE5\u9009\u62E9\u3002",
+      "AI \u7F16\u6392\u6700\u7EC8\u4F1A\u88AB\u6E32\u67D3\u4E3A\u5FAE\u4FE1\u5B89\u5168 HTML\uFF0C\u4E0D\u80FD\u4F9D\u8D56\u989D\u5916 style \u6807\u7B7E\u6216 class \u9009\u62E9\u5668\u3002"
+    ];
+    function getAiLayoutBlockConstraintLines() {
+      return AI_LAYOUT_ALLOWED_BLOCKS.map((block) => `- ${block.type}: ${block.fields.join(", ")}`);
+    }
+    function createSchemaIssue(path, message, fatal = false) {
+      return {
+        path,
+        message,
+        fatal: fatal === true
+      };
+    }
+    function normalizeBlockFieldKey(field) {
+      const normalized = String(field || "").trim();
+      if (!normalized)
+        return normalized;
+      if (normalized === "items[{label,text}]")
+        return "items";
+      const bracketIndex = normalized.indexOf("[");
+      return bracketIndex === -1 ? normalized : normalized.slice(0, bracketIndex);
+    }
+    function validateAiLayoutPayload(rawLayout) {
+      const issues = [];
+      const allowedBlockTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => block.type));
+      const allowedLayoutFamilies = new Set(AI_LAYOUT_FAMILIES);
+      const allowedColorPalettes = new Set(AI_LAYOUT_COLOR_PALETTES);
+      const fieldMap = new Map(AI_LAYOUT_ALLOWED_BLOCKS.map((block) => [block.type, /* @__PURE__ */ new Set(["type", ...block.fields.map((field) => normalizeBlockFieldKey(field)).filter(Boolean)])]));
+      if (fieldMap.has("section-block")) {
+        fieldMap.get("section-block").add("callouts");
+      }
+      const validateCalloutArray = (value, path) => {
+        if (!Array.isArray(value)) {
+          issues.push(createSchemaIssue(path, `${path.split(".").pop()} \u5FC5\u987B\u662F\u6570\u7EC4\u3002`, false));
+          return;
+        }
+        value.forEach((callout, calloutIndex) => {
+          if (!callout || typeof callout !== "object" || Array.isArray(callout)) {
+            issues.push(createSchemaIssue(`${path}[${calloutIndex}]`, "callout \u5FC5\u987B\u662F\u5BF9\u8C61\u3002", false));
+            return;
+          }
+          if ("type" in callout && typeof callout.type !== "string") {
+            issues.push(createSchemaIssue(`${path}[${calloutIndex}].type`, "callout.type \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+          }
+          if ("title" in callout && typeof callout.title !== "string") {
+            issues.push(createSchemaIssue(`${path}[${calloutIndex}].title`, "callout.title \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+          }
+          if ("body" in callout && typeof callout.body !== "string") {
+            issues.push(createSchemaIssue(`${path}[${calloutIndex}].body`, "callout.body \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+          }
+        });
+      };
+      if (!rawLayout || typeof rawLayout !== "object" || Array.isArray(rawLayout)) {
+        issues.push(createSchemaIssue("$", "\u9876\u5C42\u5FC5\u987B\u662F\u4E00\u4E2A JSON \u5BF9\u8C61\u3002", true));
+        return {
+          isValid: false,
+          fatal: true,
+          issueCount: issues.length,
+          issues
+        };
+      }
+      const requiredTopLevelFields = ["articleType", "selection", "resolved", "title", "summary", "blocks"];
+      requiredTopLevelFields.forEach((field) => {
+        if (!(field in rawLayout)) {
+          issues.push(createSchemaIssue(`$.${field}`, `\u7F3A\u5C11\u9876\u5C42\u5B57\u6BB5 ${field}\u3002`, field === "blocks"));
+          return;
+        }
+        if (field === "blocks") {
+          if (!Array.isArray(rawLayout.blocks)) {
+            issues.push(createSchemaIssue("$.blocks", "blocks \u5FC5\u987B\u662F\u6570\u7EC4\u3002", true));
+          }
+          return;
+        }
+        if ((field === "selection" || field === "resolved") && (typeof rawLayout[field] !== "object" || !rawLayout[field] || Array.isArray(rawLayout[field]))) {
+          issues.push(createSchemaIssue(`$.${field}`, `${field} \u5FC5\u987B\u662F\u5BF9\u8C61\u3002`, true));
+          return;
+        }
+        if (field !== "selection" && field !== "resolved" && typeof rawLayout[field] !== "string") {
+          issues.push(createSchemaIssue(`$.${field}`, `${field} \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002`, false));
+        }
+      });
+      if (rawLayout.selection && typeof rawLayout.selection === "object" && !Array.isArray(rawLayout.selection)) {
+        const selectionLayoutFamily = String(rawLayout.selection.layoutFamily || "").trim();
+        const selectionColorPalette = String(rawLayout.selection.colorPalette || "").trim();
+        if (!selectionLayoutFamily || selectionLayoutFamily !== AI_LAYOUT_SELECTION_AUTO2 && !allowedLayoutFamilies.has(selectionLayoutFamily)) {
+          issues.push(createSchemaIssue("$.selection.layoutFamily", "selection.layoutFamily \u5FC5\u987B\u662F auto \u6216\u5408\u6CD5\u7684 layoutFamily\u3002", true));
+        }
+        if (!selectionColorPalette || selectionColorPalette !== AI_LAYOUT_SELECTION_AUTO2 && !allowedColorPalettes.has(selectionColorPalette)) {
+          issues.push(createSchemaIssue("$.selection.colorPalette", "selection.colorPalette \u5FC5\u987B\u662F auto \u6216\u5408\u6CD5\u7684 colorPalette\u3002", true));
+        }
+      }
+      if (rawLayout.resolved && typeof rawLayout.resolved === "object" && !Array.isArray(rawLayout.resolved)) {
+        const resolvedLayoutFamily = String(rawLayout.resolved.layoutFamily || "").trim();
+        const resolvedColorPalette = String(rawLayout.resolved.colorPalette || "").trim();
+        if (!allowedLayoutFamilies.has(resolvedLayoutFamily)) {
+          issues.push(createSchemaIssue("$.resolved.layoutFamily", "resolved.layoutFamily \u5FC5\u987B\u662F\u5408\u6CD5\u7684 layoutFamily\u3002", true));
+        }
+        if (!allowedColorPalettes.has(resolvedColorPalette)) {
+          issues.push(createSchemaIssue("$.resolved.colorPalette", "resolved.colorPalette \u5FC5\u987B\u662F\u5408\u6CD5\u7684 colorPalette\u3002", true));
+        }
+      }
+      if ("recommendedLayoutFamily" in rawLayout) {
+        const recommendedLayoutFamily = String(rawLayout.recommendedLayoutFamily || "").trim();
+        if (recommendedLayoutFamily && !allowedLayoutFamilies.has(recommendedLayoutFamily)) {
+          issues.push(createSchemaIssue("$.recommendedLayoutFamily", "recommendedLayoutFamily \u5FC5\u987B\u662F\u5408\u6CD5\u7684 layoutFamily\u3002", false));
+        }
+      }
+      if ("recommendedColorPalette" in rawLayout) {
+        const recommendedColorPalette = String(rawLayout.recommendedColorPalette || "").trim();
+        if (recommendedColorPalette && !allowedColorPalettes.has(recommendedColorPalette)) {
+          issues.push(createSchemaIssue("$.recommendedColorPalette", "recommendedColorPalette \u5FC5\u987B\u662F\u5408\u6CD5\u7684 colorPalette\u3002", false));
+        }
+      }
+      if (!Array.isArray(rawLayout.blocks)) {
+        return {
+          isValid: issues.length === 0,
+          fatal: issues.some((issue) => issue.fatal),
+          issueCount: issues.length,
+          issues
+        };
+      }
+      rawLayout.blocks.forEach((block, index) => {
+        const path = `$.blocks[${index}]`;
+        if (!block || typeof block !== "object" || Array.isArray(block)) {
+          issues.push(createSchemaIssue(path, "block \u5FC5\u987B\u662F\u5BF9\u8C61\u3002", true));
+          return;
+        }
+        if (typeof block.type !== "string" || !block.type.trim()) {
+          issues.push(createSchemaIssue(`${path}.type`, "block \u7F3A\u5C11\u5408\u6CD5\u7684 type\u3002", true));
+          return;
+        }
+        if (!allowedBlockTypes.has(block.type)) {
+          issues.push(createSchemaIssue(`${path}.type`, `\u4E0D\u652F\u6301\u7684 block type: ${block.type}\u3002`, true));
+          return;
+        }
+        const allowedFields = fieldMap.get(block.type) || /* @__PURE__ */ new Set(["type"]);
+        Object.keys(block).forEach((key) => {
+          if (!allowedFields.has(key)) {
+            issues.push(createSchemaIssue(`${path}.${key}`, `${block.type} \u4E0D\u652F\u6301\u5B57\u6BB5 ${key}\u3002`, false));
+          }
+        });
+        if (block.type === "hero" && typeof block.title !== "string") {
+          issues.push(createSchemaIssue(`${path}.title`, "hero.title \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+        }
+        if (block.type === "part-nav") {
+          if (!Array.isArray(block.items)) {
+            issues.push(createSchemaIssue(`${path}.items`, "part-nav.items \u5FC5\u987B\u662F\u6570\u7EC4\u3002", true));
+          } else {
+            block.items.forEach((item, itemIndex) => {
+              if (!item || typeof item !== "object") {
+                issues.push(createSchemaIssue(`${path}.items[${itemIndex}]`, "part-nav item \u5FC5\u987B\u662F\u5BF9\u8C61\u3002", false));
+                return;
+              }
+              if (typeof item.label !== "string" || typeof item.text !== "string") {
+                issues.push(createSchemaIssue(`${path}.items[${itemIndex}]`, "part-nav item \u9700\u8981 label \u548C text \u5B57\u7B26\u4E32\u3002", false));
+              }
+            });
+          }
+        }
+        if (block.type === "lead-quote" && typeof block.text !== "string") {
+          issues.push(createSchemaIssue(`${path}.text`, "lead-quote.text \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+        }
+        if (block.type === "case-block") {
+          if ("bullets" in block && !Array.isArray(block.bullets)) {
+            issues.push(createSchemaIssue(`${path}.bullets`, "case-block.bullets \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+          if ("imageIds" in block && !Array.isArray(block.imageIds)) {
+            issues.push(createSchemaIssue(`${path}.imageIds`, "case-block.imageIds \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+        }
+        if (block.type === "section-block") {
+          const isNumber = Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0;
+          const isNumericString = typeof block.sectionIndex === "string" && /^\d+$/.test(block.sectionIndex.trim());
+          if (!isNumber && !isNumericString) {
+            issues.push(createSchemaIssue(`${path}.sectionIndex`, "section-block.sectionIndex \u5FC5\u987B\u662F\u975E\u8D1F\u6574\u6570\u3002", true));
+          }
+          if ("sectionLabel" in block && typeof block.sectionLabel !== "string") {
+            issues.push(createSchemaIssue(`${path}.sectionLabel`, "section-block.sectionLabel \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+          }
+          if ("headingLevel" in block && (!Number.isInteger(block.headingLevel) || block.headingLevel < 2 || block.headingLevel > 6)) {
+            issues.push(createSchemaIssue(`${path}.headingLevel`, "section-block.headingLevel \u5FC5\u987B\u662F 2 \u5230 6 \u4E4B\u95F4\u7684\u6574\u6570\u3002", false));
+          }
+          if ("title" in block && typeof block.title !== "string") {
+            issues.push(createSchemaIssue(`${path}.title`, "section-block.title \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+          }
+          if ("paragraphs" in block && !Array.isArray(block.paragraphs)) {
+            issues.push(createSchemaIssue(`${path}.paragraphs`, "section-block.paragraphs \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+          if ("bulletGroups" in block) {
+            if (!Array.isArray(block.bulletGroups)) {
+              issues.push(createSchemaIssue(`${path}.bulletGroups`, "section-block.bulletGroups \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+            } else {
+              block.bulletGroups.forEach((group, groupIndex) => {
+                if (!Array.isArray(group) || group.some((item) => typeof item !== "string")) {
+                  issues.push(createSchemaIssue(`${path}.bulletGroups[${groupIndex}]`, "section-block.bulletGroups \u4E2D\u7684\u6BCF\u7EC4\u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u6570\u7EC4\u3002", false));
+                }
+              });
+            }
+          }
+          if ("callouts" in block) {
+            validateCalloutArray(block.callouts, `${path}.callouts`);
+          }
+          if ("subsections" in block) {
+            if (!Array.isArray(block.subsections)) {
+              issues.push(createSchemaIssue(`${path}.subsections`, "section-block.subsections \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+            } else {
+              block.subsections.forEach((subsection, subsectionIndex) => {
+                if (!subsection || typeof subsection !== "object" || Array.isArray(subsection)) {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}]`, "subsection \u5FC5\u987B\u662F\u5BF9\u8C61\u3002", false));
+                  return;
+                }
+                if (typeof subsection.title !== "string") {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].title`, "subsection.title \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", false));
+                }
+                if ("level" in subsection && (!Number.isInteger(subsection.level) || subsection.level < 3 || subsection.level > 6)) {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].level`, "subsection.level \u5FC5\u987B\u662F 3 \u5230 6 \u4E4B\u95F4\u7684\u6574\u6570\u3002", false));
+                }
+                if ("paragraphs" in subsection && !Array.isArray(subsection.paragraphs)) {
+                  issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].paragraphs`, "subsection.paragraphs \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+                }
+                if ("bulletGroups" in subsection) {
+                  if (!Array.isArray(subsection.bulletGroups)) {
+                    issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].bulletGroups`, "subsection.bulletGroups \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+                  } else {
+                    subsection.bulletGroups.forEach((group, groupIndex) => {
+                      if (!Array.isArray(group) || group.some((item) => typeof item !== "string")) {
+                        issues.push(createSchemaIssue(`${path}.subsections[${subsectionIndex}].bulletGroups[${groupIndex}]`, "subsection.bulletGroups \u4E2D\u7684\u6BCF\u7EC4\u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u6570\u7EC4\u3002", false));
+                      }
+                    });
+                  }
+                }
+                if ("callouts" in subsection) {
+                  validateCalloutArray(subsection.callouts, `${path}.subsections[${subsectionIndex}].callouts`);
+                }
+              });
+            }
+          }
+          if ("imageIds" in block && !Array.isArray(block.imageIds)) {
+            issues.push(createSchemaIssue(`${path}.imageIds`, "section-block.imageIds \u5FC5\u987B\u662F\u6570\u7EC4\u3002", false));
+          }
+        }
+        if (block.type === "phone-frame" && typeof block.imageId !== "string") {
+          issues.push(createSchemaIssue(`${path}.imageId`, "phone-frame.imageId \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002", true));
+        }
+      });
+      const fatal = issues.some((issue) => issue.fatal);
+      return {
+        isValid: issues.length === 0,
+        fatal,
+        issueCount: issues.length,
+        issues
+      };
+    }
+    function getAiLayoutTemplate() {
+      return JSON.parse(JSON.stringify(shared.template));
+    }
+    module2.exports = {
+      AI_LAYOUT_SKILL_VERSION,
+      AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
+      AI_LAYOUT_FAMILIES,
+      AI_LAYOUT_COLOR_PALETTES,
+      AI_LAYOUT_ALLOWED_BLOCKS,
+      AI_LAYOUT_SKILL_SYSTEM_LINES,
+      AI_LAYOUT_OUTPUT_FIELDS,
+      getAiLayoutBlockConstraintLines,
+      getAiLayoutTemplate,
+      validateAiLayoutPayload,
+      getAiLayoutSkillRegistry: loadAiLayoutSkillRegistry,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources
+    };
+  }
+});
+
+// services/ai-layout.js
+var require_ai_layout = __commonJS({
+  "services/ai-layout.js"(exports2, module2) {
+    var {
+      AI_LAYOUT_SKILL_VERSION,
+      AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
+      AI_LAYOUT_FAMILIES,
+      AI_LAYOUT_COLOR_PALETTES,
+      AI_LAYOUT_ALLOWED_BLOCKS,
+      AI_LAYOUT_SKILL_SYSTEM_LINES,
+      AI_LAYOUT_OUTPUT_FIELDS,
+      getAiLayoutBlockConstraintLines,
+      getAiLayoutSkillById,
+      getAiLayoutSkillList,
+      getAiLayoutSharedResources,
+      validateAiLayoutPayload
+    } = require_ai_layout_skill_bundle();
+    var AI_LAYOUT_SCHEMA_VERSION2 = 1;
+    var AI_PROVIDER_KINDS2 = {
+      OPENAI_COMPATIBLE: "openai-compatible",
+      GEMINI: "gemini",
+      ANTHROPIC: "anthropic"
+    };
+    var MAX_LAYOUT_BLOCKS = 24;
+    var MAX_PART_NAV_ITEMS = 6;
+    var MAX_CASE_BLOCK_BULLETS = 6;
+    var MAX_CASE_BLOCK_IMAGE_IDS = 4;
+    var AI_LAYOUT_DEFAULT_FAMILY = "source-first";
+    var AI_LAYOUT_DEFAULT_COLOR_PALETTE = "tech-green";
+    var AI_LAYOUT_IMPLEMENTED_FAMILIES = new Set(AI_LAYOUT_FAMILIES);
+    var AI_LAYOUT_RESERVED_FAMILY_FALLBACKS = {};
+    var AI_LAYOUT_SHARED_RESOURCES = getAiLayoutSharedResources();
+    var AI_LAYOUT_SKILL_LIST = getAiLayoutSkillList();
+    var AI_LAYOUT_FAMILY_DEFS = AI_LAYOUT_SKILL_LIST.reduce((acc, skill) => {
+      acc[skill.id] = {
+        id: skill.id,
+        label: skill.manifest.label,
+        description: skill.manifest.description || "",
+        version: skill.manifest.version,
+        manifest: skill.manifest,
+        prompt: skill.prompt,
+        blocks: skill.blocks,
+        fallback: skill.fallback
+      };
+      return acc;
+    }, {});
+    var _a;
+    var AI_COLOR_PALETTES = (((_a = AI_LAYOUT_SHARED_RESOURCES.colorPalettes) == null ? void 0 : _a.colorPalettes) || []).reduce((acc, palette) => {
+      acc[palette.id] = {
+        id: palette.id,
+        label: palette.label,
+        description: palette.description || "",
+        recommendedFor: Array.isArray(palette.recommendedFor) ? palette.recommendedFor.slice() : [],
+        tokens: { ...palette.tokens || {} }
+      };
+      return acc;
+    }, {});
+    var AI_WECHAT_SAFE_STYLE_PRIMITIVES = AI_LAYOUT_SHARED_RESOURCES.wechatSafeStylePrimitives || {
+      typography: {},
+      image: {},
+      profiles: {},
+      sectionLabels: {}
+    };
+    var AI_STYLE_PACKS = AI_COLOR_PALETTES;
+    var AI_PROVIDER_KIND_DEFAULTS = {
+      [AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE]: {
+        baseUrl: "https://api.openai.com/v1",
+        model: "gpt-4.1-mini"
+      },
+      [AI_PROVIDER_KINDS2.GEMINI]: {
+        baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+        model: "gemini-2.5-flash"
+      },
+      [AI_PROVIDER_KINDS2.ANTHROPIC]: {
+        baseUrl: "https://api.anthropic.com/v1",
+        model: "claude-3-5-haiku-latest"
+      }
+    };
+    function createDefaultAiSettings2() {
+      return {
+        enabled: true,
+        defaultProviderId: "",
+        defaultLayoutFamily: AI_LAYOUT_SELECTION_AUTO2,
+        defaultColorPalette: AI_LAYOUT_SELECTION_AUTO2,
+        customColor: "#7c3aed",
+        includeImagesInLayout: true,
+        requestTimeoutMs: 45e3,
+        providers: [],
+        articleLayoutsByPath: {}
+      };
+    }
+    function clampNumber(value, fallback, min, max) {
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed))
+        return fallback;
+      return Math.min(max, Math.max(min, Math.round(parsed)));
+    }
+    function normalizeHexColor2(value, fallback = "#7c3aed") {
+      const raw = String(value || "").trim();
+      if (/^#[0-9a-f]{6}$/i.test(raw))
+        return raw.toLowerCase();
+      if (/^[0-9a-f]{6}$/i.test(raw))
+        return `#${raw.toLowerCase()}`;
+      return fallback;
+    }
+    function hexToRgb(hex) {
+      const normalized = normalizeHexColor2(hex).slice(1);
+      return {
+        r: parseInt(normalized.slice(0, 2), 16),
+        g: parseInt(normalized.slice(2, 4), 16),
+        b: parseInt(normalized.slice(4, 6), 16)
+      };
+    }
+    function rgbToHex({ r, g, b }) {
+      return `#${[r, g, b].map((channel) => {
+        const clamped = Math.max(0, Math.min(255, Math.round(channel)));
+        return clamped.toString(16).padStart(2, "0");
+      }).join("")}`;
+    }
+    function mixHexColor(color, target, amount) {
+      const sourceRgb = hexToRgb(color);
+      const targetRgb = hexToRgb(target);
+      return rgbToHex({
+        r: sourceRgb.r + (targetRgb.r - sourceRgb.r) * amount,
+        g: sourceRgb.g + (targetRgb.g - sourceRgb.g) * amount,
+        b: sourceRgb.b + (targetRgb.b - sourceRgb.b) * amount
+      });
+    }
+    function createColorPaletteFromAccent(accentColor, { id = "custom", label = "\u81EA\u5B9A\u4E49" } = {}) {
+      const accent = normalizeHexColor2(accentColor);
+      return {
+        id,
+        label,
+        description: "AI \u7F16\u6392\u72EC\u7ACB\u81EA\u5B9A\u4E49\u8272\uFF0C\u4F1A\u6839\u636E\u4F60\u9009\u62E9\u7684\u989C\u8272\u81EA\u52A8\u6D3E\u751F\u6DF1\u8272\u3001\u6D45\u5E95\u548C\u8FB9\u6846\u3002",
+        recommendedFor: ["custom"],
+        tokens: {
+          accent,
+          accentDeep: mixHexColor(accent, "#000000", 0.28),
+          accentSoft: mixHexColor(accent, "#ffffff", 0.9),
+          text: mixHexColor(accent, "#1f2937", 0.78),
+          muted: mixHexColor(accent, "#6b7280", 0.72),
+          border: mixHexColor(accent, "#ffffff", 0.78),
+          surface: "#ffffff",
+          surfaceSoft: mixHexColor(accent, "#ffffff", 0.96),
+          quoteBg: mixHexColor(accent, "#ffffff", 0.93)
+        }
+      };
+    }
+    function normalizeLayoutFamily(value, fallback = AI_LAYOUT_SELECTION_AUTO2) {
+      const normalized = coerceString(value);
+      if (normalized === AI_LAYOUT_SELECTION_AUTO2)
+        return AI_LAYOUT_SELECTION_AUTO2;
+      return AI_LAYOUT_FAMILY_DEFS[normalized] ? normalized : fallback;
+    }
+    function normalizeColorPalette(value, fallback = AI_LAYOUT_SELECTION_AUTO2) {
+      const normalized = coerceString(value);
+      if (normalized === AI_LAYOUT_SELECTION_AUTO2)
+        return AI_LAYOUT_SELECTION_AUTO2;
+      return AI_COLOR_PALETTES[normalized] ? normalized : fallback;
+    }
+    function normalizeResolvedLayoutFamily(value, fallback = AI_LAYOUT_DEFAULT_FAMILY) {
+      const normalized = coerceString(value);
+      if (!normalized)
+        return fallback;
+      if (AI_LAYOUT_IMPLEMENTED_FAMILIES.has(normalized))
+        return normalized;
+      if (AI_LAYOUT_RESERVED_FAMILY_FALLBACKS[normalized]) {
+        return AI_LAYOUT_RESERVED_FAMILY_FALLBACKS[normalized];
+      }
+      return AI_LAYOUT_IMPLEMENTED_FAMILIES.has(fallback) ? fallback : AI_LAYOUT_DEFAULT_FAMILY;
+    }
+    function normalizeResolvedColorPalette(value, fallback = AI_LAYOUT_DEFAULT_COLOR_PALETTE) {
+      const normalized = coerceString(value);
+      if (AI_COLOR_PALETTES[normalized])
+        return normalized;
+      return AI_COLOR_PALETTES[fallback] ? fallback : AI_LAYOUT_DEFAULT_COLOR_PALETTE;
+    }
+    function normalizeAutoRecommendedColorPalette(value, fallback = AI_LAYOUT_DEFAULT_COLOR_PALETTE) {
+      const normalized = normalizeResolvedColorPalette(value, fallback);
+      if (normalized === "custom") {
+        const fallbackPalette = normalizeResolvedColorPalette(fallback, AI_LAYOUT_DEFAULT_COLOR_PALETTE);
+        return fallbackPalette === "custom" ? AI_LAYOUT_DEFAULT_COLOR_PALETTE : fallbackPalette;
+      }
+      return normalized;
+    }
+    function normalizeLayoutSelection2(raw = {}, fallback = {}) {
+      var _a2, _b, _c, _d, _e, _f;
+      const candidate = typeof raw === "string" ? AI_COLOR_PALETTES[raw] ? { colorPalette: raw } : AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {} : raw;
+      return {
+        layoutFamily: normalizeLayoutFamily(
+          (_c = (_b = (_a2 = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a2 : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
+          normalizeLayoutFamily(fallback == null ? void 0 : fallback.layoutFamily, AI_LAYOUT_SELECTION_AUTO2)
+        ),
+        colorPalette: normalizeColorPalette(
+          (_f = (_e = (_d = candidate == null ? void 0 : candidate.colorPalette) != null ? _d : candidate == null ? void 0 : candidate.palette) != null ? _e : candidate == null ? void 0 : candidate.stylePack) != null ? _f : fallback == null ? void 0 : fallback.colorPalette,
+          normalizeColorPalette(fallback == null ? void 0 : fallback.colorPalette, AI_LAYOUT_SELECTION_AUTO2)
+        )
+      };
+    }
+    function normalizeResolvedSelection(raw = {}, fallback = {}) {
+      var _a2, _b, _c, _d, _e, _f;
+      const candidate = typeof raw === "string" ? AI_COLOR_PALETTES[raw] ? { colorPalette: raw } : AI_LAYOUT_FAMILY_DEFS[raw] ? { layoutFamily: raw } : {} : raw;
+      return {
+        layoutFamily: normalizeResolvedLayoutFamily(
+          (_c = (_b = (_a2 = candidate == null ? void 0 : candidate.layoutFamily) != null ? _a2 : candidate == null ? void 0 : candidate.layout) != null ? _b : candidate == null ? void 0 : candidate.family) != null ? _c : fallback == null ? void 0 : fallback.layoutFamily,
+          normalizeResolvedLayoutFamily(fallback == null ? void 0 : fallback.layoutFamily, AI_LAYOUT_DEFAULT_FAMILY)
+        ),
+        colorPalette: normalizeResolvedColorPalette(
+          (_f = (_e = (_d = candidate == null ? void 0 : candidate.colorPalette) != null ? _d : candidate == null ? void 0 : candidate.palette) != null ? _e : candidate == null ? void 0 : candidate.stylePack) != null ? _f : fallback == null ? void 0 : fallback.colorPalette,
+          normalizeResolvedColorPalette(fallback == null ? void 0 : fallback.colorPalette, AI_LAYOUT_DEFAULT_COLOR_PALETTE)
+        )
+      };
+    }
+    function getArticleLayoutSelectionKey(selection = {}) {
+      const normalized = normalizeLayoutSelection2(selection);
+      return `${normalized.layoutFamily || AI_LAYOUT_SELECTION_AUTO2}::${normalized.colorPalette || AI_LAYOUT_SELECTION_AUTO2}`;
+    }
+    function getLayoutFamilyList2({ includeAuto = true, includeReserved = false } = {}) {
+      const list = [];
+      if (includeAuto) {
+        list.push({
+          value: AI_LAYOUT_SELECTION_AUTO2,
+          label: "\u81EA\u52A8\u63A8\u8350",
+          description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u81EA\u52A8\u63A8\u8350\u5E03\u5C40\u3002"
+        });
+      }
+      Object.values(AI_LAYOUT_FAMILY_DEFS).forEach((family) => {
+        if (!includeReserved && !AI_LAYOUT_IMPLEMENTED_FAMILIES.has(family.id))
+          return;
+        list.push({
+          value: family.id,
+          label: family.label,
+          description: family.description
+        });
+      });
+      return list;
+    }
+    function getLayoutFamilyById2(id) {
+      const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
+      return AI_LAYOUT_FAMILY_DEFS[normalizedId] || AI_LAYOUT_FAMILY_DEFS[AI_LAYOUT_DEFAULT_FAMILY];
+    }
+    function getLayoutSkillById(id) {
+      const normalizedId = normalizeResolvedLayoutFamily(id, AI_LAYOUT_DEFAULT_FAMILY);
+      return getAiLayoutSkillById(normalizedId) || getAiLayoutSkillById(AI_LAYOUT_DEFAULT_FAMILY);
+    }
+    function getWechatSafeRenderProfile(layoutFamilyId) {
+      var _a2, _b;
+      const normalizedId = normalizeResolvedLayoutFamily(layoutFamilyId, AI_LAYOUT_DEFAULT_FAMILY);
+      return ((_a2 = AI_WECHAT_SAFE_STYLE_PRIMITIVES.profiles) == null ? void 0 : _a2[normalizedId]) || ((_b = AI_WECHAT_SAFE_STYLE_PRIMITIVES.profiles) == null ? void 0 : _b[AI_LAYOUT_DEFAULT_FAMILY]) || {};
+    }
+    function getColorPaletteList2({ includeAuto = true } = {}) {
+      const list = [];
+      if (includeAuto) {
+        list.push({
+          value: AI_LAYOUT_SELECTION_AUTO2,
+          label: "\u81EA\u52A8\u63A8\u8350",
+          description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u81EA\u52A8\u63A8\u8350\u989C\u8272\u3002"
+        });
+      }
+      Object.values(AI_COLOR_PALETTES).forEach((pack) => {
+        list.push({
+          value: pack.id,
+          label: pack.label,
+          description: pack.description
+        });
+      });
+      return list;
+    }
+    function getColorPaletteById2(id) {
+      return AI_COLOR_PALETTES[normalizeResolvedColorPalette(id)] || AI_COLOR_PALETTES[AI_LAYOUT_DEFAULT_COLOR_PALETTE];
+    }
+    function resolveColorPaletteForRender2(id, override = {}) {
+      var _a2;
+      const normalizedId = normalizeResolvedColorPalette(id);
+      const customColor = normalizeHexColor2(
+        (override == null ? void 0 : override.customColor) || (override == null ? void 0 : override.accentColor) || (override == null ? void 0 : override.accent) || "",
+        ""
+      );
+      if (normalizedId === "custom" && customColor) {
+        return createColorPaletteFromAccent(customColor, {
+          id: "custom",
+          label: ((_a2 = getColorPaletteById2("custom")) == null ? void 0 : _a2.label) || "\u81EA\u5B9A\u4E49"
+        });
+      }
+      return getColorPaletteById2(normalizedId);
+    }
+    function resolveLayoutSelection({
+      requestedSelection = {},
+      rawLayout = {},
+      signals = null,
+      imageRefs = []
+    } = {}) {
+      var _a2, _b;
+      const selection = normalizeLayoutSelection2(requestedSelection);
+      const inferredLayoutFamily = recommendLayoutFamily({ rawLayout, signals, imageRefs });
+      const inferredColorPalette = recommendColorPalette({ rawLayout, signals });
+      const recommendedLayoutFamily = normalizeResolvedLayoutFamily(
+        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily),
+        inferredLayoutFamily
+      );
+      const recommendedColorPalette = normalizeAutoRecommendedColorPalette(
+        (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_b = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _b.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack),
+        inferredColorPalette
+      );
+      const resolved = {
+        layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? recommendedLayoutFamily : normalizeResolvedLayoutFamily(selection.layoutFamily, recommendedLayoutFamily),
+        colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO2 ? recommendedColorPalette : normalizeResolvedColorPalette(selection.colorPalette, recommendedColorPalette)
+      };
+      return {
+        selection,
+        resolved,
+        recommendedLayoutFamily,
+        recommendedColorPalette
+      };
+    }
+    function normalizeAiProvider2(raw = {}) {
+      const id = typeof raw.id === "string" && raw.id.trim() ? raw.id.trim() : `ai_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+      const kind = typeof raw.kind === "string" && raw.kind.trim() ? raw.kind.trim() : AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE;
+      const defaults = AI_PROVIDER_KIND_DEFAULTS[kind] || AI_PROVIDER_KIND_DEFAULTS[AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE];
+      return {
+        id,
+        name: typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : "\u672A\u547D\u540D Provider",
+        kind,
+        baseUrl: typeof raw.baseUrl === "string" && raw.baseUrl.trim() ? raw.baseUrl.trim().replace(/\/+$/, "") : defaults.baseUrl,
+        apiKey: typeof raw.apiKey === "string" ? raw.apiKey : "",
+        model: typeof raw.model === "string" && raw.model.trim() ? raw.model.trim() : defaults.model,
+        enabled: raw.enabled !== false
+      };
+    }
+    function getAiProviderIssues2(provider = {}) {
+      const issues = [];
+      const baseUrl = coerceString(provider.baseUrl);
+      const apiKey = coerceString(provider.apiKey);
+      const model = coerceString(provider.model);
+      if (!baseUrl) {
+        issues.push("missing-base-url");
+      } else if (!/^https:\/\//i.test(baseUrl)) {
+        issues.push("invalid-base-url");
+      }
+      if (!apiKey)
+        issues.push("missing-api-key");
+      if (!model)
+        issues.push("missing-model");
+      if (provider.enabled === false)
+        issues.push("disabled");
+      return issues;
+    }
+    function isAiProviderRunnable2(provider = {}) {
+      const issues = getAiProviderIssues2(provider);
+      return !issues.some((issue) => issue !== "disabled");
+    }
+    function summarizeAiProviderIssues2(provider = {}) {
+      const issues = getAiProviderIssues2(provider);
+      if (!issues.length)
+        return "\u914D\u7F6E\u5B8C\u6574";
+      const labels = {
+        "missing-base-url": "\u7F3A\u5C11 Base URL",
+        "invalid-base-url": "Base URL \u5FC5\u987B\u662F HTTPS",
+        "missing-api-key": "\u7F3A\u5C11 API Key",
+        "missing-model": "\u7F3A\u5C11\u6A21\u578B\u540D",
+        disabled: "\u5DF2\u505C\u7528"
+      };
+      return issues.map((issue) => labels[issue] || issue).join(" / ");
+    }
+    function getLayoutBlockLabel(block = {}) {
+      return coerceString(
+        block.title || block.caseLabel || block.text || block.caption || block.buttonText || block.imageId || block.type
+      );
+    }
+    function getLayoutBlockKey(block = {}) {
+      return `${coerceString(block.type)}:${getLayoutBlockLabel(block)}`;
+    }
+    function normalizeGenerationBlockOrigin(raw = {}, fallbackIndex = 0) {
+      if (!raw || typeof raw !== "object")
+        return null;
+      const source = raw.source === "fallback" ? "fallback" : "ai";
+      const type = coerceString(raw.type);
+      if (!type)
+        return null;
+      return {
+        index: clampNumber(raw.index, fallbackIndex, 0, 99),
+        type,
+        source,
+        label: coerceString(raw.label || type)
+      };
+    }
+    function normalizeLayoutGenerationMeta(raw = {}, layoutJson = null) {
+      var _a2;
+      const blockOrigins = Array.isArray(raw == null ? void 0 : raw.blockOrigins) ? raw.blockOrigins.map((item, index) => normalizeGenerationBlockOrigin(item, index)).filter(Boolean) : [];
+      const derivedFallbackCount = blockOrigins.filter((item) => item.source === "fallback").length;
+      const finalBlockCount = clampNumber(
+        raw == null ? void 0 : raw.finalBlockCount,
+        ((_a2 = layoutJson == null ? void 0 : layoutJson.blocks) == null ? void 0 : _a2.length) || blockOrigins.length || 0,
+        0,
+        99
+      );
+      const fallbackBlockCount = clampNumber(
+        raw == null ? void 0 : raw.fallbackBlockCount,
+        derivedFallbackCount,
+        0,
+        finalBlockCount
+      );
+      return {
+        providerName: coerceString(raw == null ? void 0 : raw.providerName),
+        providerModel: coerceString(raw == null ? void 0 : raw.providerModel),
+        skillId: coerceString(raw == null ? void 0 : raw.skillId),
+        skillLabel: coerceString(raw == null ? void 0 : raw.skillLabel),
+        skillVersion: coerceString(raw == null ? void 0 : raw.skillVersion),
+        executionMode: coerceString(raw == null ? void 0 : raw.executionMode),
+        layoutFamilyLabel: coerceString(raw == null ? void 0 : raw.layoutFamilyLabel),
+        colorPaletteLabel: coerceString(raw == null ? void 0 : raw.colorPaletteLabel),
+        stylePackLabel: coerceString(raw == null ? void 0 : raw.stylePackLabel),
+        recommendedLayoutFamilyLabel: coerceString(raw == null ? void 0 : raw.recommendedLayoutFamilyLabel),
+        recommendedColorPaletteLabel: coerceString(raw == null ? void 0 : raw.recommendedColorPaletteLabel),
+        headingCount: clampNumber(raw == null ? void 0 : raw.headingCount, 0, 0, 999),
+        sectionCount: clampNumber(raw == null ? void 0 : raw.sectionCount, 0, 0, 999),
+        leadParagraphCount: clampNumber(raw == null ? void 0 : raw.leadParagraphCount, 0, 0, 999),
+        bulletGroupCount: clampNumber(raw == null ? void 0 : raw.bulletGroupCount, 0, 0, 999),
+        imageCount: clampNumber(raw == null ? void 0 : raw.imageCount, 0, 0, 999),
+        aiBlockCount: clampNumber(raw == null ? void 0 : raw.aiBlockCount, Math.max(0, finalBlockCount - fallbackBlockCount), 0, 99),
+        finalBlockCount,
+        fallbackUsed: (raw == null ? void 0 : raw.fallbackUsed) === true || fallbackBlockCount > 0,
+        fallbackBlockCount,
+        fallbackBlockTypes: Array.isArray(raw == null ? void 0 : raw.fallbackBlockTypes) ? raw.fallbackBlockTypes.map((item) => coerceString(item)).filter(Boolean).slice(0, 6) : [],
+        schemaValidation: normalizeSchemaValidation(raw == null ? void 0 : raw.schemaValidation),
+        blockOrigins
+      };
+    }
+    function normalizeSchemaValidation(raw = {}) {
+      const issues = Array.isArray(raw == null ? void 0 : raw.issues) ? raw.issues.map((item) => ({
+        path: coerceString(item == null ? void 0 : item.path),
+        message: coerceString(item == null ? void 0 : item.message),
+        fatal: (item == null ? void 0 : item.fatal) === true
+      })).filter((item) => item.path || item.message).slice(0, 12) : [];
+      const issueCount = clampNumber(raw == null ? void 0 : raw.issueCount, issues.length, 0, 99);
+      const fatal = (raw == null ? void 0 : raw.fatal) === true || issues.some((item) => item.fatal);
+      return {
+        isValid: (raw == null ? void 0 : raw.isValid) === true && issueCount === 0,
+        fatal,
+        issueCount,
+        issues
+      };
+    }
+    var AiLayoutSchemaError = class extends Error {
+      constructor(message, schemaValidation, generationMeta = null) {
+        super(message);
+        this.name = "AiLayoutSchemaError";
+        this.code = "ai-layout-schema-invalid";
+        this.schemaValidation = normalizeSchemaValidation(schemaValidation);
+        this.generationMeta = generationMeta;
+      }
+    };
+    var AiLayoutTimeoutError = class extends Error {
+      constructor(timeoutMs) {
+        const seconds = Math.max(1, Math.round(Number(timeoutMs || 0) / 1e3));
+        super(`AI \u8BF7\u6C42\u8D85\u65F6\uFF08${seconds}s\uFF09`);
+        this.name = "AiLayoutTimeoutError";
+        this.code = "ai-layout-timeout";
+        this.timeoutMs = Number(timeoutMs || 0);
+      }
+    };
+    function normalizeArticleLayoutState2(raw = {}) {
+      var _a2, _b;
+      if (!raw || typeof raw !== "object")
+        return null;
+      const layoutJson = raw.layoutJson && typeof raw.layoutJson === "object" ? raw.layoutJson : null;
+      if (!layoutJson)
+        return null;
+      const selection = normalizeLayoutSelection2(
+        raw.selection || layoutJson.selection || {
+          layoutFamily: raw.layoutFamily || layoutJson.layoutFamily || "tutorial-cards",
+          colorPalette: raw.colorPalette || raw.stylePack || layoutJson.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        },
+        {
+          layoutFamily: "tutorial-cards",
+          colorPalette: AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        }
+      );
+      const resolved = normalizeResolvedSelection(
+        raw.resolved || layoutJson.resolved || {
+          layoutFamily: raw.resolvedLayoutFamily || raw.layoutFamily || layoutJson.layoutFamily || "tutorial-cards",
+          colorPalette: raw.resolvedColorPalette || raw.colorPalette || raw.stylePack || layoutJson.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        },
+        {
+          layoutFamily: AI_LAYOUT_DEFAULT_FAMILY,
+          colorPalette: AI_LAYOUT_DEFAULT_COLOR_PALETTE
+        }
+      );
+      const dismissedBlockKeys = Array.isArray(raw.dismissedBlockKeys) ? raw.dismissedBlockKeys.map((item) => coerceString(item)).filter(Boolean).slice(0, 128) : [];
+      return {
+        version: clampNumber(raw.version, AI_LAYOUT_SCHEMA_VERSION2, 1, 999),
+        updatedAt: clampNumber(raw.updatedAt, Date.now(), 0, 9999999999999),
+        sourceHash: typeof raw.sourceHash === "string" ? raw.sourceHash : "",
+        providerId: typeof raw.providerId === "string" ? raw.providerId : "",
+        model: typeof raw.model === "string" ? raw.model : "",
+        skillId: coerceString(raw.skillId || raw.layoutFamily || resolved.layoutFamily),
+        skillVersion: coerceString(raw.skillVersion || ((_a2 = raw.generationMeta) == null ? void 0 : _a2.skillVersion) || ((_b = getLayoutFamilyById2(resolved.layoutFamily)) == null ? void 0 : _b.version)),
+        selection,
+        resolved,
+        recommendedLayoutFamily: normalizeResolvedLayoutFamily(
+          raw.recommendedLayoutFamily || layoutJson.recommendedLayoutFamily,
+          resolved.layoutFamily
+        ),
+        recommendedColorPalette: normalizeResolvedColorPalette(
+          raw.recommendedColorPalette || layoutJson.recommendedColorPalette || raw.stylePack || layoutJson.stylePack,
+          resolved.colorPalette
+        ),
+        stylePack: resolved.colorPalette,
+        layoutFamily: resolved.layoutFamily,
+        status: raw.status === "schema-error" ? "schema-error" : raw.status === "error" ? "error" : "ready",
+        lastError: typeof raw.lastError === "string" ? raw.lastError : "",
+        lastAttemptStatus: raw.lastAttemptStatus === "schema-error" ? "schema-error" : raw.lastAttemptStatus === "error" ? "error" : raw.lastAttemptStatus === "success" ? "success" : "idle",
+        lastAttemptError: typeof raw.lastAttemptError === "string" ? raw.lastAttemptError : "",
+        lastAttemptAt: clampNumber(raw.lastAttemptAt, 0, 0, 9999999999999),
+        lastAttemptSchemaValidation: normalizeSchemaValidation(raw.lastAttemptSchemaValidation),
+        dismissedBlockKeys,
+        generationMeta: normalizeLayoutGenerationMeta(raw.generationMeta, layoutJson),
+        layoutJson
+      };
+    }
+    function getArticleLayoutFamilyCacheKey(state = {}, fallback = AI_LAYOUT_DEFAULT_FAMILY) {
+      var _a2, _b, _c, _d;
+      return normalizeResolvedLayoutFamily(
+        ((_a2 = state == null ? void 0 : state.resolved) == null ? void 0 : _a2.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || ((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.resolved) == null ? void 0 : _c.layoutFamily) || ((_d = state == null ? void 0 : state.layoutJson) == null ? void 0 : _d.layoutFamily) || fallback,
+        AI_LAYOUT_DEFAULT_FAMILY
+      );
+    }
+    function shouldReplaceArticleLayoutFamilyState(currentState = null, nextState = null) {
+      if (!currentState)
+        return true;
+      if (!nextState)
+        return false;
+      const scoreState = (state) => {
+        var _a2;
+        const hasBlocks = Array.isArray((_a2 = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a2.blocks) && state.layoutJson.blocks.length > 0;
+        return [
+          (state == null ? void 0 : state.status) === "ready" ? 4 : 0,
+          hasBlocks ? 2 : 0,
+          (state == null ? void 0 : state.lastAttemptStatus) === "success" ? 1 : 0
+        ].reduce((sum, value) => sum + value, 0);
+      };
+      const currentScore = scoreState(currentState);
+      const nextScore = scoreState(nextState);
+      if (nextScore !== currentScore)
+        return nextScore > currentScore;
+      return Number(nextState.updatedAt || 0) > Number(currentState.updatedAt || 0);
+    }
+    function normalizeArticleLayoutCacheEntry2(raw = {}) {
+      var _a2, _b, _c, _d;
+      if (!raw || typeof raw !== "object")
+        return null;
+      const familyStates = {};
+      let lastFamilyFromInput = "";
+      const ingestState = (value, fallbackSelection = {}, options = {}) => {
+        var _a3, _b2;
+        const normalizedState = normalizeArticleLayoutState2(value);
+        if (!normalizedState)
+          return;
+        const effectiveSelection = normalizeLayoutSelection2(normalizedState.selection, fallbackSelection);
+        const resolvedLayoutFamily = getArticleLayoutFamilyCacheKey(normalizedState, effectiveSelection.layoutFamily);
+        const resolved = normalizeResolvedSelection(normalizedState.resolved, {
+          layoutFamily: resolvedLayoutFamily,
+          colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette
+        });
+        const stylePack = normalizeResolvedColorPalette(normalizedState.stylePack || resolved.colorPalette);
+        const layoutJson = {
+          ...normalizedState.layoutJson || {},
+          selection: {
+            ...((_a3 = normalizedState.layoutJson) == null ? void 0 : _a3.selection) || {},
+            ...effectiveSelection
+          },
+          resolved: {
+            ...((_b2 = normalizedState.layoutJson) == null ? void 0 : _b2.resolved) || {},
+            layoutFamily: resolvedLayoutFamily,
+            colorPalette: stylePack
+          },
+          layoutFamily: resolvedLayoutFamily,
+          stylePack
+        };
+        const nextState = {
+          ...normalizedState,
+          selection: effectiveSelection,
+          resolved: {
+            ...resolved,
+            layoutFamily: resolvedLayoutFamily,
+            colorPalette: stylePack
+          },
+          stylePack,
+          layoutFamily: resolvedLayoutFamily,
+          layoutJson
+        };
+        if (options.markLast)
+          lastFamilyFromInput = resolvedLayoutFamily;
+        if (options.overwrite === false && familyStates[resolvedLayoutFamily])
+          return;
+        if (shouldReplaceArticleLayoutFamilyState(familyStates[resolvedLayoutFamily], nextState)) {
+          familyStates[resolvedLayoutFamily] = nextState;
+        }
+      };
+      const legacyState = normalizeArticleLayoutState2(raw);
+      if (legacyState) {
+        ingestState(legacyState, legacyState.selection, { markLast: true });
+      }
+      if (raw.familyStates && typeof raw.familyStates === "object") {
+        for (const [layoutFamilyId, value] of Object.entries(raw.familyStates)) {
+          ingestState(value, {
+            layoutFamily: layoutFamilyId || AI_LAYOUT_DEFAULT_FAMILY,
+            colorPalette: ((_a2 = value == null ? void 0 : value.selection) == null ? void 0 : _a2.colorPalette) || (value == null ? void 0 : value.stylePack) || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+          }, { markLast: layoutFamilyId === raw.lastLayoutFamily });
+        }
+      }
+      if (raw.selectionStates && typeof raw.selectionStates === "object") {
+        for (const [selectionKey, value] of Object.entries(raw.selectionStates)) {
+          const [layoutFamilyFromKey, colorPaletteFromKey] = String(selectionKey || "").split("::");
+          ingestState(value, {
+            layoutFamily: layoutFamilyFromKey || "tutorial-cards",
+            colorPalette: colorPaletteFromKey || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+          }, { markLast: selectionKey === raw.lastSelectionKey });
+        }
+      }
+      if (raw.stylePackStates && typeof raw.stylePackStates === "object") {
+        for (const [stylePackId, value] of Object.entries(raw.stylePackStates)) {
+          ingestState(value, {
+            layoutFamily: "tutorial-cards",
+            colorPalette: stylePackId || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+          }, { overwrite: false, markLast: stylePackId === raw.lastStylePack });
+        }
+      }
+      const familyKeys = Object.keys(familyStates);
+      if (!familyKeys.length)
+        return null;
+      const requestedLastLayoutFamily = coerceString(raw.lastLayoutFamily);
+      const rawLastLayoutFamily = AI_LAYOUT_IMPLEMENTED_FAMILIES.has(requestedLastLayoutFamily) ? requestedLastLayoutFamily : "";
+      const lastLayoutFamily = familyStates[rawLastLayoutFamily] ? rawLastLayoutFamily : familyStates[lastFamilyFromInput] ? lastFamilyFromInput : familyKeys[0];
+      const requestedLastAutoResolvedFamily = coerceString(raw.lastAutoResolvedFamily);
+      const rawLastAutoResolvedFamily = AI_LAYOUT_IMPLEMENTED_FAMILIES.has(requestedLastAutoResolvedFamily) ? requestedLastAutoResolvedFamily : "";
+      const lastAutoResolvedFamily = familyStates[rawLastAutoResolvedFamily] ? rawLastAutoResolvedFamily : ((_c = (_b = familyStates[lastFamilyFromInput]) == null ? void 0 : _b.selection) == null ? void 0 : _c.layoutFamily) === AI_LAYOUT_SELECTION_AUTO2 ? lastFamilyFromInput : "";
+      const selectionStates = {};
+      const stylePackStates = {};
+      Object.entries(familyStates).forEach(([layoutFamilyId, state]) => {
+        var _a3, _b2;
+        const selectionKey = getArticleLayoutSelectionKey({
+          layoutFamily: layoutFamilyId,
+          colorPalette: ((_a3 = state.selection) == null ? void 0 : _a3.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+        });
+        selectionStates[selectionKey] = state;
+        const stylePack = normalizeResolvedColorPalette(state.stylePack || ((_b2 = state.resolved) == null ? void 0 : _b2.colorPalette));
+        if (!stylePackStates[stylePack])
+          stylePackStates[stylePack] = state;
+      });
+      const lastState = familyStates[lastLayoutFamily] || null;
+      const lastSelectionKey = getArticleLayoutSelectionKey({
+        layoutFamily: lastLayoutFamily,
+        colorPalette: ((_d = lastState == null ? void 0 : lastState.selection) == null ? void 0 : _d.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+      });
+      return {
+        lastLayoutFamily,
+        lastAutoResolvedFamily,
+        familyStates,
+        lastSelectionKey,
+        selectionStates,
+        lastStylePack: (lastState == null ? void 0 : lastState.stylePack) || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+        stylePackStates
+      };
+    }
+    function truncateMarkdownForPrompt(markdown = "", maxChars = 12e3) {
+      const content = String(markdown || "").trim();
+      if (!content || content.length <= maxChars)
+        return content;
+      const headLength = Math.max(2e3, Math.floor(maxChars * 0.72));
+      const tailLength = Math.max(800, maxChars - headLength);
+      const head = content.slice(0, headLength).trimEnd();
+      const tail = content.slice(-tailLength).trimStart();
+      return [
+        head,
+        "",
+        "[\u5185\u5BB9\u5DF2\u622A\u65AD\uFF0C\u4E3A\u4E86\u63A7\u5236\u8BF7\u6C42\u89C4\u6A21\uFF0C\u8FD9\u91CC\u7701\u7565\u4E86\u4E2D\u95F4\u90E8\u5206\u6B63\u6587\u3002]",
+        "",
+        tail
+      ].join("\n");
+    }
+    function normalizeAiSettings2(raw = {}) {
+      var _a2;
+      const defaults = createDefaultAiSettings2();
+      const providers = Array.isArray(raw.providers) ? raw.providers.map(normalizeAiProvider2) : defaults.providers;
+      const articleLayoutsByPath = {};
+      if (raw.articleLayoutsByPath && typeof raw.articleLayoutsByPath === "object") {
+        for (const [path, value] of Object.entries(raw.articleLayoutsByPath)) {
+          if (!path || typeof path !== "string")
+            continue;
+          const normalized = normalizeArticleLayoutCacheEntry2(value);
+          if (normalized) {
+            articleLayoutsByPath[path] = normalized;
+          }
+        }
+      }
+      let defaultProviderId = typeof raw.defaultProviderId === "string" ? raw.defaultProviderId : defaults.defaultProviderId;
+      if (defaultProviderId && !providers.some((provider) => provider.id === defaultProviderId && provider.enabled !== false)) {
+        defaultProviderId = "";
+      }
+      return {
+        enabled: Object.prototype.hasOwnProperty.call(raw, "enabled") ? raw.enabled === true : defaults.enabled,
+        defaultProviderId,
+        defaultLayoutFamily: normalizeLayoutFamily(raw.defaultLayoutFamily, AI_LAYOUT_SELECTION_AUTO2),
+        defaultColorPalette: normalizeColorPalette(
+          (_a2 = raw.defaultColorPalette) != null ? _a2 : raw.defaultStylePack,
+          AI_LAYOUT_SELECTION_AUTO2
+        ),
+        defaultStylePack: normalizeResolvedColorPalette(raw.defaultStylePack, AI_LAYOUT_DEFAULT_COLOR_PALETTE),
+        customColor: normalizeHexColor2(raw.customColor, defaults.customColor),
+        includeImagesInLayout: raw.includeImagesInLayout !== false,
+        requestTimeoutMs: clampNumber(raw.requestTimeoutMs, defaults.requestTimeoutMs, 5e3, 18e4),
+        providers,
+        articleLayoutsByPath
+      };
+    }
+    function getStylePackList() {
+      return getColorPaletteList2({ includeAuto: false });
+    }
+    function getStylePackById(id) {
+      return getColorPaletteById2(id);
+    }
+    function getArticleLayoutSelectionState2(entry, selection = {}, defaults = {}) {
+      const normalizedEntry = normalizeArticleLayoutCacheEntry2(entry);
+      if (!normalizedEntry)
+        return null;
+      const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
+      const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
+      const familyStates = normalizedEntry.familyStates || {};
+      const familyKeys = Object.keys(familyStates);
+      if (!familyKeys.length)
+        return null;
+      if (requestedLayoutFamily !== AI_LAYOUT_SELECTION_AUTO2) {
+        const requestedResolvedLayoutFamily = normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+        return familyStates[requestedResolvedLayoutFamily] || null;
+      }
+      if (normalizedEntry.lastAutoResolvedFamily && familyStates[normalizedEntry.lastAutoResolvedFamily]) {
+        return familyStates[normalizedEntry.lastAutoResolvedFamily];
+      }
+      if (normalizedEntry.lastLayoutFamily && familyStates[normalizedEntry.lastLayoutFamily]) {
+        return familyStates[normalizedEntry.lastLayoutFamily];
+      }
+      return familyStates[familyKeys[0]] || null;
+    }
+    function deriveArticleLayoutStateForSelection2(state, selection = {}, defaults = {}) {
+      var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+      const normalizedState = normalizeArticleLayoutState2(state);
+      if (!((_b = (_a2 = normalizedState == null ? void 0 : normalizedState.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b.length))
+        return null;
+      if (normalizedState.status !== "ready")
+        return null;
+      const requestedSelection = normalizeLayoutSelection2(selection, {
+        layoutFamily: ((_c = normalizedState.selection) == null ? void 0 : _c.layoutFamily) || (defaults == null ? void 0 : defaults.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2,
+        colorPalette: ((_d = normalizedState.selection) == null ? void 0 : _d.colorPalette) || (defaults == null ? void 0 : defaults.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+      });
+      const requestedColorPalette = normalizeColorPalette(
+        requestedSelection.colorPalette,
+        ((_e = normalizedState.selection) == null ? void 0 : _e.colorPalette) || (defaults == null ? void 0 : defaults.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+      );
+      if (!requestedColorPalette || requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2)
+        return null;
+      const baseResolvedLayoutFamily = normalizeResolvedLayoutFamily(
+        ((_f = normalizedState.resolved) == null ? void 0 : _f.layoutFamily) || normalizedState.layoutFamily,
+        AI_LAYOUT_DEFAULT_FAMILY
+      );
+      const baseSelectedLayoutFamily = normalizeLayoutFamily(
+        (_g = normalizedState.selection) == null ? void 0 : _g.layoutFamily,
+        AI_LAYOUT_SELECTION_AUTO2
+      );
+      const requestedLayoutFamily = normalizeLayoutFamily(
+        requestedSelection.layoutFamily,
+        ((_h = normalizedState.selection) == null ? void 0 : _h.layoutFamily) || (defaults == null ? void 0 : defaults.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2
+      );
+      const isCompatibleLayout = requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 || requestedLayoutFamily === baseSelectedLayoutFamily || requestedLayoutFamily === baseResolvedLayoutFamily;
+      if (!isCompatibleLayout)
+        return null;
+      const nextResolvedColorPalette = normalizeResolvedColorPalette(
+        requestedColorPalette,
+        ((_i = normalizedState.resolved) == null ? void 0 : _i.colorPalette) || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+      );
+      const nextColorPaletteLabel = ((_j = getColorPaletteById2(nextResolvedColorPalette)) == null ? void 0 : _j.label) || nextResolvedColorPalette;
+      const nextSelection = {
+        layoutFamily: requestedLayoutFamily || ((_k = normalizedState.selection) == null ? void 0 : _k.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2,
+        colorPalette: requestedColorPalette
+      };
+      const nextLayoutJson = {
+        ...normalizedState.layoutJson,
+        selection: {
+          ...normalizedState.layoutJson.selection || {},
+          ...nextSelection
+        },
+        resolved: {
+          ...normalizedState.layoutJson.resolved || {},
+          layoutFamily: baseResolvedLayoutFamily,
+          colorPalette: nextResolvedColorPalette
+        },
+        recommendedLayoutFamily: normalizedState.recommendedLayoutFamily,
+        recommendedColorPalette: normalizedState.recommendedColorPalette,
+        stylePack: nextResolvedColorPalette,
+        layoutFamily: baseResolvedLayoutFamily
+      };
+      const nextGenerationMeta = normalizeLayoutGenerationMeta({
+        ...normalizedState.generationMeta || {},
+        colorPaletteLabel: nextColorPaletteLabel,
+        stylePackLabel: nextColorPaletteLabel
+      }, nextLayoutJson);
+      return normalizeArticleLayoutState2({
+        ...normalizedState,
+        selection: nextSelection,
+        resolved: {
+          layoutFamily: baseResolvedLayoutFamily,
+          colorPalette: nextResolvedColorPalette
+        },
+        recommendedLayoutFamily: normalizedState.recommendedLayoutFamily,
+        recommendedColorPalette: normalizedState.recommendedColorPalette,
+        stylePack: nextResolvedColorPalette,
+        layoutFamily: baseResolvedLayoutFamily,
+        generationMeta: nextGenerationMeta,
+        layoutJson: nextLayoutJson
+      });
+    }
+    function getArticleLayoutSelectionStateKey(entry, selection = {}, defaults = {}) {
+      var _a2;
+      const normalizedEntry = normalizeArticleLayoutCacheEntry2(entry);
+      if (!normalizedEntry)
+        return "";
+      const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
+      const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
+      if (requestedLayoutFamily !== AI_LAYOUT_SELECTION_AUTO2) {
+        const requestedResolvedLayoutFamily = normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+        return ((_a2 = normalizedEntry.familyStates) == null ? void 0 : _a2[requestedResolvedLayoutFamily]) ? requestedResolvedLayoutFamily : "";
+      }
+      return normalizedEntry.lastAutoResolvedFamily || normalizedEntry.lastLayoutFamily || "";
+    }
+    function listEnabledAiProviders(aiSettings = {}) {
+      return Array.isArray(aiSettings.providers) ? aiSettings.providers.filter((provider) => provider.enabled !== false && isAiProviderRunnable2(provider)) : [];
+    }
+    function resolveAiProvider2(aiSettings = {}, providerId = "") {
+      const providers = listEnabledAiProviders(aiSettings);
+      if (providerId) {
+        const matched = providers.find((provider) => provider.id === providerId);
+        if (matched)
+          return matched;
+      }
+      if (aiSettings.defaultProviderId) {
+        const matched = providers.find((provider) => provider.id === aiSettings.defaultProviderId);
+        if (matched)
+          return matched;
+      }
+      return providers[0] || null;
+    }
+    function extractJsonPayload(text) {
+      const content = String(text || "").trim();
+      if (!content)
+        throw new Error("AI \u672A\u8FD4\u56DE\u5185\u5BB9");
+      const fencedMatch = content.match(/```json\s*([\s\S]*?)```/i) || content.match(/```\s*([\s\S]*?)```/i);
+      const candidate = fencedMatch ? fencedMatch[1].trim() : content;
+      const firstBrace = candidate.indexOf("{");
+      const lastBrace = candidate.lastIndexOf("}");
+      if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+        throw new Error("AI \u8FD4\u56DE\u7ED3\u679C\u4E0D\u662F\u6709\u6548 JSON");
+      }
+      return candidate.slice(firstBrace, lastBrace + 1);
+    }
+    function sanitizeJsonStringLiteralControls(payload = "") {
+      const raw = String(payload || "");
+      if (!raw)
+        return raw;
+      let sanitized = "";
+      let inString = false;
+      let isEscaped = false;
+      for (let index = 0; index < raw.length; index += 1) {
+        const char = raw[index];
+        const charCode = raw.charCodeAt(index);
+        if (!inString) {
+          sanitized += char;
+          if (char === '"')
+            inString = true;
+          continue;
+        }
+        if (isEscaped) {
+          sanitized += char;
+          isEscaped = false;
+          continue;
+        }
+        if (char === "\\") {
+          sanitized += char;
+          isEscaped = true;
+          continue;
+        }
+        if (char === '"') {
+          sanitized += char;
+          inString = false;
+          continue;
+        }
+        if (charCode <= 31) {
+          if (char === "\n")
+            sanitized += "\\n";
+          else if (char === "\r")
+            sanitized += "\\r";
+          else if (char === "	")
+            sanitized += "\\t";
+          else
+            sanitized += " ";
+          continue;
+        }
+        sanitized += char;
+      }
+      return sanitized;
+    }
+    function inferBlockType(rawBlock = {}) {
+      if (!rawBlock || typeof rawBlock !== "object" || Array.isArray(rawBlock))
+        return "";
+      const explicitType = coerceString(
+        rawBlock.type || rawBlock.blockType || rawBlock.block_type || rawBlock.kind || rawBlock.component
+      );
+      const allowedTypes = new Set(AI_LAYOUT_ALLOWED_BLOCKS.map((item) => item.type));
+      if (allowedTypes.has(explicitType))
+        return explicitType;
+      if ("sectionIndex" in rawBlock || "paragraphs" in rawBlock || "bulletGroups" in rawBlock)
+        return "section-block";
+      if (Array.isArray(rawBlock.items))
+        return "part-nav";
+      if (typeof rawBlock.imageId === "string")
+        return "phone-frame";
+      if ("coverImageId" in rawBlock || "eyebrow" in rawBlock || "subtitle" in rawBlock || explicitType === "cover")
+        return "hero";
+      if ("buttonText" in rawBlock || "body" in rawBlock)
+        return "cta-card";
+      if ("text" in rawBlock || "quote" in rawBlock)
+        return "lead-quote";
+      if ("summary" in rawBlock || "caseLabel" in rawBlock || "bullets" in rawBlock || "highlight" in rawBlock || "imageIds" in rawBlock)
+        return "case-block";
+      if (typeof rawBlock.title === "string")
+        return "section-block";
+      return "";
+    }
+    function repairRawLayoutPayload(rawLayout = {}) {
+      var _a2, _b, _c, _d;
+      if (!rawLayout || typeof rawLayout !== "object" || Array.isArray(rawLayout))
+        return rawLayout;
+      if (!Array.isArray(rawLayout.blocks))
+        return rawLayout;
+      const legacyColorPalette = normalizeResolvedColorPalette(
+        (rawLayout == null ? void 0 : rawLayout.stylePack) || (rawLayout == null ? void 0 : rawLayout.colorPalette) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.colorPalette),
+        AI_LAYOUT_DEFAULT_COLOR_PALETTE
+      );
+      const legacyLayoutFamily = normalizeResolvedLayoutFamily(
+        (rawLayout == null ? void 0 : rawLayout.layoutFamily) || ((_b = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _b.layoutFamily),
+        "tutorial-cards"
+      );
+      const selection = normalizeLayoutSelection2(rawLayout.selection, {
+        layoutFamily: legacyLayoutFamily,
+        colorPalette: legacyColorPalette
+      });
+      const resolved = normalizeResolvedSelection(rawLayout.resolved, {
+        layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? legacyLayoutFamily : selection.layoutFamily,
+        colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO2 ? legacyColorPalette : selection.colorPalette
+      });
+      return {
+        ...rawLayout,
+        selection,
+        resolved,
+        recommendedLayoutFamily: normalizeResolvedLayoutFamily(
+          rawLayout.recommendedLayoutFamily || ((_c = rawLayout.resolved) == null ? void 0 : _c.layoutFamily) || legacyLayoutFamily,
+          resolved.layoutFamily
+        ),
+        recommendedColorPalette: normalizeResolvedColorPalette(
+          rawLayout.recommendedColorPalette || ((_d = rawLayout.resolved) == null ? void 0 : _d.colorPalette) || legacyColorPalette,
+          resolved.colorPalette
+        ),
+        stylePack: resolved.colorPalette,
+        layoutFamily: resolved.layoutFamily,
+        blocks: rawLayout.blocks.map((block) => {
+          if (!block || typeof block !== "object" || Array.isArray(block))
+            return block;
+          const inferredType = inferBlockType(block);
+          if (!inferredType)
+            return block;
+          const repaired = {
+            ...block,
+            type: inferredType
+          };
+          delete repaired.blockType;
+          delete repaired.block_type;
+          delete repaired.kind;
+          delete repaired.component;
+          return repaired;
+        })
+      };
+    }
+    function coerceString(value, fallback = "") {
+      return typeof value === "string" ? value.trim() : fallback;
+    }
+    function normalizeTitleKey(value) {
+      return coerceString(value).toLowerCase().replace(/\s+/g, "");
+    }
+    function toSectionIndex(value, fallback = -1) {
+      if (Number.isInteger(value) && value >= 0)
+        return value;
+      if (typeof value === "string" && /^\d+$/.test(value.trim())) {
+        const parsed = parseInt(value.trim(), 10);
+        return parsed >= 0 ? parsed : fallback;
+      }
+      return fallback;
+    }
+    function toTextArray(value, limit = 6) {
+      if (!Array.isArray(value))
+        return [];
+      return value.map((item) => coerceString(item)).filter(Boolean).slice(0, limit);
+    }
+    function toImageIdArray(value, imageIds, limit = 4) {
+      if (!Array.isArray(value))
+        return [];
+      return value.map((item) => coerceString(item)).filter((item) => imageIds.has(item)).slice(0, limit);
+    }
+    function buildSectionBlockFromSource(section, {
+      imageIds = [],
+      fallbackIndex = 0
+    } = {}) {
+      if (!section || typeof section !== "object")
+        return null;
+      const title = coerceString(section.title || section.heading || "");
+      const paragraphs = Array.isArray(section.paragraphs) ? section.paragraphs.map((item) => coerceString(item)).filter(Boolean) : [];
+      const bulletGroups = Array.isArray(section.bulletGroups) ? section.bulletGroups.map((group) => Array.isArray(group) ? group.map((item) => coerceString(item)).filter(Boolean).slice(0, 10) : []).filter((group) => group.length) : [];
+      const callouts = Array.isArray(section.callouts) ? section.callouts.map((callout) => ({
+        type: coerceString(callout == null ? void 0 : callout.type),
+        title: coerceString(callout == null ? void 0 : callout.title),
+        body: coerceString(callout == null ? void 0 : callout.body)
+      })).filter((callout) => callout.title || callout.body || callout.type) : [];
+      const normalizedImageIds = Array.isArray(imageIds) ? imageIds.map((item) => coerceString(item)).filter(Boolean).slice(0, 3) : [];
+      const subsections = Array.isArray(section.subsections) ? section.subsections.map((subsection) => ({
+        title: coerceString((subsection == null ? void 0 : subsection.title) || (subsection == null ? void 0 : subsection.heading) || ""),
+        level: Number.isInteger(subsection == null ? void 0 : subsection.level) ? subsection.level : 3,
+        paragraphs: Array.isArray(subsection == null ? void 0 : subsection.paragraphs) ? subsection.paragraphs.map((item) => coerceString(item)).filter(Boolean) : [],
+        bulletGroups: Array.isArray(subsection == null ? void 0 : subsection.bulletGroups) ? subsection.bulletGroups.map((group) => Array.isArray(group) ? group.map((item) => coerceString(item)).filter(Boolean).slice(0, 10) : []).filter((group) => group.length) : [],
+        callouts: Array.isArray(subsection == null ? void 0 : subsection.callouts) ? subsection.callouts.map((callout) => ({
+          type: coerceString(callout == null ? void 0 : callout.type),
+          title: coerceString(callout == null ? void 0 : callout.title),
+          body: coerceString(callout == null ? void 0 : callout.body)
+        })).filter((callout) => callout.title || callout.body || callout.type) : []
+      })).filter((subsection) => subsection.title || subsection.paragraphs.length || subsection.bulletGroups.length || subsection.callouts.length) : [];
+      if (!title && !paragraphs.length && !bulletGroups.length && !callouts.length)
+        return null;
+      return {
+        type: "section-block",
+        sectionIndex: toSectionIndex(section.index, fallbackIndex),
+        sectionLabel: (section.level || 2) >= 3 ? `SUB ${String(fallbackIndex + 1).padStart(2, "0")}` : `PART ${String(fallbackIndex + 1).padStart(2, "0")}`,
+        headingLevel: Number.isInteger(section.level) ? section.level : 2,
+        title,
+        paragraphs,
+        bulletGroups,
+        callouts,
+        imageIds: normalizedImageIds,
+        subsections
+      };
+    }
+    function mergeSectionBlocksByBudget(blocks = [], maxSectionBlocks = 0) {
+      if (!Number.isInteger(maxSectionBlocks) || maxSectionBlocks <= 0)
+        return blocks.slice();
+      let sectionCount = 0;
+      const merged = [];
+      const getLastSectionBlock = () => {
+        var _a2;
+        for (let index = merged.length - 1; index >= 0; index -= 1) {
+          if (((_a2 = merged[index]) == null ? void 0 : _a2.type) === "section-block")
+            return merged[index];
+        }
+        return null;
+      };
+      blocks.forEach((block) => {
+        if (!block || block.type !== "section-block") {
+          merged.push(block);
+          return;
+        }
+        if (sectionCount < maxSectionBlocks) {
+          merged.push({
+            ...block,
+            paragraphs: Array.isArray(block.paragraphs) ? block.paragraphs.slice() : [],
+            bulletGroups: Array.isArray(block.bulletGroups) ? block.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : [],
+            callouts: Array.isArray(block.callouts) ? block.callouts.map((callout) => ({ ...callout })) : [],
+            imageIds: Array.isArray(block.imageIds) ? block.imageIds.slice() : [],
+            subsections: Array.isArray(block.subsections) ? block.subsections.map((subsection) => ({
+              ...subsection,
+              paragraphs: Array.isArray(subsection.paragraphs) ? subsection.paragraphs.slice() : [],
+              bulletGroups: Array.isArray(subsection.bulletGroups) ? subsection.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : [],
+              callouts: Array.isArray(subsection.callouts) ? subsection.callouts.map((callout) => ({ ...callout })) : []
+            })) : []
+          });
+          sectionCount += 1;
+          return;
+        }
+        const lastSectionBlock = getLastSectionBlock();
+        if (!lastSectionBlock) {
+          merged.push(block);
+          return;
+        }
+        const promotedSubsection = {
+          title: coerceString(block.title || block.sectionLabel || `Section ${sectionCount + 1}`),
+          level: Math.max(3, Number.isInteger(block.headingLevel) ? block.headingLevel : 2),
+          paragraphs: Array.isArray(block.paragraphs) ? block.paragraphs.slice() : [],
+          bulletGroups: Array.isArray(block.bulletGroups) ? block.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : [],
+          callouts: Array.isArray(block.callouts) ? block.callouts.map((callout) => ({ ...callout })) : []
+        };
+        const nestedSubsections = Array.isArray(block.subsections) ? block.subsections.map((subsection) => ({
+          title: coerceString((subsection == null ? void 0 : subsection.title) || ""),
+          level: Math.max(3, Number.isInteger(subsection == null ? void 0 : subsection.level) ? subsection.level : 3),
+          paragraphs: Array.isArray(subsection == null ? void 0 : subsection.paragraphs) ? subsection.paragraphs.slice() : [],
+          bulletGroups: Array.isArray(subsection == null ? void 0 : subsection.bulletGroups) ? subsection.bulletGroups.map((group) => Array.isArray(group) ? group.slice() : []).filter((group) => group.length) : [],
+          callouts: Array.isArray(subsection == null ? void 0 : subsection.callouts) ? subsection.callouts.map((callout) => ({ ...callout })) : []
+        })).filter((subsection) => subsection.title || subsection.paragraphs.length || subsection.bulletGroups.length || subsection.callouts.length) : [];
+        lastSectionBlock.subsections = (Array.isArray(lastSectionBlock.subsections) ? lastSectionBlock.subsections : []).concat([promotedSubsection], nestedSubsections);
+        if (Array.isArray(block.imageIds) && block.imageIds.length) {
+          lastSectionBlock.imageIds = Array.from(/* @__PURE__ */ new Set([...Array.isArray(lastSectionBlock.imageIds) ? lastSectionBlock.imageIds : [], ...block.imageIds])).slice(0, 3);
+        }
+      });
+      return merged;
+    }
+    function findSourceSectionByTitle(sourceSections = [], title = "") {
+      const expectedKey = normalizeTitleKey(title);
+      if (!expectedKey)
+        return null;
+      return sourceSections.find((section) => normalizeTitleKey(section == null ? void 0 : section.title) === expectedKey) || null;
+    }
+    function normalizeLayoutBlock(block, imageIds, sourceSections, index) {
+      if (!block || typeof block !== "object")
+        return null;
+      const type = coerceString(block.type);
+      if (!type)
+        return null;
+      if (type === "hero") {
+        return {
+          type,
+          eyebrow: coerceString(block.eyebrow),
+          title: coerceString(block.title),
+          subtitle: coerceString(block.subtitle),
+          coverImageId: imageIds.has(coerceString(block.coverImageId)) ? coerceString(block.coverImageId) : "",
+          variant: ["cover-right", "cover-left"].includes(block.variant) ? block.variant : "cover-right"
+        };
+      }
+      if (type === "part-nav") {
+        const items = Array.isArray(block.items) ? block.items.map((item, itemIndex) => ({
+          label: coerceString((item == null ? void 0 : item.label) || `PART ${String(itemIndex + 1).padStart(2, "0")}`),
+          text: coerceString((item == null ? void 0 : item.text) || (item == null ? void 0 : item.title))
+        })).filter((item) => item.text).slice(0, MAX_PART_NAV_ITEMS) : [];
+        return items.length ? { type, items } : null;
+      }
+      if (type === "lead-quote") {
+        const text = coerceString(block.text || block.quote);
+        if (!text)
+          return null;
+        return {
+          type,
+          text,
+          note: coerceString(block.note)
+        };
+      }
+      if (type === "case-block") {
+        const title = coerceString(block.title);
+        const summary = coerceString(block.summary);
+        if (!title && !summary)
+          return null;
+        const matchedSection = findSourceSectionByTitle(sourceSections, title);
+        if (matchedSection) {
+          return buildSectionBlockFromSource(matchedSection, {
+            imageIds: toImageIdArray(block.imageIds, imageIds, MAX_CASE_BLOCK_IMAGE_IDS),
+            fallbackIndex: toSectionIndex(matchedSection.index, index)
+          });
+        }
+        return {
+          type,
+          caseLabel: coerceString(block.caseLabel || `CASE ${String(index + 1).padStart(2, "0")}`),
+          title,
+          summary,
+          bullets: toTextArray(block.bullets, MAX_CASE_BLOCK_BULLETS),
+          imageIds: toImageIdArray(block.imageIds, imageIds, MAX_CASE_BLOCK_IMAGE_IDS),
+          highlight: coerceString(block.highlight)
+        };
+      }
+      if (type === "section-block") {
+        const sectionIndex = toSectionIndex(block.sectionIndex, -1);
+        const sourceSection = sectionIndex >= 0 ? sourceSections.find((item) => toSectionIndex(item == null ? void 0 : item.index, -1) === sectionIndex) : null;
+        if (!sourceSection)
+          return null;
+        return buildSectionBlockFromSource(sourceSection, {
+          imageIds: toImageIdArray(block.imageIds, imageIds, 3),
+          fallbackIndex: sectionIndex
+        });
+      }
+      if (type === "phone-frame") {
+        const imageId = coerceString(block.imageId);
+        if (!imageIds.has(imageId))
+          return null;
+        return {
+          type,
+          imageId,
+          caption: coerceString(block.caption)
+        };
+      }
+      if (type === "cta-card") {
+        const title = coerceString(block.title);
+        const body = coerceString(block.body);
+        if (!title && !body)
+          return null;
+        return {
+          type,
+          title,
+          body,
+          buttonText: coerceString(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB"),
+          note: coerceString(block.note)
+        };
+      }
+      return null;
+    }
+    function summarizeText(value, maxLength = 80) {
+      const text = coerceString(value).replace(/\s+/g, " ");
+      if (!text)
+        return "";
+      return text.length > maxLength ? `${text.slice(0, maxLength - 1)}\u2026` : text;
+    }
+    function looksLikeScreenshotRef(image = {}) {
+      const signature = [
+        image.id,
+        image.alt,
+        image.caption,
+        image.src
+      ].map((item) => coerceString(item).toLowerCase()).join(" ");
+      if (!signature)
+        return false;
+      return /(截图|界面|对话|聊天|微信|面板|后台|screenshot|screen|cleanshot|dialog|chat|ui)/i.test(signature);
+    }
+    function stripFrontmatterBlock(markdown = "") {
+      const content = String(markdown || "").replace(/^\uFEFF/, "");
+      if (!content.startsWith("---"))
+        return content;
+      const match = content.match(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/);
+      return match ? content.slice(match[0].length) : content;
+    }
+    function stripMarkdown(value) {
+      return String(value || "").replace(/```[\s\S]*?```/g, " ").replace(/`([^`]+)`/g, "$1").replace(/!\[[^\]]*]\([^)]+\)/g, " ").replace(/\[[^\]]+]\([^)]+\)/g, "$1").replace(/^\s{0,3}>\s?/gm, "").replace(/[*_~#>-]/g, " ").replace(/\s+/g, " ").trim();
+    }
+    function parseMarkdownCalloutStart(line = "") {
+      const quoteLine = String(line || "").trim();
+      const match = quoteLine.match(/^>\s*\[!\s*([^\]\r\n]+?)\s*\](?:\s*(.*))?$/u);
+      if (!match)
+        return null;
+      return {
+        type: coerceString(match[1]).toLowerCase(),
+        title: stripMarkdown(match[2] || "")
+      };
+    }
+    function formatCalloutLabel(type = "") {
+      const normalized = coerceString(type).toLowerCase();
+      const labels = {
+        note: "Note",
+        info: "Info",
+        tip: "Tip",
+        warning: "Warning",
+        caution: "Caution",
+        danger: "Danger",
+        success: "Success",
+        abstract: "Abstract",
+        summary: "Summary",
+        quote: "Quote",
+        important: "Important",
+        todo: "Todo"
+      };
+      if (labels[normalized])
+        return labels[normalized];
+      if (!normalized)
+        return "Callout";
+      return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+    }
+    function serializeClonedNodes(nodes = []) {
+      if (typeof document === "undefined")
+        return "";
+      const container = document.createElement("div");
+      trimTrailingDecorativeNodes(nodes).forEach((node) => {
+        if (!node)
+          return;
+        container.appendChild(node.cloneNode(true));
+      });
+      return container.innerHTML.trim();
+    }
+    function hasMeaningfulNodeContent(node) {
+      if (!node)
+        return false;
+      if (node.nodeType === 3)
+        return /\S/.test(node.textContent || "");
+      if (node.nodeType !== 1)
+        return false;
+      const element = node;
+      const tagName = String(element.tagName || "").toUpperCase();
+      if (["IMG", "TABLE", "PRE", "UL", "OL", "BLOCKQUOTE", "FIGURE", "SVG", "VIDEO", "AUDIO", "CANVAS"].includes(tagName)) {
+        return true;
+      }
+      if (element.querySelector("img,table,pre,ul,ol,blockquote,figure,svg,video,audio,canvas")) {
+        return true;
+      }
+      return /\S/.test((element.textContent || "").replace(/\u00a0/g, ""));
+    }
+    function isTrailingDecorativeNode(node) {
+      if (!node)
+        return true;
+      if (node.nodeType === 3)
+        return !/\S/.test(node.textContent || "");
+      if (node.nodeType !== 1)
+        return true;
+      const tagName = String(node.tagName || "").toUpperCase();
+      if (tagName === "HR")
+        return true;
+      if (["P", "DIV", "SECTION"].includes(tagName) && !hasMeaningfulNodeContent(node)) {
+        return true;
+      }
+      return false;
+    }
+    function trimTrailingDecorativeNodes(nodes = []) {
+      const trimmed = Array.isArray(nodes) ? nodes.slice() : [];
+      while (trimmed.length && isTrailingDecorativeNode(trimmed[trimmed.length - 1])) {
+        trimmed.pop();
+      }
+      return trimmed;
+    }
+    function remapPreservedFragmentColors(html = "", tokens = {}) {
+      const source = coerceString(html);
+      if (!source || typeof document === "undefined")
+        return source;
+      const container = document.createElement("div");
+      container.innerHTML = source;
+      const isInsideCodeChrome = (element) => {
+        if (!element || typeof element.closest !== "function")
+          return false;
+        return !!element.closest(".code-snippet__fix, pre, code, svg, mjx-container");
+      };
+      container.querySelectorAll("strong, b").forEach((element) => {
+        if (isInsideCodeChrome(element))
+          return;
+        element.style.color = tokens.accentDeep || tokens.accent || "";
+        element.style.fontWeight = element.style.fontWeight || "700";
+      });
+      container.querySelectorAll("span").forEach((element) => {
+        if (isInsideCodeChrome(element))
+          return;
+        const inlineStyle = (element.getAttribute("style") || "").toLowerCase();
+        if (!/font-weight\s*:\s*(bold|[6-9]00)/.test(inlineStyle))
+          return;
+        element.style.color = tokens.accentDeep || tokens.accent || "";
+      });
+      container.querySelectorAll("a").forEach((element) => {
+        if (isInsideCodeChrome(element))
+          return;
+        element.style.color = tokens.accentDeep || tokens.accent || "";
+        element.style.textDecoration = "none";
+        element.style.borderBottom = `1px dashed ${tokens.accent || tokens.accentDeep || "#000000"}`;
+      });
+      container.querySelectorAll("section, div, blockquote").forEach((element) => {
+        if (isInsideCodeChrome(element))
+          return;
+        const inlineStyle = (element.getAttribute("style") || "").toLowerCase();
+        const looksLikeLegacyCallout = /border-left\s*:/.test(inlineStyle) && /overflow\s*:\s*hidden/.test(inlineStyle) && /background\s*:/.test(inlineStyle);
+        if (!looksLikeLegacyCallout)
+          return;
+        element.style.borderLeftColor = tokens.accent || "";
+        if (!element.style.borderLeftStyle)
+          element.style.borderLeftStyle = "solid";
+        if (!element.style.borderLeftWidth)
+          element.style.borderLeftWidth = "3px";
+        element.style.background = tokens.accentSoft || "";
+        element.style.backgroundColor = tokens.accentSoft || "";
+        const [header, body] = Array.from(element.children || []);
+        if (header && !isInsideCodeChrome(header)) {
+          header.style.background = tokens.quoteBg || tokens.accentSoft || "";
+          header.style.backgroundColor = tokens.quoteBg || tokens.accentSoft || "";
+          header.style.color = tokens.text || "";
+        }
+        if (body && !isInsideCodeChrome(body)) {
+          body.style.color = tokens.text || "";
+        }
+      });
+      return container.innerHTML.trim();
+    }
+    function extractRenderedSectionFragments2(html = "") {
+      if (!html || typeof document === "undefined") {
+        return { sections: [] };
+      }
+      const container = document.createElement("div");
+      container.innerHTML = String(html || "");
+      const root = container.children.length === 1 ? container.firstElementChild : container;
+      const childNodes = Array.from((root == null ? void 0 : root.childNodes) || []).filter((node) => node.nodeType !== 3 || /\S/.test(node.textContent || ""));
+      const sections = [];
+      let currentSection = null;
+      let currentSubsection = null;
+      const finalizeSection = () => {
+        if (!currentSection)
+          return;
+        sections.push({
+          index: sections.length,
+          title: currentSection.title,
+          titleKey: currentSection.titleKey,
+          leadHtml: serializeClonedNodes(currentSection.leadNodes),
+          subsections: currentSection.subsections.map((subsection, subsectionIndex) => ({
+            index: subsectionIndex,
+            title: subsection.title,
+            titleKey: subsection.titleKey,
+            contentHtml: serializeClonedNodes(subsection.nodes)
+          }))
+        });
+        currentSection = null;
+        currentSubsection = null;
+      };
+      childNodes.forEach((node) => {
+        if (node.nodeType === 1) {
+          const tagName = String(node.tagName || "").toUpperCase();
+          const headingMatch = tagName.match(/^H([2-6])$/);
+          if (headingMatch) {
+            const level = parseInt(headingMatch[1], 10);
+            const title = coerceString(node.textContent).trim();
+            if (level === 2 || !currentSection) {
+              finalizeSection();
+              currentSection = {
+                title,
+                titleKey: normalizeTitleKey(title),
+                leadNodes: [],
+                subsections: []
+              };
+              currentSubsection = null;
+              return;
+            }
+            if (level >= 3 && currentSection) {
+              currentSubsection = {
+                title,
+                titleKey: normalizeTitleKey(title),
+                nodes: []
+              };
+              currentSection.subsections.push(currentSubsection);
+              return;
+            }
+          }
+        }
+        if (!currentSection)
+          return;
+        if (currentSubsection) {
+          currentSubsection.nodes.push(node);
+        } else {
+          currentSection.leadNodes.push(node);
+        }
+      });
+      finalizeSection();
+      return { sections };
+    }
+    function extractMarkdownSections(markdown = "") {
+      const lines = stripFrontmatterBlock(markdown).split(/\r?\n/);
+      const sections = [];
+      const introParagraphs = [];
+      const introBulletGroups = [];
+      const introCallouts = [];
+      const headings = [];
+      let currentSection = null;
+      let currentSubsection = null;
+      let currentParagraph = [];
+      let currentBullets = [];
+      let currentCallout = null;
+      const getCurrentTarget = () => currentSubsection || currentSection || null;
+      const getCurrentCalloutTarget = () => {
+        const target = getCurrentTarget();
+        if (target) {
+          if (!Array.isArray(target.callouts))
+            target.callouts = [];
+          return target.callouts;
+        }
+        return introCallouts;
+      };
+      const pushParagraphToTarget = () => {
+        const text = stripMarkdown(currentParagraph.join(" ").trim());
+        if (text) {
+          const target = getCurrentTarget();
+          if (target) {
+            target.paragraphs.push(text);
+          } else {
+            introParagraphs.push(text);
+          }
+        }
+        currentParagraph = [];
+      };
+      const pushBulletsToTarget = () => {
+        if (currentBullets.length) {
+          const target = getCurrentTarget();
+          if (target) {
+            target.bulletGroups.push(currentBullets);
+          } else {
+            introBulletGroups.push(currentBullets);
+          }
+        }
+        currentBullets = [];
+      };
+      const pushCalloutToTarget = () => {
+        if (!currentCallout)
+          return;
+        const body = stripMarkdown(currentCallout.lines.join(" ").trim());
+        if (body || currentCallout.title || currentCallout.type) {
+          getCurrentCalloutTarget().push({
+            type: currentCallout.type,
+            title: currentCallout.title,
+            body
+          });
+        }
+        currentCallout = null;
+      };
+      const finalizeSection = () => {
+        var _a2;
+        pushCalloutToTarget();
+        if (currentSection && (currentSection.title || currentSection.paragraphs.length || currentSection.bulletGroups.length || ((_a2 = currentSection.callouts) == null ? void 0 : _a2.length))) {
+          currentSection.index = sections.length;
+          sections.push(currentSection);
+        }
+        currentSection = null;
+        currentSubsection = null;
+      };
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) {
+          pushParagraphToTarget();
+          pushBulletsToTarget();
+          pushCalloutToTarget();
+          continue;
+        }
+        const calloutStart = parseMarkdownCalloutStart(rawLine);
+        if (calloutStart) {
+          pushParagraphToTarget();
+          pushBulletsToTarget();
+          pushCalloutToTarget();
+          currentCallout = {
+            type: calloutStart.type,
+            title: calloutStart.title,
+            lines: []
+          };
+          continue;
+        }
+        if (currentCallout) {
+          const calloutLineMatch = rawLine.match(/^\s*>\s?(.*)$/);
+          if (calloutLineMatch) {
+            const calloutText = stripMarkdown(calloutLineMatch[1] || "");
+            if (calloutText)
+              currentCallout.lines.push(calloutText);
+            continue;
+          }
+          pushCalloutToTarget();
+        }
+        const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+        if (headingMatch) {
+          pushParagraphToTarget();
+          pushBulletsToTarget();
+          const level = headingMatch[1].length;
+          const title = stripMarkdown(headingMatch[2]);
+          headings.push({ level, text: title });
+          if (level === 1) {
+            currentSubsection = null;
+            continue;
+          }
+          if (level === 2 || !currentSection) {
+            finalizeSection();
+            currentSection = {
+              index: sections.length,
+              level: 2,
+              title,
+              paragraphs: [],
+              bulletGroups: [],
+              callouts: [],
+              subsections: []
+            };
+            currentSubsection = null;
+            continue;
+          }
+          currentSubsection = {
+            level,
+            title,
+            paragraphs: [],
+            bulletGroups: [],
+            callouts: []
+          };
+          currentSection.subsections.push(currentSubsection);
+          continue;
+        }
+        const bulletMatch = line.match(/^[-*+]\s+(.+)$/) || line.match(/^\d+\.\s+(.+)$/);
+        if (bulletMatch) {
+          pushParagraphToTarget();
+          currentBullets.push(stripMarkdown(bulletMatch[1]));
+          continue;
+        }
+        currentParagraph.push(line);
+      }
+      pushParagraphToTarget();
+      pushBulletsToTarget();
+      pushCalloutToTarget();
+      finalizeSection();
+      if (!sections.length && (introParagraphs.length || introBulletGroups.length || introCallouts.length)) {
+        sections.push({
+          index: 0,
+          level: 2,
+          title: "\u6838\u5FC3\u5185\u5BB9",
+          paragraphs: introParagraphs.slice(),
+          bulletGroups: introBulletGroups.slice(),
+          callouts: introCallouts.slice(),
+          subsections: []
+        });
+      }
+      return {
+        introParagraphs,
+        introBulletGroups,
+        introCallouts,
+        headings,
+        sections
+      };
+    }
+    function extractMarkdownSignals(markdown = "") {
+      const structure = extractMarkdownSections(markdown);
+      const headings = Array.isArray(structure.headings) ? structure.headings.map((heading) => ({
+        level: heading.level || 2,
+        text: coerceString(heading.text)
+      })).filter((heading) => heading.text) : [];
+      const bulletGroups = [
+        ...structure.introBulletGroups,
+        ...structure.sections.flatMap((section) => [
+          ...section.bulletGroups || [],
+          ...(section.subsections || []).flatMap((subsection) => subsection.bulletGroups || [])
+        ])
+      ];
+      const paragraphs = [
+        ...structure.introParagraphs,
+        ...structure.sections.flatMap((section) => [
+          ...section.paragraphs || [],
+          ...(section.subsections || []).flatMap((subsection) => subsection.paragraphs || [])
+        ])
+      ];
+      const leadParagraphs = paragraphs.slice(0, 3);
+      const lastParagraph = paragraphs[paragraphs.length - 1] || "";
+      const sectionTitles = structure.sections.map((section) => coerceString(section.title)).filter(Boolean).slice(0, 12);
+      return {
+        headings,
+        sectionTitles,
+        paragraphs,
+        leadParagraphs,
+        bulletGroups,
+        lastParagraph
+      };
+    }
+    function recommendLayoutFamily({ rawLayout = {}, signals = null, imageRefs = [] } = {}) {
+      var _a2, _b, _c, _d;
+      const rawRecommended = coerceString(
+        (rawLayout == null ? void 0 : rawLayout.recommendedLayoutFamily) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.layoutFamily) || (rawLayout == null ? void 0 : rawLayout.layoutFamily)
+      );
+      if (rawRecommended && AI_LAYOUT_FAMILY_DEFS[rawRecommended])
+        return normalizeResolvedLayoutFamily(rawRecommended);
+      const safeSignals = signals || extractMarkdownSignals("");
+      const headingCount = ((_b = safeSignals.headings) == null ? void 0 : _b.length) || 0;
+      const sectionCount = ((_c = safeSignals.sectionTitles) == null ? void 0 : _c.length) || 0;
+      const bulletGroupCount = ((_d = safeSignals.bulletGroups) == null ? void 0 : _d.length) || 0;
+      const imageCount = Array.isArray(imageRefs) ? imageRefs.length : 0;
+      const hintText = `${coerceString(rawLayout == null ? void 0 : rawLayout.title)} ${Array.isArray(safeSignals.sectionTitles) ? safeSignals.sectionTitles.join(" ") : ""}`.toLowerCase();
+      if (/(观点|经验|复盘|写作|表达|品牌|故事|思考|方法论|内容创作|心得|感受|editorial|essay|brand)/i.test(hintText)) {
+        return "editorial-lite";
+      }
+      if (sectionCount >= 2 || headingCount >= 4 || bulletGroupCount >= 2 || imageCount >= 2) {
+        return "tutorial-cards";
+      }
+      return "source-first";
+    }
+    function recommendColorPalette({ rawLayout = {}, signals = null } = {}) {
+      var _a2;
+      const rawRecommended = coerceString(
+        (rawLayout == null ? void 0 : rawLayout.recommendedColorPalette) || ((_a2 = rawLayout == null ? void 0 : rawLayout.resolved) == null ? void 0 : _a2.colorPalette) || (rawLayout == null ? void 0 : rawLayout.stylePack)
+      );
+      if (rawRecommended && rawRecommended !== "custom" && AI_COLOR_PALETTES[rawRecommended]) {
+        return normalizeResolvedColorPalette(rawRecommended);
+      }
+      const headingTitles = Array.isArray(signals == null ? void 0 : signals.sectionTitles) ? signals.sectionTitles.join(" ") : "";
+      const titleHints = `${coerceString(rawLayout == null ? void 0 : rawLayout.title)} ${headingTitles}`.toLowerCase();
+      if (/(教程|指南|入门|步骤|实践|实操|配置|接入|使用|标签|双链|知识库|workflow|guide|tutorial|how to)/i.test(titleHints)) {
+        return "ocean-blue";
+      }
+      if (/(观点|品牌|复盘|内容|经验|编辑|写作|表达)/i.test(titleHints)) {
+        return "graphite-rose";
+      }
+      if (/(清单|合集|推荐|总结|收藏)/i.test(titleHints)) {
+        return "sunset-amber";
+      }
+      return "tech-green";
+    }
+    function buildFallbackLayout(context = {}) {
+      var _a2, _b;
+      const title = coerceString(context.title || "\u672A\u547D\u540D\u6587\u7AE0");
+      const selectionResolution = resolveLayoutSelection({
+        requestedSelection: context.selection || { colorPalette: context.stylePack },
+        rawLayout: context.rawLayout,
+        signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+        imageRefs: context.imageRefs
+      });
+      const resolved = selectionResolution.resolved;
+      const skill = getLayoutSkillById(resolved.layoutFamily);
+      const fallbackConfig = (skill == null ? void 0 : skill.fallback) || {};
+      const imageRefs = Array.isArray(context.imageRefs) ? context.imageRefs : [];
+      const signals = context.signals || extractMarkdownSignals(context.markdown || "");
+      const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
+      const firstImageId = ((_a2 = imageRefs[0]) == null ? void 0 : _a2.id) || "";
+      const leadText = summarizeText(signals.leadParagraphs[0] || signals.paragraphs[0] || "");
+      const leadNote = summarizeText(signals.leadParagraphs[1] || "");
+      const partItems = signals.sectionTitles.slice(0, MAX_PART_NAV_ITEMS).map((text, index) => ({
+        label: `PART ${String(index + 1).padStart(2, "0")}`,
+        text
+      }));
+      const headBlocks = [];
+      const bodyBlocks = [];
+      if (fallbackConfig.includeHero) {
+        headBlocks.push({
+          type: "hero",
+          eyebrow: signals.sectionTitles[0] ? fallbackConfig.heroEyebrow || "AI Layout Draft" : fallbackConfig.heroEyebrow || "AI Article Layout",
+          title,
+          subtitle: leadText || summarizeText(signals.lastParagraph || title, 64),
+          coverImageId: firstImageId,
+          variant: fallbackConfig.heroVariant || "cover-right"
+        });
+      }
+      if (fallbackConfig.includePartNav && partItems.length >= 2) {
+        headBlocks.push({ type: "part-nav", items: partItems });
+      }
+      if (fallbackConfig.includeLeadQuote && leadText) {
+        headBlocks.push({
+          type: "lead-quote",
+          text: leadText,
+          note: leadNote
+        });
+      }
+      const heroCoverImageId = coerceString((_b = headBlocks.find((block) => (block == null ? void 0 : block.type) === "hero")) == null ? void 0 : _b.coverImageId);
+      sourceSections.forEach((section, index) => {
+        const block = buildSectionBlockFromSource(section, {
+          imageIds: index === 0 && firstImageId && heroCoverImageId !== firstImageId ? [firstImageId] : [],
+          fallbackIndex: index
+        });
+        if (block)
+          bodyBlocks.push(block);
+      });
+      const maxSectionBlocks = Number.isInteger(fallbackConfig.maxSectionBlocks) ? fallbackConfig.maxSectionBlocks : 0;
+      const budgetedBodyBlocks = mergeSectionBlocksByBudget(bodyBlocks, maxSectionBlocks);
+      const screenshotImage = imageRefs.find((image, index) => index > 0 && looksLikeScreenshotRef(image)) || null;
+      if (fallbackConfig.includePhoneFrame && (screenshotImage == null ? void 0 : screenshotImage.id)) {
+        budgetedBodyBlocks.push({
+          type: "phone-frame",
+          imageId: screenshotImage.id,
+          caption: screenshotImage.caption || screenshotImage.alt || "\u793A\u610F\u622A\u56FE"
+        });
+      }
+      const collectUsedImageIds = (blocks = []) => {
+        const used = /* @__PURE__ */ new Set();
+        blocks.forEach((block) => {
+          const coverImageId = coerceString(block == null ? void 0 : block.coverImageId);
+          if (coverImageId)
+            used.add(coverImageId);
+          const singleImageId = coerceString(block == null ? void 0 : block.imageId);
+          if (singleImageId)
+            used.add(singleImageId);
+          if (Array.isArray(block == null ? void 0 : block.imageIds)) {
+            block.imageIds.map((item) => coerceString(item)).filter(Boolean).forEach((item) => used.add(item));
+          }
+        });
+        return used;
+      };
+      const appendRemainingImages = (blocks = [], remainingImageIds2 = [], familyId = "") => {
+        const queue = remainingImageIds2.slice();
+        if (!queue.length)
+          return blocks;
+        const attachableIndexes = [];
+        blocks.forEach((block, index) => {
+          if ((block == null ? void 0 : block.type) === "section-block" || (block == null ? void 0 : block.type) === "case-block") {
+            attachableIndexes.push(index);
+          }
+        });
+        attachableIndexes.forEach((blockIndex) => {
+          if (!queue.length)
+            return;
+          const block = blocks[blockIndex];
+          const limit = block.type === "case-block" ? MAX_CASE_BLOCK_IMAGE_IDS : 3;
+          const currentImageIds = Array.isArray(block.imageIds) ? block.imageIds.map((item) => coerceString(item)).filter(Boolean) : [];
+          const availableSlots = Math.max(0, limit - currentImageIds.length);
+          if (!availableSlots)
+            return;
+          blocks[blockIndex] = {
+            ...block,
+            imageIds: currentImageIds.concat(queue.splice(0, availableSlots))
+          };
+        });
+        while (queue.length) {
+          blocks.push({
+            type: "case-block",
+            caseLabel: fallbackConfig.galleryCaseLabel || (familyId === "editorial-lite" ? "IMAGES" : "GALLERY"),
+            title: fallbackConfig.galleryTitle || (familyId === "editorial-lite" ? "\u56FE\u50CF\u6458\u5F55" : "\u914D\u56FE\u8865\u5145"),
+            summary: "",
+            bullets: [],
+            imageIds: queue.splice(0, MAX_CASE_BLOCK_IMAGE_IDS),
+            highlight: ""
+          });
+        }
+        return blocks;
+      };
+      const usedImageIds = collectUsedImageIds([...headBlocks, ...budgetedBodyBlocks]);
+      const remainingImageIds = imageRefs.map((image) => coerceString(image == null ? void 0 : image.id)).filter(Boolean).filter((imageId) => !usedImageIds.has(imageId));
+      appendRemainingImages(budgetedBodyBlocks, remainingImageIds, resolved.layoutFamily);
+      return {
+        version: AI_LAYOUT_SCHEMA_VERSION2,
+        articleType: signals.sectionTitles.length >= 2 ? "tutorial" : "article",
+        selection: selectionResolution.selection,
+        resolved,
+        recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+        recommendedColorPalette: selectionResolution.recommendedColorPalette,
+        stylePack: resolved.colorPalette,
+        layoutFamily: resolved.layoutFamily,
+        title,
+        summary: summarizeText(leadText || signals.lastParagraph || title, 90),
+        blocks: [...headBlocks, ...budgetedBodyBlocks].filter(Boolean).slice(0, MAX_LAYOUT_BLOCKS)
+      };
+    }
+    function mergeBlocksWithFallback(aiBlocks = [], fallbackBlocks = []) {
+      return mergeBlocksWithFallbackDetailed(aiBlocks, fallbackBlocks).map((entry) => entry.block);
+    }
+    function mergeBlocksWithFallbackDetailed(aiBlocks = [], fallbackBlocks = []) {
+      const introOrder = ["hero", "part-nav", "lead-quote"];
+      const introAiByType = /* @__PURE__ */ new Map();
+      const introFallbackByType = /* @__PURE__ */ new Map();
+      const fallbackSectionsByIndex = /* @__PURE__ */ new Map();
+      const deferredAi = [];
+      const deferredFallback = [];
+      const seenKeys = /* @__PURE__ */ new Set();
+      const merged = [];
+      const addBlock = (block, source) => {
+        if (!block || !block.type)
+          return;
+        const dedupeKey = getLayoutBlockKey(block);
+        if (seenKeys.has(dedupeKey))
+          return;
+        seenKeys.add(dedupeKey);
+        merged.push({ block, source });
+      };
+      const fallbackSectionIndices = [];
+      fallbackBlocks.forEach((block) => {
+        if (!block || !block.type)
+          return;
+        if (introOrder.includes(block.type)) {
+          if (!introFallbackByType.has(block.type)) {
+            introFallbackByType.set(block.type, block);
+          }
+          return;
+        }
+        if (block.type === "section-block" && Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0) {
+          if (!fallbackSectionsByIndex.has(block.sectionIndex)) {
+            fallbackSectionsByIndex.set(block.sectionIndex, block);
+            fallbackSectionIndices.push(block.sectionIndex);
+          }
+          return;
+        }
+        deferredFallback.push({ block, source: "fallback" });
+      });
+      aiBlocks.forEach((block) => {
+        if (!block || !block.type)
+          return;
+        if (introOrder.includes(block.type)) {
+          if (!introAiByType.has(block.type)) {
+            introAiByType.set(block.type, block);
+          }
+          return;
+        }
+        deferredAi.push({ block, source: "ai" });
+      });
+      introOrder.forEach((type) => {
+        const aiBlock = introAiByType.get(type);
+        const fallbackBlock = introFallbackByType.get(type);
+        if (aiBlock) {
+          addBlock(aiBlock, "ai");
+        } else if (fallbackBlock) {
+          addBlock(fallbackBlock, "fallback");
+        }
+      });
+      const sortedFallbackIndices = Array.from(new Set(fallbackSectionIndices)).sort((a, b) => a - b);
+      let fallbackPointer = 0;
+      const flushFallbackSectionsBefore = (targetIndex) => {
+        while (fallbackPointer < sortedFallbackIndices.length && sortedFallbackIndices[fallbackPointer] < targetIndex) {
+          const sectionIndex = sortedFallbackIndices[fallbackPointer];
+          addBlock(fallbackSectionsByIndex.get(sectionIndex), "fallback");
+          fallbackPointer += 1;
+        }
+      };
+      const consumeFallbackSection = (sectionIndex) => {
+        while (fallbackPointer < sortedFallbackIndices.length && sortedFallbackIndices[fallbackPointer] <= sectionIndex) {
+          fallbackPointer += 1;
+        }
+      };
+      deferredAi.forEach((entry) => {
+        const block = entry.block;
+        if ((block == null ? void 0 : block.type) === "section-block" && Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0) {
+          flushFallbackSectionsBefore(block.sectionIndex);
+          addBlock(block, "ai");
+          consumeFallbackSection(block.sectionIndex);
+          return;
+        }
+        if ((block == null ? void 0 : block.type) === "hero" || (block == null ? void 0 : block.type) === "part-nav" || (block == null ? void 0 : block.type) === "lead-quote") {
+          return;
+        }
+        deferredFallback.push(entry);
+      });
+      flushFallbackSectionsBefore(Number.POSITIVE_INFINITY);
+      deferredFallback.forEach((entry) => addBlock(entry.block, entry.source));
+      return merged.slice(0, MAX_LAYOUT_BLOCKS);
+    }
+    function normalizeArticleLayout(rawLayout = {}, context = {}) {
+      const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
+      const selectionResolution = resolveLayoutSelection({
+        requestedSelection: context.selection || { colorPalette: context.stylePack },
+        rawLayout,
+        signals: context.signals || extractMarkdownSignals(context.markdown || ""),
+        imageRefs: context.imageRefs
+      });
+      const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
+      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, sourceSections, index)).filter(Boolean) : [];
+      const fallbackLayout = buildFallbackLayout({
+        title: rawLayout.title || context.title,
+        markdown: context.markdown,
+        selection: selectionResolution.selection,
+        rawLayout,
+        imageRefs: context.imageRefs,
+        signals: context.signals,
+        sourceSections
+      });
+      const blocks = mergeBlocksWithFallback(normalizedAiBlocks, fallbackLayout.blocks);
+      return {
+        version: AI_LAYOUT_SCHEMA_VERSION2,
+        articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || "article"),
+        selection: selectionResolution.selection,
+        resolved: selectionResolution.resolved,
+        recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+        recommendedColorPalette: selectionResolution.recommendedColorPalette,
+        stylePack: selectionResolution.resolved.colorPalette,
+        layoutFamily: selectionResolution.resolved.layoutFamily,
+        title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
+        summary: coerceString(rawLayout.summary || fallbackLayout.summary),
+        blocks
+      };
+    }
+    function createLayoutGenerationMeta({
+      provider,
+      layoutFamily,
+      colorPalette,
+      recommendedLayoutFamily,
+      recommendedColorPalette,
+      signals,
+      imageRefs = [],
+      normalizedAiBlocks = [],
+      mergedEntries = [],
+      schemaValidation = null
+    }) {
+      var _a2, _b;
+      const layoutFamilyInfo = getLayoutFamilyById2(layoutFamily);
+      const colorPaletteInfo = getColorPaletteById2(colorPalette);
+      const fallbackEntries = mergedEntries.filter((entry) => entry.source === "fallback");
+      const executionMode = fallbackEntries.length > 0 && normalizedAiBlocks.length === 0 ? "local-fallback" : "ai-enhanced";
+      return {
+        providerName: coerceString(provider == null ? void 0 : provider.name),
+        providerModel: coerceString(provider == null ? void 0 : provider.model),
+        skillId: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.id) || coerceString(layoutFamily),
+        skillLabel: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.label) || "",
+        skillVersion: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.version) || "",
+        executionMode,
+        layoutFamilyLabel: (layoutFamilyInfo == null ? void 0 : layoutFamilyInfo.label) || "",
+        colorPaletteLabel: (colorPaletteInfo == null ? void 0 : colorPaletteInfo.label) || "",
+        stylePackLabel: (colorPaletteInfo == null ? void 0 : colorPaletteInfo.label) || "",
+        recommendedLayoutFamilyLabel: ((_a2 = getLayoutFamilyById2(recommendedLayoutFamily)) == null ? void 0 : _a2.label) || "",
+        recommendedColorPaletteLabel: ((_b = getColorPaletteById2(recommendedColorPalette)) == null ? void 0 : _b.label) || "",
+        headingCount: signals.headings.length,
+        sectionCount: signals.sectionTitles.length,
+        leadParagraphCount: signals.leadParagraphs.length,
+        bulletGroupCount: signals.bulletGroups.length,
+        imageCount: Array.isArray(imageRefs) ? imageRefs.length : 0,
+        aiBlockCount: normalizedAiBlocks.length,
+        finalBlockCount: mergedEntries.length,
+        fallbackUsed: fallbackEntries.length > 0,
+        fallbackBlockCount: fallbackEntries.length,
+        fallbackBlockTypes: Array.from(new Set(fallbackEntries.map((entry) => {
+          var _a3;
+          return (_a3 = entry.block) == null ? void 0 : _a3.type;
+        }).filter(Boolean))).slice(0, 6),
+        schemaValidation: normalizeSchemaValidation(schemaValidation),
+        blockOrigins: mergedEntries.map((entry, index) => {
+          var _a3;
+          return {
+            index,
+            type: coerceString((_a3 = entry.block) == null ? void 0 : _a3.type),
+            source: entry.source === "fallback" ? "fallback" : "ai",
+            label: getLayoutBlockLabel(entry.block)
+          };
+        })
+      };
+    }
+    function buildLayoutResult(rawLayout = {}, context = {}) {
+      const validation = validateAiLayoutPayload(rawLayout);
+      const signals = context.signals || extractMarkdownSignals(context.markdown || "");
+      const selectionResolution = resolveLayoutSelection({
+        requestedSelection: context.selection || { colorPalette: context.stylePack },
+        rawLayout,
+        signals,
+        imageRefs: context.imageRefs
+      });
+      if (validation.fatal) {
+        const generationMeta = createLayoutGenerationMeta({
+          provider: context.provider,
+          layoutFamily: selectionResolution.resolved.layoutFamily,
+          colorPalette: selectionResolution.resolved.colorPalette,
+          recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+          recommendedColorPalette: selectionResolution.recommendedColorPalette,
+          signals,
+          imageRefs: context.imageRefs,
+          normalizedAiBlocks: [],
+          mergedEntries: [],
+          schemaValidation: validation
+        });
+        throw new AiLayoutSchemaError(`AI \u8FD4\u56DE\u7684\u5E03\u5C40\u7ED3\u679C\u672A\u901A\u8FC7 schema \u6821\u9A8C\uFF08${validation.issueCount} \u9879\uFF09`, validation, generationMeta);
+      }
+      const imageIds = new Set((context.imageRefs || []).map((image) => image.id));
+      const sourceSections = Array.isArray(context.sourceSections) ? context.sourceSections : extractMarkdownSections(context.markdown || "").sections;
+      const normalizedAiBlocks = Array.isArray(rawLayout.blocks) ? rawLayout.blocks.map((block, index) => normalizeLayoutBlock(block, imageIds, sourceSections, index)).filter(Boolean) : [];
+      const fallbackLayout = buildFallbackLayout({
+        title: rawLayout.title || context.title,
+        markdown: context.markdown,
+        selection: selectionResolution.selection,
+        rawLayout,
+        imageRefs: context.imageRefs,
+        signals,
+        sourceSections
+      });
+      const mergedEntries = mergeBlocksWithFallbackDetailed(normalizedAiBlocks, fallbackLayout.blocks);
+      const layoutJson = {
+        version: AI_LAYOUT_SCHEMA_VERSION2,
+        articleType: coerceString(rawLayout.articleType || fallbackLayout.articleType || "article"),
+        selection: selectionResolution.selection,
+        resolved: selectionResolution.resolved,
+        recommendedLayoutFamily: selectionResolution.recommendedLayoutFamily,
+        recommendedColorPalette: selectionResolution.recommendedColorPalette,
+        stylePack: selectionResolution.resolved.colorPalette,
+        layoutFamily: selectionResolution.resolved.layoutFamily,
+        title: coerceString(rawLayout.title || context.title || fallbackLayout.title),
+        summary: coerceString(rawLayout.summary || fallbackLayout.summary),
+        blocks: mergedEntries.map((entry) => entry.block)
+      };
+      return {
+        layoutJson,
+        generationMeta: createLayoutGenerationMeta({
+          provider: context.provider,
+          layoutFamily: layoutJson.resolved.layoutFamily,
+          colorPalette: layoutJson.resolved.colorPalette,
+          recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+          recommendedColorPalette: layoutJson.recommendedColorPalette,
+          signals,
+          imageRefs: context.imageRefs,
+          normalizedAiBlocks,
+          mergedEntries,
+          schemaValidation: validation
+        })
+      };
+    }
+    function extractImageRefsFromHtml2(html) {
+      if (typeof document === "undefined" || !html)
+        return [];
+      const container = document.createElement("div");
+      container.innerHTML = html;
+      const figures = Array.from(container.querySelectorAll("figure"));
+      const refs = [];
+      figures.forEach((figure, index) => {
+        var _a2, _b;
+        const img = figure.querySelector("img");
+        if (!img || !img.src || img.alt === "logo")
+          return;
+        const caption = ((_b = (_a2 = figure.querySelector("figcaption")) == null ? void 0 : _a2.textContent) == null ? void 0 : _b.trim()) || img.alt || `\u914D\u56FE ${index + 1}`;
+        refs.push({
+          id: `image-${index + 1}`,
+          src: img.src,
+          alt: img.alt || caption,
+          caption
+        });
+      });
+      return refs;
+    }
+    function buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs = [] }) {
+      const resolvedSelection = resolveLayoutSelection({
+        requestedSelection: selection || { colorPalette: stylePack },
+        rawLayout: { title },
+        signals: extractMarkdownSignals(markdown),
+        imageRefs
+      });
+      const selectedLayoutFamily = (selection == null ? void 0 : selection.layoutFamily) || AI_LAYOUT_SELECTION_AUTO2;
+      const selectedColorPalette = (selection == null ? void 0 : selection.colorPalette) || AI_LAYOUT_SELECTION_AUTO2;
+      const selectedLayoutFamilyInfo = selectedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? { label: "\u81EA\u52A8\u63A8\u8350", description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u5E03\u5C40\u98CE\u683C\u3002" } : getLayoutFamilyById2(selectedLayoutFamily);
+      const selectedColorPaletteInfo = selectedColorPalette === AI_LAYOUT_SELECTION_AUTO2 ? { label: "\u81EA\u52A8\u63A8\u8350", description: "\u7531 AI \u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u989C\u8272\u3002" } : getColorPaletteById2(selectedColorPalette);
+      const selectedSkill = selectedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? null : getLayoutSkillById(selectedLayoutFamily);
+      const recommendedSkill = getLayoutSkillById(resolvedSelection.recommendedLayoutFamily);
+      const signals = extractMarkdownSignals(markdown);
+      const promptMarkdown = truncateMarkdownForPrompt(markdown);
+      const imageSummary = imageRefs.length ? imageRefs.map((image) => `- ${image.id}: ${image.caption}`).join("\n") : "- \u65E0\u53EF\u7528\u56FE\u7247";
+      const sectionSummary = signals.sectionTitles.length ? signals.sectionTitles.map((item, index) => `- ${index}: ${item}`).join("\n") : "- \u65E0\u660E\u663E\u7AE0\u8282\u7ED3\u6784";
+      const headingSummary = signals.sectionTitles.length ? signals.sectionTitles.map((item, index) => `${index + 1}. ${item}`).join("\n") : "- \u65E0\u660E\u663E\u6807\u9898\u7ED3\u6784";
+      const leadSummary = signals.leadParagraphs.length ? signals.leadParagraphs.map((item, index) => `${index + 1}. ${summarizeText(item, 90)}`).join("\n") : "- \u65E0\u53EF\u63D0\u53D6\u5BFC\u8BED";
+      const bulletSummary = signals.bulletGroups.length ? signals.bulletGroups.slice(0, 2).map((group, groupIndex) => `\u7EC4 ${groupIndex + 1}: ${group.slice(0, 4).join(" / ")}`).join("\n") : "- \u65E0\u660E\u663E\u5217\u8868\u4FE1\u606F";
+      const skillSummary = AI_LAYOUT_SKILL_LIST.map((skill) => {
+        const manifest = skill.manifest || {};
+        return `- ${manifest.id}: ${manifest.label}\uFF08${manifest.description || "\u65E0\u63CF\u8FF0"}\uFF09`;
+      }).join("\n");
+      const safeStyleNotes = Array.isArray(AI_WECHAT_SAFE_STYLE_PRIMITIVES.allowedCssNotes) ? AI_WECHAT_SAFE_STYLE_PRIMITIVES.allowedCssNotes.map((item) => `- ${item}`).join("\n") : "- \u4EC5\u5141\u8BB8 inline style";
+      const selectedSkillPrompt = (selectedSkill == null ? void 0 : selectedSkill.prompt) ? selectedSkill.prompt : "\u5F53\u524D layoutFamily \u4E3A auto\uFF0C\u8BF7\u5728\u5185\u7F6E skill \u4E2D\u505A\u9009\u62E9\uFF0C\u5E76\u7ED9\u51FA\u6700\u5408\u9002\u7684 recommendedLayoutFamily\u3002";
+      const recommendedSkillPrompt = (recommendedSkill == null ? void 0 : recommendedSkill.prompt) ? recommendedSkill.prompt : "";
+      return [
+        {
+          role: "system",
+          content: AI_LAYOUT_SKILL_SYSTEM_LINES.join("\n")
+        },
+        {
+          role: "user",
+          content: [
+            `\u6587\u7AE0\u6807\u9898\uFF1A${title || "\u672A\u547D\u540D\u6587\u7AE0"}`,
+            `\u5E03\u5C40\u9009\u62E9\uFF1A${selectedLayoutFamilyInfo.label}`,
+            `\u5E03\u5C40\u8BF4\u660E\uFF1A${selectedLayoutFamilyInfo.description}`,
+            `\u989C\u8272\u9009\u62E9\uFF1A${selectedColorPaletteInfo.label}`,
+            `\u989C\u8272\u8BF4\u660E\uFF1A${selectedColorPaletteInfo.description}`,
+            `\u63A8\u8350\u5E03\u5C40\uFF1A${getLayoutFamilyById2(resolvedSelection.recommendedLayoutFamily).label}`,
+            `\u63A8\u8350\u989C\u8272\uFF1A${getColorPaletteById2(resolvedSelection.recommendedColorPalette).label}`,
+            "",
+            "\u5185\u7F6E\u5E03\u5C40 skills\uFF1A",
+            skillSummary,
+            "",
+            selectedSkill ? `\u5F53\u524D skill\uFF1A${selectedSkill.manifest.label}\uFF08${selectedSkill.manifest.version}\uFF09` : "\u5F53\u524D skill\uFF1A\u81EA\u52A8\u63A8\u8350",
+            "\u5F53\u524D skill \u76EE\u6807\uFF1A",
+            selectedSkillPrompt,
+            recommendedSkillPrompt ? ["", "\u5F53\u524D\u63A8\u8350 skill \u53C2\u8003\uFF1A", recommendedSkillPrompt, ""].join("\n") : "",
+            "\u5FAE\u4FE1\u5B89\u5168\u6837\u5F0F\u7EA6\u675F\uFF1A",
+            safeStyleNotes,
+            "",
+            "\u53EF\u7528\u56FE\u7247\uFF1A",
+            imageSummary,
+            "",
+            "\u53EF\u7528\u6B63\u6587 section\uFF1A",
+            sectionSummary,
+            "",
+            "\u6587\u7AE0\u7ED3\u6784\u6458\u8981\uFF1A",
+            "\u6807\u9898\u5927\u7EB2\uFF1A",
+            headingSummary,
+            "\u5BFC\u8BED\u5019\u9009\uFF1A",
+            leadSummary,
+            "\u5217\u8868\u4FE1\u606F\uFF1A",
+            bulletSummary,
+            "",
+            "\u8BF7\u8F93\u51FA\u4E00\u4E2A JSON \u5BF9\u8C61\uFF0C\u5305\u542B\uFF1A",
+            ...AI_LAYOUT_OUTPUT_FIELDS.map((field) => `- ${field}`),
+            "",
+            "selection \u89C4\u5219\uFF1A",
+            `- layoutFamily \u53EA\u80FD\u662F ${AI_LAYOUT_SELECTION_AUTO2} / ${AI_LAYOUT_FAMILIES.join(" / ")}`,
+            `- colorPalette \u53EA\u80FD\u662F ${AI_LAYOUT_SELECTION_AUTO2} / ${AI_LAYOUT_COLOR_PALETTES.join(" / ")}`,
+            "- \u5F53 selection.colorPalette = auto \u65F6\uFF0C\u8BF7\u53EA\u4ECE\u5185\u7F6E\u975E custom \u989C\u8272\u4E2D\u63A8\u8350\uFF1Bcustom \u53EA\u5728\u7528\u6237\u660E\u786E\u9009\u62E9\u81EA\u5B9A\u4E49\u65F6\u4F7F\u7528\u3002",
+            `- \u5F53\u524D selection.layoutFamily = ${selectedLayoutFamily}`,
+            `- \u5F53\u524D selection.colorPalette = ${selectedColorPalette}`,
+            "\u5982\u679C selection \u4E3A auto\uFF0C\u8BF7\u4F60\u7ED9\u51FA recommended* \u5E76\u5199\u5165 resolved\uFF1B\u5982\u679C\u4E0D\u662F auto\uFF0C\u8BF7\u5C0A\u91CD\u7528\u6237\u9009\u62E9\u3002",
+            "",
+            "block \u7EA6\u675F\uFF1A",
+            ...getAiLayoutBlockConstraintLines(),
+            "",
+            "\u6B63\u6587\u4E3B\u4F53\u8BF7\u4F18\u5148\u4F7F\u7528 section-block\uFF0C\u5E76\u901A\u8FC7 sectionIndex \u5F15\u7528\u539F\u6587\u7AE0\u8282\u3002",
+            "sectionIndex \u4ECE 0 \u5F00\u59CB\uFF0C\u5BF9\u5E94\u4E0A\u9762\u201C\u53EF\u7528\u6B63\u6587 section\u201D\u7684\u7F16\u53F7\u3002",
+            "\u9ED8\u8BA4\u53EA\u628A H2 \u7EA7\u6807\u9898\u5F53\u4F5C major section\uFF1BH3/H4 \u66F4\u9002\u5408\u7559\u5728\u5BF9\u5E94 section-block \u5185\u90E8\uFF0C\u4F5C\u4E3A subsection \u6216\u6BB5\u5185\u5C42\u7EA7\u3002",
+            "\u4F18\u5148\u8986\u76D6\u5168\u6587\u4E3B\u8981\u7AE0\u8282\uFF0C\u4E0D\u8981\u53EA\u5904\u7406\u524D\u534A\u7BC7\uFF0C\u4E5F\u4E0D\u8981\u9057\u6F0F\u540E\u534A\u90E8\u5206\u5185\u5BB9\u3002",
+            "\u4E0D\u8981\u673A\u68B0\u5730\u628A\u6BCF\u4E2A\u5C0F\u6807\u9898\u90FD\u5347\u7EA7\u6210\u72EC\u7ACB block\uFF1B\u7ED3\u6784\u6E05\u6670\u6BD4 block \u6570\u91CF\u66F4\u591A\u66F4\u91CD\u8981\u3002",
+            "CTA \u548C phone-frame \u90FD\u662F\u53EF\u9009\u5757\uFF0C\u4E0D\u8981\u9ED8\u8BA4\u5F3A\u52A0\u3002",
+            "",
+            "\u539F\u6587\u5982\u4E0B\uFF1A",
+            promptMarkdown
+          ].filter(Boolean).join("\n")
+        }
+      ];
+    }
+    function readChatCompletionContent(data) {
+      var _a2, _b;
+      const message = (_b = (_a2 = data == null ? void 0 : data.choices) == null ? void 0 : _a2[0]) == null ? void 0 : _b.message;
+      if (!message)
+        throw new Error("AI \u54CD\u5E94\u7F3A\u5C11 message");
+      const content = message.content;
+      if (typeof content === "string")
+        return content;
+      if (Array.isArray(content)) {
+        return content.map((item) => typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
+      }
+      throw new Error("AI \u54CD\u5E94\u683C\u5F0F\u65E0\u6CD5\u8BC6\u522B");
+    }
+    function readGeminiContent(data) {
+      var _a2;
+      const candidate = Array.isArray(data == null ? void 0 : data.candidates) ? data.candidates[0] : null;
+      const parts = Array.isArray((_a2 = candidate == null ? void 0 : candidate.content) == null ? void 0 : _a2.parts) ? candidate.content.parts : [];
+      const text = parts.map((item) => typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
+      if (text)
+        return text;
+      throw new Error("Gemini \u54CD\u5E94\u7F3A\u5C11\u53EF\u89E3\u6790\u6587\u672C");
+    }
+    function readAnthropicContent(data) {
+      const content = Array.isArray(data == null ? void 0 : data.content) ? data.content : [];
+      const text = content.map((item) => (item == null ? void 0 : item.type) === "text" && typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
+      if (text)
+        return text;
+      throw new Error("Anthropic \u54CD\u5E94\u7F3A\u5C11\u53EF\u89E3\u6790\u6587\u672C");
+    }
+    function toPlainPromptFromMessages(messages = []) {
+      return messages.map((message) => {
+        const roleLabel = (message == null ? void 0 : message.role) === "system" ? "\u7CFB\u7EDF\u8981\u6C42" : "\u7528\u6237\u8BF7\u6C42";
+        return `${roleLabel}\uFF1A
+${String((message == null ? void 0 : message.content) || "").trim()}`;
+      }).filter(Boolean).join("\n\n");
+    }
+    function shouldUseLocalFallbackLayout(error, selection = {}) {
+      const requestedLayoutFamily = normalizeLayoutFamily(selection == null ? void 0 : selection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
+      return requestedLayoutFamily === "source-first" && !!error;
+    }
+    async function requestOpenAICompatibleLayout({
+      provider,
+      title,
+      markdown,
+      selection,
+      stylePack,
+      imageRefs,
+      timeoutMs,
+      fetchImpl
+    }) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetchImpl(`${provider.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${provider.apiKey}`
+          },
+          body: JSON.stringify({
+            model: provider.model,
+            temperature: 0.2,
+            messages: buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs })
+          }),
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`AI \u8BF7\u6C42\u5931\u8D25 (${response.status}): ${text || response.statusText}`);
+        }
+        const data = await response.json();
+        const content = readChatCompletionContent(data);
+        const jsonPayload = extractJsonPayload(content);
+        try {
+          return repairRawLayoutPayload(JSON.parse(jsonPayload));
+        } catch (error) {
+          const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+          if (sanitizedPayload !== jsonPayload) {
+            return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+          }
+          throw error;
+        }
+      } catch (error) {
+        if (controller.signal.aborted || (error == null ? void 0 : error.name) === "AbortError") {
+          throw new AiLayoutTimeoutError(timeoutMs);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    async function requestGeminiLayout({
+      provider,
+      title,
+      markdown,
+      selection,
+      stylePack,
+      imageRefs,
+      timeoutMs,
+      fetchImpl
+    }) {
+      var _a2, _b;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
+        const systemInstruction = String(((_a2 = messages[0]) == null ? void 0 : _a2.content) || "").trim();
+        const userPrompt = String(((_b = messages[1]) == null ? void 0 : _b.content) || "").trim() || toPlainPromptFromMessages(messages);
+        const endpoint = `${provider.baseUrl}/models/${encodeURIComponent(provider.model)}:generateContent`;
+        const response = await fetchImpl(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": provider.apiKey
+          },
+          body: JSON.stringify({
+            systemInstruction: systemInstruction ? {
+              role: "system",
+              parts: [{ text: systemInstruction }]
+            } : void 0,
+            contents: [
+              {
+                role: "user",
+                parts: [{ text: userPrompt }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.2
+            }
+          }),
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`AI \u8BF7\u6C42\u5931\u8D25 (${response.status}): ${text || response.statusText}`);
+        }
+        const data = await response.json();
+        const content = readGeminiContent(data);
+        const jsonPayload = extractJsonPayload(content);
+        try {
+          return repairRawLayoutPayload(JSON.parse(jsonPayload));
+        } catch (error) {
+          const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+          if (sanitizedPayload !== jsonPayload) {
+            return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+          }
+          throw error;
+        }
+      } catch (error) {
+        if (controller.signal.aborted || (error == null ? void 0 : error.name) === "AbortError") {
+          throw new AiLayoutTimeoutError(timeoutMs);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    async function requestAnthropicLayout({
+      provider,
+      title,
+      markdown,
+      selection,
+      stylePack,
+      imageRefs,
+      timeoutMs,
+      fetchImpl
+    }) {
+      var _a2, _b;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const messages = buildLayoutMessages({ title, markdown, selection, stylePack, imageRefs });
+        const systemInstruction = String(((_a2 = messages[0]) == null ? void 0 : _a2.content) || "").trim();
+        const userPrompt = String(((_b = messages[1]) == null ? void 0 : _b.content) || "").trim() || toPlainPromptFromMessages(messages);
+        const response = await fetchImpl(`${provider.baseUrl}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": provider.apiKey,
+            "anthropic-version": "2023-06-01"
+          },
+          body: JSON.stringify({
+            model: provider.model,
+            max_tokens: 4096,
+            temperature: 0.2,
+            system: systemInstruction,
+            messages: [
+              {
+                role: "user",
+                content: userPrompt
+              }
+            ]
+          }),
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`AI \u8BF7\u6C42\u5931\u8D25 (${response.status}): ${text || response.statusText}`);
+        }
+        const data = await response.json();
+        const content = readAnthropicContent(data);
+        const jsonPayload = extractJsonPayload(content);
+        try {
+          return repairRawLayoutPayload(JSON.parse(jsonPayload));
+        } catch (error) {
+          const sanitizedPayload = sanitizeJsonStringLiteralControls(jsonPayload);
+          if (sanitizedPayload !== jsonPayload) {
+            return repairRawLayoutPayload(JSON.parse(sanitizedPayload));
+          }
+          throw error;
+        }
+      } catch (error) {
+        if (controller.signal.aborted || (error == null ? void 0 : error.name) === "AbortError") {
+          throw new AiLayoutTimeoutError(timeoutMs);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    async function generateArticleLayout2({
+      provider,
+      title,
+      markdown,
+      stylePack = "",
+      selection = {
+        layoutFamily: AI_LAYOUT_SELECTION_AUTO2,
+        colorPalette: AI_LAYOUT_SELECTION_AUTO2
+      },
+      imageRefs = [],
+      timeoutMs = 45e3,
+      fetchImpl = globalThis.fetch
+    }) {
+      if (!markdown || !String(markdown).trim())
+        throw new Error("\u6587\u7AE0\u5185\u5BB9\u4E3A\u7A7A\uFF0C\u65E0\u6CD5\u8FDB\u884C AI \u7F16\u6392");
+      const signals = extractMarkdownSignals(markdown);
+      const sourceSections = extractMarkdownSections(markdown).sections;
+      const requestedLayoutFamily = normalizeLayoutFamily(selection == null ? void 0 : selection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
+      let rawLayout;
+      if (!provider) {
+        if (requestedLayoutFamily !== "source-first") {
+          throw new Error("\u672A\u627E\u5230\u53EF\u7528\u7684 AI Provider");
+        }
+        rawLayout = {
+          articleType: "article",
+          title,
+          summary: "",
+          fallbackUsed: true,
+          blocks: []
+        };
+      } else {
+        if (typeof fetchImpl !== "function")
+          throw new Error("\u5F53\u524D\u73AF\u5883\u4E0D\u652F\u6301 AI \u7F51\u7EDC\u8BF7\u6C42");
+        try {
+          switch (provider.kind) {
+            case AI_PROVIDER_KINDS2.OPENAI_COMPATIBLE:
+              rawLayout = await requestOpenAICompatibleLayout({
+                provider,
+                title,
+                markdown,
+                selection,
+                stylePack,
+                imageRefs,
+                timeoutMs,
+                fetchImpl
+              });
+              break;
+            case AI_PROVIDER_KINDS2.GEMINI:
+              rawLayout = await requestGeminiLayout({
+                provider,
+                title,
+                markdown,
+                selection,
+                stylePack,
+                imageRefs,
+                timeoutMs,
+                fetchImpl
+              });
+              break;
+            case AI_PROVIDER_KINDS2.ANTHROPIC:
+              rawLayout = await requestAnthropicLayout({
+                provider,
+                title,
+                markdown,
+                selection,
+                stylePack,
+                imageRefs,
+                timeoutMs,
+                fetchImpl
+              });
+              break;
+            default:
+              throw new Error(`\u6682\u4E0D\u652F\u6301\u7684 AI Provider \u7C7B\u578B: ${provider.kind}`);
+          }
+        } catch (error) {
+          if (!shouldUseLocalFallbackLayout(error, selection)) {
+            throw error;
+          }
+          rawLayout = {
+            articleType: "article",
+            title,
+            summary: "",
+            fallbackUsed: true,
+            blocks: []
+          };
+        }
+      }
+      try {
+        return buildLayoutResult(rawLayout, {
+          title,
+          selection,
+          stylePack,
+          imageRefs,
+          markdown,
+          provider,
+          signals,
+          sourceSections
+        });
+      } catch (error) {
+        if (!shouldUseLocalFallbackLayout(error, selection)) {
+          throw error;
+        }
+        return buildLayoutResult({
+          articleType: "article",
+          title,
+          summary: "",
+          fallbackUsed: true,
+          blocks: []
+        }, {
+          title,
+          selection,
+          stylePack,
+          imageRefs,
+          markdown,
+          provider: null,
+          signals,
+          sourceSections
+        });
+      }
+    }
+    async function testAiProviderConnection2(provider, fetchImpl = globalThis.fetch) {
+      var _a2, _b;
+      const result = await generateArticleLayout2({
+        provider,
+        title: "\u8FDE\u63A5\u6D4B\u8BD5",
+        markdown: "\u8FD9\u662F\u4E00\u4E2A\u8FDE\u63A5\u6D4B\u8BD5\u3002\u8BF7\u8F93\u51FA\u6700\u5C0F\u53EF\u7528\u7684\u6559\u7A0B\u6392\u7248 JSON\u3002",
+        selection: {
+          layoutFamily: "tutorial-cards",
+          colorPalette: "tech-green"
+        },
+        imageRefs: [],
+        timeoutMs: 15e3,
+        fetchImpl
+      });
+      return !!((_b = (_a2 = result == null ? void 0 : result.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b.length);
+    }
+    function escapeHtml(text) {
+      return String(text || "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+    function normalizeInlineFontFamily(fontFamily = "") {
+      return String(fontFamily || "").replace(/"/g, "'");
+    }
+    function renderStyledText(tagName, text, style, { mode = "preview" } = {}) {
+      if (text === void 0 || text === null || text === "")
+        return "";
+      const actualTagName = mode === "draft" && /^h[1-6]$/i.test(tagName) ? "p" : tagName;
+      return `<${actualTagName} style="${style}">${escapeHtml(text)}</${actualTagName}>`;
+    }
+    function renderEditorialDraftDivider(tokens) {
+      return `<section style="margin:24px 0 0;padding:0;font-size:0;line-height:0;overflow:hidden;">
+    <section style="width:100%;height:1px;background:${tokens.border};font-size:0;line-height:0;overflow:hidden;">
+      <span style="display:block;width:48px;height:1px;background:${tokens.accent};font-size:0;line-height:0;overflow:hidden;">&nbsp;</span>
+    </section>
+  </section>`;
+    }
+    function renderEditorialPreviewDivider(tokens) {
+      return `<div style="margin-top:24px;font-size:0;line-height:0;overflow:hidden;">
+    <div style="width:100%;height:1px;background:${tokens.border};font-size:0;line-height:0;overflow:hidden;">
+      <span style="display:block;width:48px;height:1px;background:${tokens.accent};font-size:0;line-height:0;overflow:hidden;">&nbsp;</span>
+    </div>
+  </div>`;
+    }
+    function renderArticleLayoutHtml2(layout, { imageRefs = [], mode = "preview", renderedSectionFragments = null, colorPaletteOverride = null } = {}) {
+      var _a2, _b, _c, _d, _e, _f, _g, _h;
+      const layoutFamily = getLayoutFamilyById2(((_a2 = layout == null ? void 0 : layout.resolved) == null ? void 0 : _a2.layoutFamily) || (layout == null ? void 0 : layout.layoutFamily));
+      const colorPalette = resolveColorPaletteForRender2(
+        ((_b = layout == null ? void 0 : layout.resolved) == null ? void 0 : _b.colorPalette) || (layout == null ? void 0 : layout.stylePack),
+        colorPaletteOverride
+      );
+      const tokens = colorPalette.tokens;
+      const renderProfile = getWechatSafeRenderProfile(layoutFamily.id);
+      const typography = AI_WECHAT_SAFE_STYLE_PRIMITIVES.typography || {};
+      const sectionLabelPrefix = ((_c = AI_WECHAT_SAFE_STYLE_PRIMITIVES.sectionLabels) == null ? void 0 : _c[layoutFamily.id]) || "SECTION";
+      const isSourceFirst = layoutFamily.id === "source-first";
+      const isTutorialCards = layoutFamily.id === "tutorial-cards";
+      const isEditorialLite = layoutFamily.id === "editorial-lite";
+      const isDraft = mode === "draft";
+      const editorialDisplayFont = normalizeInlineFontFamily(
+        typography.editorialDisplayFont || 'Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif'
+      );
+      const bodyFontFamily = normalizeInlineFontFamily(
+        typography.bodyFontFamily || '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif'
+      );
+      const imageMap = new Map(imageRefs.map((image) => [image.id, image]));
+      const renderedSections = Array.isArray(renderedSectionFragments == null ? void 0 : renderedSectionFragments.sections) ? renderedSectionFragments.sections : [];
+      const renderedSectionByTitle = new Map(renderedSections.map((section) => [normalizeTitleKey((section == null ? void 0 : section.title) || ""), section]));
+      const tutorialSpacing = isTutorialCards ? isDraft ? {
+        wrapperPadding: "12px 4px 10px",
+        cardPadding: "10px",
+        cardMargin: 8,
+        bodyParagraphGap: 12,
+        heroPadding: "12px",
+        leadQuoteMarginY: 8,
+        leadQuotePadding: "10px",
+        sectionMarginY: 10,
+        sectionCardPadding: "10px",
+        subsectionSpacingTop: 6,
+        subsectionCardPadding: "18px 24px 16px"
+      } : {
+        wrapperPadding: "22px 16px 30px",
+        cardPadding: "18px",
+        cardMargin: 16,
+        bodyParagraphGap: 18,
+        heroPadding: "20px",
+        leadQuoteMarginY: 16,
+        leadQuotePadding: "18px",
+        sectionMarginY: 22,
+        sectionCardPadding: "18px",
+        subsectionSpacingTop: 16,
+        subsectionCardPadding: "14px 16px 12px"
+      } : null;
+      const bodyFontSize = Number(typography.bodyFontSize || 16);
+      const bodyLineHeight = Number(typography.bodyLineHeight || 1.8);
+      const bodyParagraphGap = (tutorialSpacing == null ? void 0 : tutorialSpacing.bodyParagraphGap) || Number(typography.paragraphGap || 20);
+      const sharedImageRadius = Number(((_d = AI_WECHAT_SAFE_STYLE_PRIMITIVES.image) == null ? void 0 : _d.borderRadius) || 14);
+      const wrapperPadding = isTutorialCards ? tutorialSpacing.wrapperPadding : renderProfile.wrapperPadding || (isEditorialLite ? "30px 22px 40px" : "20px 16px 28px");
+      const cardRadius = Number((_e = renderProfile.cardRadius) != null ? _e : isSourceFirst ? 10 : isEditorialLite ? 0 : 18);
+      const cardPadding = isTutorialCards ? tutorialSpacing.cardPadding : (_f = renderProfile.cardPadding) != null ? _f : isSourceFirst ? "0" : isEditorialLite ? "0" : "18px";
+      const cardMargin = isTutorialCards ? tutorialSpacing.cardMargin : Number((_g = renderProfile.cardMargin) != null ? _g : isSourceFirst ? 8 : isEditorialLite ? 30 : 18);
+      const cardShadow = isDraft ? "none" : (_h = renderProfile.cardShadow) != null ? _h : isTutorialCards ? "0 10px 30px -24px rgba(0,0,0,0.18)" : "none";
+      const heroProfile = renderProfile.hero || {};
+      const partNavProfile = renderProfile.partNav || {};
+      const leadQuoteProfile = renderProfile.leadQuote || {};
+      const caseBlockProfile = renderProfile.caseBlock || {};
+      const subsectionProfile = renderProfile.subsection || {};
+      const wrapperStyle = [
+        `font-family:${bodyFontFamily}`,
+        `color:${tokens.text}`,
+        `font-size:${bodyFontSize}px`,
+        `line-height:${bodyLineHeight}`,
+        `letter-spacing:${typography.letterSpacing || "0"}`,
+        `padding:${wrapperPadding}`,
+        `background:${tokens.surface}`
+      ].join(";");
+      const cardStyle = [
+        `background:${tokens.surface}`,
+        `border:1px solid ${tokens.border}`,
+        `border-radius:${cardRadius}px`,
+        `padding:${cardPadding}`,
+        `margin:${cardMargin}px 0`,
+        `box-shadow:${cardShadow}`
+      ].join(";");
+      const ctaCardPadding = isTutorialCards ? isDraft ? "14px 14px 12px" : "18px 18px 16px" : isEditorialLite ? isDraft ? "16px 18px 14px" : "18px 20px 16px" : isSourceFirst ? "14px 14px 12px" : "16px 16px 14px";
+      const renderImage = (imageId, extraStyle = "") => {
+        const image = imageMap.get(imageId);
+        if (!image)
+          return "";
+        const style = [
+          "display:block",
+          "width:100%",
+          "height:auto",
+          `border-radius:${sharedImageRadius}px`,
+          extraStyle
+        ].filter(Boolean).join(";");
+        return `<img src="${escapeHtml(image.src)}" alt="${escapeHtml(image.alt || image.caption)}" style="${style}">`;
+      };
+      const collectImageSrcsFromHtml = (html = "") => {
+        const normalizedHtml = coerceString(html);
+        if (!normalizedHtml || typeof document === "undefined")
+          return /* @__PURE__ */ new Set();
+        const container = document.createElement("div");
+        container.innerHTML = normalizedHtml;
+        return new Set(
+          Array.from(container.querySelectorAll("img")).map((img) => coerceString(img.getAttribute("src") || img.src)).filter(Boolean)
+        );
+      };
+      const collectImageSrcsFromRenderedSection = (sectionFragment = null) => {
+        const allSrcs = /* @__PURE__ */ new Set();
+        collectImageSrcsFromHtml(sectionFragment == null ? void 0 : sectionFragment.leadHtml).forEach((src) => allSrcs.add(src));
+        const subsectionFragments = Array.isArray(sectionFragment == null ? void 0 : sectionFragment.subsections) ? sectionFragment.subsections : [];
+        subsectionFragments.forEach((subsection) => {
+          collectImageSrcsFromHtml(subsection == null ? void 0 : subsection.contentHtml).forEach((src) => allSrcs.add(src));
+        });
+        return allSrcs;
+      };
+      const findRenderedSection = (block = {}) => {
+        if (Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0 && renderedSections[block.sectionIndex]) {
+          return renderedSections[block.sectionIndex];
+        }
+        return renderedSectionByTitle.get(normalizeTitleKey(block.title || "")) || null;
+      };
+      const findRenderedSubsection = (sectionFragment, subsection = {}, subsectionIndex = 0) => {
+        const candidates = Array.isArray(sectionFragment == null ? void 0 : sectionFragment.subsections) ? sectionFragment.subsections : [];
+        const titleKey = normalizeTitleKey((subsection == null ? void 0 : subsection.title) || "");
+        if (titleKey) {
+          const matched = candidates.find((item) => item.titleKey === titleKey);
+          if (matched)
+            return matched;
+        }
+        return candidates[subsectionIndex] || null;
+      };
+      const renderCalloutCard = (callout = {}, { compact = false } = {}) => {
+        const label = coerceString((callout == null ? void 0 : callout.title) || formatCalloutLabel(callout == null ? void 0 : callout.type));
+        const body = coerceString(callout == null ? void 0 : callout.body);
+        if (!label && !body)
+          return "";
+        const chipHtml = label ? `<div style="margin-bottom:${compact ? 8 : 10}px;">
+          <span style="display:inline-block;padding:${compact ? "3px 8px" : "4px 10px"};border-radius:999px;background:${tokens.accentSoft};font-size:10px;font-weight:700;letter-spacing:0.8px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(label)}</span>
+        </div>` : "";
+        return `<section style="margin:${compact ? "10px 0 16px" : "14px 0 20px"};padding:${compact ? "12px 12px 10px" : "14px 14px 12px"};border:1px solid ${tokens.border};border-left:${compact ? 3 : 4}px solid ${tokens.accent};border-radius:${compact ? 12 : 14}px;background:${isDraft && isTutorialCards ? tokens.surface : tokens.accentSoft};">
+      ${chipHtml}
+      ${body ? `<p style="margin:0;color:${tokens.text};font-size:${compact ? bodyFontSize : Math.max(bodyFontSize, 15)}px;line-height:${bodyLineHeight};font-weight:${compact ? 500 : 600};letter-spacing:0;">${escapeHtml(body)}</p>` : ""}
+    </section>`;
+      };
+      const blocksHtml = (layout.blocks || []).map((block, index) => {
+        var _a3, _b2;
+        const previousBlock = ((_a3 = layout.blocks) == null ? void 0 : _a3[index - 1]) || null;
+        const nextBlock = ((_b2 = layout.blocks) == null ? void 0 : _b2[index + 1]) || null;
+        if (block.type === "hero") {
+          const heroImageStyle = isDraft ? isTutorialCards ? `width:100%;max-width:none;height:100%;object-fit:cover;border-radius:${heroProfile.imageRadius || 12}px;` : `width:100%;max-width:none;border-radius:${heroProfile.imageRadius || (isEditorialLite ? 28 : 18)}px;` : isEditorialLite ? `width:100%;max-width:none;flex:none;border-radius:${heroProfile.imageRadius || 28}px;` : isSourceFirst ? `max-width:none;width:100%;flex:none;border-radius:${heroProfile.imageRadius || 18}px;` : `max-width:116px;flex:0 0 116px;border-radius:${heroProfile.imageRadius || 18}px;`;
+          const imageHtml = block.coverImageId ? renderImage(block.coverImageId, heroImageStyle) : "";
+          const contentHtml = [
+            block.eyebrow ? `<div style="font-size:${heroProfile.eyebrowSize || (isEditorialLite ? 10 : 11)}px;font-weight:700;letter-spacing:${heroProfile.eyebrowLetterSpacing || (isEditorialLite ? 2 : 1.2)}px;color:${tokens.accentDeep};text-transform:uppercase;margin-bottom:${isSourceFirst ? 8 : 10}px;">${escapeHtml(block.eyebrow)}</div>` : "",
+            renderStyledText(
+              "h1",
+              block.title,
+              `margin:0 0 ${isSourceFirst ? 6 : isEditorialLite ? 14 : 10}px;font-size:${heroProfile.titleSize || (isSourceFirst ? 26 : isEditorialLite ? 36 : 28)}px;line-height:${isEditorialLite ? 1.12 : 1.24};color:${tokens.text};font-weight:${isEditorialLite ? 700 : 700};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`,
+              { mode }
+            ),
+            block.subtitle ? `<p style="margin:0;color:${tokens.muted};font-size:${heroProfile.subtitleSize || (isSourceFirst ? 16 : isEditorialLite ? 17 : 14)}px;line-height:${heroProfile.subtitleLineHeight || (isSourceFirst ? 1.8 : isEditorialLite ? 1.88 : 1.7)};letter-spacing:0;">${escapeHtml(block.subtitle)}</p>` : ""
+          ].join("");
+          const flexDirection = block.variant === "cover-left" ? "row-reverse" : "row";
+          const heroFooter = isDraft ? heroProfile.footerMode === "editorial-divider" ? isEditorialLite && (nextBlock == null ? void 0 : nextBlock.type) === "part-nav" ? renderEditorialDraftDivider(tokens) : `<p style="margin:24px 0 0;height:1px;background:${tokens.border};border-radius:999px;font-size:0;line-height:0;overflow:hidden;">&nbsp;</p>` : `<p style="margin:18px 0 0;height:${heroProfile.footerMode === "accent-bar" ? 10 : 1}px;background:${heroProfile.footerMode === "accent-bar" ? tokens.accent : tokens.border};border-radius:999px;font-size:0;line-height:0;overflow:hidden;">&nbsp;</p>` : heroProfile.footerMode === "editorial-divider" ? renderEditorialPreviewDivider(tokens) : heroProfile.footerMode === "divider" ? `<div style="height:1px;margin-top:18px;background:${tokens.border};border-radius:999px;"></div>` : `<div style="height:10px;margin-top:18px;background:${tokens.accent};border-radius:999px;"></div>`;
+          if (isDraft) {
+            if (isTutorialCards) {
+              const heroThumbHtml = imageHtml ? `<div style="width:112px;height:112px;padding:6px;border-radius:18px;background:linear-gradient(135deg, ${tokens.accentDeep} 0%, ${tokens.accent} 60%, ${tokens.accentSoft} 100%);box-sizing:border-box;">
+                ${imageHtml}
+              </div>` : "";
+              const heroBodyHtml = heroThumbHtml ? `<section style="display:flex;align-items:center;${block.variant === "cover-left" ? "flex-direction:row-reverse;" : ""}">
+                <section style="flex:1;min-width:0;${block.variant === "cover-left" ? "padding-left:16px;" : "padding-right:16px;"}">${contentHtml}</section>
+                <section style="flex-shrink:0;width:124px;">${heroThumbHtml}</section>
+              </section>` : `<div>${contentHtml}</div>`;
+              return `<section style="${cardStyle};padding:${(tutorialSpacing == null ? void 0 : tutorialSpacing.heroPadding) || "16px"};background:${tokens.surfaceSoft};overflow:hidden;">
+            ${heroBodyHtml}
+            ${heroFooter}
+          </section>`;
+            }
+            const draftHeroStyle = isTutorialCards ? `${cardStyle};padding:14px;background:${tokens.surfaceSoft};` : `margin:${isEditorialLite ? "4px 0 34px" : "2px 0 24px"};`;
+            return `<section style="${draftHeroStyle}">
+          <div>${contentHtml}</div>
+          ${imageHtml ? `<div style="margin-top:14px;">${imageHtml}</div>` : ""}
+          ${heroFooter}
+        </section>`;
+          }
+          if (isEditorialLite) {
+            return `<section style="margin:4px 0 34px;">
+          <div style="max-width:680px;">${contentHtml}</div>
+          ${imageHtml ? `<div style="margin-top:20px;">${imageHtml}</div>` : ""}
+          ${heroFooter}
+        </section>`;
+          }
+          if (isSourceFirst) {
+            return `<section style="margin:2px 0 24px;">
+          ${imageHtml ? `<div style="margin-bottom:14px;">${imageHtml}</div>` : ""}
+          <div style="max-width:720px;">${contentHtml}</div>
+          ${heroFooter}
+        </section>`;
+          }
+          return `<section style="${cardStyle};padding:${isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.heroPadding) || "18px" : "22px"};background:linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%);">
+        <div style="display:flex;flex-direction:${flexDirection};gap:16px;align-items:center;">
+          <div style="flex:1 1 auto;min-width:0;">${contentHtml}</div>
+          ${imageHtml}
+        </div>
+        ${heroFooter}
+      </section>`;
+        }
+        if (block.type === "part-nav") {
+          if (isDraft) {
+            if (isTutorialCards) {
+              const navHintHtml = `<p style="margin:0 2px 6px 0;font-size:11px;line-height:1.5;color:${tokens.muted};text-align:right;">\u2190 \u5DE6\u53F3\u6ED1\u52A8</p>`;
+              const itemsHtml3 = block.items.map((item, itemIndex) => `
+            <section style="display:inline-block;white-space:normal;vertical-align:top;width:${partNavProfile.cardWidth || 112}px;height:${partNavProfile.cardHeight || 116}px;padding:10px 10px 12px;margin-right:${itemIndex === block.items.length - 1 ? 0 : 8}px;border:1px solid ${tokens.border};border-radius:${partNavProfile.useCard ? 16 : 12}px;background:${partNavProfile.useCard ? tokens.surfaceSoft : tokens.surface};box-sizing:border-box;overflow:hidden;">
+              <p style="margin:0 0 8px;font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:0.8px;text-transform:uppercase;">${escapeHtml(item.label)}</p>
+              <p style="margin:0;height:60px;overflow:hidden;font-size:13px;font-weight:600;color:${tokens.text};line-height:1.55;">${escapeHtml(item.text)}</p>
+            </section>
+          `).join("");
+              return `<section style="margin:${isEditorialLite ? 20 : isSourceFirst ? 20 : 10}px 0 ${isSourceFirst ? 18 : 4}px;">
+            ${navHintHtml}
+            <section style="overflow-x:scroll;-webkit-overflow-scrolling:touch;white-space:nowrap;padding-bottom:8px;">
+              ${itemsHtml3}
+            </section>
+          </section>`;
+            }
+            if (isEditorialLite) {
+              const itemsHtml3 = block.items.map((item) => `
+            <section style="padding:14px 0 16px;border-bottom:1px solid ${tokens.border};">
+              <p style="margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(item.label)}</p>
+              <p style="margin:0;font-size:17px;font-weight:500;line-height:1.72;color:${tokens.text};font-family:${editorialDisplayFont};">${escapeHtml(item.text)}</p>
+            </section>
+          `).join("");
+              return `<section style="margin:14px 0 8px;">
+            <section>
+              ${itemsHtml3}
+            </section>
+          </section>`;
+            }
+            const itemsHtml2 = block.items.map((item, itemIndex) => `
+          <div style="margin:${itemIndex === 0 ? 0 : 8}px 0 0;padding:12px 12px;border:1px solid ${tokens.border};border-radius:${partNavProfile.useCard ? 14 : 10}px;background:${partNavProfile.useCard ? tokens.surfaceSoft : tokens.surface};">
+            <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
+            <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : isEditorialLite ? 17 : 13}px;font-weight:${isSourceFirst ? 500 : isEditorialLite ? 500 : 600};color:${tokens.text};line-height:${isEditorialLite ? 1.72 : 1.55};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(item.text)}</div>
+          </div>
+        `).join("");
+            return `<section style="margin:${isEditorialLite ? 20 : isSourceFirst ? 20 : 16}px 0 ${isSourceFirst ? 18 : 8}px;">
+          <div>${itemsHtml2}</div>
+        </section>`;
+          }
+          const itemsHtml = block.items.map((item) => `
+        <div style="flex:${partNavProfile.direction === "column" ? "1 1 100%" : isEditorialLite ? "1 1 100%" : "1 1 0"};min-width:0;padding:${isSourceFirst ? "0 0 0 0" : isEditorialLite ? "14px 0" : "12px 10px"};border:${partNavProfile.useCard ? `1px solid ${tokens.border}` : "none"};border-radius:${partNavProfile.useCard ? 14 : 0}px;background:${partNavProfile.useCard ? tokens.surfaceSoft : "transparent"};border-bottom:${partNavProfile.useDivider ? `1px solid ${tokens.border}` : "none"};">
+          <div style="font-size:10px;font-weight:700;color:${tokens.accentDeep};letter-spacing:${isEditorialLite ? 1.2 : 0.8}px;text-transform:uppercase;">${escapeHtml(item.label)}</div>
+          <div style="margin-top:8px;font-size:${isSourceFirst ? 14 : isEditorialLite ? 17 : 13}px;font-weight:${isSourceFirst ? 500 : isEditorialLite ? 500 : 600};color:${tokens.text};line-height:${isEditorialLite ? 1.72 : 1.55};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};">${escapeHtml(item.text)}</div>
+        </div>
+      `).join("");
+          return `<section style="margin:${isEditorialLite ? 20 : isSourceFirst ? 20 : 16}px 0 ${isSourceFirst ? 18 : 8}px;">
+        <div style="display:flex;gap:${partNavProfile.gap || (isSourceFirst ? 16 : 10)}px;flex-wrap:wrap;${partNavProfile.useDivider && isSourceFirst ? `padding:0 0 10px;border-bottom:1px solid ${tokens.border};` : ""}${partNavProfile.direction === "column" ? "flex-direction:column;" : ""}">${itemsHtml}</div>
+      </section>`;
+        }
+        if (block.type === "lead-quote") {
+          const leadQuoteFontSize = leadQuoteProfile.fontSize || (isSourceFirst ? 16 : isEditorialLite ? 26 : isDraft && isTutorialCards ? 20 : 18);
+          const editorialLeadQuoteBorderTop = isEditorialLite && (previousBlock == null ? void 0 : previousBlock.type) !== "part-nav" ? `1px solid ${tokens.border}` : "none";
+          return `<section style="margin:${isSourceFirst ? 14 : isEditorialLite ? 26 : isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.leadQuoteMarginY) || 14 : 18}px 0;padding:${isSourceFirst ? "0 0 0 14px" : isEditorialLite ? "24px 0" : isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.leadQuotePadding) || "14px" : "18px"};border-radius:${isTutorialCards ? 16 : 0}px;background:${leadQuoteProfile.background === "quoteBg" ? tokens.quoteBg : "transparent"};border:${isTutorialCards ? `1px solid ${tokens.border}` : "none"};border-left:${leadQuoteProfile.borderLeft ? `3px solid ${tokens.accent}` : "none"};border-top:${editorialLeadQuoteBorderTop};border-bottom:${isEditorialLite ? `1px solid ${tokens.border}` : "none"};">
+        <p style="margin:0;font-size:${leadQuoteFontSize}px;font-weight:${leadQuoteProfile.fontWeight || (isSourceFirst ? 600 : isEditorialLite ? 600 : 700)};line-height:${isEditorialLite ? 1.7 : 1.75};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};letter-spacing:0;">${escapeHtml(block.text)}</p>
+        ${block.note ? `<p style="margin:${isTutorialCards ? 8 : 10}px 0 0;font-size:${isTutorialCards ? 13 : 12}px;line-height:1.8;color:${tokens.muted};letter-spacing:0;">${escapeHtml(block.note)}</p>` : ""}
+      </section>`;
+        }
+        if (block.type === "case-block") {
+          const imagesHtml = block.imageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("");
+          const bulletsHtml = block.bullets.length ? `<ul style="margin:12px 0 0 18px;padding:0;color:${tokens.text};">${block.bullets.map((bullet) => `<li style="margin:6px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>` : "";
+          const caseHeaderHtml = isDraft ? `<div style="margin-bottom:8px;">
+            <span style="display:inline-block;font-size:${caseBlockProfile.indexSize || (isSourceFirst ? 22 : isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${String(index + 1).padStart(2, "0")}</span>
+            <span style="display:inline-block;margin-left:8px;font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</span>
+          </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:${caseBlockProfile.indexSize || (isSourceFirst ? 22 : isEditorialLite ? 14 : 28)}px;font-weight:${isEditorialLite ? 700 : 800};color:${tokens.accent};line-height:1;letter-spacing:${isEditorialLite ? 1.2 : 0};text-transform:${isEditorialLite ? "uppercase" : "none"};">${String(index + 1).padStart(2, "0")}</div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.caseLabel)}</div>
+          </div>`;
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 32 : isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.sectionMarginY) || 18 : 26}px 0;${caseBlockProfile.useCard ? `padding:${isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.sectionCardPadding) || "14px" : "18px"};border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};` : ""}">
+        ${caseHeaderHtml}
+        ${renderStyledText(
+            "h2",
+            block.title,
+            `margin:0 0 ${isEditorialLite ? 10 : 8}px;font-size:${caseBlockProfile.titleSize || (isSourceFirst ? 20 : isEditorialLite ? 26 : 22)}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${tokens.text};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`,
+            { mode }
+          )}
+        ${block.summary ? `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.summary)}</p>` : ""}
+        ${block.highlight ? `<div style="margin-top:12px;padding:10px 12px;border-left:4px solid ${tokens.accent};background:${tokens.accentSoft};border-radius:10px;color:${tokens.accentDeep};font-weight:600;font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.highlight)}</div>` : ""}
+        ${bulletsHtml}
+        ${imagesHtml}
+      </section>`;
+        }
+        if (block.type === "section-block") {
+          const renderedSection = findRenderedSection(block);
+          const sectionDisplayIndex = Number.isInteger(block.sectionIndex) && block.sectionIndex >= 0 ? block.sectionIndex + 1 : index + 1;
+          const headingLevel = Number.isInteger(block.headingLevel) ? block.headingLevel : 2;
+          const titleFontSize = headingLevel >= 3 ? isSourceFirst ? 17 : isEditorialLite ? 18 : 18 : isSourceFirst ? 20 : isEditorialLite ? 26 : 22;
+          const titleMarginBottom = headingLevel >= 3 ? 10 : isEditorialLite ? 14 : 12;
+          const titleColor = headingLevel >= 3 ? tokens.accentDeep : tokens.text;
+          const paragraphsHtml = Array.isArray(block.paragraphs) ? block.paragraphs.map((paragraph) => `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(paragraph)}</p>`).join("") : "";
+          const bulletGroupsHtml = Array.isArray(block.bulletGroups) ? block.bulletGroups.map((group) => {
+            if (!Array.isArray(group) || !group.length)
+              return "";
+            return `<ul style="margin:12px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>`;
+          }).join("") : "";
+          const calloutsHtml = Array.isArray(block.callouts) ? block.callouts.map((callout) => renderCalloutCard(callout)).join("") : "";
+          const preservedLeadHtml = remapPreservedFragmentColors(renderedSection == null ? void 0 : renderedSection.leadHtml, tokens);
+          const preservedSectionImageSrcs = collectImageSrcsFromRenderedSection(renderedSection);
+          const uniqueImageIds = Array.isArray(block.imageIds) ? block.imageIds.filter((imageId) => {
+            var _a4;
+            const imageSrc = coerceString((_a4 = imageMap.get(imageId)) == null ? void 0 : _a4.src);
+            return imageSrc && !preservedSectionImageSrcs.has(imageSrc);
+          }) : [];
+          const imagesHtml = uniqueImageIds.map((imageId) => `<div style="margin-top:14px;">${renderImage(imageId)}</div>`).join("");
+          const subsectionsHtml = Array.isArray(block.subsections) ? block.subsections.map((subsection, subsectionIndex) => {
+            const renderedSubsection = findRenderedSubsection(renderedSection, subsection, subsectionIndex);
+            const subsectionLevel = Number.isInteger(subsection == null ? void 0 : subsection.level) ? subsection.level : 3;
+            const subsectionParagraphs = Array.isArray(subsection == null ? void 0 : subsection.paragraphs) ? subsection.paragraphs.map((paragraph) => `<p style="margin:0 0 ${bodyParagraphGap}px;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(paragraph)}</p>`).join("") : "";
+            const subsectionBullets = Array.isArray(subsection == null ? void 0 : subsection.bulletGroups) ? subsection.bulletGroups.map((group) => {
+              if (!Array.isArray(group) || !group.length)
+                return "";
+              return `<ul style="margin:10px 0 ${bodyParagraphGap}px 20px;padding:0;color:${tokens.text};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${group.map((bullet) => `<li style="margin:4px 0;">${escapeHtml(bullet)}</li>`).join("")}</ul>`;
+            }).join("") : "";
+            const subsectionCallouts = Array.isArray(subsection == null ? void 0 : subsection.callouts) ? subsection.callouts.map((callout) => renderCalloutCard(callout, { compact: true })).join("") : "";
+            const preservedSubsectionHtml = remapPreservedFragmentColors(renderedSubsection == null ? void 0 : renderedSubsection.contentHtml, tokens);
+            const subsectionTitle = coerceString(subsection == null ? void 0 : subsection.title);
+            const subsectionLabel = isTutorialCards ? `STEP ${String(subsectionIndex + 1).padStart(2, "0")}` : isEditorialLite ? `Scene ${String(subsectionIndex + 1).padStart(2, "0")}` : `Sub ${String(subsectionIndex + 1).padStart(2, "0")}`;
+            const subsectionHasAccentRail = !!subsectionProfile.useBorderLeft;
+            const tutorialSubsectionContentPadding = isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.subsectionCardPadding) || (isDraft ? "18px 24px 16px" : "14px 16px 12px") : null;
+            const tutorialPreviewSubsectionContentPadding = isTutorialCards ? "14px 16px 12px" : null;
+            const tutorialSubsectionShellStyle = isTutorialCards && subsectionProfile.useCard ? isDraft ? `padding:${tutorialSubsectionContentPadding || "18px 24px 16px"};box-sizing:border-box;border:1px solid ${tokens.border};border-left:3px solid ${tokens.accent};border-radius:14px;background:${tokens.surfaceSoft};background-color:${tokens.surfaceSoft};overflow:hidden` : `border:1px solid ${tokens.border};border-left:3px solid ${tokens.accent};border-radius:14px;background:${tokens.surfaceSoft};overflow:hidden` : null;
+            const subsectionContainerStyle = [
+              `margin-top:${subsectionProfile.spacingTop || (isEditorialLite ? 18 : isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.subsectionSpacingTop) || 12 : 14)}px`,
+              subsectionProfile.useCard ? tutorialSubsectionShellStyle ? tutorialSubsectionShellStyle : `padding:${isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.subsectionCardPadding) || "18px 24px 16px" : "0"};border:1px solid ${tokens.border};border-radius:${isTutorialCards ? 14 : 0}px;background:${isTutorialCards ? isDraft ? tokens.surface : tokens.surfaceSoft : "transparent"}` : "",
+              isEditorialLite ? `padding-top:6px;border-top:1px dashed ${tokens.border};` : ""
+            ].filter(Boolean).join(";");
+            const subsectionTitleSize = subsectionLevel >= 4 ? Math.max(14, Number(subsectionProfile.titleSize || (isEditorialLite ? 18 : 16)) - 1) : Number(subsectionProfile.titleSize || (isEditorialLite ? 18 : 16));
+            const subsectionLabelHtml = subsectionTitle ? isDraft ? `<div style="margin-bottom:8px;">
+                  <span style="display:inline-block;padding:${isTutorialCards ? "3px 8px" : "0"};border-radius:${isTutorialCards ? "999px" : "0"};background:${isTutorialCards ? tokens.accentSoft : "transparent"};font-size:10px;font-weight:700;letter-spacing:${isEditorialLite ? 1.4 : 1}px;color:${tokens.accentDeep};text-transform:uppercase;${isEditorialLite ? `font-family:${editorialDisplayFont};` : ""}">${escapeHtml(subsectionLabel)}</span>
+                </div>` : `<div style="display:flex;align-items:center;gap:${isEditorialLite ? 10 : 8}px;margin-bottom:8px;">
+                  <span style="font-size:10px;font-weight:700;letter-spacing:${isEditorialLite ? 1.4 : 1}px;color:${tokens.accentDeep};text-transform:uppercase;${isEditorialLite ? `font-family:${editorialDisplayFont};` : ""}">${escapeHtml(subsectionLabel)}</span>
+                  <div style="flex:1;height:1px;background:${isEditorialLite ? tokens.border : "transparent"};"></div>
+                </div>` : "";
+            const subsectionTitleStyle = isDraft && isTutorialCards ? `margin:0 0 8px;font-size:${subsectionTitleSize}px;line-height:1.5;font-weight:${subsectionProfile.titleWeight || 700};color:${tokens.accentDeep};font-family:inherit;` : `margin:0 0 8px;font-size:${subsectionTitleSize}px;line-height:${isEditorialLite ? 1.45 : 1.5};font-weight:${subsectionProfile.titleWeight || (isEditorialLite ? 600 : 700)};color:${tokens.accentDeep};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`;
+            const subsectionInnerHtml = `
+            ${subsectionLabelHtml}
+            ${renderStyledText(
+              "h3",
+              subsectionTitle,
+              subsectionTitleStyle,
+              { mode }
+            )}
+            ${preservedSubsectionHtml || `${subsectionParagraphs}${subsectionBullets}${subsectionCallouts}`}
+          `;
+            const subsectionRailWidth = isTutorialCards ? 3 : 2;
+            const subsectionRailGap = isTutorialCards ? 12 : 14;
+            const subsectionContentHtml = subsectionHasAccentRail ? isDraft && isTutorialCards ? subsectionInnerHtml : `<div style="${tutorialPreviewSubsectionContentPadding ? `padding:${tutorialPreviewSubsectionContentPadding};` : ""}">${subsectionInnerHtml}</div>` : subsectionInnerHtml;
+            const subsectionWrapperTag = isTutorialCards && isDraft ? "section" : "div";
+            return `<${subsectionWrapperTag} style="${subsectionContainerStyle}">
+            ${subsectionContentHtml}
+          </${subsectionWrapperTag}>`;
+          }).join("") : "";
+          const sectionHead = isDraft ? isTutorialCards ? `<div style="margin-bottom:8px;">
+              <span style="display:inline-block;font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</span>
+              <span style="display:inline-block;margin-left:8px;font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</span>
+            </div>` : `<div style="margin-bottom:${isEditorialLite ? 14 : 10}px;">
+              <span style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:${isEditorialLite ? 1.4 : 1.2}px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</span>
+            </div>` : isSourceFirst ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+              <div style="height:1px;flex:1;background:${tokens.border};"></div>
+            </div>` : isEditorialLite ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:1.4px;color:${tokens.accentDeep};text-transform:uppercase;">${escapeHtml(`${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+                <div style="width:42px;height:1px;background:${tokens.border};"></div>
+              </div>` : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div style="font-size:28px;font-weight:800;color:${tokens.accent};line-height:1;">${String(sectionDisplayIndex).padStart(2, "0")}</div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:${tokens.muted};text-transform:uppercase;">${escapeHtml(block.sectionLabel || `${sectionLabelPrefix} ${String(sectionDisplayIndex).padStart(2, "0")}`)}</div>
+            </div>`;
+          return `<section style="margin:${isSourceFirst ? 22 : isEditorialLite ? 36 : isTutorialCards ? (tutorialSpacing == null ? void 0 : tutorialSpacing.sectionMarginY) || 18 : 26}px 0;${caseBlockProfile.useCard && isTutorialCards ? `padding:${(tutorialSpacing == null ? void 0 : tutorialSpacing.sectionCardPadding) || "14px"};border:1px solid ${tokens.border};border-radius:${cardRadius}px;background:${tokens.surfaceSoft};box-shadow:${cardShadow};` : ""}${isSourceFirst ? `padding-top:4px;` : ""}">
+        ${sectionHead}
+        ${renderStyledText(
+            "h2",
+            block.title,
+            `margin:0 0 ${titleMarginBottom}px;font-size:${titleFontSize}px;line-height:${isEditorialLite ? 1.28 : 1.4};color:${titleColor};font-family:${isEditorialLite ? editorialDisplayFont : "inherit"};`,
+            { mode }
+          )}
+        ${preservedLeadHtml || `${paragraphsHtml}${bulletGroupsHtml}${calloutsHtml}${imagesHtml}`}
+        ${subsectionsHtml}
+        ${preservedLeadHtml ? imagesHtml : ""}
+      </section>`;
+        }
+        if (block.type === "phone-frame") {
+          return `<section style="margin:24px auto;max-width:${isSourceFirst ? 420 : isEditorialLite ? 460 : 380}px;padding:${isSourceFirst ? 10 : isEditorialLite ? 12 : 14}px;border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 24 : isEditorialLite ? 18 : 42}px;background:${isDraft ? tokens.surfaceSoft : `linear-gradient(180deg, ${tokens.surfaceSoft} 0%, ${tokens.surface} 100%)`};${isDraft ? "" : "box-shadow:0 20px 40px -28px rgba(36,50,61,0.18);"}">
+        <div style="width:${isEditorialLite ? 28 : 42}%;height:${isEditorialLite ? 2 : 18}px;margin:0 auto 14px;border-radius:999px;background:${tokens.border};"></div>
+        <div style="background:${tokens.surface};border:1px solid ${tokens.border};border-radius:${isSourceFirst ? 16 : isEditorialLite ? 14 : 28}px;padding:10px;overflow:hidden;">
+          ${renderImage(block.imageId, `border-radius:${isSourceFirst ? 12 : isEditorialLite ? 12 : 22}px;`)}
+        </div>
+        ${block.caption ? `<div style="margin-top:10px;font-size:12px;text-align:center;color:${tokens.muted};">${escapeHtml(block.caption)}</div>` : ""}
+      </section>`;
+        }
+        if (block.type === "cta-card") {
+          const ctaButtonHtml = `<p style="margin:14px 0 0;font-size:0;line-height:0;">
+        <span style="display:inline-block;padding:${isEditorialLite ? "9px 18px" : "10px 16px"};border-radius:999px;background:${tokens.accent};color:#ffffff;font-weight:700;font-size:14px;line-height:1.2;letter-spacing:0;white-space:nowrap;">${escapeHtml(block.buttonText || "\u7EE7\u7EED\u9605\u8BFB")}</span>
+      </p>`;
+          return `<section style="${cardStyle};padding:${ctaCardPadding};background:${isDraft ? tokens.accentSoft : `linear-gradient(135deg, ${tokens.accentSoft} 0%, #ffffff 100%)`};">
+        ${renderStyledText(
+            "h3",
+            block.title,
+            `margin:0 0 10px;font-size:${isEditorialLite ? 22 : 20}px;line-height:${isEditorialLite ? 1.3 : 1.35};color:${tokens.text};`,
+            { mode }
+          )}
+        ${block.body ? `<p style="margin:0;color:${tokens.muted};font-size:${bodyFontSize}px;line-height:${bodyLineHeight};letter-spacing:0;">${escapeHtml(block.body)}</p>` : ""}
+        ${ctaButtonHtml}
+        ${block.note ? `<p style="margin:12px 0 0;font-size:12px;line-height:1.75;color:${tokens.muted};letter-spacing:0;">${escapeHtml(block.note)}</p>` : ""}
+      </section>`;
+        }
+        return "";
+      }).join("");
+      return `<section style="${wrapperStyle}">${blocksHtml}</section>`;
+    }
+    module2.exports = {
+      AI_LAYOUT_SCHEMA_VERSION: AI_LAYOUT_SCHEMA_VERSION2,
+      AI_LAYOUT_SKILL_VERSION,
+      AI_LAYOUT_SELECTION_AUTO: AI_LAYOUT_SELECTION_AUTO2,
+      AI_LAYOUT_FAMILY_DEFS,
+      AI_PROVIDER_KINDS: AI_PROVIDER_KINDS2,
+      AI_COLOR_PALETTES,
+      AI_STYLE_PACKS,
+      createDefaultAiSettings: createDefaultAiSettings2,
+      normalizeAiSettings: normalizeAiSettings2,
+      normalizeAiProvider: normalizeAiProvider2,
+      getAiProviderIssues: getAiProviderIssues2,
+      isAiProviderRunnable: isAiProviderRunnable2,
+      summarizeAiProviderIssues: summarizeAiProviderIssues2,
+      normalizeArticleLayoutState: normalizeArticleLayoutState2,
+      normalizeArticleLayoutCacheEntry: normalizeArticleLayoutCacheEntry2,
+      normalizeSchemaValidation,
+      normalizeLayoutFamily,
+      normalizeColorPalette,
+      normalizeLayoutSelection: normalizeLayoutSelection2,
+      normalizeResolvedSelection,
+      getArticleLayoutSelectionKey,
+      getArticleLayoutSelectionState: getArticleLayoutSelectionState2,
+      getArticleLayoutSelectionStateKey,
+      getLayoutFamilyList: getLayoutFamilyList2,
+      getLayoutFamilyById: getLayoutFamilyById2,
+      getColorPaletteList: getColorPaletteList2,
+      getColorPaletteById: getColorPaletteById2,
+      resolveColorPaletteForRender: resolveColorPaletteForRender2,
+      normalizeHexColor: normalizeHexColor2,
+      getStylePackList,
+      getStylePackById,
+      listEnabledAiProviders,
+      resolveAiProvider: resolveAiProvider2,
+      deriveArticleLayoutStateForSelection: deriveArticleLayoutStateForSelection2,
+      extractImageRefsFromHtml: extractImageRefsFromHtml2,
+      extractRenderedSectionFragments: extractRenderedSectionFragments2,
+      extractMarkdownSections,
+      extractMarkdownSignals,
+      buildFallbackLayout,
+      normalizeArticleLayout,
+      normalizeLayoutGenerationMeta,
+      buildLayoutResult,
+      AiLayoutSchemaError,
+      AiLayoutTimeoutError,
+      generateArticleLayout: generateArticleLayout2,
+      renderArticleLayoutHtml: renderArticleLayoutHtml2,
+      testAiProviderConnection: testAiProviderConnection2
     };
   }
 });
@@ -3457,6 +9288,7 @@ var require_wechat_sync = __commonJS({
         srcToBlob,
         processAllImages,
         processMathFormulas,
+        prepareHtmlForDraft = async (html) => html,
         cleanHtmlForDraft,
         cleanupConfiguredDirectory,
         getFirstImageFromArticle
@@ -3484,9 +9316,10 @@ var require_wechat_sync = __commonJS({
           const coverBlob = await srcToBlob(coverSrc);
           const coverRes = await api.uploadCover(coverBlob);
           const thumbMediaId = coverRes.media_id;
+          let draftHtml = await prepareHtmlForDraft(currentHtml);
           if (onStatus)
             onStatus("images");
-          let processedHtml = await processAllImages(currentHtml, api, (current, total) => {
+          let processedHtml = await processAllImages(draftHtml, api, (current, total) => {
             if (onImageProgress)
               onImageProgress(current, total);
           }, {
@@ -3513,6 +9346,16 @@ var require_wechat_sync = __commonJS({
             author: account.author || "",
             digest: sessionDigest || "\u4E00\u952E\u540C\u6B65\u81EA Obsidian"
           };
+          const contentSourceUrl = String(account.contentSourceUrl || "").trim();
+          if (contentSourceUrl) {
+            article.content_source_url = contentSourceUrl;
+          }
+          if (typeof account.openComment === "boolean") {
+            article.need_open_comment = account.openComment ? 1 : 0;
+          }
+          if (typeof account.onlyFansCanComment === "boolean") {
+            article.only_fans_can_comment = account.onlyFansCanComment ? 1 : 0;
+          }
           if (onStatus)
             onStatus("draft");
           await api.createDraft(article);
@@ -3668,6 +9511,48 @@ var require_wechat_media = __commonJS({
       svgUploadCache,
       svgToPngBlob
     }) {
+      const INLINE_MATH_IMAGE_STYLE = "display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px;";
+      const BLOCK_MATH_WRAP_STYLE = "display:block; width:100%; margin:1em auto; text-align:center; max-width:100%;";
+      const BLOCK_MATH_IMAGE_STYLE = "display:block; max-width:100%; height:auto; margin:0 auto;";
+      const appendStyle = (base, extra) => {
+        const left = String(base || "").trim();
+        const right = String(extra || "").trim();
+        if (!left)
+          return right;
+        if (!right)
+          return left;
+        return `${left}${left.endsWith(";") ? "" : ";"}${right}`;
+      };
+      const filterMathStyle = (styleText, { keepVerticalAlign = false } = {}) => {
+        let style = String(styleText || "");
+        style = style.replace(/display\s*:\s*[^;]+;?/gi, "");
+        style = style.replace(/margin(?:-[a-z]+)?\s*:\s*[^;]+;?/gi, "");
+        if (!keepVerticalAlign) {
+          style = style.replace(/vertical-align\s*:\s*[^;]+;?/gi, "");
+        }
+        return style.trim();
+      };
+      const isBlockMathHost = (svg) => {
+        const parent = svg == null ? void 0 : svg.parentElement;
+        if (!parent)
+          return false;
+        const parentTag = parent.tagName.toLowerCase();
+        const styleText = String(parent.getAttribute("display") || parent.getAttribute("style") || "").toLowerCase();
+        if (parentTag === "section")
+          return true;
+        if (parentTag === "mjx-container" && (styleText.includes("true") || styleText.includes("display:block") || styleText.includes("display: block"))) {
+          return true;
+        }
+        if (parentTag === "p") {
+          const meaningfulChildren = Array.from(parent.childNodes).filter((node) => {
+            if (node.nodeType === Node.TEXT_NODE)
+              return /\S/.test(node.textContent || "");
+            return true;
+          });
+          return meaningfulChildren.length === 1;
+        }
+        return false;
+      };
       const container = document.createElement("div");
       container.style.position = "absolute";
       container.style.left = "-9999px";
@@ -3716,22 +9601,35 @@ var require_wechat_media = __commonJS({
               img.setAttribute("width", logicalWidth);
             if (logicalHeight)
               img.setAttribute("height", logicalHeight);
-            let finalStyle = "display: inline-block; margin: 0 2px;";
             const svgStyle = svg.getAttribute("style");
-            if (svgStyle)
-              finalStyle += svgStyle;
             const parent = svg.parentElement;
-            if (parent && parent.tagName.toLowerCase().includes("mjx")) {
-              const parentStyle = parent.getAttribute("style");
-              if (parentStyle)
-                finalStyle += parentStyle;
-              img.setAttribute("style", finalStyle);
-              parent.replaceWith(img);
+            const isBlockMath = isBlockMathHost(svg);
+            if (isBlockMath) {
+              const extraStyle = appendStyle(filterMathStyle(svgStyle), rawStyle);
+              img.setAttribute("style", appendStyle(BLOCK_MATH_IMAGE_STYLE, extraStyle));
+              const wrapper = document.createElement("section");
+              wrapper.setAttribute("style", BLOCK_MATH_WRAP_STYLE);
+              wrapper.appendChild(img);
+              if (parent && parent.tagName.toLowerCase() === "p" && parent.parentElement) {
+                parent.replaceWith(wrapper);
+              } else if (parent && parent.tagName.toLowerCase().includes("mjx")) {
+                parent.replaceWith(wrapper);
+              } else {
+                svg.replaceWith(wrapper);
+              }
             } else {
-              if (rawStyle)
-                finalStyle += rawStyle;
+              let finalStyle = INLINE_MATH_IMAGE_STYLE;
+              finalStyle = appendStyle(finalStyle, filterMathStyle(svgStyle, { keepVerticalAlign: false }));
+              if (parent && parent.tagName.toLowerCase().includes("mjx")) {
+                finalStyle = appendStyle(finalStyle, filterMathStyle(parent.getAttribute("style"), { keepVerticalAlign: false }));
+              }
+              finalStyle = appendStyle(finalStyle, filterMathStyle(rawStyle, { keepVerticalAlign: false }));
               img.setAttribute("style", finalStyle);
-              svg.replaceWith(img);
+              if (parent && parent.tagName.toLowerCase().includes("mjx")) {
+                parent.replaceWith(img);
+              } else {
+                svg.replaceWith(img);
+              }
             }
             completed++;
             if (progressCallback)
@@ -3760,6 +9658,43 @@ var require_wechat_html_cleaner = __commonJS({
     function cleanHtmlForDraft(html) {
       const div = document.createElement("div");
       div.innerHTML = html;
+      const decodeFragment = (value) => {
+        try {
+          return decodeURIComponent(value);
+        } catch (error) {
+          return value;
+        }
+      };
+      const isTagLikeFragmentLink = (anchor) => {
+        if (!anchor)
+          return false;
+        const href = (anchor.getAttribute("href") || "").trim();
+        if (!href.startsWith("#"))
+          return false;
+        const text = (anchor.textContent || "").trim();
+        if (!text.startsWith("#"))
+          return false;
+        const fragment = href.slice(1).trim();
+        if (!fragment)
+          return false;
+        const normalizedText = text.slice(1).trim();
+        if (!normalizedText)
+          return false;
+        return normalizedText === fragment || normalizedText === decodeFragment(fragment);
+      };
+      const unwrapTagLikeFragmentLinks = (root) => {
+        if (!root)
+          return;
+        root.querySelectorAll("a[href]").forEach((anchor) => {
+          if (!isTagLikeFragmentLink(anchor))
+            return;
+          const fragment = document.createDocumentFragment();
+          while (anchor.firstChild) {
+            fragment.appendChild(anchor.firstChild);
+          }
+          anchor.replaceWith(fragment);
+        });
+      };
       const getInlineLabelPrefixInfo = (container) => {
         if (!container)
           return null;
@@ -3786,6 +9721,7 @@ var require_wechat_html_cleaner = __commonJS({
         }
         return null;
       };
+      unwrapTagLikeFragmentLinks(div);
       const hasInlineLabelPrefix = (container) => !!getInlineLabelPrefixInfo(container);
       const collapseLabelBreakInParagraph = (paragraph) => {
         const prefixInfo = getInlineLabelPrefixInfo(paragraph);
@@ -4292,16 +10228,47 @@ var { buildRenderRuntime } = require_dependency_loader();
 var { resolveMarkdownSource } = require_markdown_source();
 var { normalizeVaultPath, isAbsolutePathLike } = require_path_utils();
 var { renderObsidianTripletMarkdown } = require_obsidian_triplet_renderer();
+var { convertRenderedMermaidDiagramsToImages } = require_rendered_mermaid();
+var {
+  AI_LAYOUT_SCHEMA_VERSION,
+  AI_LAYOUT_SELECTION_AUTO,
+  AI_PROVIDER_KINDS,
+  createDefaultAiSettings,
+  normalizeAiSettings,
+  normalizeAiProvider,
+  getAiProviderIssues,
+  isAiProviderRunnable,
+  summarizeAiProviderIssues,
+  getLayoutFamilyList,
+  getLayoutFamilyById,
+  getColorPaletteList,
+  getColorPaletteById,
+  resolveColorPaletteForRender,
+  normalizeHexColor,
+  normalizeLayoutSelection,
+  getArticleLayoutSelectionState,
+  resolveAiProvider,
+  deriveArticleLayoutStateForSelection,
+  normalizeArticleLayoutState,
+  normalizeArticleLayoutCacheEntry,
+  extractImageRefsFromHtml,
+  extractRenderedSectionFragments,
+  generateArticleLayout,
+  renderArticleLayoutHtml,
+  testAiProviderConnection
+} = require_ai_layout();
 var { createWechatSyncService } = require_wechat_sync();
 var { resolveSyncAccount, toSyncFriendlyMessage } = require_sync_context();
 var { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require_wechat_media();
 var { cleanHtmlForDraft: cleanHtmlForDraftService } = require_wechat_html_cleaner();
+var { rasterizeSvgToPngBlob } = require_svg_rasterizer();
 var APPLE_STYLE_VIEW = "apple-style-converter";
 var APPLE_STYLE_VIEW_TITLE = "\u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668";
 var DEFAULT_SETTINGS = {
   theme: "github",
   themeColor: "blue",
   customColor: "#0366d6",
+  quoteCalloutStyleMode: "theme",
   fontFamily: "sans-serif",
   fontSize: 3,
   macCodeBlock: true,
@@ -4337,9 +10304,32 @@ var DEFAULT_SETTINGS = {
   // 发送成功后要清理的目录（支持 {{note}}）
   // 旧字段保留用于迁移检测
   wechatAppId: "",
-  wechatAppSecret: ""
+  wechatAppSecret: "",
+  ai: createDefaultAiSettings()
 };
 var MAX_ACCOUNTS = 5;
+var AI_LAYOUT_SOURCE_SWITCH_STALE_SUPPRESS_MS = 700;
+var DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS = Object.freeze({
+  contentSourceUrl: "",
+  openComment: true,
+  onlyFansCanComment: false
+});
+function getWechatAccountPublishOptions(account = null) {
+  return {
+    contentSourceUrl: typeof (account == null ? void 0 : account.contentSourceUrl) === "string" ? account.contentSourceUrl : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.contentSourceUrl,
+    openComment: typeof (account == null ? void 0 : account.openComment) === "boolean" ? account.openComment : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.openComment,
+    onlyFansCanComment: typeof (account == null ? void 0 : account.onlyFansCanComment) === "boolean" ? account.onlyFansCanComment : DEFAULT_WECHAT_ACCOUNT_PUBLISH_OPTIONS.onlyFansCanComment
+  };
+}
+function normalizeWechatAccountPublishOptions(values = {}) {
+  const contentSourceUrl = typeof values.contentSourceUrl === "string" ? values.contentSourceUrl.trim() : "";
+  const openComment = !!values.openComment;
+  return {
+    contentSourceUrl,
+    openComment,
+    onlyFansCanComment: openComment && !!values.onlyFansCanComment
+  };
+}
 function isMobileClient(app) {
   if (typeof (Platform == null ? void 0 : Platform.isMobile) === "boolean") {
     return Platform.isMobile;
@@ -4611,6 +10601,7 @@ var AppleStyleView = class extends ItemView {
     this.articleStates = /* @__PURE__ */ new Map();
     this.svgUploadCache = /* @__PURE__ */ new Map();
     this.imageUploadCache = /* @__PURE__ */ new Map();
+    this.mermaidImageCache = /* @__PURE__ */ new Map();
     this.renderGeneration = 0;
     this.lastRenderError = "";
     this.lastRenderFailureNoticeKey = "";
@@ -4620,6 +10611,17 @@ var AppleStyleView = class extends ItemView {
     this.sidePaddingPreviewTimer = null;
     this.lastResolvedMarkdown = "";
     this.lastResolvedSourcePath = "";
+    this.lastResolvedSourceHash = "";
+    this.aiLayoutSourceSwitchPath = "";
+    this.aiLayoutStaleSuppressPath = "";
+    this.aiLayoutStaleSuppressUntil = 0;
+    this.aiLayoutStaleSuppressTimer = null;
+    this.baseRenderedHtml = null;
+    this.aiPreviewApplied = false;
+    this.aiLayoutBtn = null;
+    this.settingsBtn = null;
+    this.aiLayoutDebugMode = "";
+    this.aiLayoutActiveGenerationSelection = null;
   }
   getViewType() {
     return APPLE_STYLE_VIEW;
@@ -4645,12 +10647,7 @@ var AppleStyleView = class extends ItemView {
       cls: `apple-preview-wrapper ${usePhoneFrame ? "mode-phone" : "mode-classic"}`
     });
     previewWrapper.addEventListener("click", (e) => {
-      if (this.settingsOverlay && this.settingsOverlay.classList.contains("visible")) {
-        this.settingsOverlay.classList.remove("visible");
-        const btn = container.querySelector('.apple-icon-btn[aria-label="\u6837\u5F0F\u8BBE\u7F6E"]');
-        if (btn)
-          btn.classList.remove("active");
-      }
+      this.closeTransientPanels();
     });
     if (usePhoneFrame) {
       const phoneFrame = previewWrapper.createEl("div", { cls: "apple-phone-frame" });
@@ -4687,13 +10684,20 @@ var AppleStyleView = class extends ItemView {
         const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (activeView && activeView.file) {
           this.lastActiveFile = activeView.file;
+          const nextSourcePath = activeView.file.path || "";
+          if (nextSourcePath && nextSourcePath !== this.lastResolvedSourcePath) {
+            this.markAiLayoutSourceSwitch(nextSourcePath);
+          }
         }
         this.updateCurrentDoc();
+        if (this.shouldSyncAiLayoutUi()) {
+          this.refreshAiLayoutPanel();
+        }
         if (activeView) {
           this.registerScrollSync(activeView);
         }
         if (activeView && this.converter) {
-          this.scheduleActiveLeafRender();
+          this.scheduleActiveLeafRender(activeView);
         }
       })
     );
@@ -4710,24 +10714,35 @@ var AppleStyleView = class extends ItemView {
         return;
       const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
       if (activeView && activeView.file && this.lastActiveFile && activeView.file.path === this.lastActiveFile.path) {
-        await this.convertCurrent(true);
+        await this.convertCurrent(true, {
+          sourceOverride: {
+            markdown: activeView.editor.getValue(),
+            sourcePath: activeView.file.path || ""
+          }
+        });
       }
     }, 500);
     this.registerEvent(
       this.app.workspace.on("editor-change", debouncedConvert)
     );
   }
-  scheduleActiveLeafRender() {
+  scheduleActiveLeafRender(activeViewOverride = null) {
     if (this.activeLeafRenderTimer) {
       clearTimeout(this.activeLeafRenderTimer);
       this.activeLeafRenderTimer = null;
     }
     this.activeLeafRenderTimer = setTimeout(() => {
       this.activeLeafRenderTimer = null;
+      const activeView = activeViewOverride || this.app.workspace.getActiveViewOfType(MarkdownView);
+      const sourceOverride = activeView && activeView.file ? {
+        markdown: activeView.editor.getValue(),
+        sourcePath: activeView.file.path || ""
+      } : null;
       this.convertCurrent(true, {
         showLoading: true,
         loadingText: "\u6B63\u5728\u5207\u6362\u6587\u7AE0\u9884\u89C8...",
-        loadingDelay: 150
+        loadingDelay: 120,
+        sourceOverride
       });
     }, 16);
   }
@@ -4751,6 +10766,40 @@ var AppleStyleView = class extends ItemView {
     }
     this.previewContainer.removeClass("apple-preview-loading");
     delete this.previewContainer.dataset.loadingText;
+  }
+  markAiLayoutSourceSwitch(sourcePath = "") {
+    if (!sourcePath)
+      return;
+    this.aiLayoutSourceSwitchPath = sourcePath;
+    this.aiLayoutStaleSuppressPath = sourcePath;
+    this.aiLayoutStaleSuppressUntil = Date.now() + AI_LAYOUT_SOURCE_SWITCH_STALE_SUPPRESS_MS;
+    if (this.aiLayoutStaleSuppressTimer) {
+      clearTimeout(this.aiLayoutStaleSuppressTimer);
+    }
+    this.aiLayoutStaleSuppressTimer = setTimeout(() => {
+      this.aiLayoutStaleSuppressTimer = null;
+      if (this.aiLayoutStaleSuppressPath === sourcePath && Date.now() >= this.aiLayoutStaleSuppressUntil) {
+        this.aiLayoutStaleSuppressPath = "";
+        this.aiLayoutStaleSuppressUntil = 0;
+      }
+      if (this.shouldSyncAiLayoutUi()) {
+        this.refreshAiLayoutPanel();
+      }
+    }, AI_LAYOUT_SOURCE_SWITCH_STALE_SUPPRESS_MS + 40);
+  }
+  completeAiLayoutSourceSwitch(sourcePath = "") {
+    if (sourcePath && this.aiLayoutSourceSwitchPath === sourcePath) {
+      this.aiLayoutSourceSwitchPath = "";
+    }
+  }
+  isAiLayoutStaleSuppressedForPath(sourcePath = "") {
+    if (!sourcePath || this.aiLayoutStaleSuppressPath !== sourcePath)
+      return false;
+    if (Date.now() < this.aiLayoutStaleSuppressUntil)
+      return true;
+    this.aiLayoutStaleSuppressPath = "";
+    this.aiLayoutStaleSuppressUntil = 0;
+    return false;
   }
   /**
    * 注册同步滚动 (双向: Editor <-> Preview)
@@ -4852,7 +10901,9 @@ var AppleStyleView = class extends ItemView {
             markdown,
             sourcePath: context.sourcePath || "",
             settings: context.settings || this.plugin.settings,
-            component: this
+            component: this,
+            rasterizeMermaid: false,
+            preserveSvgStyleTags: true
           });
         }
       });
@@ -4885,10 +10936,10 @@ var AppleStyleView = class extends ItemView {
       btn.addEventListener("click", onClick);
       return btn;
     };
-    const settingsBtn = createIconBtn("sliders-horizontal", "\u6837\u5F0F\u8BBE\u7F6E", () => {
-      this.settingsOverlay.classList.toggle("visible");
-      settingsBtn.classList.toggle("active");
+    this.settingsBtn = createIconBtn("sliders-horizontal", "\u6837\u5F0F\u8BBE\u7F6E", () => {
+      this.togglePanel(this.settingsOverlay, this.settingsBtn);
     });
+    this.aiLayoutBtn = createIconBtn("sparkles", "AI \u7F16\u6392", () => this.onAiLayoutButtonClick());
     if (!isMobileClient(this.app)) {
       this.copyBtn = createIconBtn("copy", "\u590D\u5236\u5230\u516C\u4F17\u53F7", () => this.copyHTML());
     } else {
@@ -4980,57 +11031,6 @@ var AppleStyleView = class extends ItemView {
         await this.onColorChange("custom", grid);
       });
     });
-    this.createSection(settingsArea, "\u6807\u9898\u6837\u5F0F", (section) => {
-      section.style.display = "flex";
-      section.style.alignItems = "center";
-      const toggle = section.createEl("label", { cls: "apple-toggle" });
-      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
-      checkbox.checked = this.plugin.settings.coloredHeader;
-      toggle.createEl("span", { cls: "apple-toggle-slider" });
-      section.createEl("span", {
-        text: "\u6807\u9898\u4F7F\u7528\u52A0\u6DF1\u4E3B\u9898\u8272",
-        attr: {
-          style: "font-size: 11px; color: var(--apple-secondary); margin-left: 12px; opacity: 0.8; font-weight: 500; transform: translateY(-1px);"
-        }
-      });
-      checkbox.addEventListener("change", async () => {
-        this.plugin.settings.coloredHeader = checkbox.checked;
-        await this.plugin.saveSettings();
-        this.theme.update({ coloredHeader: checkbox.checked });
-        await this.convertCurrent(true);
-      });
-    });
-    this.createSection(settingsArea, "\u6B63\u6587\u6807\u70B9\u6807\u51C6\u5316", (section) => {
-      const toggle = section.createEl("label", { cls: "apple-toggle" });
-      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
-      checkbox.checked = this.plugin.settings.normalizeChinesePunctuation === true;
-      toggle.createEl("span", { cls: "apple-toggle-slider" });
-      section.createEl("span", {
-        text: "\u4EC5\u4F5C\u7528\u4E8E\u9884\u89C8 / \u590D\u5236 / \u540C\u6B65\u7ED3\u679C",
-        attr: {
-          style: "font-size: 11px; color: var(--apple-secondary); margin-left: 12px; opacity: 0.8; font-weight: 500; transform: translateY(-1px);"
-        }
-      });
-      checkbox.addEventListener("change", async () => {
-        this.plugin.settings.normalizeChinesePunctuation = checkbox.checked;
-        await this.plugin.saveSettings();
-        await this.convertCurrent(true);
-      });
-    });
-    this.createSection(settingsArea, "Mac \u98CE\u683C\u4EE3\u7801\u5757", (section) => {
-      const toggle = section.createEl("label", { cls: "apple-toggle" });
-      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
-      checkbox.checked = this.plugin.settings.macCodeBlock;
-      toggle.createEl("span", { cls: "apple-toggle-slider" });
-      checkbox.addEventListener("change", () => this.onMacCodeBlockChange(checkbox.checked));
-    });
-    this.createSection(settingsArea, "\u663E\u793A\u4EE3\u7801\u884C\u53F7", (section) => {
-      const toggle = section.createEl("label", { cls: "apple-toggle" });
-      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
-      checkbox.checked = this.plugin.settings.codeLineNumber;
-      toggle.createEl("span", { cls: "apple-toggle-slider" });
-      checkbox.addEventListener("change", () => this.onCodeLineNumberChange(checkbox.checked));
-    });
     this.createSection(settingsArea, "\u9875\u9762\u4E24\u4FA7\u7559\u767D", (section) => {
       const mobile = isMobileClient(this.app);
       const container2 = section.createEl("div", {
@@ -5073,25 +11073,130 @@ var AppleStyleView = class extends ItemView {
         await this.convertCurrent(true);
       });
     });
-    const captionSetting = new Setting(settingsArea).setName("\u663E\u793A\u56FE\u7247\u8BF4\u660E\u6587\u5B57").setDesc("\u5173\u95ED\u6C34\u5370\u65F6\uFF0C\u5728\u56FE\u7247\u4E0B\u65B9\u663E\u793A\u8BF4\u660E\u6587\u5B57").addToggle((toggle) => toggle.setValue(this.plugin.settings.showImageCaption).onChange(async (value) => {
-      this.plugin.settings.showImageCaption = value;
-      await this.plugin.saveSettings();
-      if (this.converter) {
-        this.converter.updateConfig({ showImageCaption: value });
+    const advancedOptions = settingsArea.createEl("details", { cls: "apple-settings-details" });
+    advancedOptions.createEl("summary", {
+      cls: "apple-settings-summary",
+      text: "\u9AD8\u7EA7\u9009\u9879"
+    });
+    const advancedArea = advancedOptions.createDiv({ cls: "apple-settings-area apple-settings-advanced-area" });
+    const quoteStyleSection = this.createSection(advancedArea, "\u5F15\u7528\u6837\u5F0F", (section) => {
+      const select = section.createEl("select", { cls: "apple-select" });
+      [
+        { value: "theme", label: "\u7ECF\u5178\u4E3B\u9898\u8272" },
+        { value: "neutral", label: "\u4E2D\u6027\u7070\uFF08\u63A8\u8350\uFF09" }
+      ].forEach((opt) => {
+        const option = select.createEl("option", { value: opt.value, text: opt.label });
+        if (this.plugin.settings.quoteCalloutStyleMode === opt.value)
+          option.selected = true;
+      });
+      select.addEventListener("change", (e) => this.onQuoteCalloutStyleModeChange(e.target.value));
+      section.createEl("span", {
+        text: "\u4E2D\u6027\u7070\u66F4\u9002\u5408\u957F\u6587\u9605\u8BFB\uFF1B\u7ECF\u5178\u4E3B\u9898\u8272\u517C\u5BB9\u73B0\u6709\u98CE\u683C\u3002",
+        attr: {
+          style: "font-size: 11px; color: var(--apple-secondary); margin-top: 8px; opacity: 0.8; font-weight: 500; display: block;"
+        }
+      });
+    });
+    quoteStyleSection.classList.add("apple-settings-featured");
+    const headingStyleSection = this.createSection(advancedArea, "\u6807\u9898\u6837\u5F0F", (section) => {
+      const row = section.createEl("div", { cls: "apple-settings-inline-row" });
+      const toggle = row.createEl("label", { cls: "apple-toggle" });
+      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
+      checkbox.checked = this.plugin.settings.coloredHeader;
+      toggle.createEl("span", { cls: "apple-toggle-slider" });
+      section.createEl("span", {
+        text: "\u6807\u9898\u4F7F\u7528\u52A0\u6DF1\u4E3B\u9898\u8272",
+        attr: {
+          style: "font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;"
+        }
+      });
+      checkbox.addEventListener("change", async () => {
+        this.plugin.settings.coloredHeader = checkbox.checked;
+        await this.plugin.saveSettings();
+        this.theme.update({ coloredHeader: checkbox.checked });
         await this.convertCurrent(true);
-      }
-    }));
+      });
+    });
+    headingStyleSection.classList.add("apple-settings-inline-toggle");
+    const punctuationSection = this.createSection(advancedArea, "\u6B63\u6587\u6807\u70B9\u6807\u51C6\u5316", (section) => {
+      const row = section.createEl("div", { cls: "apple-settings-inline-row" });
+      const toggle = row.createEl("label", { cls: "apple-toggle" });
+      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
+      checkbox.checked = this.plugin.settings.normalizeChinesePunctuation === true;
+      toggle.createEl("span", { cls: "apple-toggle-slider" });
+      section.createEl("span", {
+        text: "\u4EC5\u4F5C\u7528\u4E8E\u9884\u89C8 / \u590D\u5236 / \u540C\u6B65\u7ED3\u679C",
+        attr: {
+          style: "font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;"
+        }
+      });
+      checkbox.addEventListener("change", async () => {
+        this.plugin.settings.normalizeChinesePunctuation = checkbox.checked;
+        await this.plugin.saveSettings();
+        await this.convertCurrent(true);
+      });
+    });
+    punctuationSection.classList.add("apple-settings-inline-toggle");
+    const macCodeSection = this.createSection(advancedArea, "Mac \u98CE\u683C\u4EE3\u7801\u5757", (section) => {
+      const row = section.createEl("div", { cls: "apple-settings-inline-row" });
+      const toggle = row.createEl("label", { cls: "apple-toggle" });
+      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
+      checkbox.checked = this.plugin.settings.macCodeBlock;
+      toggle.createEl("span", { cls: "apple-toggle-slider" });
+      checkbox.addEventListener("change", () => this.onMacCodeBlockChange(checkbox.checked));
+    });
+    macCodeSection.classList.add("apple-settings-inline-toggle");
+    const codeLineNumberSection = this.createSection(advancedArea, "\u663E\u793A\u4EE3\u7801\u884C\u53F7", (section) => {
+      const row = section.createEl("div", { cls: "apple-settings-inline-row" });
+      const toggle = row.createEl("label", { cls: "apple-toggle" });
+      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
+      checkbox.checked = this.plugin.settings.codeLineNumber;
+      toggle.createEl("span", { cls: "apple-toggle-slider" });
+      checkbox.addEventListener("change", () => this.onCodeLineNumberChange(checkbox.checked));
+    });
+    codeLineNumberSection.classList.add("apple-settings-inline-toggle");
+    const captionSection = this.createSection(advancedArea, "\u663E\u793A\u56FE\u7247\u8BF4\u660E\u6587\u5B57", (section) => {
+      const row = section.createEl("div", { cls: "apple-settings-inline-row" });
+      const toggle = row.createEl("label", { cls: "apple-toggle" });
+      const checkbox = toggle.createEl("input", { type: "checkbox", cls: "apple-toggle-input" });
+      checkbox.checked = this.plugin.settings.showImageCaption;
+      toggle.createEl("span", { cls: "apple-toggle-slider" });
+      section.createEl("span", {
+        text: "\u5173\u95ED\u6C34\u5370\u65F6\uFF0C\u5728\u56FE\u7247\u4E0B\u65B9\u663E\u793A\u8BF4\u660E\u6587\u5B57",
+        attr: {
+          style: "font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;"
+        }
+      });
+      checkbox.addEventListener("change", async () => {
+        this.plugin.settings.showImageCaption = checkbox.checked;
+        await this.plugin.saveSettings();
+        if (this.converter) {
+          this.converter.updateConfig({ showImageCaption: checkbox.checked });
+          await this.convertCurrent(true);
+        }
+      });
+      section._captionToggle = { checkbox, toggle };
+    });
+    captionSection.classList.add("apple-settings-inline-toggle");
     if (this.plugin.settings.enableWatermark) {
-      captionSetting.setDesc("\u56E0\u5168\u5C40\u8BBE\u7F6E\u4E2D\u5DF2\u5F00\u542F\u6C34\u5370\uFF0C\u6B64\u9009\u9879\u9ED8\u8BA4\u5F00\u542F");
-      const toggleComp = captionSetting.components[0];
-      toggleComp.setValue(true);
-      toggleComp.setDisabled(true);
-      if (toggleComp.toggleEl) {
-        toggleComp.toggleEl.style.pointerEvents = "none";
-        toggleComp.toggleEl.style.opacity = "0.6";
-        toggleComp.toggleEl.style.filter = "grayscale(100%)";
+      const captionDesc = captionSection.querySelector(".apple-setting-content > span");
+      if (captionDesc) {
+        captionDesc.setText("\u56E0\u5168\u5C40\u8BBE\u7F6E\u4E2D\u5DF2\u5F00\u542F\u6C34\u5370\uFF0C\u6B64\u9009\u9879\u9ED8\u8BA4\u5F00\u542F");
+      }
+      const toggleState = captionSection._captionToggle;
+      if (toggleState == null ? void 0 : toggleState.checkbox) {
+        toggleState.checkbox.checked = true;
+        toggleState.checkbox.disabled = true;
+      }
+      if (toggleState == null ? void 0 : toggleState.toggle) {
+        toggleState.toggle.style.pointerEvents = "none";
+        toggleState.toggle.style.opacity = "0.6";
+        toggleState.toggle.style.filter = "grayscale(100%)";
       }
     }
+    this.aiLayoutOverlay = container.createEl("div", { cls: "apple-ai-layout-overlay" });
+    this.createAiLayoutPanel(this.aiLayoutOverlay);
+    this.updateAiToolbarState();
   }
   /**
    * 创建账号选择器
@@ -5377,6 +11482,1787 @@ var AppleStyleView = class extends ItemView {
     section.createEl("label", { cls: "apple-setting-label", text: label });
     const content = section.createEl("div", { cls: "apple-setting-content" });
     builder(content);
+    return section;
+  }
+  togglePanel(overlay, button, onOpen) {
+    if (!overlay || !button)
+      return;
+    const willOpen = !overlay.classList.contains("visible");
+    this.closeTransientPanels();
+    if (willOpen) {
+      overlay.classList.add("visible");
+      button.classList.add("active");
+      if (typeof onOpen === "function")
+        onOpen();
+    }
+  }
+  canScrollElementInDirection(element, deltaY) {
+    if (!element)
+      return false;
+    const maxScroll = Math.max(0, (element.scrollHeight || 0) - (element.clientHeight || 0));
+    if (maxScroll <= 0)
+      return false;
+    if (deltaY < 0)
+      return (element.scrollTop || 0) > 0;
+    if (deltaY > 0)
+      return (element.scrollTop || 0) < maxScroll - 1;
+    return true;
+  }
+  attachOverlayScrollGuard(overlay, nestedSelectors = []) {
+    if (!overlay || overlay.__appleScrollGuardAttached)
+      return;
+    const normalizedSelectors = Array.isArray(nestedSelectors) ? nestedSelectors.filter(Boolean) : [];
+    const handleWheel = (event) => {
+      if (!overlay.classList.contains("visible"))
+        return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      const nestedScrollable = target ? normalizedSelectors.map((selector) => target.closest(selector)).find(Boolean) : null;
+      const activeScrollable = nestedScrollable || overlay;
+      if (!this.canScrollElementInDirection(activeScrollable, event.deltaY)) {
+        event.preventDefault();
+      }
+      event.stopPropagation();
+    };
+    const handleTouchMove = (event) => {
+      if (!overlay.classList.contains("visible"))
+        return;
+      event.stopPropagation();
+    };
+    overlay.addEventListener("wheel", handleWheel, { passive: false });
+    overlay.addEventListener("touchmove", handleTouchMove, { passive: false });
+    overlay.__appleScrollGuardAttached = true;
+  }
+  closeTransientPanels() {
+    if (this.settingsOverlay)
+      this.settingsOverlay.classList.remove("visible");
+    if (this.aiLayoutOverlay)
+      this.aiLayoutOverlay.classList.remove("visible");
+    if (this.settingsBtn)
+      this.settingsBtn.classList.remove("active");
+    if (this.aiLayoutBtn)
+      this.aiLayoutBtn.classList.remove("active");
+  }
+  getCurrentArticleAnyLayoutState() {
+    var _a, _b, _c, _d, _e, _f;
+    const { sourcePath } = this.getCurrentLayoutContext();
+    if (!sourcePath)
+      return null;
+    if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
+      return this.plugin.getArticleLayoutState(sourcePath, {}) || null;
+    }
+    const normalizedPath = normalizeVaultPath(sourcePath);
+    const entry = ((_e = (_d = (_c = (_b = this.plugin) == null ? void 0 : _b.settings) == null ? void 0 : _c.ai) == null ? void 0 : _d.articleLayoutsByPath) == null ? void 0 : _e[normalizedPath]) || null;
+    const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+    if (!normalizedEntry)
+      return null;
+    return ((_f = normalizedEntry.familyStates) == null ? void 0 : _f[normalizedEntry.lastLayoutFamily]) || null;
+  }
+  hasCurrentArticleAiLayoutCache() {
+    var _a;
+    const state = this.getCurrentArticleAnyLayoutState();
+    return !!((state == null ? void 0 : state.status) === "ready" && Array.isArray((_a = state.layoutJson) == null ? void 0 : _a.blocks) && state.layoutJson.blocks.length);
+  }
+  updateAiToolbarState() {
+    var _a;
+    if (!this.aiLayoutBtn)
+      return;
+    const aiSettings = ((_a = this.plugin.settings) == null ? void 0 : _a.ai) || createDefaultAiSettings();
+    const enabled = aiSettings.enabled === true;
+    const hasProvider = !!resolveAiProvider(aiSettings);
+    const hasCachedLayout = this.hasCurrentArticleAiLayoutCache();
+    const shouldShow = enabled && (hasProvider || hasCachedLayout);
+    this.aiLayoutBtn.classList.toggle("is-disabled", !shouldShow);
+    this.aiLayoutBtn.setAttribute(
+      "title",
+      !enabled ? "AI \u7F16\u6392\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528" : shouldShow ? "AI \u7F16\u6392" : "\u914D\u7F6E\u53EF\u7528 AI Provider \u540E\u663E\u793A AI \u7F16\u6392\u5165\u53E3"
+    );
+    this.aiLayoutBtn.hidden = !shouldShow;
+    if (!shouldShow) {
+      if (this.aiLayoutOverlay)
+        this.aiLayoutOverlay.classList.remove("visible");
+      this.aiLayoutBtn.classList.remove("active");
+    }
+  }
+  onAiLayoutButtonClick() {
+    var _a, _b;
+    if (((_b = (_a = this.plugin.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.enabled) !== true) {
+      this.closeTransientPanels();
+      this.updateAiToolbarState();
+      new Notice("AI \u7F16\u6392\u5F53\u524D\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528");
+      return;
+    }
+    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
+  }
+  createAiLayoutPanel(parent) {
+    var _a, _b;
+    this.attachOverlayScrollGuard(parent, [".apple-ai-layout-debug-body"]);
+    const area = parent.createDiv({ cls: "apple-ai-layout-area" });
+    const header = area.createDiv({ cls: "apple-ai-layout-header" });
+    header.createEl("div", { cls: "apple-ai-layout-title", text: "AI \u7F16\u6392" });
+    header.createEl("div", {
+      cls: "apple-ai-layout-subtitle",
+      text: "\u6309\u5F53\u524D\u6587\u7AE0\u5185\u5BB9\u751F\u6210\u533A\u5757\u5316\u6392\u7248\u5EFA\u8BAE"
+    });
+    this.aiLayoutStatus = area.createDiv({ cls: "apple-ai-layout-status" });
+    this.aiLayoutStatusBadge = this.aiLayoutStatus.createEl("span", { cls: "apple-ai-layout-badge", text: "\u672A\u751F\u6210" });
+    this.aiLayoutStatusBody = this.aiLayoutStatus.createDiv({ cls: "apple-ai-layout-status-body" });
+    this.aiLayoutStatusText = this.aiLayoutStatusBody.createEl("span", {
+      cls: "apple-ai-layout-status-text",
+      text: "\u5C1A\u672A\u751F\u6210\u5F53\u524D\u6587\u7AE0\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002"
+    });
+    this.aiCachedLayoutList = this.aiLayoutStatusBody.createDiv({ cls: "apple-ai-layout-cache-list" });
+    this.aiLayoutSummary = this.aiLayoutStatusBody.createDiv({
+      cls: "apple-ai-layout-summary",
+      text: "\u751F\u6210\u540E\u4F1A\u5728\u8FD9\u91CC\u5C55\u793A\u5F53\u524D\u7ED3\u679C\u7684\u7B80\u8981\u8BF4\u660E\u3002"
+    });
+    const controlSection = area.createDiv({ cls: "apple-ai-layout-section apple-ai-layout-controls-section" });
+    const layoutControl = controlSection.createDiv({ cls: "apple-ai-layout-control" });
+    layoutControl.createEl("label", { cls: "apple-setting-label", text: "\u5E03\u5C40" });
+    this.aiLayoutFamilySelect = layoutControl.createEl("select", { cls: "apple-select" });
+    getLayoutFamilyList({ includeAuto: true, includeReserved: false }).forEach((family) => {
+      var _a2;
+      const option = this.aiLayoutFamilySelect.createEl("option", {
+        value: family.value,
+        text: this.getAiLayoutFamilyLabel(family.value)
+      });
+      if ((((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO) === family.value) {
+        option.selected = true;
+      }
+    });
+    const paletteControl = controlSection.createDiv({ cls: "apple-ai-layout-control" });
+    paletteControl.createEl("label", { cls: "apple-setting-label", text: "\u989C\u8272" });
+    this.aiColorPaletteSelect = paletteControl.createEl("select", { cls: "apple-select apple-ai-layout-color-select" });
+    getColorPaletteList({ includeAuto: true }).forEach((palette) => {
+      var _a2;
+      const option = this.aiColorPaletteSelect.createEl("option", {
+        value: palette.value,
+        text: palette.label
+      });
+      if ((((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO) === palette.value) {
+        option.selected = true;
+      }
+    });
+    this.pendingAiLayoutFamily = this.pendingAiLayoutFamily || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO;
+    this.pendingAiColorPalette = this.pendingAiColorPalette || ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
+    this.pendingAiStylePack = this.pendingAiColorPalette;
+    this.aiLayoutFamilySelect.value = this.pendingAiLayoutFamily;
+    this.aiColorPaletteSelect.value = this.pendingAiColorPalette;
+    this.aiStylePackSelect = this.aiColorPaletteSelect;
+    this.aiColorPaletteControls = paletteControl.createDiv({ cls: "apple-ai-color-controls" });
+    const autoPaletteRow = this.aiColorPaletteControls.createDiv({ cls: "apple-ai-color-mode-row" });
+    this.aiColorPaletteGrid = this.aiColorPaletteControls.createDiv({ cls: "apple-ai-color-grid" });
+    const customPaletteRow = this.aiColorPaletteControls.createDiv({ cls: "apple-ai-color-custom-row" });
+    getColorPaletteList({ includeAuto: true }).forEach((palette) => {
+      var _a2;
+      const isAuto = palette.value === AI_LAYOUT_SELECTION_AUTO;
+      const isCustom = palette.value === "custom";
+      const target = isAuto ? autoPaletteRow : isCustom ? customPaletteRow : this.aiColorPaletteGrid;
+      const button = target.createEl("button", {
+        cls: isCustom ? "apple-btn-custom-text apple-ai-color-custom" : isAuto ? "apple-ai-color-pill" : "apple-btn-color apple-ai-color-btn",
+        text: isAuto ? "\u81EA\u52A8" : isCustom ? "\u81EA\u5B9A\u4E49" : "",
+        title: palette.label
+      });
+      button.dataset.value = palette.value;
+      if (!isAuto && !isCustom) {
+        const pack = getColorPaletteById(palette.value);
+        button.style.setProperty("--btn-color", ((_a2 = pack == null ? void 0 : pack.tokens) == null ? void 0 : _a2.accent) || "#7c3aed");
+      }
+      button.addEventListener("click", async () => {
+        var _a3;
+        await this.onAiColorPaletteChange(palette.value);
+        if (isCustom)
+          (_a3 = this.aiCustomColorInput) == null ? void 0 : _a3.click();
+      });
+    });
+    this.aiCustomColorInput = paletteControl.createEl("input", {
+      type: "color",
+      cls: "apple-color-picker-hidden apple-ai-custom-color-input"
+    });
+    this.aiCustomColorInput.value = this.getAiCustomColor();
+    this.aiCustomColorInput.addEventListener("input", (event) => {
+      const nextColor = normalizeHexColor(event.target.value, this.getAiCustomColor());
+      this.plugin.settings.ai.customColor = nextColor;
+    });
+    this.aiCustomColorInput.addEventListener("change", async (event) => {
+      const nextColor = normalizeHexColor(event.target.value, this.getAiCustomColor());
+      this.plugin.settings.ai.customColor = nextColor;
+      await this.plugin.saveSettings();
+      await this.onAiColorPaletteChange("custom", { skipSave: true });
+    });
+    this.updateAiColorPaletteControls();
+    this.aiLayoutFamilySelect.addEventListener("change", () => {
+      var _a2;
+      this.onAiLayoutFamilyChange(this.aiLayoutFamilySelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO);
+    });
+    this.aiColorPaletteSelect.addEventListener("change", () => {
+      var _a2;
+      this.onAiColorPaletteChange(this.aiColorPaletteSelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO);
+    });
+    const actionRow = area.createDiv({ cls: "apple-ai-layout-actions" });
+    this.aiGenerateBtn = actionRow.createEl("button", { cls: "apple-btn-primary", text: "\u751F\u6210\u5E76\u5E94\u7528" });
+    this.aiGenerateBtn.addEventListener("click", () => this.handleAiPrimaryAction());
+    this.aiRegenerateBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528" });
+    this.aiRegenerateBtn.addEventListener("click", () => this.generateAiLayoutForCurrentArticle({ applyAfterGenerate: true }));
+    this.aiResetBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u666E\u901A\u9884\u89C8" });
+    this.aiResetBtn.addEventListener("click", () => this.restoreBasePreview());
+    this.aiRestoreBlocksBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u5DF2\u79FB\u9664" });
+    this.aiRestoreBlocksBtn.addEventListener("click", () => this.restoreRemovedAiLayoutBlocks());
+    this.aiResultSection = area.createDiv({ cls: "apple-ai-layout-section apple-ai-layout-result-section" });
+    this.aiResultSection.createEl("label", { cls: "apple-setting-label", text: "\u533A\u5757" });
+    this.aiLayoutMetaNote = this.aiResultSection.createDiv({ cls: "apple-ai-layout-mini-note" });
+    this.aiBlockList = this.aiResultSection.createDiv({ cls: "apple-ai-layout-block-list" });
+    const advancedSection = area.createDiv({ cls: "apple-ai-layout-section apple-ai-layout-advanced" });
+    this.aiAdvancedToggleBtn = advancedSection.createEl("button", {
+      cls: "apple-ai-layout-advanced-toggle",
+      text: "\u9AD8\u7EA7 / \u8C03\u8BD5",
+      attr: { "aria-expanded": "false" }
+    });
+    this.aiAdvancedToggleBtn.addEventListener("click", () => {
+      this.aiAdvancedOpen = !this.aiAdvancedOpen;
+      if (!this.aiAdvancedOpen)
+        this.aiLayoutDebugMode = "";
+      this.refreshAiLayoutPanel();
+    });
+    this.aiAdvancedBody = advancedSection.createDiv({ cls: "apple-ai-layout-advanced-body" });
+    this.aiLayoutMetaChips = this.aiAdvancedBody.createDiv({ cls: "apple-ai-layout-meta-chips" });
+    this.aiSchemaIssuePanel = this.aiAdvancedBody.createDiv({ cls: "apple-ai-layout-issues" });
+    const debugRow = this.aiAdvancedBody.createDiv({ cls: "apple-ai-layout-debug-actions" });
+    this.aiViewJsonBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u5E03\u5C40 JSON" });
+    this.aiViewJsonBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("json"));
+    this.aiViewErrorBtn = debugRow.createEl("button", { cls: "apple-btn-secondary apple-ai-layout-debug-btn", text: "\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5" });
+    this.aiViewErrorBtn.addEventListener("click", () => this.toggleAiLayoutDebugMode("error"));
+    this.aiDebugPanel = this.aiAdvancedBody.createDiv({ cls: "apple-ai-layout-debug-panel" });
+    const debugHeader = this.aiDebugPanel.createDiv({ cls: "apple-ai-layout-debug-header" });
+    this.aiDebugPanelTitle = debugHeader.createDiv({ cls: "apple-ai-layout-debug-title", text: "\u8C03\u8BD5\u8F93\u51FA" });
+    const debugTools = debugHeader.createDiv({ cls: "apple-ai-layout-debug-tools" });
+    this.aiCopyPromptBtn = debugTools.createEl("button", {
+      cls: "apple-ai-layout-debug-copy",
+      text: "\u590D\u5236\u7ED9 AI",
+      title: "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u6587\u7AE0\u6458\u5F55\u3001\u5E03\u5C40\u6458\u8981\u548C\u8C03\u8BD5\u4FE1\u606F\u7684\u6392\u67E5 Prompt"
+    });
+    this.aiCopyPromptBtn.addEventListener("click", () => this.copyAiLayoutPromptContext());
+    this.aiCopyDebugBtn = debugTools.createEl("button", {
+      cls: "apple-ai-layout-debug-copy",
+      text: "\u590D\u5236\u5F53\u524D\u5185\u5BB9",
+      title: "\u590D\u5236\u5F53\u524D\u8C03\u8BD5\u9762\u677F\u5185\u5BB9"
+    });
+    this.aiCopyDebugBtn.addEventListener("click", () => this.copyAiLayoutDebugSnapshot());
+    this.aiDebugPanelBody = this.aiDebugPanel.createEl("pre", { cls: "apple-ai-layout-debug-body" });
+    this.aiLayoutLoadingMask = parent.createDiv({ cls: "apple-ai-layout-loading-mask" });
+    const loadingBar = this.aiLayoutLoadingMask.createDiv({ cls: "apple-ai-layout-loading-bar" });
+    loadingBar.createDiv({ cls: "apple-ai-layout-loading-bar-fill" });
+    this.aiLayoutLoadingSpinner = this.aiLayoutLoadingMask.createDiv({ cls: "apple-ai-layout-loading-spinner" });
+    this.aiLayoutLoadingMaskText = this.aiLayoutLoadingMask.createDiv({
+      cls: "apple-ai-layout-loading-text",
+      text: "\u6B63\u5728\u751F\u6210 AI \u7F16\u6392..."
+    });
+    this.refreshAiLayoutPanel();
+  }
+  getAiCustomColor() {
+    var _a, _b;
+    return normalizeHexColor((_b = (_a = this.plugin.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.customColor, "#7c3aed");
+  }
+  getAiColorPaletteOverride(colorPaletteId = "") {
+    const targetPalette = colorPaletteId || this.getCurrentAiLayoutSelection().colorPalette;
+    if (targetPalette !== "custom")
+      return null;
+    return { customColor: this.getAiCustomColor() };
+  }
+  getAiRenderColorPalette(colorPaletteId = "") {
+    const targetPalette = colorPaletteId || this.getCurrentAiLayoutSelection().colorPalette || "tech-green";
+    return resolveColorPaletteForRender(targetPalette, this.getAiColorPaletteOverride(targetPalette));
+  }
+  updateAiColorPaletteControls() {
+    var _a, _b, _c, _d, _e;
+    const selectedValue = this.pendingAiColorPalette || ((_a = this.aiColorPaletteSelect) == null ? void 0 : _a.value) || ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
+    if (this.aiColorPaletteSelect && this.aiColorPaletteSelect.value !== selectedValue) {
+      this.aiColorPaletteSelect.value = selectedValue;
+    }
+    if (this.aiCustomColorInput) {
+      this.aiCustomColorInput.value = this.getAiCustomColor();
+    }
+    (_e = (_d = (_c = this.aiColorPaletteControls) == null ? void 0 : _c.querySelectorAll) == null ? void 0 : _d.call(_c, "button[data-value]")) == null ? void 0 : _e.forEach((button) => {
+      button.classList.toggle("active", button.dataset.value === selectedValue);
+    });
+  }
+  getAiRenderLayoutJson(layoutJson = null, colorPaletteId = "") {
+    if (!layoutJson || typeof layoutJson !== "object")
+      return layoutJson;
+    const selectedPalette = colorPaletteId || this.getCurrentAiLayoutSelection().colorPalette;
+    if (!selectedPalette || selectedPalette === AI_LAYOUT_SELECTION_AUTO)
+      return layoutJson;
+    return {
+      ...layoutJson,
+      selection: {
+        ...layoutJson.selection || {},
+        colorPalette: selectedPalette
+      },
+      resolved: {
+        ...layoutJson.resolved || {},
+        colorPalette: selectedPalette
+      },
+      stylePack: selectedPalette
+    };
+  }
+  async onAiColorPaletteChange(value, { skipSave = false } = {}) {
+    var _a, _b, _c;
+    const nextValue = value || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
+    const previousState = this.getCurrentArticleLayoutState();
+    this.pendingAiColorPalette = nextValue;
+    this.pendingAiStylePack = this.pendingAiColorPalette;
+    if (this.aiColorPaletteSelect)
+      this.aiColorPaletteSelect.value = nextValue;
+    this.updateAiColorPaletteControls();
+    if (!skipSave && nextValue === "custom") {
+      this.plugin.settings.ai.customColor = this.getAiCustomColor();
+      await this.plugin.saveSettings();
+    }
+    await this.ensureAiLayoutSelectionState(previousState, {
+      layoutFamily: this.pendingAiLayoutFamily || ((_b = this.aiLayoutFamilySelect) == null ? void 0 : _b.value) || ((_c = previousState == null ? void 0 : previousState.selection) == null ? void 0 : _c.layoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: this.pendingAiColorPalette
+    });
+    if (this.aiPreviewApplied) {
+      this.applyAiLayoutToPreview();
+      return;
+    }
+    this.refreshAiLayoutPanel();
+  }
+  async onAiLayoutFamilyChange(value) {
+    var _a, _b, _c;
+    const nextValue = value || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO;
+    this.pendingAiLayoutFamily = nextValue;
+    if (this.aiLayoutFamilySelect && this.aiLayoutFamilySelect.value !== nextValue) {
+      this.aiLayoutFamilySelect.value = nextValue;
+    }
+    if (this.aiPreviewApplied) {
+      const state = this.getCurrentArticleLayoutState();
+      if ((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length) {
+        this.applyAiLayoutToPreview({ stateOverride: state, allowStale: true });
+        return;
+      }
+    }
+    this.refreshAiLayoutPanel();
+  }
+  applyAiLayoutPanelStylePack(colorPaletteId) {
+    if (!this.aiLayoutOverlay)
+      return;
+    const pack = this.getAiRenderColorPalette(colorPaletteId || "tech-green");
+    const tokens = (pack == null ? void 0 : pack.tokens) || {};
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent", tokens.accent || "#0a84ff");
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-deep", tokens.accentDeep || tokens.accent || "#0a84ff");
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-soft", tokens.accentSoft || "rgba(0, 122, 255, 0.08)");
+    this.aiLayoutOverlay.style.setProperty("--ai-layout-accent-border", tokens.accent || "#0a84ff");
+  }
+  getAiLayoutBlockStateKey(block = {}, index = 0) {
+    const type = String((block == null ? void 0 : block.type) || "").trim();
+    const sectionIndex = Number.isInteger(block == null ? void 0 : block.sectionIndex) ? String(block.sectionIndex) : "";
+    const label = String(
+      (block == null ? void 0 : block.title) || (block == null ? void 0 : block.caseLabel) || (block == null ? void 0 : block.text) || (block == null ? void 0 : block.caption) || (block == null ? void 0 : block.buttonText) || (block == null ? void 0 : block.imageId) || type
+    ).trim();
+    return [type, sectionIndex, label, String(index)].join("::");
+  }
+  getVisibleAiLayoutSnapshot(state) {
+    var _a, _b;
+    if (!((_b = (_a = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
+      return {
+        layoutJson: (state == null ? void 0 : state.layoutJson) || null,
+        blockOrigins: [],
+        hiddenCount: 0
+      };
+    }
+    const dismissedKeys = new Set(Array.isArray(state.dismissedBlockKeys) ? state.dismissedBlockKeys : []);
+    const visibleBlocks = [];
+    const visibleOrigins = [];
+    let hiddenCount = 0;
+    state.layoutJson.blocks.forEach((block, index) => {
+      var _a2, _b2;
+      const blockKey = this.getAiLayoutBlockStateKey(block, index);
+      if (dismissedKeys.has(blockKey)) {
+        hiddenCount += 1;
+        return;
+      }
+      visibleBlocks.push(block);
+      const origin = (_b2 = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b2[index];
+      if (origin) {
+        visibleOrigins.push({
+          ...origin,
+          originalIndex: index,
+          blockKey
+        });
+      } else {
+        visibleOrigins.push({
+          index: visibleBlocks.length - 1,
+          type: (block == null ? void 0 : block.type) || "",
+          source: "ai",
+          label: this.getAiLayoutBlockLabel(block),
+          originalIndex: index,
+          blockKey
+        });
+      }
+    });
+    return {
+      layoutJson: {
+        ...state.layoutJson,
+        blocks: visibleBlocks
+      },
+      blockOrigins: visibleOrigins,
+      hiddenCount
+    };
+  }
+  queueAiLayoutRemovalAnchor(originalIndex, itemEl = null) {
+    const state = this.getCurrentArticleLayoutState();
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    const visibleOrigins = Array.isArray(visibleSnapshot.blockOrigins) ? visibleSnapshot.blockOrigins : [];
+    const removedVisibleIndex = visibleOrigins.findIndex((origin) => origin.originalIndex === originalIndex);
+    const nextOrigin = removedVisibleIndex >= 0 ? visibleOrigins[removedVisibleIndex + 1] || visibleOrigins[removedVisibleIndex - 1] || null : null;
+    const overlay = this.aiLayoutOverlay;
+    const relativeTop = overlay && itemEl ? Math.max(0, itemEl.offsetTop - overlay.scrollTop) : 0;
+    this.aiLayoutPendingAnchor = {
+      blockKey: (nextOrigin == null ? void 0 : nextOrigin.blockKey) || "",
+      relativeTop,
+      fallbackScrollTop: (overlay == null ? void 0 : overlay.scrollTop) || 0
+    };
+  }
+  restoreAiLayoutPendingAnchor() {
+    var _a, _b;
+    const pendingAnchor = this.aiLayoutPendingAnchor;
+    if (!pendingAnchor || !this.aiLayoutOverlay)
+      return;
+    const items = Array.from(((_b = (_a = this.aiBlockList) == null ? void 0 : _a.querySelectorAll) == null ? void 0 : _b.call(_a, ".apple-ai-layout-block-item")) || []);
+    const targetItem = pendingAnchor.blockKey ? items.find((item) => item.dataset.blockKey === pendingAnchor.blockKey) : null;
+    if (targetItem) {
+      this.aiLayoutOverlay.scrollTop = Math.max(0, targetItem.offsetTop - (pendingAnchor.relativeTop || 0));
+    } else {
+      this.aiLayoutOverlay.scrollTop = Math.max(0, pendingAnchor.fallbackScrollTop || 0);
+    }
+    this.aiLayoutPendingAnchor = null;
+  }
+  async removeAiLayoutBlock(originalIndex, itemEl = null) {
+    var _a, _b;
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    if (!context.sourcePath || !((_b = (_a = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length))
+      return;
+    const block = state.layoutJson.blocks[originalIndex];
+    if (!block)
+      return;
+    this.queueAiLayoutRemovalAnchor(originalIndex, itemEl);
+    const blockKey = this.getAiLayoutBlockStateKey(block, originalIndex);
+    const nextDismissedBlockKeys = Array.from(/* @__PURE__ */ new Set([
+      ...Array.isArray(state.dismissedBlockKeys) ? state.dismissedBlockKeys : [],
+      blockKey
+    ]));
+    await this.plugin.saveArticleLayoutState(context.sourcePath, {
+      ...state,
+      dismissedBlockKeys: nextDismissedBlockKeys
+    });
+    if (this.aiPreviewApplied) {
+      this.applyAiLayoutToPreview();
+      return;
+    }
+    this.refreshAiLayoutPanel();
+  }
+  async restoreRemovedAiLayoutBlocks() {
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    if (!context.sourcePath || !state)
+      return;
+    if (!Array.isArray(state.dismissedBlockKeys) || !state.dismissedBlockKeys.length)
+      return;
+    await this.plugin.saveArticleLayoutState(context.sourcePath, {
+      ...state,
+      dismissedBlockKeys: []
+    });
+    if (this.aiPreviewApplied) {
+      this.applyAiLayoutToPreview();
+      return;
+    }
+    this.refreshAiLayoutPanel();
+  }
+  async handleAiPrimaryAction() {
+    const mode = this.aiPrimaryActionMode || "generate-apply";
+    if (mode === "apply") {
+      this.applyAiLayoutToPreview();
+      return;
+    }
+    if (mode === "apply-stale") {
+      this.applyAiLayoutToPreview({ allowStale: true });
+      return;
+    }
+    await this.generateAiLayoutForCurrentArticle({ applyAfterGenerate: true });
+  }
+  toggleAiLayoutDebugMode(mode) {
+    this.aiAdvancedOpen = true;
+    this.aiLayoutDebugMode = this.aiLayoutDebugMode === mode ? "" : mode;
+    this.refreshAiLayoutPanel();
+  }
+  getCurrentLayoutContext() {
+    var _a, _b, _c, _d;
+    const activeFile = ((_c = (_b = (_a = this.app) == null ? void 0 : _a.workspace) == null ? void 0 : _b.getActiveFile) == null ? void 0 : _c.call(_b)) || this.lastActiveFile || null;
+    const activePath = (activeFile == null ? void 0 : activeFile.path) || "";
+    const resolvedPath = this.lastResolvedSourcePath || "";
+    const canUseResolvedSource = !activePath || !resolvedPath || activePath === resolvedPath;
+    const sourcePath = canUseResolvedSource ? resolvedPath || activePath : activePath;
+    const markdown = canUseResolvedSource ? this.lastResolvedMarkdown || "" : "";
+    const sourceHash = markdown ? String(this.simpleHash(markdown)) : "";
+    const isSourcePending = !!(activePath && resolvedPath && activePath !== resolvedPath);
+    const isSourceSwitching = !!(isSourcePending && this.aiLayoutSourceSwitchPath && this.aiLayoutSourceSwitchPath === activePath);
+    const isStaleSuppressed = this.isAiLayoutStaleSuppressedForPath(sourcePath);
+    return {
+      sourcePath,
+      markdown,
+      sourceHash,
+      isSourcePending,
+      isSourceSwitching,
+      isStaleSuppressed,
+      title: ((_d = activeFile || this.getPublishContextFile()) == null ? void 0 : _d.basename) || "\u672A\u547D\u540D\u6587\u7AE0"
+    };
+  }
+  getCurrentAiLayoutSelection() {
+    var _a, _b, _c, _d, _e;
+    const aiSettings = ((_b = (_a = this.plugin) == null ? void 0 : _a.settings) == null ? void 0 : _b.ai) || createDefaultAiSettings();
+    return normalizeLayoutSelection({
+      layoutFamily: this.pendingAiLayoutFamily || ((_c = this.aiLayoutFamilySelect) == null ? void 0 : _c.value) || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: this.pendingAiStylePack || this.pendingAiColorPalette || ((_d = this.aiColorPaletteSelect) == null ? void 0 : _d.value) || ((_e = this.aiStylePackSelect) == null ? void 0 : _e.value) || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    }, {
+      layoutFamily: aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    });
+  }
+  getCurrentArticleLayoutState() {
+    var _a;
+    const { sourcePath, sourceHash } = this.getCurrentLayoutContext();
+    if (!sourcePath)
+      return null;
+    const selection = this.getCurrentAiLayoutSelection();
+    if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
+      const state = this.plugin.getArticleLayoutState(sourcePath, selection);
+      if (state) {
+        return this.preferFreshAiLayoutState(sourcePath, selection, state, sourceHash);
+      }
+    }
+    return null;
+  }
+  preferFreshAiLayoutState(sourcePath = "", selection = {}, candidateState = null, sourceHash = "") {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+    if (!candidateState || !sourceHash || !candidateState.sourceHash || candidateState.sourceHash === sourceHash) {
+      return candidateState;
+    }
+    const normalizedSelection = normalizeLayoutSelection(selection || {}, {
+      layoutFamily: ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    const canUseAnyColor = normalizedSelection.colorPalette === AI_LAYOUT_SELECTION_AUTO;
+    if (!canUseAnyColor)
+      return candidateState;
+    const normalizedPath = normalizeVaultPath(sourcePath || "");
+    const entry = normalizeArticleLayoutCacheEntry((_f = (_e = (_d = (_c = this.plugin) == null ? void 0 : _c.settings) == null ? void 0 : _d.ai) == null ? void 0 : _e.articleLayoutsByPath) == null ? void 0 : _f[normalizedPath]);
+    const statesByFamily = (entry == null ? void 0 : entry.familyStates) || {};
+    const requestedFamily = normalizedSelection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "" : normalizedSelection.layoutFamily;
+    const exactState = requestedFamily ? statesByFamily[requestedFamily] : null;
+    if ((exactState == null ? void 0 : exactState.sourceHash) === sourceHash && ((_h = (_g = exactState.layoutJson) == null ? void 0 : _g.blocks) == null ? void 0 : _h.length))
+      return exactState;
+    const lastState = statesByFamily[entry == null ? void 0 : entry.lastLayoutFamily];
+    if ((lastState == null ? void 0 : lastState.sourceHash) === sourceHash && ((_j = (_i = lastState.layoutJson) == null ? void 0 : _i.blocks) == null ? void 0 : _j.length))
+      return lastState;
+    return Object.values(statesByFamily).find((state) => {
+      var _a2, _b2;
+      return (state == null ? void 0 : state.sourceHash) === sourceHash && ((_b2 = (_a2 = state.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b2.length);
+    }) || candidateState;
+  }
+  async recoverSourceFirstLayoutState(currentState = null, selection = null, context = null) {
+    var _a, _b, _c, _d, _e, _f;
+    const requestedSelection = normalizeLayoutSelection(selection || this.getCurrentAiLayoutSelection(), {
+      layoutFamily: ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    if (requestedSelection.layoutFamily !== "source-first")
+      return null;
+    const sourceContext = (context == null ? void 0 : context.sourcePath) ? context : await this.ensureCurrentArticleContext();
+    if (!(sourceContext == null ? void 0 : sourceContext.sourcePath) || !(sourceContext == null ? void 0 : sourceContext.markdown))
+      return null;
+    if ((currentState == null ? void 0 : currentState.status) === "ready" && ((_d = (_c = currentState == null ? void 0 : currentState.layoutJson) == null ? void 0 : _c.blocks) == null ? void 0 : _d.length))
+      return currentState;
+    const recoveryKey = `${sourceContext.sourcePath}::${requestedSelection.layoutFamily}::${requestedSelection.colorPalette}::${sourceContext.sourceHash}`;
+    if (this._sourceFirstRecoveryKey === recoveryKey)
+      return null;
+    this._sourceFirstRecoveryKey = recoveryKey;
+    try {
+      if (!this.baseRenderedHtml) {
+        await this.convertCurrent(true, { showLoading: false });
+      }
+      const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+      const provider = resolveAiProvider(aiSettings);
+      const imageRefs = aiSettings.includeImagesInLayout === false ? [] : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+      const result = await generateArticleLayout({
+        provider,
+        title: sourceContext.title,
+        markdown: sourceContext.markdown,
+        selection: requestedSelection,
+        imageRefs,
+        timeoutMs: aiSettings.requestTimeoutMs
+      });
+      const layoutJson = result.layoutJson;
+      if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length)
+        return null;
+      await this.plugin.saveArticleLayoutState(sourceContext.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: Date.now(),
+        sourceHash: sourceContext.sourceHash,
+        providerId: (provider == null ? void 0 : provider.id) || "",
+        model: (provider == null ? void 0 : provider.model) || "",
+        selection: layoutJson.selection,
+        resolved: layoutJson.resolved,
+        recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+        recommendedColorPalette: layoutJson.recommendedColorPalette,
+        stylePack: layoutJson.stylePack,
+        status: "ready",
+        lastError: "",
+        lastAttemptStatus: "success",
+        lastAttemptError: "",
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: null,
+        dismissedBlockKeys: [],
+        generationMeta: result.generationMeta,
+        layoutJson
+      }, layoutJson.selection);
+      this.pendingAiLayoutFamily = ((_e = layoutJson.selection) == null ? void 0 : _e.layoutFamily) || requestedSelection.layoutFamily;
+      this.pendingAiColorPalette = ((_f = layoutJson.selection) == null ? void 0 : _f.colorPalette) || requestedSelection.colorPalette;
+      this.pendingAiStylePack = this.pendingAiColorPalette;
+      this.refreshAiLayoutPanel();
+      return layoutJson;
+    } catch (error) {
+      console.error("\u539F\u6587\u589E\u5F3A\u578B\u672C\u5730\u6062\u590D\u5931\u8D25:", error);
+      return null;
+    } finally {
+      if (this._sourceFirstRecoveryKey === recoveryKey) {
+        this._sourceFirstRecoveryKey = "";
+      }
+    }
+  }
+  async ensureAiLayoutSelectionState(baseState = null, selection = null) {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const context = this.getCurrentLayoutContext();
+    if (!context.sourcePath || typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) !== "function")
+      return null;
+    const requestedSelection = normalizeLayoutSelection(selection || this.getCurrentAiLayoutSelection(), {
+      layoutFamily: ((_b = this.plugin.settings.ai) == null ? void 0 : _b.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_c = this.plugin.settings.ai) == null ? void 0 : _c.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    const existingState = this.plugin.getArticleLayoutState(context.sourcePath, requestedSelection);
+    if ((_e = (_d = existingState == null ? void 0 : existingState.layoutJson) == null ? void 0 : _d.blocks) == null ? void 0 : _e.length) {
+      return existingState;
+    }
+    const derivedState = deriveArticleLayoutStateForSelection(baseState, requestedSelection, {
+      layoutFamily: ((_f = this.plugin.settings.ai) == null ? void 0 : _f.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_g = this.plugin.settings.ai) == null ? void 0 : _g.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+    if (!derivedState)
+      return null;
+    await this.plugin.saveArticleLayoutState(context.sourcePath, {
+      ...derivedState,
+      updatedAt: Date.now()
+    }, requestedSelection);
+    return derivedState;
+  }
+  isAiLayoutPanelVisible() {
+    var _a;
+    return !!(this.aiLayoutOverlay && ((_a = this.aiLayoutOverlay.classList) == null ? void 0 : _a.contains("visible")));
+  }
+  shouldSyncAiLayoutUi() {
+    return this.aiPreviewApplied === true || this.aiLayoutLoading === true || this.isAiLayoutPanelVisible();
+  }
+  getArticleLayoutProviderLabel(state, aiSettings) {
+    var _a;
+    if (!state)
+      return "";
+    const providerList = Array.isArray(aiSettings == null ? void 0 : aiSettings.providers) ? aiSettings.providers : [];
+    const matchedProvider = state.providerId ? providerList.find((item) => item.id === state.providerId) : null;
+    return ((_a = state.generationMeta) == null ? void 0 : _a.providerName) || (matchedProvider == null ? void 0 : matchedProvider.name) || "";
+  }
+  getArticleLayoutModelLabel(state, aiSettings) {
+    var _a;
+    if (!state)
+      return "";
+    const providerList = Array.isArray(aiSettings == null ? void 0 : aiSettings.providers) ? aiSettings.providers : [];
+    const matchedProvider = state.providerId ? providerList.find((item) => item.id === state.providerId) : null;
+    return ((_a = state.generationMeta) == null ? void 0 : _a.providerModel) || state.model || (matchedProvider == null ? void 0 : matchedProvider.model) || "";
+  }
+  getAiLayoutBlockLabel(block) {
+    return (block == null ? void 0 : block.title) || (block == null ? void 0 : block.caseLabel) || (block == null ? void 0 : block.text) || (block == null ? void 0 : block.caption) || (block == null ? void 0 : block.buttonText) || (block == null ? void 0 : block.type) || "\u672A\u547D\u540D\u533A\u5757";
+  }
+  getAiLayoutFamilyLabel(value) {
+    if (value === AI_LAYOUT_SELECTION_AUTO)
+      return "\u81EA\u52A8\u63A8\u8350";
+    const family = getLayoutFamilyById(value);
+    if (!family)
+      return value || "\u81EA\u52A8\u63A8\u8350";
+    return family.label || value || "\u81EA\u52A8\u63A8\u8350";
+  }
+  getAiColorPaletteLabel(value) {
+    var _a;
+    if (value === AI_LAYOUT_SELECTION_AUTO)
+      return "\u81EA\u52A8\u914D\u8272";
+    return ((_a = getColorPaletteById(value)) == null ? void 0 : _a.label) || value || "\u81EA\u52A8\u914D\u8272";
+  }
+  getVisibleAiSchemaValidation(state) {
+    var _a, _b;
+    if (!state)
+      return null;
+    if (state.lastAttemptStatus === "schema-error") {
+      return ((_a = state.lastAttemptSchemaValidation) == null ? void 0 : _a.issueCount) ? state.lastAttemptSchemaValidation : null;
+    }
+    if (state.lastAttemptStatus === "error") {
+      return null;
+    }
+    return ((_b = state.generationMeta) == null ? void 0 : _b.schemaValidation) || null;
+  }
+  renderAiLayoutMetaChips(chips = []) {
+    if (!this.aiLayoutMetaChips)
+      return;
+    this.aiLayoutMetaChips.empty();
+    chips.forEach((chip) => {
+      if (!chip)
+        return;
+      this.aiLayoutMetaChips.createEl("span", {
+        cls: "apple-ai-layout-meta-chip",
+        text: chip
+      });
+    });
+  }
+  getCurrentArticleLayoutCacheEntry() {
+    var _a, _b, _c, _d;
+    const { sourcePath } = this.getCurrentLayoutContext();
+    if (!sourcePath)
+      return null;
+    const normalizedPath = normalizeVaultPath(sourcePath);
+    return normalizeArticleLayoutCacheEntry((_d = (_c = (_b = (_a = this.plugin) == null ? void 0 : _a.settings) == null ? void 0 : _b.ai) == null ? void 0 : _c.articleLayoutsByPath) == null ? void 0 : _d[normalizedPath]);
+  }
+  getCachedAiLayoutFamilyItems(context = this.getCurrentLayoutContext()) {
+    const entry = this.getCurrentArticleLayoutCacheEntry();
+    if (!(entry == null ? void 0 : entry.familyStates))
+      return [];
+    return Object.entries(entry.familyStates).map(([layoutFamily, state]) => {
+      var _a, _b, _c;
+      if (!((_b = (_a = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length))
+        return null;
+      const isCurrentContent = !!(context.sourceHash && state.sourceHash && state.sourceHash === context.sourceHash);
+      const isStaleContent = !!(!context.isStaleSuppressed && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+      const fromAuto = ((_c = state.selection) == null ? void 0 : _c.layoutFamily) === AI_LAYOUT_SELECTION_AUTO;
+      return {
+        layoutFamily,
+        state,
+        label: this.getAiLayoutFamilyLabel(layoutFamily),
+        isCurrentContent,
+        isStaleContent,
+        fromAuto,
+        updatedAt: Number(state.updatedAt || 0)
+      };
+    }).filter(Boolean).sort((a, b) => {
+      if (a.isCurrentContent !== b.isCurrentContent)
+        return a.isCurrentContent ? -1 : 1;
+      return b.updatedAt - a.updatedAt;
+    });
+  }
+  renderAiCachedLayoutFamilies({ context, currentLayoutFamily = "", isLoading = false } = {}) {
+    if (!this.aiCachedLayoutList)
+      return;
+    const items = this.getCachedAiLayoutFamilyItems(context);
+    this.aiCachedLayoutList.hidden = items.length === 0;
+    this.aiCachedLayoutList.empty();
+    if (!items.length)
+      return;
+    const activeItem = items.find((item) => item.layoutFamily === currentLayoutFamily) || items[0];
+    if (items.length === 1 && activeItem) {
+      const inline = this.aiCachedLayoutList.createDiv({ cls: "apple-ai-layout-cache-inline" });
+      const sourceText = activeItem.fromAuto ? "\u7531\u81EA\u52A8\u63A8\u8350\u751F\u6210" : "\u624B\u52A8\u9009\u62E9";
+      inline.createEl("span", {
+        cls: "apple-ai-layout-cache-name",
+        text: `${activeItem.label} \xB7 ${sourceText}`
+      });
+      if (activeItem.isStaleContent) {
+        inline.createEl("span", { cls: "apple-ai-layout-cache-separator", text: "\xB7" });
+        inline.createEl("span", {
+          cls: "apple-ai-layout-cache-state is-stale",
+          text: "\u57FA\u4E8E\u65E7\u5185\u5BB9"
+        });
+      }
+      return;
+    }
+    const activeRow = this.aiCachedLayoutList.createDiv({ cls: "apple-ai-layout-cache-inline" });
+    const activeSourceText = (activeItem == null ? void 0 : activeItem.fromAuto) ? "\u7531\u81EA\u52A8\u63A8\u8350\u751F\u6210" : "\u624B\u52A8\u9009\u62E9";
+    activeRow.createEl("span", {
+      cls: "apple-ai-layout-cache-name",
+      text: `${(activeItem == null ? void 0 : activeItem.label) || this.getAiLayoutFamilyLabel(currentLayoutFamily)} \xB7 ${activeSourceText}`
+    });
+    if (activeItem == null ? void 0 : activeItem.isStaleContent) {
+      activeRow.createEl("span", { cls: "apple-ai-layout-cache-separator", text: "\xB7" });
+      activeRow.createEl("span", {
+        cls: "apple-ai-layout-cache-state is-stale",
+        text: "\u57FA\u4E8E\u65E7\u5185\u5BB9"
+      });
+    }
+    const switchRow = this.aiCachedLayoutList.createDiv({ cls: "apple-ai-layout-cache-switch-row" });
+    switchRow.createEl("span", { cls: "apple-ai-layout-cache-caption", text: "\u5207\u6362\u5230" });
+    items.filter((item) => item.layoutFamily !== (activeItem == null ? void 0 : activeItem.layoutFamily)).forEach((item) => {
+      const button = switchRow.createEl("button", {
+        cls: "apple-ai-layout-cache-chip",
+        title: item.isStaleContent ? "\u9884\u89C8\u8FD9\u4EFD\u57FA\u4E8E\u65E7\u5185\u5BB9\u7684\u7F13\u5B58" : "\u9884\u89C8\u8FD9\u4EFD\u7F13\u5B58"
+      });
+      button.disabled = isLoading;
+      button.dataset.layoutFamily = item.layoutFamily;
+      button.createEl("span", { cls: "apple-ai-layout-cache-name", text: item.label });
+      if (item.isStaleContent) {
+        button.createEl("span", { cls: "apple-ai-layout-cache-state is-stale", text: "\u57FA\u4E8E\u65E7\u5185\u5BB9" });
+      }
+      button.addEventListener("click", () => this.previewCachedAiLayoutFamily(item.layoutFamily));
+    });
+  }
+  previewCachedAiLayoutFamily(layoutFamily = "") {
+    var _a, _b, _c;
+    const entry = this.getCurrentArticleLayoutCacheEntry();
+    const state = ((_a = entry == null ? void 0 : entry.familyStates) == null ? void 0 : _a[layoutFamily]) || null;
+    if (!((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length)) {
+      new Notice("\u8FD9\u4EFD\u7F13\u5B58\u5DF2\u7ECF\u4E0D\u53EF\u7528\uFF0C\u8BF7\u91CD\u65B0\u751F\u6210");
+      this.refreshAiLayoutPanel();
+      return;
+    }
+    this.pendingAiLayoutFamily = layoutFamily;
+    if (this.aiLayoutFamilySelect)
+      this.aiLayoutFamilySelect.value = layoutFamily;
+    this.applyAiLayoutToPreview({ stateOverride: state, allowStale: true });
+  }
+  getAiPrimaryActionConfig({
+    hasDoc,
+    aiFeatureEnabled,
+    canGenerateForSelection,
+    state,
+    visibleLayout,
+    hasReusableLayout,
+    hasLastAttemptFailure,
+    hasApplied,
+    isStale,
+    isLoading
+  }) {
+    var _a, _b;
+    if (isLoading) {
+      return { mode: "generate-apply", label: "\u751F\u6210\u4E2D...", disabled: true };
+    }
+    if (!hasDoc || !aiFeatureEnabled) {
+      return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: true };
+    }
+    if (isStale) {
+      if ((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length) {
+        return { mode: "apply-stale", label: "\u5E94\u7528\u65E7\u7F13\u5B58", disabled: false };
+      }
+      return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: !canGenerateForSelection };
+    }
+    if (hasReusableLayout && hasLastAttemptFailure) {
+      if (hasApplied) {
+        return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: !canGenerateForSelection };
+      }
+      return { mode: "apply", label: "\u5E94\u7528\u4E0A\u4E00\u7248", disabled: false };
+    }
+    if (((_b = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _b.length) && !hasApplied) {
+      return { mode: "apply", label: "\u5E94\u7528\u5F53\u524D\u7ED3\u679C", disabled: false };
+    }
+    if (!canGenerateForSelection) {
+      return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: true };
+    }
+    if (!state) {
+      return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
+    }
+    if (state.status === "error" || state.status === "schema-error") {
+      return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
+    }
+    return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
+  }
+  refreshAiSchemaIssuePanel(schemaValidation = null) {
+    if (!this.aiSchemaIssuePanel)
+      return;
+    this.aiSchemaIssuePanel.empty();
+    const issues = Array.isArray(schemaValidation == null ? void 0 : schemaValidation.issues) ? schemaValidation.issues.filter(Boolean) : [];
+    if (!issues.length) {
+      this.aiSchemaIssuePanel.classList.remove("visible");
+      return;
+    }
+    this.aiSchemaIssuePanel.classList.add("visible");
+    this.aiSchemaIssuePanel.createDiv({
+      cls: "apple-ai-layout-issues-title",
+      text: (schemaValidation == null ? void 0 : schemaValidation.fatal) === true ? "Schema \u6821\u9A8C\u95EE\u9898" : "Schema \u63D0\u9192"
+    });
+    issues.slice(0, 5).forEach((issue) => {
+      const item = this.aiSchemaIssuePanel.createDiv({
+        cls: `apple-ai-layout-issue-item ${(issue == null ? void 0 : issue.fatal) === true ? "is-fatal" : ""}`
+      });
+      item.createEl("span", {
+        cls: "apple-ai-layout-issue-path",
+        text: (issue == null ? void 0 : issue.path) || "$"
+      });
+      item.createEl("span", {
+        cls: "apple-ai-layout-issue-message",
+        text: (issue == null ? void 0 : issue.message) || "\u672A\u77E5 schema \u95EE\u9898"
+      });
+    });
+    if (issues.length > 5) {
+      this.aiSchemaIssuePanel.createDiv({
+        cls: "apple-ai-layout-mini-note",
+        text: `\u5176\u4F59 ${issues.length - 5} \u9879\u8BF7\u5728\u201C\u9519\u8BEF\u8BE6\u60C5\u201D\u6216\u8C03\u8BD5\u5FEB\u7167\u4E2D\u67E5\u770B\u3002`
+      });
+    }
+  }
+  buildAiLayoutDebugJson(state) {
+    if (!state)
+      return "";
+    return JSON.stringify({
+      layoutJson: state.layoutJson || null,
+      generationMeta: state.generationMeta || null,
+      lastAttempt: {
+        status: state.lastAttemptStatus || "idle",
+        error: state.lastAttemptError || "",
+        at: state.lastAttemptAt ? new Date(state.lastAttemptAt).toISOString() : "",
+        schemaValidation: state.lastAttemptSchemaValidation || null
+      }
+    }, null, 2);
+  }
+  buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }) {
+    return JSON.stringify({
+      status: (state == null ? void 0 : state.status) || "unknown",
+      lastError: (state == null ? void 0 : state.lastError) || "",
+      providerId: (state == null ? void 0 : state.providerId) || "",
+      providerName: providerLabel || "",
+      model: modelLabel || "",
+      selection: (state == null ? void 0 : state.selection) || null,
+      resolved: (state == null ? void 0 : state.resolved) || null,
+      updatedAt: (state == null ? void 0 : state.updatedAt) ? new Date(state.updatedAt).toISOString() : "",
+      sourceHash: (state == null ? void 0 : state.sourceHash) || "",
+      isStale: isStale === true,
+      currentLayoutGenerationMeta: (state == null ? void 0 : state.generationMeta) || null,
+      lastAttempt: {
+        status: (state == null ? void 0 : state.lastAttemptStatus) || "idle",
+        error: (state == null ? void 0 : state.lastAttemptError) || "",
+        at: (state == null ? void 0 : state.lastAttemptAt) ? new Date(state.lastAttemptAt).toISOString() : "",
+        schemaValidation: (state == null ? void 0 : state.lastAttemptSchemaValidation) || null
+      }
+    }, null, 2);
+  }
+  buildAiLayoutDebugSnapshot({ mode, state, providerLabel, modelLabel, isStale, sourcePath }) {
+    if (!state || !mode)
+      return "";
+    const header = [
+      `mode: ${mode}`,
+      `sourcePath: ${sourcePath || ""}`,
+      `provider: ${providerLabel || ""}`,
+      `model: ${modelLabel || ""}`,
+      `updatedAt: ${(state == null ? void 0 : state.updatedAt) ? new Date(state.updatedAt).toISOString() : ""}`,
+      ""
+    ].join("\n");
+    if (mode === "json") {
+      return `${header}${this.buildAiLayoutDebugJson(state)}`;
+    }
+    return `${header}${this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale })}`;
+  }
+  truncateAiPromptMarkdown(markdown, maxLength = 1600) {
+    const normalized = String(markdown || "").trim();
+    if (!normalized)
+      return "";
+    return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}\u2026` : normalized;
+  }
+  buildAiLayoutPromptContext({ state, context, providerLabel, modelLabel, isStale }) {
+    var _a, _b, _c, _d, _e;
+    if (!(state == null ? void 0 : state.layoutJson))
+      return "";
+    const visibleSchemaValidation = this.getVisibleAiSchemaValidation(state);
+    const blockLines = Array.isArray(state.layoutJson.blocks) ? state.layoutJson.blocks.map((block, index) => {
+      var _a2, _b2, _c2;
+      const origin = ((_c2 = (_b2 = (_a2 = state.generationMeta) == null ? void 0 : _a2.blockOrigins) == null ? void 0 : _b2[index]) == null ? void 0 : _c2.source) === "fallback" ? "\u8865\u5168" : "AI";
+      return `${index + 1}. [${origin}] ${block.type} - ${this.getAiLayoutBlockLabel(block)}`;
+    }).join("\n") : "- \u65E0\u533A\u5757";
+    const markdownExcerpt = this.truncateAiPromptMarkdown((context == null ? void 0 : context.markdown) || "");
+    const snapshot = this.aiLayoutDebugMode ? this.buildAiLayoutDebugSnapshot({
+      mode: this.aiLayoutDebugMode,
+      state,
+      providerLabel,
+      modelLabel,
+      isStale,
+      sourcePath: context == null ? void 0 : context.sourcePath
+    }) : this.buildAiLayoutDebugSnapshot({
+      mode: "json",
+      state,
+      providerLabel,
+      modelLabel,
+      isStale,
+      sourcePath: context == null ? void 0 : context.sourcePath
+    });
+    return [
+      "# \u516C\u4F17\u53F7 AI \u7F16\u6392\u8C03\u8BD5\u4E0A\u4E0B\u6587",
+      "",
+      "\u8BF7\u57FA\u4E8E\u4E0B\u9762\u7684\u4FE1\u606F\uFF0C\u5E2E\u6211\u5206\u6790\u5F53\u524D Obsidian \u5FAE\u4FE1\u516C\u4F17\u53F7 AI \u7F16\u6392\u7ED3\u679C\uFF0C\u5E76\u7ED9\u51FA\uFF1A",
+      "1. \u5F53\u524D block \u7EC4\u5408\u548C\u987A\u5E8F\u662F\u5426\u5408\u7406",
+      "2. \u54EA\u4E9B\u533A\u5757\u9002\u5408\u4FDD\u7559\u3001\u66FF\u6362\u6216\u91CD\u6392",
+      "3. \u5982\u679C\u5B58\u5728\u5931\u8D25\u6216 fallback \u4ECB\u5165\uFF0C\u6700\u53EF\u80FD\u7684\u539F\u56E0\u662F\u4EC0\u4E48",
+      "4. \u4E0B\u4E00\u6B65\u6700\u503C\u5F97\u8C03\u6574\u7684 prompt / schema / block \u7B56\u7565",
+      "",
+      "## \u6587\u7AE0\u4FE1\u606F",
+      `- \u6807\u9898\uFF1A${(context == null ? void 0 : context.title) || "\u672A\u547D\u540D\u6587\u7AE0"}`,
+      `- \u8DEF\u5F84\uFF1A${(context == null ? void 0 : context.sourcePath) || ""}`,
+      `- \u6E90\u54C8\u5E0C\uFF1A${(context == null ? void 0 : context.sourceHash) || ""}`,
+      `- AI \u72B6\u6001\uFF1A${state.status || "ready"}`,
+      `- \u5DF2\u8FC7\u671F\uFF1A${isStale ? "\u662F" : "\u5426"}`,
+      `- \u5E03\u5C40\u9009\u62E9\uFF1A${((_a = state.selection) == null ? void 0 : _a.layoutFamily) || ""}`,
+      `- \u989C\u8272\u9009\u62E9\uFF1A${((_b = state.selection) == null ? void 0 : _b.colorPalette) || ""}`,
+      `- \u6700\u7EC8\u5E03\u5C40\uFF1A${((_c = state.resolved) == null ? void 0 : _c.layoutFamily) || ""}`,
+      `- \u6700\u7EC8\u989C\u8272\uFF1A${((_d = state.resolved) == null ? void 0 : _d.colorPalette) || ""}`,
+      `- Provider\uFF1A${providerLabel || ""}`,
+      `- Model\uFF1A${modelLabel || ""}`,
+      "",
+      "## \u5F53\u524D\u5E03\u5C40\u6458\u8981",
+      `- articleType: ${state.layoutJson.articleType || "article"}`,
+      `- blockCount: ${((_e = state.layoutJson.blocks) == null ? void 0 : _e.length) || 0}`,
+      blockLines,
+      "",
+      "## \u751F\u6210\u5143\u4FE1\u606F",
+      "```json",
+      JSON.stringify(state.generationMeta || null, null, 2),
+      "```",
+      "",
+      "## Schema \u95EE\u9898",
+      "```json",
+      JSON.stringify(visibleSchemaValidation, null, 2),
+      "```",
+      "",
+      "## \u5F53\u524D\u8C03\u8BD5\u5FEB\u7167",
+      "```text",
+      snapshot,
+      "```",
+      "",
+      "## \u6587\u7AE0\u6B63\u6587\u6458\u5F55",
+      "```md",
+      markdownExcerpt || "(\u65E0\u53EF\u7528\u6B63\u6587)",
+      "```"
+    ].join("\n");
+  }
+  copyPlainTextBySelection(text) {
+    var _a;
+    if (typeof (document == null ? void 0 : document.execCommand) !== "function")
+      return false;
+    const selection = (_a = window.getSelection) == null ? void 0 : _a.call(window);
+    if (!selection)
+      return false;
+    const previousRanges = [];
+    for (let i = 0; i < selection.rangeCount; i += 1) {
+      previousRanges.push(selection.getRangeAt(i).cloneRange());
+    }
+    const activeElement = document.activeElement;
+    const tempEl = document.createElement("textarea");
+    tempEl.value = text;
+    tempEl.setAttribute("readonly", "readonly");
+    tempEl.style.position = "fixed";
+    tempEl.style.left = "-9999px";
+    tempEl.style.top = "0";
+    document.body.appendChild(tempEl);
+    tempEl.select();
+    let success = false;
+    try {
+      success = document.execCommand("copy");
+    } catch (error) {
+      success = false;
+    } finally {
+      tempEl.remove();
+      selection.removeAllRanges();
+      for (const prevRange of previousRanges) {
+        try {
+          selection.addRange(prevRange);
+        } catch (restoreError) {
+        }
+      }
+      if (activeElement && typeof activeElement.focus === "function") {
+        try {
+          activeElement.focus({ preventScroll: true });
+        } catch (focusError) {
+          activeElement.focus();
+        }
+      }
+    }
+    return success;
+  }
+  async copyPlainTextSnapshot(text) {
+    if (!text)
+      return false;
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    return this.copyPlainTextBySelection(text);
+  }
+  async copyAiLayoutDebugSnapshot() {
+    const state = this.getCurrentArticleLayoutState();
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const context = this.getCurrentLayoutContext();
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const payload = this.buildAiLayoutDebugSnapshot({
+      mode: this.aiLayoutDebugMode,
+      state,
+      providerLabel,
+      modelLabel,
+      isStale,
+      sourcePath: context.sourcePath
+    });
+    if (!payload) {
+      new Notice("\u8BF7\u5148\u5C55\u5F00\u5E03\u5C40 JSON \u6216\u9519\u8BEF\u8BE6\u60C5\uFF0C\u518D\u590D\u5236\u8C03\u8BD5\u5FEB\u7167");
+      return;
+    }
+    try {
+      const copied = await this.copyPlainTextSnapshot(payload);
+      if (!copied)
+        throw new Error("clipboard unavailable");
+      new Notice("\u2705 \u8C03\u8BD5\u5FEB\u7167\u5DF2\u590D\u5236");
+    } catch (error) {
+      new Notice("\u274C \u8C03\u8BD5\u5FEB\u7167\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u526A\u8D34\u677F\u6743\u9650");
+    }
+  }
+  async copyAiLayoutPromptContext() {
+    const state = this.getCurrentArticleLayoutState();
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const context = this.getCurrentLayoutContext();
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const isStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const payload = this.buildAiLayoutPromptContext({
+      state,
+      context,
+      providerLabel,
+      modelLabel,
+      isStale
+    });
+    if (!payload) {
+      new Notice("\u5F53\u524D\u8FD8\u6CA1\u6709\u53EF\u7528\u7684 AI \u7F16\u6392\u7ED3\u679C\uFF0C\u6682\u65F6\u65E0\u6CD5\u751F\u6210 Prompt \u4E0A\u4E0B\u6587");
+      return;
+    }
+    try {
+      const copied = await this.copyPlainTextSnapshot(payload);
+      if (!copied)
+        throw new Error("clipboard unavailable");
+      new Notice("\u2705 Prompt \u4E0A\u4E0B\u6587\u5DF2\u590D\u5236");
+    } catch (error) {
+      new Notice("\u274C Prompt \u4E0A\u4E0B\u6587\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u526A\u8D34\u677F\u6743\u9650");
+    }
+  }
+  refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale }) {
+    if (!this.aiDebugPanel || !this.aiDebugPanelBody || !this.aiDebugPanelTitle)
+      return;
+    const isLoading = this.aiLayoutLoading === true;
+    const canShowJson = !!(state == null ? void 0 : state.layoutJson);
+    const canShowError = !!((state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" || (state == null ? void 0 : state.lastError));
+    const isAdvancedOpen = this.aiAdvancedOpen === true;
+    if (this.aiViewJsonBtn) {
+      this.aiViewJsonBtn.disabled = !canShowJson || isLoading;
+      this.aiViewJsonBtn.classList.toggle("is-active", this.aiLayoutDebugMode === "json");
+    }
+    if (this.aiViewErrorBtn) {
+      this.aiViewErrorBtn.disabled = !canShowError || isLoading;
+      this.aiViewErrorBtn.classList.toggle("is-active", this.aiLayoutDebugMode === "error");
+    }
+    if (this.aiCopyDebugBtn) {
+      this.aiCopyDebugBtn.disabled = !this.aiLayoutDebugMode || isLoading;
+    }
+    if (this.aiCopyPromptBtn) {
+      this.aiCopyPromptBtn.disabled = !(state == null ? void 0 : state.layoutJson) || isLoading;
+    }
+    if (this.aiLayoutDebugMode === "json" && !canShowJson || this.aiLayoutDebugMode === "error" && !canShowError) {
+      this.aiLayoutDebugMode = "";
+    }
+    if (!isAdvancedOpen || !this.aiLayoutDebugMode) {
+      this.aiDebugPanel.classList.remove("visible");
+      this.aiDebugPanelTitle.setText("\u8C03\u8BD5\u8F93\u51FA");
+      this.aiDebugPanelBody.setText("");
+      if (this.aiCopyPromptBtn) {
+        this.aiCopyPromptBtn.setText("\u590D\u5236\u7ED9 AI");
+        this.aiCopyPromptBtn.title = "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u6587\u7AE0\u6458\u5F55\u3001\u5E03\u5C40\u6458\u8981\u548C\u8C03\u8BD5\u4FE1\u606F\u7684\u6392\u67E5 Prompt";
+      }
+      if (this.aiCopyDebugBtn) {
+        this.aiCopyDebugBtn.setText("\u590D\u5236\u5F53\u524D\u5185\u5BB9");
+        this.aiCopyDebugBtn.title = "\u590D\u5236\u5F53\u524D\u8C03\u8BD5\u9762\u677F\u5185\u5BB9";
+      }
+      if (this.aiCopyDebugBtn)
+        this.aiCopyDebugBtn.disabled = true;
+      return;
+    }
+    this.aiDebugPanel.classList.add("visible");
+    if (this.aiCopyDebugBtn)
+      this.aiCopyDebugBtn.disabled = false;
+    if (this.aiCopyPromptBtn) {
+      this.aiCopyPromptBtn.setText("\u590D\u5236\u7ED9 AI");
+      this.aiCopyPromptBtn.title = this.aiLayoutDebugMode === "error" ? "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u9519\u8BEF\u8BE6\u60C5\u3001\u6587\u7AE0\u6458\u5F55\u548C\u5E03\u5C40\u6458\u8981\u7684\u6392\u67E5 Prompt" : "\u590D\u5236\u4E00\u4EFD\u5305\u542B\u5E03\u5C40 JSON\u3001\u6587\u7AE0\u6458\u5F55\u548C\u5E03\u5C40\u6458\u8981\u7684\u6392\u67E5 Prompt";
+    }
+    if (this.aiLayoutDebugMode === "json") {
+      this.aiDebugPanelTitle.setText("\u5E03\u5C40 JSON");
+      if (this.aiCopyDebugBtn) {
+        this.aiCopyDebugBtn.setText("\u590D\u5236 JSON");
+        this.aiCopyDebugBtn.title = "\u53EA\u590D\u5236\u5F53\u524D\u5E03\u5C40 JSON \u8C03\u8BD5\u5185\u5BB9";
+      }
+      this.aiDebugPanelBody.setText(this.buildAiLayoutDebugJson(state));
+      return;
+    }
+    this.aiDebugPanelTitle.setText("\u9519\u8BEF\u8BE6\u60C5");
+    if (this.aiCopyDebugBtn) {
+      this.aiCopyDebugBtn.setText("\u590D\u5236\u9519\u8BEF\u8BE6\u60C5");
+      this.aiCopyDebugBtn.title = "\u53EA\u590D\u5236\u5F53\u524D\u9519\u8BEF\u8BE6\u60C5\u8C03\u8BD5\u5185\u5BB9";
+    }
+    this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
+  }
+  refreshAiLayoutPanel() {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
+    if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
+      return;
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const provider = resolveAiProvider(aiSettings);
+    const configuredProviders = Array.isArray(aiSettings.providers) ? aiSettings.providers.length : 0;
+    const context = this.getCurrentLayoutContext();
+    const storedState = this.getCurrentArticleLayoutState();
+    const currentSelection = this.getCurrentAiLayoutSelection();
+    const activeGenerationSelection = this.aiLayoutLoading === true ? normalizeLayoutSelection(this.aiLayoutActiveGenerationSelection || {}, {
+      layoutFamily: aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    }) : null;
+    const effectiveSelection = {
+      layoutFamily: (activeGenerationSelection == null ? void 0 : activeGenerationSelection.layoutFamily) || currentSelection.layoutFamily || ((_a = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _a.layoutFamily) || aiSettings.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: (activeGenerationSelection == null ? void 0 : activeGenerationSelection.colorPalette) || currentSelection.colorPalette || ((_b = storedState == null ? void 0 : storedState.selection) == null ? void 0 : _b.colorPalette) || aiSettings.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+    };
+    const state = storedState;
+    if (effectiveSelection.layoutFamily === "source-first" && context.sourcePath && (!state || (state.status === "error" || state.status === "schema-error") && !((_d = (_c = state.layoutJson) == null ? void 0 : _c.blocks) == null ? void 0 : _d.length))) {
+      this.recoverSourceFirstLayoutState(state, effectiveSelection, context);
+    }
+    const generationMeta = (state == null ? void 0 : state.generationMeta) || null;
+    const schemaValidation = this.getVisibleAiSchemaValidation(state);
+    const providerLabel = this.getArticleLayoutProviderLabel(state, aiSettings);
+    const modelLabel = this.getArticleLayoutModelLabel(state, aiSettings);
+    const aiFeatureEnabled = aiSettings.enabled === true;
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    const visibleLayout = visibleSnapshot.layoutJson;
+    const visibleBlockOrigins = visibleSnapshot.blockOrigins;
+    const hiddenBlockCount = visibleSnapshot.hiddenCount;
+    const hasReusableLayout = !!((state == null ? void 0 : state.status) === "ready" && ((_e = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _e.length));
+    const hasLastAttemptFailure = (state == null ? void 0 : state.lastAttemptStatus) === "error" || (state == null ? void 0 : state.lastAttemptStatus) === "schema-error";
+    const hasDoc = !!context.sourcePath;
+    const hasProvider = !!provider;
+    const canUseLocalLayout = effectiveSelection.layoutFamily === "source-first";
+    const canGenerateForSelection = hasProvider || canUseLocalLayout;
+    const rawIsStale = !!(state && context.sourceHash && state.sourceHash && state.sourceHash !== context.sourceHash);
+    const isSourceSwitching = context.isSourceSwitching === true;
+    const isResolvingSourceState = isSourceSwitching || context.isStaleSuppressed === true && rawIsStale;
+    const isStale = rawIsStale && !isResolvingSourceState;
+    const hasApplied = this.aiPreviewApplied === true && !!state && !rawIsStale;
+    const isGenerating = this.aiLayoutLoading === true;
+    const isLoading = isGenerating || isResolvingSourceState;
+    const hasVisibleLayout = !!((_f = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _f.length);
+    const canApplyVisibleLayout = hasVisibleLayout && !hasApplied && !rawIsStale;
+    let badge = "\u672A\u751F\u6210";
+    let statusText = hasDoc ? "\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709 AI \u7F16\u6392\u7ED3\u679C\u3002" : "\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u3002";
+    if (isResolvingSourceState) {
+      badge = "\u8BFB\u53D6\u4E2D";
+      statusText = "\u6B63\u5728\u5207\u6362\u5230\u5F53\u524D\u6587\u7AE0\uFF0C\u8BF7\u7A0D\u5019\u3002";
+    } else if (isGenerating) {
+      badge = "\u751F\u6210\u4E2D";
+      statusText = "\u6B63\u5728\u751F\u6210\u5E76\u5E94\u7528\u65B0\u7684\u7F16\u6392\uFF0C\u8BF7\u7A0D\u5019\u3002";
+    } else if (!aiFeatureEnabled) {
+      badge = "\u5DF2\u5173\u95ED";
+      statusText = "AI \u7F16\u6392\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u8BBE\u7F6E\u4E2D\u542F\u7528\u3002";
+    } else if (!state) {
+      if (!hasProvider && !canUseLocalLayout) {
+        badge = "\u5F85\u914D\u7F6E";
+        statusText = configuredProviders > 0 ? "\u5F53\u524D\u5E03\u5C40\u9700\u8981\u53EF\u7528\u7684 AI Provider\uFF0C\u8BF7\u8865\u5168\u914D\u7F6E\u540E\u518D\u8BD5\u3002" : "\u5F53\u524D\u5E03\u5C40\u9700\u8981 AI Provider\uFF0C\u8BF7\u5148\u5230\u8BBE\u7F6E\u4E2D\u5B8C\u6210\u914D\u7F6E\u3002";
+      } else {
+        badge = "\u672A\u751F\u6210";
+        statusText = "\u70B9\u51FB\u201C\u751F\u6210\u5E76\u5E94\u7528\u201D\u67E5\u770B\u6548\u679C\u3002";
+      }
+    } else if ((state == null ? void 0 : state.status) === "schema-error") {
+      badge = hasReusableLayout ? "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248" : "\u751F\u6210\u5931\u8D25";
+      statusText = hasReusableLayout ? "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u8BF7\u91CD\u8BD5\u6216\u68C0\u67E5 AI \u8BBE\u7F6E\u3002";
+    } else if ((state == null ? void 0 : state.status) === "error") {
+      badge = hasReusableLayout ? "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248" : "\u751F\u6210\u5931\u8D25";
+      statusText = hasReusableLayout ? "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u751F\u6210\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5\u6216\u68C0\u67E5 AI \u8BBE\u7F6E\u3002";
+    } else if (state && isStale) {
+      if (canGenerateForSelection) {
+        badge = "\u9700\u66F4\u65B0";
+        statusText = hasReusableLayout ? "\u8FD9\u4EFD\u7F16\u6392\u57FA\u4E8E\u65E7\u5185\u5BB9\uFF0C\u53EF\u5148\u5E94\u7528\u65E7\u7F13\u5B58\uFF0C\u6216\u91CD\u65B0\u751F\u6210\u6700\u65B0\u7ED3\u679C\u3002" : "\u6587\u7AE0\u5185\u5BB9\u6709\u66F4\u65B0\uFF0C\u5EFA\u8BAE\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528\u3002";
+      } else {
+        badge = "\u5F85\u914D\u7F6E";
+        statusText = hasReusableLayout ? "\u8FD9\u4EFD\u7F16\u6392\u57FA\u4E8E\u65E7\u5185\u5BB9\uFF1B\u82E5\u8981\u91CD\u65B0\u751F\u6210\uFF0C\u8BF7\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002" : "\u5F53\u524D\u5DF2\u6709\u65E7\u7ED3\u679C\uFF0C\u4F46\u6587\u7AE0\u5185\u5BB9\u5DF2\u66F4\u65B0\u3002\u82E5\u8981\u91CD\u65B0\u751F\u6210\uFF0C\u8BF7\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002";
+      }
+    } else if (hasReusableLayout && hasLastAttemptFailure) {
+      badge = "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248";
+      statusText = "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C\u3002";
+    } else if (state) {
+      badge = hasApplied ? "\u5DF2\u5E94\u7528" : "\u53EF\u5E94\u7528";
+      statusText = hasApplied ? "\u5DF2\u5E94\u7528\u5230\u9884\u89C8\u3002" : "\u53EF\u4EE5\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\u3002";
+    }
+    this.aiLayoutStatusBadge.setText(badge);
+    this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
+    const hideSuccessStatusText = !!state && !isLoading && aiFeatureEnabled && !isStale && !hasLastAttemptFailure && state.status !== "error" && state.status !== "schema-error";
+    this.aiLayoutStatusText.hidden = hideSuccessStatusText;
+    this.aiLayoutStatusText.setText(hideSuccessStatusText ? "" : statusText);
+    this.applyAiLayoutPanelStylePack(
+      ((_g = state == null ? void 0 : state.resolved) == null ? void 0 : _g.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
+    );
+    if (isResolvingSourceState && this.aiCachedLayoutList) {
+      this.aiCachedLayoutList.empty();
+      this.aiCachedLayoutList.hidden = true;
+    } else {
+      this.renderAiCachedLayoutFamilies({
+        context,
+        currentLayoutFamily: ((_h = state == null ? void 0 : state.resolved) == null ? void 0 : _h.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || effectiveSelection.layoutFamily,
+        isLoading
+      });
+    }
+    this.aiLayoutFamilySelect.value = effectiveSelection.layoutFamily;
+    this.aiColorPaletteSelect.value = effectiveSelection.colorPalette;
+    if (this.aiStylePackSelect)
+      this.aiStylePackSelect.value = effectiveSelection.colorPalette;
+    this.pendingAiLayoutFamily = effectiveSelection.layoutFamily;
+    this.pendingAiColorPalette = effectiveSelection.colorPalette;
+    this.pendingAiStylePack = effectiveSelection.colorPalette;
+    this.updateAiColorPaletteControls();
+    this.aiLayoutFamilySelect.disabled = !aiFeatureEnabled || isLoading;
+    this.aiColorPaletteSelect.disabled = !aiFeatureEnabled || isLoading;
+    if (this.aiStylePackSelect)
+      this.aiStylePackSelect.disabled = !aiFeatureEnabled || isLoading;
+    if (this.aiAdvancedToggleBtn) {
+      this.aiAdvancedToggleBtn.classList.toggle("is-open", this.aiAdvancedOpen === true);
+      this.aiAdvancedToggleBtn.setAttribute("aria-expanded", this.aiAdvancedOpen === true ? "true" : "false");
+    }
+    if (this.aiAdvancedBody) {
+      this.aiAdvancedBody.classList.toggle("visible", this.aiAdvancedOpen === true);
+      this.aiAdvancedBody.hidden = this.aiAdvancedOpen !== true;
+    }
+    if (this.aiLayoutOverlay) {
+      this.aiLayoutOverlay.classList.toggle("is-loading", isLoading);
+    }
+    const converterContainer = (_i = this.previewContainer) == null ? void 0 : _i.closest(".apple-converter-container");
+    if (converterContainer) {
+      converterContainer.classList.toggle("apple-ai-layout-panel-loading", isLoading);
+    }
+    if (this.aiLayoutLoadingMask) {
+      this.aiLayoutLoadingMask.classList.toggle("visible", isLoading);
+    }
+    if (this.aiLayoutLoadingMaskText) {
+      const layoutLabel = this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily);
+      const colorLabel = this.getAiColorPaletteLabel(effectiveSelection.colorPalette);
+      this.aiLayoutLoadingMaskText.setText(isResolvingSourceState ? "\u6B63\u5728\u5207\u6362\u6587\u7AE0\u9884\u89C8..." : `\u6B63\u5728\u751F\u6210\u300C${layoutLabel} \xB7 ${colorLabel}\u300D\u7F16\u6392...`);
+    }
+    const primaryAction = this.getAiPrimaryActionConfig({
+      hasDoc,
+      aiFeatureEnabled,
+      canGenerateForSelection,
+      state,
+      visibleLayout,
+      hasReusableLayout,
+      hasLastAttemptFailure,
+      hasApplied,
+      isStale,
+      isLoading
+    });
+    this.aiPrimaryActionMode = primaryAction.mode;
+    this.aiGenerateBtn.setText(primaryAction.label);
+    this.aiGenerateBtn.disabled = primaryAction.disabled;
+    if (this.aiRegenerateBtn) {
+      const showRegenerate = !!(hasDoc && aiFeatureEnabled && canGenerateForSelection && !isLoading && state && primaryAction.mode !== "generate-apply");
+      this.aiRegenerateBtn.hidden = !showRegenerate;
+      this.aiRegenerateBtn.disabled = !showRegenerate;
+    }
+    const setSummary = (text = "") => {
+      if (!this.aiLayoutSummary)
+        return;
+      const value = String(text || "").trim();
+      this.aiLayoutSummary.setText(value);
+      this.aiLayoutSummary.hidden = !value;
+    };
+    const setMetaNote = (text = "") => {
+      if (!this.aiLayoutMetaNote)
+        return;
+      const value = String(text || "").trim();
+      this.aiLayoutMetaNote.setText(value);
+      this.aiLayoutMetaNote.hidden = !value;
+    };
+    if (isResolvingSourceState) {
+      setSummary("\u6B63\u5728\u8BFB\u53D6\u5F53\u524D\u6587\u7AE0\u7684\u7F16\u6392\u72B6\u6001\u3002");
+      this.renderAiLayoutMetaChips([]);
+      setMetaNote("");
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (isGenerating) {
+      setSummary(`\u6B63\u5728\u4E3A\u300C${context.title || "\u5F53\u524D\u6587\u7AE0"}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u6548\u679C\u3002`);
+      this.renderAiLayoutMetaChips([]);
+      setMetaNote("");
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (!aiFeatureEnabled) {
+      setSummary("\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u6839\u636E\u5F53\u524D\u6587\u7AE0\u751F\u6210\u7248\u5F0F\u7ED3\u679C\u3002");
+      setMetaNote("");
+      this.renderAiLayoutMetaChips([]);
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (!hasDoc) {
+      setSummary("\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u540E\uFF0C\u5C31\u53EF\u4EE5\u751F\u6210\u4E13\u5C5E\u7F16\u6392\u3002");
+      setMetaNote("");
+      this.renderAiLayoutMetaChips([]);
+      this.refreshAiSchemaIssuePanel(null);
+    } else if ((state == null ? void 0 : state.status) === "schema-error") {
+      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "");
+      this.renderAiLayoutMetaChips([
+        ...providerLabel ? [`Provider ${providerLabel}`] : [],
+        ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
+        ...(schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0 ? [`Schema ${schemaValidation.issueCount} \u9879`] : []
+      ]);
+      setMetaNote(hasReusableLayout ? "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u53EF\u4EE5\u76F4\u63A5\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002" : "\u53EF\u4EE5\u91CD\u8BD5\u4E00\u6B21\uFF1B\u5982\u4ECD\u5931\u8D25\uFF0C\u518D\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u5177\u4F53\u539F\u56E0\u3002");
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
+      setSummary(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "");
+      this.renderAiLayoutMetaChips([
+        ...providerLabel ? [`Provider ${providerLabel}`] : [],
+        ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
+      ]);
+      setMetaNote(hasReusableLayout ? "\u5F53\u524D\u4E0D\u4F1A\u5F71\u54CD\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u5982\u679C\u53CD\u590D\u5931\u8D25\uFF0C\u53EF\u4EE5\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002");
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (hasReusableLayout && hasLastAttemptFailure) {
+      setSummary("\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002");
+      this.renderAiLayoutMetaChips([
+        ...providerLabel ? [`Provider ${providerLabel}`] : [],
+        ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
+        state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u6821\u9A8C\u5931\u8D25" : "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25"
+      ]);
+      setMetaNote(hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "");
+      this.refreshAiSchemaIssuePanel(state.lastAttemptStatus === "schema-error" ? schemaValidation : null);
+    } else if (!state) {
+      if (!hasProvider && !canUseLocalLayout) {
+        setSummary("\u5F53\u524D\u6240\u9009\u5E03\u5C40\u4F9D\u8D56 AI Provider\u3002");
+        setMetaNote("");
+        this.renderAiLayoutMetaChips([]);
+      } else {
+        setSummary("");
+        this.renderAiLayoutMetaChips([]);
+        setMetaNote("");
+      }
+      this.refreshAiSchemaIssuePanel(null);
+    } else if (state && isStale && !canGenerateForSelection) {
+      setSummary("\u5F53\u524D\u5DF2\u6709\u4E00\u7248\u65E7\u7ED3\u679C\uFF0C\u4F46\u8981\u91CD\u65B0\u751F\u6210\u9700\u8981\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002");
+      this.renderAiLayoutMetaChips([
+        ...providerLabel ? [`Provider ${providerLabel}`] : [],
+        ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
+      ]);
+      setMetaNote(canApplyVisibleLayout ? "\u5F53\u524D\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u5E94\u7528\uFF1B\u5982\u679C\u8981\u66F4\u65B0\u5185\u5BB9\uFF0C\u8BF7\u5148\u6062\u590D Provider\u3002" : "");
+      this.refreshAiSchemaIssuePanel(null);
+    } else {
+      const blockCount = ((_j = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _j.length) || 0;
+      setSummary(`\u5171 ${blockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u79FB\u9664\u4E0D\u9700\u8981\u7684\u90E8\u5206\u3002`);
+      const metaChips = [];
+      if (providerLabel)
+        metaChips.push(`Provider ${providerLabel}`);
+      if (modelLabel)
+        metaChips.push(`\u6A21\u578B ${modelLabel}`);
+      if ((schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0)
+        metaChips.push(`Schema ${schemaValidation.issueCount} \u9879`);
+      if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
+        metaChips.push("\u672C\u5730\u515C\u5E95");
+      } else if (generationMeta == null ? void 0 : generationMeta.fallbackUsed) {
+        metaChips.push(`\u8865\u5168 ${generationMeta.fallbackBlockCount} \u5757`);
+      }
+      if (hiddenBlockCount > 0)
+        metaChips.push(`\u5DF2\u79FB\u9664 ${hiddenBlockCount} \u5757`);
+      if (hasLastAttemptFailure) {
+        metaChips.push(state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u6821\u9A8C\u5931\u8D25" : "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25");
+      }
+      this.renderAiLayoutMetaChips(metaChips);
+      const hiddenText = hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "";
+      if (hasLastAttemptFailure && state.lastAttemptError) {
+        setMetaNote(`\u4E0A\u4E00\u7248\u7ED3\u679C\u5DF2\u4FDD\u7559\u3002${hiddenText}`.trim());
+      } else if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
+        setMetaNote(`\u5F53\u524D\u4F7F\u7528\u7684\u662F\u66F4\u7A33\u5B9A\u7684\u672C\u5730\u589E\u5F3A\u7ED3\u679C\u3002${hiddenText}`.trim());
+      } else {
+        setMetaNote(hiddenText);
+      }
+      this.refreshAiSchemaIssuePanel(schemaValidation);
+    }
+    if (this.aiResultSection) {
+      this.aiResultSection.hidden = !(isLoading || hasVisibleLayout || hiddenBlockCount > 0);
+    }
+    this.aiBlockList.empty();
+    if (isLoading) {
+      for (let index = 0; index < 4; index += 1) {
+        const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item is-skeleton" });
+        item.createDiv({ cls: "apple-ai-layout-block-skeleton-index" });
+        const content = item.createDiv({ cls: "apple-ai-layout-block-main" });
+        content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-title" });
+        content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-meta" });
+        item.createDiv({ cls: "apple-ai-layout-block-skeleton-badge" });
+      }
+    } else if ((_k = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _k.length) {
+      visibleLayout.blocks.forEach((block, index) => {
+        const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
+        const origin = (visibleBlockOrigins == null ? void 0 : visibleBlockOrigins[index]) || null;
+        if (origin == null ? void 0 : origin.blockKey) {
+          item.dataset.blockKey = origin.blockKey;
+        }
+        item.createEl("span", { cls: "apple-ai-layout-block-index", text: String(index + 1).padStart(2, "0") });
+        const content = item.createDiv({ cls: "apple-ai-layout-block-main" });
+        content.createEl("span", {
+          cls: "apple-ai-layout-block-name",
+          text: this.getAiLayoutBlockLabel(block)
+        });
+        if ((origin == null ? void 0 : origin.originalIndex) >= 0) {
+          const removeBtn = item.createEl("button", {
+            cls: "apple-ai-layout-block-remove",
+            text: "\u79FB\u9664"
+          });
+          removeBtn.addEventListener("click", () => this.removeAiLayoutBlock(origin.originalIndex, item));
+        }
+      });
+    } else {
+      this.aiBlockList.createDiv({
+        cls: "apple-ai-layout-empty",
+        text: hiddenBlockCount > 0 ? "\u5F53\u524D\u533A\u5757\u90FD\u5DF2\u88AB\u79FB\u9664\uFF0C\u53EF\u4EE5\u70B9\u51FB\u201C\u6062\u590D\u5DF2\u79FB\u9664\u201D\u91CD\u65B0\u67E5\u770B\u3002" : aiFeatureEnabled ? "\u751F\u6210\u540E\u4F1A\u5C55\u793A\u533A\u5757\u6E05\u5355\u3002" : "\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u5C55\u793A\u5F53\u524D\u6587\u7AE0\u7684\u533A\u5757\u6E05\u5355\u3002"
+      });
+    }
+    this.aiResetBtn.disabled = !this.aiPreviewApplied || isLoading;
+    if (this.aiRegenerateBtn && isLoading) {
+      this.aiRegenerateBtn.disabled = true;
+    }
+    if (this.aiRestoreBlocksBtn) {
+      this.aiRestoreBlocksBtn.disabled = hiddenBlockCount <= 0 || isLoading;
+      this.aiRestoreBlocksBtn.hidden = hiddenBlockCount <= 0;
+    }
+    this.restoreAiLayoutPendingAnchor();
+    this.refreshAiLayoutDebugPanel({ state, providerLabel, modelLabel, isStale });
+    this.updateAiToolbarState();
+  }
+  async ensureCurrentArticleContext() {
+    var _a;
+    const source = await resolveMarkdownSource({
+      app: this.app,
+      lastActiveFile: this.lastActiveFile,
+      MarkdownViewType: MarkdownView
+    });
+    if (!source.ok || !String(source.markdown || "").trim()) {
+      return null;
+    }
+    const markdown = source.markdown || "";
+    const sourcePath = source.sourcePath || "";
+    this.lastResolvedMarkdown = markdown;
+    this.lastResolvedSourcePath = sourcePath;
+    this.lastResolvedSourceHash = String(this.simpleHash(markdown));
+    return {
+      markdown,
+      sourcePath,
+      sourceHash: this.lastResolvedSourceHash,
+      title: ((_a = this.getPublishContextFile()) == null ? void 0 : _a.basename) || "\u672A\u547D\u540D\u6587\u7AE0"
+    };
+  }
+  async generateAiLayoutForCurrentArticle({ applyAfterGenerate = false } = {}) {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
+    const context = await this.ensureCurrentArticleContext();
+    if (!context) {
+      new Notice("\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7\u6709\u5185\u5BB9\u7684 Markdown \u6587\u7AE0");
+      return;
+    }
+    if (!this.baseRenderedHtml) {
+      await this.convertCurrent(true, { showLoading: true, loadingText: "\u6B63\u5728\u51C6\u5907\u6587\u7AE0\u4E0A\u4E0B\u6587..." });
+    }
+    const imageRefs = aiSettings.includeImagesInLayout === false ? [] : extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+    const selection = this.getCurrentAiLayoutSelection();
+    const provider = resolveAiProvider(aiSettings);
+    if (selection.layoutFamily !== "source-first" && !provider) {
+      new Notice("\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u914D\u7F6E\u5E76\u542F\u7528 AI Provider");
+      return;
+    }
+    const originalText = (_a = this.aiGenerateBtn) == null ? void 0 : _a.textContent;
+    try {
+      this.aiLayoutActiveGenerationSelection = selection;
+      this.aiLayoutLoading = true;
+      this.refreshAiLayoutPanel();
+      if (this.aiGenerateBtn) {
+        this.aiGenerateBtn.disabled = true;
+        this.aiGenerateBtn.setText("\u751F\u6210\u4E2D...");
+      }
+      const result = await generateArticleLayout({
+        provider,
+        title: context.title,
+        markdown: context.markdown,
+        selection,
+        imageRefs,
+        timeoutMs: aiSettings.requestTimeoutMs
+      });
+      const layoutJson = result.layoutJson;
+      if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length) {
+        throw new Error("AI \u8FD4\u56DE\u4E86\u7A7A\u7684\u7F16\u6392\u7ED3\u679C");
+      }
+      await this.plugin.saveArticleLayoutState(context.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: Date.now(),
+        sourceHash: context.sourceHash,
+        providerId: (provider == null ? void 0 : provider.id) || "",
+        model: (provider == null ? void 0 : provider.model) || "",
+        selection: layoutJson.selection,
+        resolved: layoutJson.resolved,
+        recommendedLayoutFamily: layoutJson.recommendedLayoutFamily,
+        recommendedColorPalette: layoutJson.recommendedColorPalette,
+        stylePack: layoutJson.stylePack,
+        status: "ready",
+        lastError: "",
+        lastAttemptStatus: "success",
+        lastAttemptError: "",
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: null,
+        dismissedBlockKeys: [],
+        generationMeta: result.generationMeta,
+        layoutJson
+      }, layoutJson.selection);
+      this.pendingAiLayoutFamily = ((_b = layoutJson.selection) == null ? void 0 : _b.layoutFamily) || selection.layoutFamily;
+      this.pendingAiColorPalette = ((_c = layoutJson.selection) == null ? void 0 : _c.colorPalette) || selection.colorPalette;
+      this.pendingAiStylePack = this.pendingAiColorPalette;
+      if (applyAfterGenerate) {
+        this.applyAiLayoutToPreview();
+        new Notice(
+          ((_d = result.generationMeta) == null ? void 0 : _d.executionMode) === "local-fallback" ? "\u2705 \u5DF2\u751F\u6210\u5E76\u5E94\u7528\u539F\u6587\u589E\u5F3A\u7ED3\u679C" : "\u2705 \u5DF2\u751F\u6210\u5E76\u5E94\u7528\u65B0\u7684\u7F16\u6392\u7ED3\u679C"
+        );
+      } else {
+        new Notice(
+          ((_e = result.generationMeta) == null ? void 0 : _e.executionMode) === "local-fallback" ? "\u2705 \u5DF2\u751F\u6210\u539F\u6587\u589E\u5F3A\u7ED3\u679C" : "\u2705 AI \u7F16\u6392\u5DF2\u751F\u6210"
+        );
+      }
+    } catch (error) {
+      console.error("AI \u7F16\u6392\u751F\u6210\u5931\u8D25:", error);
+      const previousState = this.getCurrentArticleLayoutState();
+      const isSchemaError = (error == null ? void 0 : error.code) === "ai-layout-schema-invalid";
+      const hasReusablePreviousLayout = !!((previousState == null ? void 0 : previousState.status) === "ready" && ((_g = (_f = previousState == null ? void 0 : previousState.layoutJson) == null ? void 0 : _f.blocks) == null ? void 0 : _g.length));
+      await this.plugin.saveArticleLayoutState(context.sourcePath, {
+        version: AI_LAYOUT_SCHEMA_VERSION,
+        updatedAt: hasReusablePreviousLayout ? previousState.updatedAt : Date.now(),
+        sourceHash: hasReusablePreviousLayout ? previousState.sourceHash : context.sourceHash,
+        providerId: (provider == null ? void 0 : provider.id) || "",
+        model: (provider == null ? void 0 : provider.model) || "",
+        selection: hasReusablePreviousLayout ? previousState.selection : selection,
+        resolved: hasReusablePreviousLayout ? previousState.resolved : {
+          layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "source-first" : selection.layoutFamily,
+          colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette
+        },
+        recommendedLayoutFamily: hasReusablePreviousLayout ? previousState.recommendedLayoutFamily : "",
+        recommendedColorPalette: hasReusablePreviousLayout ? previousState.recommendedColorPalette : "",
+        stylePack: hasReusablePreviousLayout ? previousState.stylePack : selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette,
+        status: hasReusablePreviousLayout ? previousState.status : isSchemaError ? "schema-error" : "error",
+        lastError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
+        lastAttemptStatus: isSchemaError ? "schema-error" : "error",
+        lastAttemptError: (error == null ? void 0 : error.message) || "\u672A\u77E5\u9519\u8BEF",
+        lastAttemptAt: Date.now(),
+        lastAttemptSchemaValidation: (error == null ? void 0 : error.schemaValidation) || ((_h = error == null ? void 0 : error.generationMeta) == null ? void 0 : _h.schemaValidation) || null,
+        dismissedBlockKeys: hasReusablePreviousLayout ? previousState.dismissedBlockKeys || [] : [],
+        generationMeta: hasReusablePreviousLayout ? previousState.generationMeta : (error == null ? void 0 : error.generationMeta) || (previousState == null ? void 0 : previousState.generationMeta) || null,
+        layoutJson: hasReusablePreviousLayout ? previousState.layoutJson : (previousState == null ? void 0 : previousState.layoutJson) || {
+          version: AI_LAYOUT_SCHEMA_VERSION,
+          articleType: "article",
+          selection,
+          resolved: {
+            layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "source-first" : selection.layoutFamily,
+            colorPalette: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette
+          },
+          recommendedLayoutFamily: "",
+          recommendedColorPalette: "",
+          stylePack: selection.colorPalette === AI_LAYOUT_SELECTION_AUTO ? "tech-green" : selection.colorPalette,
+          layoutFamily: selection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "source-first" : selection.layoutFamily,
+          title: context.title,
+          summary: "",
+          blocks: []
+        }
+      }, selection);
+      new Notice(
+        hasReusablePreviousLayout ? "\u274C \u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C" : isSchemaError ? `\u274C \u751F\u6210\u5931\u8D25\uFF1A${error.message}` : `\u274C \u751F\u6210\u5931\u8D25\uFF1A${error.message}`
+      );
+    } finally {
+      this.aiLayoutLoading = false;
+      this.aiLayoutActiveGenerationSelection = null;
+      if (this.aiGenerateBtn) {
+        this.aiGenerateBtn.disabled = false;
+        this.aiGenerateBtn.setText(originalText || "\u751F\u6210\u5E76\u5E94\u7528");
+      }
+      this.refreshAiLayoutPanel();
+    }
+  }
+  applyAiLayoutToPreview({ stateOverride = null, allowStale = false } = {}) {
+    var _a, _b, _c, _d;
+    const context = this.getCurrentLayoutContext();
+    const state = stateOverride || this.getCurrentArticleLayoutState();
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    if (!state || !((_b = (_a = visibleSnapshot.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
+      new Notice("\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709\u53EF\u7528\u7684 AI \u7F16\u6392\u7ED3\u679C");
+      return;
+    }
+    if (!allowStale && context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+      new Notice("\u5F53\u524D\u6587\u7AE0\u5185\u5BB9\u5DF2\u53D8\u5316\uFF0C\u8BF7\u5148\u91CD\u65B0\u751F\u6210 AI \u7F16\u6392");
+      this.refreshAiLayoutPanel();
+      return;
+    }
+    const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+    const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || "");
+    const renderLayout = this.getAiRenderLayoutJson(visibleSnapshot.layoutJson);
+    const html = renderArticleLayoutHtml(renderLayout, {
+      imageRefs,
+      renderedSectionFragments,
+      colorPaletteOverride: this.getAiColorPaletteOverride(((_c = renderLayout == null ? void 0 : renderLayout.resolved) == null ? void 0 : _c.colorPalette) || (renderLayout == null ? void 0 : renderLayout.stylePack))
+    });
+    const scrollTop = ((_d = this.previewContainer) == null ? void 0 : _d.scrollTop) || 0;
+    this.currentHtml = html;
+    this.aiPreviewApplied = true;
+    if (this.previewContainer) {
+      this.previewContainer.innerHTML = html;
+      this.previewContainer.scrollTop = scrollTop;
+      this.previewContainer.addClass("apple-has-content");
+    }
+    this.syncPreviewPresentationMode();
+    this.refreshAiLayoutPanel();
+  }
+  getCurrentExportHtml() {
+    var _a, _b, _c;
+    if (!this.currentHtml)
+      return null;
+    if (!this.aiPreviewApplied)
+      return this.currentHtml;
+    const context = this.getCurrentLayoutContext();
+    const state = this.getCurrentArticleLayoutState();
+    const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
+    if (!state || !((_b = (_a = visibleSnapshot.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
+      return this.currentHtml;
+    }
+    if (context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+      return this.currentHtml;
+    }
+    const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
+    const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || "");
+    const renderLayout = this.getAiRenderLayoutJson(visibleSnapshot.layoutJson);
+    return renderArticleLayoutHtml(renderLayout, {
+      imageRefs,
+      mode: "draft",
+      renderedSectionFragments,
+      colorPaletteOverride: this.getAiColorPaletteOverride(((_c = renderLayout == null ? void 0 : renderLayout.resolved) == null ? void 0 : _c.colorPalette) || (renderLayout == null ? void 0 : renderLayout.stylePack))
+    });
+  }
+  restoreBasePreview() {
+    if (!this.baseRenderedHtml || !this.previewContainer)
+      return;
+    const scrollTop = this.previewContainer.scrollTop;
+    this.currentHtml = this.baseRenderedHtml;
+    this.aiPreviewApplied = false;
+    this.previewContainer.innerHTML = this.baseRenderedHtml;
+    this.previewContainer.scrollTop = scrollTop;
+    this.previewContainer.addClass("apple-has-content");
+    this.syncPreviewPresentationMode();
+    this.refreshAiLayoutPanel();
+  }
+  syncPreviewPresentationMode() {
+    if (!this.previewContainer)
+      return;
+    const hasAiPreview = this.aiPreviewApplied === true;
+    this.previewContainer.classList.toggle("apple-ai-preview-active", hasAiPreview);
+    const previewWrapper = this.previewContainer.closest(".apple-preview-wrapper");
+    previewWrapper == null ? void 0 : previewWrapper.classList.toggle("apple-ai-preview-active", hasAiPreview);
   }
   openPluginSettings() {
     var _a, _b, _c;
@@ -5652,6 +13538,7 @@ var AppleStyleView = class extends ItemView {
         srcToBlob: this.srcToBlob.bind(this),
         processAllImages: this.processAllImages.bind(this),
         processMathFormulas: this.processMathFormulas.bind(this),
+        prepareHtmlForDraft: this.prepareHtmlForWechatDraft.bind(this),
         cleanHtmlForDraft: this.cleanHtmlForDraft.bind(this),
         cleanupConfiguredDirectory: this.cleanupConfiguredDirectory.bind(this),
         getFirstImageFromArticle: this.getFirstImageFromArticle.bind(this)
@@ -5659,7 +13546,7 @@ var AppleStyleView = class extends ItemView {
       const { cleanupResult } = await syncService.syncToDraft({
         account,
         proxyUrl: this.plugin.settings.proxyUrl,
-        currentHtml: this.currentHtml,
+        currentHtml: this.getCurrentExportHtml(),
         activeFile,
         publishMeta,
         sessionCoverBase64: this.sessionCoverBase64,
@@ -5749,71 +13636,7 @@ var AppleStyleView = class extends ItemView {
    * 返回: { blob, width, height, style }
    */
   async svgToPngBlob(svgElement, scale = 3) {
-    return new Promise((resolve, reject) => {
-      try {
-        const clonedSvg = svgElement.cloneNode(true);
-        const rect = svgElement.getBoundingClientRect();
-        let logicalWidth = rect.width;
-        let logicalHeight = rect.height;
-        const rawWidth = svgElement.getAttribute("width");
-        const rawHeight = svgElement.getAttribute("height");
-        const rawStyle = svgElement.getAttribute("style");
-        if (logicalWidth === 0 || logicalHeight === 0) {
-          logicalWidth = parseFloat(rawWidth) || 100;
-          logicalHeight = parseFloat(rawHeight) || 20;
-        }
-        const isMathJax = svgElement.getAttribute("role") === "img" || svgElement.getAttribute("focusable") === "false" || svgElement.classList.contains("MathJax");
-        if (isMathJax) {
-          clonedSvg.setAttribute("fill", "#333333");
-          clonedSvg.style.color = "#333333";
-          clonedSvg.querySelectorAll("*").forEach((el) => {
-            if (el.getAttribute("fill") === "currentColor" || !el.getAttribute("fill")) {
-              el.setAttribute("fill", "#333333");
-            }
-            if (el.getAttribute("stroke") === "currentColor") {
-              el.setAttribute("stroke", "#333333");
-            }
-          });
-        }
-        const serializer = new XMLSerializer();
-        const svgString = serializer.serializeToString(clonedSvg);
-        const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-        const url = URL.createObjectURL(svgBlob);
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const canvas = document.createElement("canvas");
-            canvas.width = logicalWidth * scale;
-            canvas.height = logicalHeight * scale;
-            const ctx = canvas.getContext("2d");
-            ctx.scale(scale, scale);
-            ctx.drawImage(img, 0, 0, logicalWidth, logicalHeight);
-            URL.revokeObjectURL(url);
-            canvas.toBlob((blob) => {
-              if (blob) {
-                resolve({
-                  blob,
-                  width: logicalWidth,
-                  // 返回逻辑宽度 (例如 20.5)
-                  height: logicalHeight,
-                  style: rawStyle
-                });
-              } else
-                reject(new Error("Canvas conversion failed"));
-            }, "image/png");
-          } catch (e) {
-            reject(e);
-          }
-        };
-        img.onerror = (e) => {
-          URL.revokeObjectURL(url);
-          reject(new Error("SVG Image load failed"));
-        };
-        img.src = url;
-      } catch (e) {
-        reject(e);
-      }
-    });
+    return rasterizeSvgToPngBlob(svgElement, { scale });
   }
   /**
    * 清理 HTML 以适配微信编辑器
@@ -5852,6 +13675,13 @@ var AppleStyleView = class extends ItemView {
     await this.plugin.saveSettings();
     this.updateButtonActive(grid, value);
     this.theme.update({ themeColor: value });
+    await this.convertCurrent(true);
+  }
+  async onQuoteCalloutStyleModeChange(value) {
+    const nextValue = value === "neutral" ? "neutral" : "theme";
+    this.plugin.settings.quoteCalloutStyleMode = nextValue;
+    await this.plugin.saveSettings();
+    this.theme.update({ quoteCalloutStyleMode: nextValue });
     await this.convertCurrent(true);
   }
   async onMacCodeBlockChange(checked) {
@@ -5907,6 +13737,7 @@ var AppleStyleView = class extends ItemView {
       this.docTitleText.setText("\u672A\u9009\u62E9\u6587\u6863");
       this.docTitleText.style.color = "var(--apple-tertiary)";
     }
+    this.updateAiToolbarState();
   }
   /**
    * 设置占位符
@@ -5952,10 +13783,12 @@ var AppleStyleView = class extends ItemView {
    * 转换当前文档
    */
   async convertCurrent(silent = false, options = {}) {
+    var _a, _b, _c;
     const {
       showLoading = false,
       loadingText = "\u6B63\u5728\u6E32\u67D3\u9884\u89C8...",
-      loadingDelay = 0
+      loadingDelay = 0,
+      sourceOverride = null
     } = options;
     const generation = ++this.renderGeneration;
     if (showLoading) {
@@ -5975,7 +13808,11 @@ var AppleStyleView = class extends ItemView {
         this.setPreviewLoading(true, loadingText);
       }
     }
-    const source = await resolveMarkdownSource({
+    const source = sourceOverride && typeof sourceOverride === "object" ? {
+      ok: true,
+      markdown: typeof sourceOverride.markdown === "string" ? sourceOverride.markdown : "",
+      sourcePath: typeof sourceOverride.sourcePath === "string" ? sourceOverride.sourcePath : ""
+    } : await resolveMarkdownSource({
       app: this.app,
       lastActiveFile: this.lastActiveFile,
       MarkdownViewType: MarkdownView
@@ -5985,10 +13822,6 @@ var AppleStyleView = class extends ItemView {
     if (source.ok) {
       markdown = source.markdown || "";
       sourcePath = source.sourcePath || "";
-      if (markdown.trim()) {
-        this.lastResolvedMarkdown = markdown;
-        this.lastResolvedSourcePath = sourcePath;
-      }
     } else if (this.lastResolvedMarkdown.trim()) {
       markdown = this.lastResolvedMarkdown;
       sourcePath = this.lastResolvedSourcePath || "";
@@ -6007,6 +13840,7 @@ var AppleStyleView = class extends ItemView {
     if (!markdown.trim()) {
       if (!silent)
         new Notice("\u5F53\u524D\u6587\u4EF6\u5185\u5BB9\u4E3A\u7A7A");
+      this.completeAiLayoutSourceSwitch(sourcePath);
       if (showLoading && this.loadingGeneration === generation) {
         if (this.loadingVisibilityTimer) {
           clearTimeout(this.loadingVisibilityTimer);
@@ -6022,6 +13856,11 @@ var AppleStyleView = class extends ItemView {
       const html = await this.renderMarkdownForPreview(markdown, sourcePath);
       if (generation !== this.renderGeneration)
         return;
+      this.lastResolvedMarkdown = markdown;
+      this.lastResolvedSourcePath = sourcePath;
+      this.lastResolvedSourceHash = String(this.simpleHash(markdown));
+      this.completeAiLayoutSourceSwitch(sourcePath);
+      this.baseRenderedHtml = html;
       this.currentHtml = html;
       this.lastRenderError = "";
       this.lastRenderFailureNoticeKey = "";
@@ -6030,7 +13869,23 @@ var AppleStyleView = class extends ItemView {
       this.previewContainer.innerHTML = html;
       this.previewContainer.scrollTop = scrollTop;
       this.previewContainer.addClass("apple-has-content");
+      this.syncPreviewPresentationMode();
       this.updateCurrentDoc();
+      if (this.shouldSyncAiLayoutUi()) {
+        const activeSelection = this.getCurrentAiLayoutSelection();
+        let layoutState = null;
+        if (sourcePath && typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
+          layoutState = this.plugin.getArticleLayoutState(sourcePath, activeSelection);
+        }
+        const canReuseAiLayout = !!(this.aiPreviewApplied && ((_c = (_b = layoutState == null ? void 0 : layoutState.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length) && this.lastResolvedSourceHash && layoutState.sourceHash === this.lastResolvedSourceHash);
+        if (canReuseAiLayout) {
+          this.applyAiLayoutToPreview();
+        } else if (this.aiPreviewApplied) {
+          this.aiPreviewApplied = false;
+          this.syncPreviewPresentationMode();
+        }
+        this.refreshAiLayoutPanel();
+      }
       if (!silent)
         new Notice("\u2705 \u8F6C\u6362\u6210\u529F\uFF01");
     } catch (error) {
@@ -6038,9 +13893,16 @@ var AppleStyleView = class extends ItemView {
       if (generation !== this.renderGeneration)
         return;
       this.currentHtml = null;
+      this.baseRenderedHtml = null;
+      this.aiPreviewApplied = false;
+      this.completeAiLayoutSourceSwitch(sourcePath);
+      this.syncPreviewPresentationMode();
       this.lastRenderError = (error == null ? void 0 : error.message) || "\u672A\u77E5\u6E32\u67D3\u9519\u8BEF";
       this.showRenderFailurePlaceholder(this.lastRenderError);
       this.updateCurrentDoc();
+      if (this.shouldSyncAiLayoutUi()) {
+        this.refreshAiLayoutPanel();
+      }
       const noticeKey = `${sourcePath || ""}:${this.lastRenderError}`;
       if (!silent || this.lastRenderFailureNoticeKey !== noticeKey) {
         new Notice("\u274C \u8F6C\u6362\u5931\u8D25: " + this.lastRenderError);
@@ -6136,6 +13998,90 @@ var AppleStyleView = class extends ItemView {
   normalizeClipboardText(text) {
     return (text || "").replace(/\s+/g, " ").trim();
   }
+  setCopyButtonIcon(icon) {
+    if (!this.copyBtn)
+      return;
+    const { setIcon } = require("obsidian");
+    this.copyBtn.replaceChildren();
+    setIcon(this.copyBtn, icon);
+  }
+  setCopyButtonSpinner() {
+    if (!this.copyBtn)
+      return;
+    this.copyBtn.replaceChildren();
+    const spinner = document.createElement("span");
+    spinner.className = "apple-copy-spinner";
+    spinner.setAttribute("aria-hidden", "true");
+    this.copyBtn.appendChild(spinner);
+  }
+  async enhanceHtmlForWechatPublishing(root) {
+    if (!root)
+      return;
+    let mount = null;
+    try {
+      if (typeof document !== "undefined" && document.body && !root.isConnected) {
+        mount = document.createElement("div");
+        mount.setAttribute("style", "position:fixed;left:-99999px;top:0;width:760px;opacity:0;pointer-events:none;overflow:hidden;");
+        document.body.appendChild(mount);
+        mount.appendChild(root);
+      }
+      await convertRenderedMermaidDiagramsToImages(root, {
+        simpleHash: this.simpleHash.bind(this),
+        mermaidImageCache: this.mermaidImageCache
+      });
+      this.transformCodeBlocksForClipboard(root);
+    } finally {
+      if (mount) {
+        mount.remove();
+      }
+    }
+  }
+  async prepareHtmlForWechatDraft(html) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html || "";
+    await this.enhanceHtmlForWechatPublishing(tempDiv);
+    return tempDiv.innerHTML;
+  }
+  transformCodeBlocksForClipboard(root) {
+    if (!root)
+      return;
+    const codeBlocks = Array.from(root.querySelectorAll(".code-snippet__fix"));
+    codeBlocks.forEach((block) => {
+      const codePre = block.querySelector("pre");
+      if (!codePre)
+        return;
+      const codeHtml = codePre.innerHTML || "";
+      const styleText = block.getAttribute("style") || "";
+      const backgroundMatch = styleText.match(/background:([^;!]+)(?:\s*!important)?/i);
+      const borderMatch = styleText.match(/border:([^;!]+)(?:\s*!important)?/i);
+      const radiusMatch = styleText.match(/border-radius:([^;!]+)(?:\s*!important)?/i);
+      const background = backgroundMatch ? backgroundMatch[1].trim() : "#0d1117";
+      const border = borderMatch ? borderMatch[1].trim() : "1px solid #30363d";
+      const borderRadius = radiusMatch ? radiusMatch[1].trim() : "8px";
+      const table = document.createElement("table");
+      table.setAttribute("style", `width:100% !important;border-collapse:collapse !important;margin:12px 0 !important;background:${background} !important;border:${border} !important;border-radius:${borderRadius} !important;overflow:hidden !important;`);
+      const toolbarRow = document.createElement("tr");
+      const toolbarCell = document.createElement("td");
+      toolbarCell.setAttribute("style", "background:#161b22 !important;padding:6px 10px 6px 10px !important;border:none !important;line-height:1 !important;vertical-align:top !important;");
+      toolbarCell.innerHTML = [
+        '<span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;color:transparent !important;vertical-align:top !important;">&nbsp;</span>',
+        '<span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;color:transparent !important;vertical-align:top !important;">&nbsp;</span>',
+        '<span style="display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#28c840 !important;font-size:0 !important;line-height:0 !important;color:transparent !important;vertical-align:top !important;">&nbsp;</span>'
+      ].join("");
+      toolbarRow.appendChild(toolbarCell);
+      table.appendChild(toolbarRow);
+      const codeRow = document.createElement("tr");
+      const codeCell = document.createElement("td");
+      codeCell.setAttribute("style", `padding:0 !important;border:none !important;background:${background} !important;color:#f0f6fc !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:1.75 !important;overflow-x:auto !important;`);
+      const newPre = document.createElement("pre");
+      newPre.setAttribute("style", `margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:#f0f6fc !important;white-space:nowrap !important;overflow-x:visible !important;display:inline-block !important;min-width:100% !important;`);
+      newPre.innerHTML = codeHtml;
+      codeCell.appendChild(newPre);
+      codeRow.appendChild(codeCell);
+      table.appendChild(codeRow);
+      block.replaceWith(table);
+    });
+  }
   async readClipboardTextSnapshot() {
     if (!navigator.clipboard || typeof navigator.clipboard.readText !== "function") {
       return { supported: false, text: "" };
@@ -6159,17 +14105,15 @@ var AppleStyleView = class extends ItemView {
     }
     this.isCopying = true;
     if (this.copyBtn) {
-      this.copyBtn.classList.add("active");
+      this.copyBtn.classList.add("is-copying");
+      this.setCopyButtonSpinner();
     }
     try {
+      const exportHtml = this.getCurrentExportHtml() || this.currentHtml;
       const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = this.currentHtml;
-      const images = Array.from(tempDiv.querySelectorAll("img"));
-      const localImages = images.filter((img) => img.src.startsWith("app://"));
-      if (localImages.length > 0) {
-        new Notice("\u23F3 \u6B63\u5728\u5904\u7406\u56FE\u7247...");
-      }
+      tempDiv.innerHTML = exportHtml;
       const processed = await this.processImagesToDataURL(tempDiv);
+      await this.enhanceHtmlForWechatPublishing(tempDiv);
       const cleanedHtml = this.cleanHtmlForDraft(tempDiv.innerHTML);
       const htmlContent = cleanedHtml;
       window.__OWC_LAST_CLIPBOARD_HTML = htmlContent;
@@ -6186,19 +14130,25 @@ var AppleStyleView = class extends ItemView {
           copied = snapshot.supported && snapshot.text === expectedPlainText;
         }
       } else {
-        copied = await this.copyRichHTMLByClipboard(htmlContent);
+        try {
+          copied = await this.copyRichHTMLByClipboard(htmlContent);
+        } catch (error) {
+          copied = false;
+        }
+        if (!copied) {
+          copied = this.copyRichHTMLBySelection(htmlContent);
+        }
       }
       if (!copied) {
         throw new Error("rich copy unavailable");
       }
       new Notice("\u2705 \u5DF2\u590D\u5236\u516C\u4F17\u53F7\u683C\u5F0F\uFF0C\u8BF7\u76F4\u63A5\u7C98\u8D34\u5230\u516C\u4F17\u53F7\u7F16\u8F91\u5668");
       if (this.copyBtn) {
-        const { setIcon } = require("obsidian");
-        setIcon(this.copyBtn, "check");
+        this.copyBtn.classList.remove("is-copying");
+        this.setCopyButtonIcon("check");
         setTimeout(() => {
           if (this.copyBtn) {
-            setIcon(this.copyBtn, "copy");
-            this.copyBtn.classList.remove("active");
+            this.setCopyButtonIcon("copy");
           }
         }, 2e3);
       }
@@ -6207,7 +14157,8 @@ var AppleStyleView = class extends ItemView {
       console.error("\u590D\u5236\u5931\u8D25:", error);
       new Notice("\u274C \u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u4F7F\u7528\u300C\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1\u300D\u53D1\u9001\u6587\u7AE0");
       if (this.copyBtn) {
-        this.copyBtn.classList.remove("active");
+        this.copyBtn.classList.remove("is-copying");
+        this.setCopyButtonIcon("copy");
       }
     } finally {
       this.isCopying = false;
@@ -6303,6 +14254,10 @@ var AppleStyleView = class extends ItemView {
       clearTimeout(this.sidePaddingPreviewTimer);
       this.sidePaddingPreviewTimer = null;
     }
+    if (this.aiLayoutStaleSuppressTimer) {
+      clearTimeout(this.aiLayoutStaleSuppressTimer);
+      this.aiLayoutStaleSuppressTimer = null;
+    }
     this.setPreviewLoading(false);
     if (this.activeEditorScroller && this.editorScrollListener) {
       this.activeEditorScroller.removeEventListener("scroll", this.editorScrollListener);
@@ -6311,6 +14266,9 @@ var AppleStyleView = class extends ItemView {
       this.previewContainer.removeEventListener("scroll", this.previewScrollListener);
     }
     (_a = this.previewContainer) == null ? void 0 : _a.empty();
+    this.closeTransientPanels();
+    this.aiLayoutBtn = null;
+    this.settingsBtn = null;
     if (this.articleStates) {
       this.articleStates.clear();
     }
@@ -6319,6 +14277,9 @@ var AppleStyleView = class extends ItemView {
     }
     if (this.imageUploadCache) {
       this.imageUploadCache.clear();
+    }
+    if (this.mermaidImageCache) {
+      this.mermaidImageCache.clear();
     }
     console.log("\u{1F34E} \u8F6C\u6362\u5668\u9762\u677F\u5DF2\u5173\u95ED");
   }
@@ -6343,6 +14304,16 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
   }
   isAbsolutePathLike(vaultPath) {
     return isAbsolutePathLike(vaultPath);
+  }
+  refreshOpenConverterAiState() {
+    var _a, _b;
+    const view = (_b = (_a = this.plugin).getConverterView) == null ? void 0 : _b.call(_a);
+    if (view && typeof view.updateAiToolbarState === "function") {
+      view.updateAiToolbarState();
+    }
+    if (view && typeof view.refreshAiLayoutPanel === "function") {
+      view.refreshAiLayoutPanel();
+    }
   }
   display() {
     const { containerEl } = this;
@@ -6474,6 +14445,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
         attr: { style: "color: var(--text-muted);" }
       });
     }
+    this.renderAiSettingsSection(containerEl);
     new Setting(containerEl).setName("\u9AD8\u7EA7\u8BBE\u7F6E").setHeading();
     new Setting(containerEl).setName("\u53D1\u9001\u6210\u529F\u540E\u81EA\u52A8\u6E05\u7406\u8D44\u6E90").setDesc("\u9ED8\u8BA4\u5173\u95ED\u3002\u5F00\u542F\u540E\u4F1A\u5728\u521B\u5EFA\u8349\u7A3F\u6210\u529F\u540E\uFF0C\u5220\u9664\u4F60\u5728\u4E0B\u65B9\u914D\u7F6E\u7684\u76EE\u5F55\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.cleanupAfterSync).onChange(async (value) => {
       this.plugin.settings.cleanupAfterSync = value;
@@ -6530,6 +14502,338 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
   }
+  renderAiSettingsSection(containerEl) {
+    new Setting(containerEl).setName("AI \u7F16\u6392").setDesc("\u7BA1\u7406\u6A21\u578B\u3001\u9ED8\u8BA4\u5E03\u5C40\u3001\u9ED8\u8BA4\u989C\u8272\u548C\u7F13\u5B58\u7B56\u7565\u3002\u5B9E\u9645\u751F\u6210\u4E0E\u5E94\u7528\u5165\u53E3\u5728\u8F6C\u6362\u5668\u9876\u90E8\u5DE5\u5177\u680F\u7684\u300CAI \u7F16\u6392\u300D\u6309\u94AE\u4E2D\u3002").setHeading();
+    new Setting(containerEl).setName("\u542F\u7528 AI \u7F16\u6392").setDesc("\u5173\u95ED\u540E\u4F1A\u9690\u85CF\u53F3\u4FA7\u5DE5\u5177\u680F\u4E2D\u7684 AI \u7F16\u6392\u5165\u53E3\uFF0C\u4F46\u4E0D\u4F1A\u5220\u9664\u5DF2\u7ECF\u4E3A\u6587\u7AE0\u548C\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u751F\u6210\u8FC7\u7684\u7F13\u5B58\u7ED3\u679C\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.enabled === true).onChange(async (value) => {
+      this.plugin.settings.ai.enabled = value;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    const layoutFamilyOptions = getLayoutFamilyList({ includeAuto: true, includeReserved: false });
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u5E03\u5C40").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u5E03\u5C40\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u6839\u636E\u6587\u7AE0\u5185\u5BB9\u63A8\u8350\u5E03\u5C40\u98CE\u683C\u3002").addDropdown((dropdown) => {
+      layoutFamilyOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(this.plugin.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO);
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultLayoutFamily = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    const colorPaletteOptions = getColorPaletteList({ includeAuto: true });
+    new Setting(containerEl).setName("\u9ED8\u8BA4\u989C\u8272").setDesc("\u6253\u5F00 AI \u7F16\u6392\u9762\u677F\u65F6\u9ED8\u8BA4\u9009\u4E2D\u7684\u989C\u8272\u3002\u4FDD\u6301\u201C\u81EA\u52A8\u63A8\u8350\u201D\u65F6\uFF0CAI \u4F1A\u5728\u5185\u7F6E\u914D\u8272\u65B9\u6848\u4E2D\u63A8\u8350\u4E00\u4E2A\u7ED3\u679C\uFF1B\u751F\u6210\u540E\u4E5F\u53EF\u4EE5\u624B\u52A8\u5207\u6362\u989C\u8272\u590D\u7528\u5F53\u524D\u5E03\u5C40\u3002").addDropdown((dropdown) => {
+      colorPaletteOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(this.plugin.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO);
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultColorPalette = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    const providers = this.plugin.settings.ai.providers || [];
+    const defaultProviderId = this.plugin.settings.ai.defaultProviderId;
+    const runnableProviders = providers.filter((provider) => isAiProviderRunnable(provider) && provider.enabled !== false);
+    new Setting(containerEl).setName("\u9ED8\u8BA4 AI Provider").setDesc(runnableProviders.length > 0 ? "\u751F\u6210 AI \u7F16\u6392\u65F6\u4F1A\u4F18\u5148\u4F7F\u7528\u8FD9\u91CC\u9009\u4E2D\u7684 Provider\u3002" : "\u8FD8\u6CA1\u6709\u53EF\u76F4\u63A5\u7528\u4E8E AI \u7F16\u6392\u7684 Provider\uFF0C\u8BF7\u5148\u8865\u5168 Base URL\u3001API Key \u548C\u6A21\u578B\u3002").addDropdown((dropdown) => {
+      dropdown.addOption("", "\u81EA\u52A8\u9009\u62E9");
+      providers.forEach((provider) => {
+        const statusText = summarizeAiProviderIssues(provider);
+        dropdown.addOption(provider.id, `${provider.name} (${statusText})`);
+      });
+      dropdown.setValue(defaultProviderId || "");
+      dropdown.onChange(async (value) => {
+        this.plugin.settings.ai.defaultProviderId = value;
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+      });
+    });
+    if (providers.length === 0) {
+      containerEl.createEl("p", {
+        text: "\u6682\u65E0 AI Provider\uFF0C\u8BF7\u70B9\u51FB\u4E0B\u65B9\u6309\u94AE\u6DFB\u52A0",
+        cls: "setting-item-description",
+        attr: { style: "color: var(--text-muted); font-style: italic;" }
+      });
+    } else {
+      const providerList = containerEl.createDiv({ cls: "wechat-account-list" });
+      for (const provider of providers) {
+        const isDefault = provider.id === defaultProviderId;
+        const providerIssues = getAiProviderIssues(provider);
+        const isRunnable = isAiProviderRunnable(provider) && provider.enabled !== false;
+        const providerCard = providerList.createDiv({ cls: "wechat-account-card" });
+        const info = providerCard.createDiv({ cls: "wechat-account-info" });
+        const nameRow = info.createDiv({ cls: "wechat-account-name-row" });
+        nameRow.createEl("span", { text: provider.name, cls: "wechat-account-name" });
+        if (isDefault) {
+          nameRow.createEl("span", { text: "\u9ED8\u8BA4", cls: "wechat-account-badge" });
+        }
+        if (provider.enabled === false) {
+          nameRow.createEl("span", { text: "\u5DF2\u505C\u7528", cls: "wechat-account-badge", attr: { style: "background: var(--text-faint);" } });
+        } else if (isRunnable) {
+          nameRow.createEl("span", { text: "\u53EF\u7528", cls: "wechat-account-badge", attr: { style: "background: #0f8f64;" } });
+        } else {
+          nameRow.createEl("span", { text: "\u5F85\u8865\u5168", cls: "wechat-account-badge", attr: { style: "background: #d97706;" } });
+        }
+        info.createDiv({
+          text: `${provider.kind} \xB7 ${provider.model || "\u672A\u8BBE\u7F6E\u6A21\u578B"}`,
+          cls: "wechat-account-appid"
+        });
+        info.createDiv({
+          text: summarizeAiProviderIssues(provider),
+          cls: "wechat-account-appid"
+        });
+        const actions = providerCard.createDiv({ cls: "wechat-account-actions" });
+        if (!isDefault) {
+          const defaultBtn = actions.createEl("button", { text: "\u8BBE\u4E3A\u9ED8\u8BA4", cls: "wechat-btn-small" });
+          defaultBtn.onclick = async () => {
+            this.plugin.settings.ai.defaultProviderId = provider.id;
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          };
+        }
+        const editBtn = actions.createEl("button", { text: "\u7F16\u8F91", cls: "wechat-btn-small" });
+        editBtn.onclick = () => this.showEditAiProviderModal(provider);
+        const testBtn = actions.createEl("button", { text: "\u6D4B\u8BD5", cls: "wechat-btn-small wechat-btn-test" });
+        if (!isRunnable) {
+          testBtn.disabled = true;
+          testBtn.title = providerIssues.includes("disabled") ? "\u8BF7\u5148\u542F\u7528\u8BE5 Provider" : `\u5F53\u524D\u65E0\u6CD5\u6D4B\u8BD5\uFF1A${summarizeAiProviderIssues(provider)}`;
+        }
+        testBtn.onclick = async () => {
+          if (!isRunnable)
+            return;
+          testBtn.disabled = true;
+          testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
+          try {
+            await testAiProviderConnection(provider);
+            new Notice(`\u2705 ${provider.name} \u8FDE\u63A5\u6210\u529F\uFF01`);
+          } catch (error) {
+            new Notice(`\u274C ${provider.name} \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
+          }
+          testBtn.disabled = false;
+          testBtn.textContent = "\u6D4B\u8BD5";
+        };
+        const deleteBtn = actions.createEl("button", { text: "\u5220\u9664", cls: "wechat-btn-small wechat-btn-danger" });
+        deleteBtn.onclick = async () => {
+          if (confirm(`\u786E\u5B9A\u8981\u5220\u9664 AI Provider "${provider.name}" \u5417\uFF1F`)) {
+            this.plugin.settings.ai.providers = providers.filter((item) => item.id !== provider.id);
+            if (provider.id === defaultProviderId) {
+              const nextRunnableProvider = this.plugin.settings.ai.providers.find((item) => item.enabled !== false && isAiProviderRunnable(item));
+              this.plugin.settings.ai.defaultProviderId = (nextRunnableProvider == null ? void 0 : nextRunnableProvider.id) || "";
+            }
+            await this.plugin.saveSettings();
+            this.refreshOpenConverterAiState();
+            this.display();
+          }
+        };
+      }
+    }
+    const addProviderContainer = containerEl.createDiv({ cls: "wechat-add-account-container" });
+    const addProviderBtn = addProviderContainer.createEl("button", {
+      text: "+ \u6DFB\u52A0 AI Provider",
+      cls: "wechat-btn-add"
+    });
+    addProviderBtn.onclick = () => this.showEditAiProviderModal(null);
+    const advancedOptions = containerEl.createEl("details", { cls: "apple-settings-details" });
+    advancedOptions.createEl("summary", {
+      cls: "apple-settings-summary",
+      text: "AI \u7F16\u6392\u9AD8\u7EA7\u9009\u9879"
+    });
+    const advancedArea = advancedOptions.createDiv({ cls: "apple-settings-area apple-settings-advanced-area" });
+    new Setting(advancedArea).setName("\u7F16\u6392\u65F6\u53C2\u8003\u56FE\u7247").setDesc("\u5F00\u542F\u540E\uFF0CAI \u4F1A\u628A\u6587\u4E2D\u7684\u914D\u56FE\u548C\u622A\u56FE\u4F5C\u4E3A\u6392\u7248\u7D20\u6750\u53C2\u8003\uFF0C\u4F46\u4E0D\u4F1A\u76F4\u63A5\u6539\u5199\u4F60\u7684\u6B63\u6587\u3002").addToggle((toggle) => toggle.setValue(this.plugin.settings.ai.includeImagesInLayout !== false).onChange(async (value) => {
+      this.plugin.settings.ai.includeImagesInLayout = value;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    new Setting(advancedArea).setName("AI \u8BF7\u6C42\u8D85\u65F6\uFF08\u79D2\uFF09").setDesc("\u8F83\u5FEB\u6A21\u578B\u53EF\u8BBE 15 \u5230 45 \u79D2\uFF1B\u8F83\u6162\u6A21\u578B\u5EFA\u8BAE\u8BBE 60 \u5230 120 \u79D2\u3002").addText((text) => text.setPlaceholder("45").setValue(String(Math.round((this.plugin.settings.ai.requestTimeoutMs || 45e3) / 1e3))).onChange(async (value) => {
+      const seconds = Math.min(180, Math.max(5, parseInt(value || "45", 10) || 45));
+      this.plugin.settings.ai.requestTimeoutMs = seconds * 1e3;
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+    }));
+    const layoutCacheEntries = Object.values(this.plugin.settings.ai.articleLayoutsByPath || {});
+    const cachedDocCount = layoutCacheEntries.length;
+    const cachedLayoutCount = layoutCacheEntries.reduce((count, entry) => {
+      const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+      if (!normalizedEntry)
+        return count;
+      return count + Object.keys(normalizedEntry.familyStates || {}).length;
+    }, 0);
+    const cacheSetting = new Setting(advancedArea).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u7F16\u6392\u98CE\u683C\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
+    if (cachedLayoutCount > 0) {
+      cacheSetting.addButton((button) => button.setButtonText("\u6E05\u7A7A\u7F13\u5B58").setWarning().onClick(async () => {
+        if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
+          return;
+        this.plugin.settings.ai.articleLayoutsByPath = {};
+        await this.plugin.saveSettings();
+        this.refreshOpenConverterAiState();
+        new Notice("\u5DF2\u6E05\u7A7A AI \u7F16\u6392\u7F13\u5B58");
+        this.display();
+      }));
+    }
+  }
+  /**
+   * 显示添加/编辑账号的模态框
+   */
+  showEditAiProviderModal(provider) {
+    const { Modal } = require("obsidian");
+    const modal = new Modal(this.app);
+    modal.titleEl.setText(provider ? "\u7F16\u8F91 AI Provider" : "\u6DFB\u52A0 AI Provider");
+    const form = modal.contentEl.createDiv();
+    const nameGroup = form.createDiv({ cls: "wechat-form-group" });
+    nameGroup.createEl("label", { text: "\u540D\u79F0" });
+    const nameInput = nameGroup.createEl("input", {
+      type: "text",
+      placeholder: "\u4F8B\u5982\uFF1AOpenAI / OpenRouter / \u81EA\u5EFA\u7F51\u5173",
+      value: (provider == null ? void 0 : provider.name) || ""
+    });
+    const kindGroup = form.createDiv({ cls: "wechat-form-group" });
+    kindGroup.createEl("label", { text: "\u7C7B\u578B" });
+    const kindSelect = kindGroup.createEl("select", { cls: "wechat-form-select" });
+    const providerKinds = [
+      { value: AI_PROVIDER_KINDS.OPENAI_COMPATIBLE, label: "OpenAI \u517C\u5BB9\u63A5\u53E3" },
+      { value: AI_PROVIDER_KINDS.GEMINI, label: "Gemini \u517C\u5BB9\u683C\u5F0F" },
+      { value: AI_PROVIDER_KINDS.ANTHROPIC, label: "Anthropic \u517C\u5BB9\u683C\u5F0F" }
+    ];
+    providerKinds.forEach((kind) => {
+      const option = kindSelect.createEl("option", { value: kind.value, text: kind.label });
+      if (((provider == null ? void 0 : provider.kind) || AI_PROVIDER_KINDS.OPENAI_COMPATIBLE) === kind.value) {
+        option.selected = true;
+      }
+    });
+    const baseUrlGroup = form.createDiv({ cls: "wechat-form-group" });
+    baseUrlGroup.createEl("label", { text: "Base URL" });
+    const baseUrlInput = baseUrlGroup.createEl("input", {
+      type: "text",
+      placeholder: "https://api.openai.com/v1",
+      value: (provider == null ? void 0 : provider.baseUrl) || "https://api.openai.com/v1"
+    });
+    const apiKeyGroup = form.createDiv({ cls: "wechat-form-group" });
+    apiKeyGroup.createEl("label", { text: "API Key" });
+    const apiKeyInput = apiKeyGroup.createEl("input", {
+      type: "password",
+      placeholder: "sk-...",
+      value: (provider == null ? void 0 : provider.apiKey) || ""
+    });
+    const modelGroup = form.createDiv({ cls: "wechat-form-group" });
+    modelGroup.createEl("label", { text: "\u6A21\u578B" });
+    const modelInput = modelGroup.createEl("input", {
+      type: "text",
+      placeholder: "gpt-4.1-mini",
+      value: (provider == null ? void 0 : provider.model) || "gpt-4.1-mini"
+    });
+    const applyKindDefaults = () => {
+      const kind = kindSelect.value || AI_PROVIDER_KINDS.OPENAI_COMPATIBLE;
+      if (kind === AI_PROVIDER_KINDS.GEMINI) {
+        baseUrlInput.placeholder = "https://generativelanguage.googleapis.com/v1beta";
+        modelInput.placeholder = "gemini-2.5-flash";
+        if (!provider || provider.kind !== kind) {
+          if (!baseUrlInput.value.trim())
+            baseUrlInput.value = "https://generativelanguage.googleapis.com/v1beta";
+          if (!modelInput.value.trim())
+            modelInput.value = "gemini-2.5-flash";
+        }
+        return;
+      }
+      if (kind === AI_PROVIDER_KINDS.ANTHROPIC) {
+        baseUrlInput.placeholder = "https://api.anthropic.com/v1";
+        modelInput.placeholder = "claude-3-5-haiku-latest";
+        if (!provider || provider.kind !== kind) {
+          if (!baseUrlInput.value.trim())
+            baseUrlInput.value = "https://api.anthropic.com/v1";
+          if (!modelInput.value.trim())
+            modelInput.value = "claude-3-5-haiku-latest";
+        }
+        return;
+      }
+      baseUrlInput.placeholder = "https://api.openai.com/v1";
+      modelInput.placeholder = "gpt-4.1-mini";
+      if (!provider || provider.kind !== kind) {
+        if (!baseUrlInput.value.trim())
+          baseUrlInput.value = "https://api.openai.com/v1";
+        if (!modelInput.value.trim())
+          modelInput.value = "gpt-4.1-mini";
+      }
+    };
+    kindSelect.addEventListener("change", applyKindDefaults);
+    applyKindDefaults();
+    const enabledGroup = form.createDiv({ cls: "wechat-form-group" });
+    enabledGroup.createEl("label", { text: "\u542F\u7528" });
+    const enabledWrap = enabledGroup.createDiv({ cls: "wechat-provider-enabled" });
+    const enabledToggle = enabledWrap.createEl("label", { cls: "apple-toggle" }).createEl("input", {
+      type: "checkbox",
+      cls: "apple-toggle-input",
+      checked: (provider == null ? void 0 : provider.enabled) !== false ? true : void 0
+    });
+    enabledToggle.checked = (provider == null ? void 0 : provider.enabled) !== false;
+    enabledToggle.parentElement.createEl("span", { cls: "apple-toggle-slider" });
+    enabledWrap.createEl("span", {
+      cls: "wechat-provider-enabled-text",
+      text: "\u4FDD\u5B58\u540E\u53EF\u7528\u4E8E AI \u7F16\u6392\u548C\u8FDE\u63A5\u6D4B\u8BD5"
+    });
+    const btnRow = form.createDiv({ cls: "wechat-modal-buttons" });
+    const cancelBtn = btnRow.createEl("button", { text: "\u53D6\u6D88" });
+    cancelBtn.onclick = () => modal.close();
+    const testBtn = btnRow.createEl("button", { text: "\u6D4B\u8BD5\u8FDE\u63A5", cls: "wechat-btn-test" });
+    testBtn.onclick = async () => {
+      const candidate = normalizeAiProvider({
+        id: provider == null ? void 0 : provider.id,
+        name: nameInput.value.trim() || "\u672A\u547D\u540D Provider",
+        kind: kindSelect.value,
+        baseUrl: baseUrlInput.value.trim(),
+        apiKey: apiKeyInput.value.trim(),
+        model: modelInput.value.trim(),
+        enabled: enabledToggle.checked
+      });
+      const issueSummary = summarizeAiProviderIssues(candidate);
+      if (!isAiProviderRunnable(candidate)) {
+        new Notice(`\u8BF7\u5148\u8865\u5168 Provider \u914D\u7F6E\uFF1A${issueSummary}`);
+        return;
+      }
+      testBtn.disabled = true;
+      testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
+      try {
+        await testAiProviderConnection(candidate);
+        new Notice("\u2705 AI Provider \u8FDE\u63A5\u6210\u529F\uFF01");
+      } catch (error) {
+        new Notice(`\u274C \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
+      }
+      testBtn.disabled = false;
+      testBtn.textContent = "\u6D4B\u8BD5\u8FDE\u63A5";
+    };
+    const saveBtn = btnRow.createEl("button", { text: "\u4FDD\u5B58", cls: "mod-cta" });
+    saveBtn.onclick = async () => {
+      const nextProvider = normalizeAiProvider({
+        id: provider == null ? void 0 : provider.id,
+        name: nameInput.value.trim() || "\u672A\u547D\u540D Provider",
+        kind: kindSelect.value,
+        baseUrl: baseUrlInput.value.trim(),
+        apiKey: apiKeyInput.value.trim(),
+        model: modelInput.value.trim(),
+        enabled: enabledToggle.checked
+      });
+      const issues = getAiProviderIssues(nextProvider).filter((issue) => issue !== "disabled");
+      if (issues.length > 0) {
+        new Notice(`\u8BF7\u8865\u5168 Provider \u914D\u7F6E\uFF1A${summarizeAiProviderIssues(nextProvider)}`);
+        return;
+      }
+      const providers = this.plugin.settings.ai.providers || [];
+      if (provider) {
+        this.plugin.settings.ai.providers = providers.map((item) => item.id === provider.id ? nextProvider : item);
+      } else {
+        this.plugin.settings.ai.providers.push(nextProvider);
+        if (!this.plugin.settings.ai.defaultProviderId) {
+          this.plugin.settings.ai.defaultProviderId = nextProvider.id;
+        }
+      }
+      if (!this.plugin.settings.ai.defaultProviderId && nextProvider.enabled !== false && isAiProviderRunnable(nextProvider)) {
+        this.plugin.settings.ai.defaultProviderId = nextProvider.id;
+      }
+      await this.plugin.saveSettings();
+      this.refreshOpenConverterAiState();
+      modal.close();
+      this.display();
+      new Notice(provider ? "\u2705 AI Provider \u5DF2\u66F4\u65B0" : "\u2705 AI Provider \u5DF2\u6DFB\u52A0");
+    };
+    modal.open();
+  }
   /**
    * 显示添加/编辑账号的模态框
    */
@@ -6538,6 +14842,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
     const modal = new Modal(this.app);
     modal.titleEl.setText(account ? "\u7F16\u8F91\u8D26\u53F7" : "\u6DFB\u52A0\u8D26\u53F7");
     const form = modal.contentEl.createDiv();
+    const publishDefaults = getWechatAccountPublishOptions(account);
     const nameGroup = form.createDiv({ cls: "wechat-form-group" });
     nameGroup.createEl("label", { text: "\u8D26\u53F7\u540D\u79F0" });
     const nameInput = nameGroup.createEl("input", {
@@ -6566,6 +14871,46 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       placeholder: "\u7559\u7A7A\u5219\u4E0D\u663E\u793A\u4F5C\u8005",
       value: (account == null ? void 0 : account.author) || ""
     });
+    const publishOptions = form.createEl("details", { cls: "wechat-sync-advanced wechat-account-publish-options" });
+    publishOptions.createEl("summary", {
+      text: "\u53D1\u5E03\u9009\u9879",
+      cls: "wechat-sync-advanced-summary"
+    });
+    const publishSection = publishOptions.createDiv({ cls: "wechat-sync-advanced-body wechat-account-publish-body" });
+    publishSection.createEl("div", {
+      text: "\u53EF\u4E3A\u5F53\u524D\u516C\u4F17\u53F7\u9884\u8BBE\u539F\u6587\u94FE\u63A5\u4E0E\u7559\u8A00\u76F8\u5173\u7684\u9ED8\u8BA4\u53D1\u5E03\u7B56\u7565\u3002",
+      cls: "wechat-form-help"
+    });
+    const sourceUrlGroup = publishSection.createDiv({ cls: "wechat-form-group" });
+    sourceUrlGroup.createEl("label", { text: "\u9ED8\u8BA4\u539F\u6587\u94FE\u63A5\uFF08\u53EF\u9009\uFF09" });
+    const sourceUrlInput = sourceUrlGroup.createEl("input", {
+      type: "url",
+      placeholder: "\u7559\u7A7A\u5219\u4E0D\u540C\u6B65\u539F\u6587\u94FE\u63A5",
+      value: publishDefaults.contentSourceUrl
+    });
+    const commentGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
+    const commentLabel = commentGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
+    const commentInput = commentLabel.createEl("input", { type: "checkbox" });
+    commentInput.checked = publishDefaults.openComment;
+    commentLabel.appendText("\u9ED8\u8BA4\u5F00\u542F\u7559\u8A00");
+    const fansCommentGroup = publishSection.createDiv({ cls: "wechat-form-checkbox-group" });
+    const fansCommentLabel = fansCommentGroup.createEl("label", { cls: "wechat-form-checkbox-label" });
+    const fansCommentInput = fansCommentLabel.createEl("input", { type: "checkbox" });
+    fansCommentInput.checked = publishDefaults.openComment && publishDefaults.onlyFansCanComment;
+    fansCommentLabel.appendText("\u9ED8\u8BA4\u4EC5\u7C89\u4E1D\u53EF\u7559\u8A00");
+    fansCommentGroup.createEl("div", {
+      text: "\u5173\u95ED\u7559\u8A00\u65F6\uFF0C\u6B64\u9009\u9879\u4E0D\u4F1A\u751F\u6548\u3002",
+      cls: "wechat-form-help"
+    });
+    const syncCommentDependency = () => {
+      const enabled = commentInput.checked;
+      fansCommentInput.disabled = !enabled;
+      fansCommentGroup.toggleClass("is-disabled", !enabled);
+      if (!enabled)
+        fansCommentInput.checked = false;
+    };
+    commentInput.addEventListener("change", syncCommentDependency);
+    syncCommentDependency();
     const btnRow = form.createDiv({ cls: "wechat-modal-buttons" });
     const cancelBtn = btnRow.createEl("button", { text: "\u53D6\u6D88" });
     cancelBtn.onclick = () => modal.close();
@@ -6596,18 +14941,25 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
         new Notice("\u8BF7\u586B\u5199 AppID \u548C AppSecret");
         return;
       }
+      const publishOptions2 = normalizeWechatAccountPublishOptions({
+        contentSourceUrl: sourceUrlInput.value,
+        openComment: commentInput.checked,
+        onlyFansCanComment: fansCommentInput.checked
+      });
       if (account) {
         account.name = name;
         account.appId = appId;
         account.appSecret = appSecret;
         account.author = authorInput.value.trim();
+        Object.assign(account, publishOptions2);
       } else {
         const newAccount = {
           id: generateId(),
           name,
           appId,
           appSecret,
-          author: authorInput.value.trim()
+          author: authorInput.value.trim(),
+          ...publishOptions2
         };
         this.plugin.settings.wechatAccounts.push(newAccount);
         if (this.plugin.settings.wechatAccounts.length === 1) {
@@ -6701,6 +15053,14 @@ var AppleStylePlugin = class extends Plugin {
     const loadedData = await this.loadData() || {};
     this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
     let didMigrate = false;
+    const rawAiSettings = loadedData.ai;
+    this.settings.ai = normalizeAiSettings(rawAiSettings || this.settings.ai || {});
+    if (rawAiSettings !== void 0) {
+      const normalizedRawAi = normalizeAiSettings(rawAiSettings);
+      if (JSON.stringify(normalizedRawAi) !== JSON.stringify(rawAiSettings)) {
+        didMigrate = true;
+      }
+    }
     if (this.settings.wechatAppId && this.settings.wechatAccounts.length === 0) {
       const migratedAccount = {
         id: generateId(),
@@ -6714,6 +15074,26 @@ var AppleStylePlugin = class extends Plugin {
       this.settings.wechatAppSecret = "";
       didMigrate = true;
       console.log("\u2705 \u5DF2\u5C06\u65E7\u8D26\u53F7\u914D\u7F6E\u8FC1\u79FB\u5230\u65B0\u683C\u5F0F");
+    }
+    if (Array.isArray(this.settings.wechatAccounts)) {
+      this.settings.wechatAccounts = this.settings.wechatAccounts.map((account) => {
+        if (!account || typeof account !== "object")
+          return account;
+        const nextAccount = { ...account };
+        let changed = false;
+        if (Object.prototype.hasOwnProperty.call(nextAccount, "enableOriginal")) {
+          delete nextAccount.enableOriginal;
+          changed = true;
+        }
+        if (Object.prototype.hasOwnProperty.call(nextAccount, "allowReprint")) {
+          delete nextAccount.allowReprint;
+          changed = true;
+        }
+        if (changed) {
+          didMigrate = true;
+        }
+        return nextAccount;
+      });
     }
     const currentTemplate = normalizeVaultPath(this.settings.cleanupDirTemplate || "");
     const legacyRootDir = normalizeVaultPath(this.settings.cleanupRootDir || "");
@@ -6751,6 +15131,99 @@ var AppleStylePlugin = class extends Plugin {
     if (didMigrate) {
       await this.saveSettings();
     }
+  }
+  getArticleLayoutState(sourcePath = "", selection = {}) {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const normalizedPath = normalizeVaultPath(sourcePath || "");
+    if (!normalizedPath)
+      return null;
+    const entry = ((_c = (_b = (_a = this.settings) == null ? void 0 : _a.ai) == null ? void 0 : _b.articleLayoutsByPath) == null ? void 0 : _c[normalizedPath]) || null;
+    const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
+    if (!normalizedEntry)
+      return null;
+    if (!selection || Object.keys(selection).length === 0) {
+      return ((_d = normalizedEntry.familyStates) == null ? void 0 : _d[normalizedEntry.lastLayoutFamily]) || null;
+    }
+    return getArticleLayoutSelectionState(normalizedEntry, selection, {
+      layoutFamily: ((_f = (_e = this.settings) == null ? void 0 : _e.ai) == null ? void 0 : _f.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
+      colorPalette: ((_h = (_g = this.settings) == null ? void 0 : _g.ai) == null ? void 0 : _h.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO
+    });
+  }
+  async saveArticleLayoutState(sourcePath = "", nextState = null, selection = {}) {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const normalizedPath = normalizeVaultPath(sourcePath || "");
+    if (!normalizedPath)
+      return false;
+    if (!this.settings.ai) {
+      this.settings.ai = createDefaultAiSettings();
+    }
+    if (!this.settings.ai.articleLayoutsByPath || typeof this.settings.ai.articleLayoutsByPath !== "object") {
+      this.settings.ai.articleLayoutsByPath = {};
+    }
+    const existingEntry = normalizeArticleLayoutCacheEntry(this.settings.ai.articleLayoutsByPath[normalizedPath]) || {
+      lastLayoutFamily: "",
+      lastAutoResolvedFamily: "",
+      familyStates: {}
+    };
+    const hasExplicitSelection = typeof selection === "string" || selection && typeof selection === "object" && Object.keys(selection).length > 0;
+    const requestedSelection = normalizeLayoutSelection(
+      (nextState == null ? void 0 : nextState.selection) || (hasExplicitSelection ? selection : null) || {
+        layoutFamily: (nextState == null ? void 0 : nextState.layoutFamily) || ((_a = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _a.layoutFamily),
+        colorPalette: (nextState == null ? void 0 : nextState.stylePack) || ((_b = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _b.colorPalette) || ((_c = nextState == null ? void 0 : nextState.layoutJson) == null ? void 0 : _c.stylePack)
+      },
+      {
+        layoutFamily: this.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
+        colorPalette: this.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
+      }
+    );
+    const getCacheFamily = (state = null) => {
+      var _a2, _b2;
+      const normalizedState = normalizeArticleLayoutState(state || {});
+      const rawFamily = ((_a2 = normalizedState == null ? void 0 : normalizedState.resolved) == null ? void 0 : _a2.layoutFamily) || (normalizedState == null ? void 0 : normalizedState.layoutFamily) || ((_b2 = state == null ? void 0 : state.resolved) == null ? void 0 : _b2.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || (requestedSelection.layoutFamily !== AI_LAYOUT_SELECTION_AUTO ? requestedSelection.layoutFamily : "");
+      const normalizedFamily = normalizeLayoutSelection({ layoutFamily: rawFamily }).layoutFamily;
+      return normalizedFamily === AI_LAYOUT_SELECTION_AUTO ? "" : normalizedFamily;
+    };
+    const effectiveLayoutFamily = getCacheFamily(nextState);
+    if (!nextState) {
+      if (selection && Object.keys(selection).length && effectiveLayoutFamily) {
+        delete existingEntry.familyStates[effectiveLayoutFamily];
+        const remainingFamilies = Object.keys(existingEntry.familyStates);
+        if (!remainingFamilies.length) {
+          delete this.settings.ai.articleLayoutsByPath[normalizedPath];
+        } else {
+          existingEntry.lastLayoutFamily = existingEntry.familyStates[existingEntry.lastLayoutFamily] ? existingEntry.lastLayoutFamily : remainingFamilies[0];
+          if (existingEntry.lastAutoResolvedFamily && !existingEntry.familyStates[existingEntry.lastAutoResolvedFamily]) {
+            existingEntry.lastAutoResolvedFamily = "";
+          }
+          this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
+        }
+      } else {
+        delete this.settings.ai.articleLayoutsByPath[normalizedPath];
+      }
+    } else {
+      const resolvedLayoutFamily = effectiveLayoutFamily || "source-first";
+      const inferredSkillId = (nextState == null ? void 0 : nextState.skillId) || resolvedLayoutFamily || requestedSelection.layoutFamily;
+      const inferredSkillVersion = (nextState == null ? void 0 : nextState.skillVersion) || ((_d = nextState == null ? void 0 : nextState.generationMeta) == null ? void 0 : _d.skillVersion) || ((_e = getLayoutFamilyById(inferredSkillId)) == null ? void 0 : _e.version) || "";
+      existingEntry.familyStates[resolvedLayoutFamily] = {
+        ...nextState,
+        skillId: inferredSkillId,
+        skillVersion: inferredSkillVersion,
+        selection: requestedSelection,
+        resolved: {
+          ...(nextState == null ? void 0 : nextState.resolved) || {},
+          layoutFamily: resolvedLayoutFamily,
+          colorPalette: (nextState == null ? void 0 : nextState.stylePack) || ((_f = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _f.colorPalette) || "tech-green"
+        },
+        layoutFamily: resolvedLayoutFamily,
+        stylePack: (nextState == null ? void 0 : nextState.stylePack) || ((_g = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _g.colorPalette) || "tech-green"
+      };
+      existingEntry.lastLayoutFamily = resolvedLayoutFamily;
+      if (requestedSelection.layoutFamily === AI_LAYOUT_SELECTION_AUTO) {
+        existingEntry.lastAutoResolvedFamily = resolvedLayoutFamily;
+      }
+      this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
+    }
+    return this.saveSettings();
   }
   async saveSettings() {
     try {

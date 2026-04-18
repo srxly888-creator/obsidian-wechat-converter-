@@ -54,8 +54,8 @@ function toTitleCase(value) {
 
 function resolveLegacyCalloutIcon(type) {
   const key = String(type || '').trim().toLowerCase();
-  if (!key) return '📌';
-  return LEGACY_CALLOUT_ICON_BY_TYPE[key] || '📌';
+  if (!key) return 'ℹ️';
+  return LEGACY_CALLOUT_ICON_BY_TYPE[key] || 'ℹ️';
 }
 
 function convertObsidianCalloutsToLegacy(container, converter) {
@@ -142,7 +142,9 @@ function sanitizeClassList(el, tagName, finalStage = false) {
   if (tagName === 'section') {
     keep = classes.filter((cls) => cls === 'code-snippet__fix');
   } else if (tagName === 'img') {
-    keep = classes.filter((cls) => cls === 'math-formula-image');
+    keep = classes.filter((cls) => cls === 'math-formula-image' || cls === 'mermaid-diagram-image');
+  } else if (tagName === 'svg') {
+    keep = classes.filter((cls) => cls === 'owc-mermaid-diagram');
   } else if (!finalStage && (tagName === 'pre' || tagName === 'code')) {
     keep = classes.filter((cls) => cls.startsWith('language-'));
   }
@@ -157,11 +159,29 @@ function sanitizeClassList(el, tagName, finalStage = false) {
 function pruneObsidianOnlyAttributes(container, { finalStage = false } = {}) {
   if (!container) return;
 
+  const SVG_ALLOWED_ATTRS = new Set([
+    'style', 'class', 'xmlns', 'viewbox', 'width', 'height', 'x', 'y',
+    'cx', 'cy', 'rx', 'ry', 'r', 'x1', 'y1', 'x2', 'y2', 'd', 'points',
+    'transform', 'fill', 'stroke', 'stroke-width', 'stroke-linecap',
+    'stroke-linejoin', 'stroke-dasharray', 'stroke-dashoffset', 'opacity',
+    'fill-opacity', 'stroke-opacity', 'font-size', 'font-family',
+    'font-weight', 'text-anchor', 'dominant-baseline', 'preserveaspectratio',
+    'marker-start', 'marker-mid', 'marker-end', 'markerwidth', 'markerheight',
+    'refx', 'refy', 'orient', 'pathlength', 'role', 'focusable', 'aria-hidden',
+    'xmlns:xlink', 'xlink:href',
+  ]);
+  const SVG_TAGS = new Set([
+    'svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline',
+    'polygon', 'text', 'tspan', 'defs', 'marker', 'foreignobject', 'clippath',
+    'pattern', 'mask', 'symbol', 'use',
+  ]);
+
   const getAllowedAttrs = (tagName) => {
     if (tagName === 'a') return new Set(['href', 'style']);
     if (tagName === 'img') return new Set(['src', 'alt', 'style', 'width', 'height', 'class']);
     if (tagName === 'section') return new Set(['style', 'class']);
     if (!finalStage && (tagName === 'pre' || tagName === 'code')) return new Set(['style', 'class']);
+    if (SVG_TAGS.has(tagName)) return SVG_ALLOWED_ATTRS;
     return new Set(['style']);
   };
 
@@ -541,6 +561,18 @@ function convertStandaloneImages(container, converter) {
     if (img.closest('figure')) continue;
     if (img.getAttribute('alt') === 'logo') continue;
     if (img.classList.contains('math-formula-image')) continue;
+    if (img.classList.contains('mermaid-diagram-image')) {
+      const src = img.getAttribute('src') || '';
+      const safeSrc =
+        converter && typeof converter.validateLink === 'function'
+          ? converter.validateLink(src, true)
+          : src;
+      img.setAttribute('src', safeSrc);
+      if (!img.getAttribute('style')) {
+        img.setAttribute('style', 'display:block;max-width:100%;height:auto;margin:16px auto;');
+      }
+      continue;
+    }
 
     let src = img.getAttribute('src') || '';
     src = normalizeObsidianImageSrcForLegacyParity(src);
@@ -730,9 +762,146 @@ function applyThemeInlineStyles(container, converter) {
   }
 }
 
-function stripDangerousTags(container) {
+function stripDangerousTags(container, { preserveSvgStyleTags = false } = {}) {
   if (!container) return;
-  container.querySelectorAll('script,iframe,object,embed,form,input,button,style').forEach((el) => el.remove());
+  container.querySelectorAll('script,iframe,object,embed,form,input,button,style').forEach((el) => {
+    if (
+      preserveSvgStyleTags
+      && el.tagName?.toLowerCase?.() === 'style'
+      && el.closest?.('svg')
+    ) {
+      return;
+    }
+    el.remove();
+  });
+}
+
+function protectSvgStyleTags(html) {
+  if (typeof html !== 'string' || !html.includes('<style')) {
+    return { html, placeholders: [] };
+  }
+
+  const placeholders = [];
+  let index = 0;
+  const protectedHtml = html.replace(/<svg\b[\s\S]*?<\/svg>/gi, (svgMarkup) => {
+    return svgMarkup.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, (styleMarkup) => {
+      const token = `__OWC_SVG_STYLE_${index}__`;
+      placeholders.push({ token, styleMarkup });
+      index += 1;
+      return token;
+    });
+  });
+
+  return { html: protectedHtml, placeholders };
+}
+
+function restoreSvgStyleTags(html, placeholders = []) {
+  let result = String(html || '');
+  placeholders.forEach(({ token, styleMarkup }) => {
+    result = result.split(token).join(styleMarkup);
+  });
+  return result;
+}
+
+function looksLikeMathSvg(svg) {
+  if (!svg || svg.tagName?.toLowerCase?.() !== 'svg') return false;
+  if (svg.getAttribute('role') === 'img') return true;
+  if (svg.getAttribute('focusable') === 'false') return true;
+  if (svg.classList?.contains('MathJax')) return true;
+  return !!svg.closest?.('mjx-container,mjx-math,.MathJax');
+}
+
+function normalizeMathPresentation(container) {
+  if (!container || typeof document === 'undefined') return;
+
+  const blockStyle = 'display:block; width:100%; margin:1em auto; text-align:center; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;';
+  const inlineStyle = 'display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px; line-height:1;';
+
+  const normalizeTopOffsets = (el) => {
+    if (!el || typeof el.getAttribute !== 'function' || typeof el.setAttribute !== 'function') return;
+    const style = String(el.getAttribute('style') || '');
+    if (!/\btop\s*:/i.test(style)) return;
+    let topValue = null;
+    let nextStyle = style.replace(/(^|;)\s*top\s*:\s*([^;]+)\s*;?/i, (_m, prefix, value) => {
+      topValue = String(value || '').trim();
+      return prefix || '';
+    });
+    if (!topValue) return;
+    if (/transform\s*:/i.test(nextStyle)) {
+      nextStyle = nextStyle.replace(
+        /transform\s*:\s*([^;]+)/i,
+        (_m, value) => `transform:${String(value || '').trim()} translateY(${topValue})`
+      );
+    } else {
+      nextStyle = `${nextStyle}${nextStyle.trim().endsWith(';') || !nextStyle.trim() ? '' : ';'}transform: translateY(${topValue});`;
+    }
+    el.setAttribute('style', nextStyle);
+  };
+
+  container.querySelectorAll('mjx-container').forEach((mjx) => {
+    const attrs = `${mjx.getAttribute('display') || ''} ${mjx.getAttribute('style') || ''}`.toLowerCase();
+    const isBlock = attrs.includes('true') || attrs.includes('display: block') || attrs.includes('display:block');
+    const existing = String(mjx.getAttribute('style') || '');
+    const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+    mjx.setAttribute('style', `${normalized}${isBlock ? blockStyle : inlineStyle}`);
+  });
+
+  container.querySelectorAll('svg').forEach((svg) => {
+    if (!looksLikeMathSvg(svg)) return;
+    const svgStyle = String(svg.getAttribute('style') || '');
+    let normalizedSvgStyle = svgStyle ? `${svgStyle}${svgStyle.trim().endsWith(';') ? '' : ';'}` : '';
+    normalizedSvgStyle = normalizedSvgStyle.replace(/vertical-align\s*:\s*[^;]+;?/gi, '');
+    if (!/max-width\s*:/i.test(normalizedSvgStyle)) {
+      normalizedSvgStyle = `${normalizedSvgStyle}max-width: 100%; height: auto;`;
+    }
+    svg.setAttribute('style', `${normalizedSvgStyle}display:inline-block;vertical-align:middle;`);
+
+    const parent = svg.parentElement;
+    if (!parent) return;
+
+    const parentTag = parent.tagName.toLowerCase();
+    const mathParent = parentTag === 'mjx-container' ? parent : null;
+    const blockHint = String(mathParent?.getAttribute('display') || mathParent?.getAttribute('style') || '').toLowerCase();
+    const wrapperMathMode = parent.getAttribute('data-owc-math');
+    const hostMathMode = parentTag !== 'mjx-container' ? parent.closest?.('[data-owc-math]')?.getAttribute('data-owc-math') : null;
+    const isBlockMath = wrapperMathMode === 'block'
+      || hostMathMode === 'block'
+      || blockHint.includes('true')
+      || blockHint.includes('display: block')
+      || blockHint.includes('display:block');
+
+    if (isBlockMath) {
+      const host = parentTag === 'section'
+        ? parent
+        : (parentTag === 'p' && parent.childNodes.length === 1 ? parent : null);
+      if (host) {
+        host.setAttribute('style', blockStyle);
+      }
+      svg.setAttribute(
+        'style',
+        `${svg.getAttribute('style') || ''}${String(svg.getAttribute('style') || '').trim().endsWith(';') || !svg.getAttribute('style') ? '' : ';'}display:block;margin:0 auto;`
+      );
+    } else if (parentTag === 'span' || parentTag === 'mjx-container') {
+      const existing = String(parent.getAttribute('style') || '');
+      const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+      parent.setAttribute('style', `${normalized}${inlineStyle}`);
+    }
+
+    normalizeTopOffsets(svg);
+    Array.from(svg.querySelectorAll('[style*="top:"], [style*="top: "]')).forEach(normalizeTopOffsets);
+  });
+
+  container.querySelectorAll('[data-owc-math="block"]').forEach((el) => {
+    const existing = String(el.getAttribute('style') || '');
+    const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+    el.setAttribute('style', `${normalized}${blockStyle}`);
+  });
+
+  container.querySelectorAll('[data-owc-math="inline"]').forEach((el) => {
+    const existing = String(el.getAttribute('style') || '');
+    const normalized = existing ? `${existing}${existing.trim().endsWith(';') ? '' : ';'}` : '';
+    el.setAttribute('style', `${normalized}${inlineStyle}`);
+  });
 }
 
 function applyLegacyTypographerParity(container, converter) {
@@ -920,7 +1089,12 @@ function injectPreRenderedMathFormulas(html, formulas) {
   return result;
 }
 
-function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }) {
+function serializeObsidianRenderedHtml({
+  root,
+  converter,
+  preRenderedMath = [],
+  preserveSvgStyleTags = false,
+}) {
   if (typeof document === 'undefined') {
     throw new Error('Triplet serializer requires DOM environment');
   }
@@ -934,12 +1108,13 @@ function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }
   pruneObsidianOnlyAttributes(container, { finalStage: false });
   normalizeLegacyTagAliases(container);
   normalizeLegacyDeleteNesting(container);
-  stripDangerousTags(container);
+  stripDangerousTags(container, { preserveSvgStyleTags });
   // Render math formulas that Obsidian's MarkdownRenderer didn't process
   renderUnresolvedMathFormulas(container, converter);
   applyLegacyLinkifyParity(container, converter);
   applyLegacyTypographerParity(container, converter);
   sanitizeAnchorAndImageLinks(container, converter);
+  normalizeMathPresentation(container);
   convertPreBlocks(container, converter);
   convertStandaloneImages(container, converter);
   applyThemeInlineStyles(container, converter);
@@ -965,8 +1140,18 @@ function serializeObsidianRenderedHtml({ root, converter, preRenderedMath = [] }
   if (converter && typeof converter.fixMathJaxTags === 'function') {
     html = converter.fixMathJaxTags(html);
   }
+  let svgStyleProtection = { html, placeholders: [] };
+  if (preserveSvgStyleTags) {
+    svgStyleProtection = protectSvgStyleTags(html);
+    html = svgStyleProtection.html;
+  }
+
   if (converter && typeof converter.sanitizeHtml === 'function') {
     html = converter.sanitizeHtml(html);
+  }
+
+  if (preserveSvgStyleTags) {
+    html = restoreSvgStyleTags(html, svgStyleProtection.placeholders);
   }
   html = normalizeLegacyDeleteNestingInHtml(html);
 

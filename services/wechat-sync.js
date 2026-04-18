@@ -4,6 +4,7 @@ function createWechatSyncService(deps) {
     srcToBlob,
     processAllImages,
     processMathFormulas,
+    prepareHtmlForDraft = async (html) => html,
     cleanHtmlForDraft,
     cleanupConfiguredDirectory,
     getFirstImageFromArticle,
@@ -34,8 +35,10 @@ function createWechatSyncService(deps) {
       const coverRes = await api.uploadCover(coverBlob);
       const thumbMediaId = coverRes.media_id;
 
+      let draftHtml = await prepareHtmlForDraft(currentHtml);
+
       if (onStatus) onStatus('images');
-      let processedHtml = await processAllImages(currentHtml, api, (current, total) => {
+      let processedHtml = await processAllImages(draftHtml, api, (current, total) => {
         if (onImageProgress) onImageProgress(current, total);
       }, {
         accountId: account.id || '',
@@ -62,6 +65,16 @@ function createWechatSyncService(deps) {
         author: account.author || '',
         digest: sessionDigest || '一键同步自 Obsidian',
       };
+      const contentSourceUrl = String(account.contentSourceUrl || '').trim();
+      if (contentSourceUrl) {
+        article.content_source_url = contentSourceUrl;
+      }
+      if (typeof account.openComment === 'boolean') {
+        article.need_open_comment = account.openComment ? 1 : 0;
+      }
+      if (typeof account.onlyFansCanComment === 'boolean') {
+        article.only_fans_can_comment = account.onlyFansCanComment ? 1 : 0;
+      }
 
       if (onStatus) onStatus('draft');
       await api.createDraft(article);
