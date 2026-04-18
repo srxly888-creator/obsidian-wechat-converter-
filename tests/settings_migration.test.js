@@ -247,7 +247,7 @@ describe('AppleStylePlugin - Settings Migration', () => {
     })?.stylePack).toBe('tech-green');
   });
 
-  it('should keep separate cached layouts for the same note across style packs', async () => {
+  it('should keep one cached layout per note layout family across style packs', async () => {
     const plugin = new AppleStylePlugin();
     plugin.loadData = vi.fn().mockResolvedValue({
       wechatAccounts: [],
@@ -273,10 +273,8 @@ describe('AppleStylePlugin - Settings Migration', () => {
       stylePack: 'ocean-blue',
     });
 
-    expect(plugin.getArticleLayoutState('notes/demo.md', 'tech-green')?.layoutJson?.blocks?.[0]?.title).toBe('green');
+    expect(plugin.getArticleLayoutState('notes/demo.md', 'tech-green')?.layoutJson?.blocks?.[0]?.title).toBe('blue');
     expect(plugin.getArticleLayoutState('notes/demo.md', 'ocean-blue')?.layoutJson?.blocks?.[0]?.title).toBe('blue');
-    expect(Object.keys(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].stylePackStates)).toEqual(
-      expect.arrayContaining(['tech-green', 'ocean-blue'])
-    );
+    expect(Object.keys(plugin.settings.ai.articleLayoutsByPath['notes/demo.md'].familyStates)).toEqual(['tutorial-cards']);
   });
 });

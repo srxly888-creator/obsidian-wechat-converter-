@@ -580,57 +580,96 @@ function normalizeArticleLayoutState(raw = {}) {
   };
 }
 
+function getArticleLayoutFamilyCacheKey(state = {}, fallback = AI_LAYOUT_DEFAULT_FAMILY) {
+  return normalizeResolvedLayoutFamily(
+    state?.resolved?.layoutFamily
+    || state?.layoutFamily
+    || state?.layoutJson?.resolved?.layoutFamily
+    || state?.layoutJson?.layoutFamily
+    || fallback,
+    AI_LAYOUT_DEFAULT_FAMILY
+  );
+}
+
+function shouldReplaceArticleLayoutFamilyState(currentState = null, nextState = null) {
+  if (!currentState) return true;
+  if (!nextState) return false;
+  const scoreState = (state) => {
+    const hasBlocks = Array.isArray(state?.layoutJson?.blocks) && state.layoutJson.blocks.length > 0;
+    return [
+      state?.status === 'ready' ? 4 : 0,
+      hasBlocks ? 2 : 0,
+      state?.lastAttemptStatus === 'success' ? 1 : 0,
+    ].reduce((sum, value) => sum + value, 0);
+  };
+  const currentScore = scoreState(currentState);
+  const nextScore = scoreState(nextState);
+  if (nextScore !== currentScore) return nextScore > currentScore;
+  return Number(nextState.updatedAt || 0) > Number(currentState.updatedAt || 0);
+}
+
 function normalizeArticleLayoutCacheEntry(raw = {}) {
   if (!raw || typeof raw !== 'object') return null;
 
-  const withLegacyAliases = (entry) => {
-    if (!entry || !entry.selectionStates) return entry;
-    const stylePackStates = {};
-    Object.values(entry.selectionStates).forEach((state) => {
-      const paletteId = normalizeResolvedColorPalette(state?.stylePack || state?.resolved?.colorPalette);
-      if (!stylePackStates[paletteId]) {
-        stylePackStates[paletteId] = state;
-      }
-    });
-    const lastSelectionState = entry.selectionStates[entry.lastSelectionKey] || null;
-    return {
-      ...entry,
-      lastStylePack: lastSelectionState?.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
-      stylePackStates,
-    };
-  };
+  const familyStates = {};
+  let lastFamilyFromInput = '';
 
-  const legacyState = normalizeArticleLayoutState(raw);
-  if (legacyState) {
-    const selectionKey = getArticleLayoutSelectionKey(legacyState.selection);
-    return withLegacyAliases({
-      lastSelectionKey: selectionKey,
-      selectionStates: {
-        [selectionKey]: legacyState,
-      },
-    });
-  }
-
-  const selectionStates = {};
   const ingestState = (value, fallbackSelection = {}, options = {}) => {
     const normalizedState = normalizeArticleLayoutState(value);
     if (!normalizedState) return;
     const effectiveSelection = normalizeLayoutSelection(normalizedState.selection, fallbackSelection);
-    const effectiveKey = getArticleLayoutSelectionKey(effectiveSelection);
-    if (options.overwrite === false && selectionStates[effectiveKey]) {
-      return;
-    }
-    selectionStates[effectiveKey] = {
+    const resolvedLayoutFamily = getArticleLayoutFamilyCacheKey(normalizedState, effectiveSelection.layoutFamily);
+    const resolved = normalizeResolvedSelection(normalizedState.resolved, {
+      layoutFamily: resolvedLayoutFamily,
+      colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette,
+    });
+    const stylePack = normalizeResolvedColorPalette(normalizedState.stylePack || resolved.colorPalette);
+    const layoutJson = {
+      ...(normalizedState.layoutJson || {}),
+      selection: {
+        ...(normalizedState.layoutJson?.selection || {}),
+        ...effectiveSelection,
+      },
+      resolved: {
+        ...(normalizedState.layoutJson?.resolved || {}),
+        layoutFamily: resolvedLayoutFamily,
+        colorPalette: stylePack,
+      },
+      layoutFamily: resolvedLayoutFamily,
+      stylePack,
+    };
+    const nextState = {
       ...normalizedState,
       selection: effectiveSelection,
-      resolved: normalizeResolvedSelection(normalizedState.resolved, {
-        layoutFamily: normalizedState.layoutFamily || effectiveSelection.layoutFamily,
-        colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette,
-      }),
-      stylePack: normalizeResolvedColorPalette(normalizedState.stylePack || normalizedState.resolved?.colorPalette),
-      layoutFamily: normalizeResolvedLayoutFamily(normalizedState.layoutFamily || normalizedState.resolved?.layoutFamily),
+      resolved: {
+        ...resolved,
+        layoutFamily: resolvedLayoutFamily,
+        colorPalette: stylePack,
+      },
+      stylePack,
+      layoutFamily: resolvedLayoutFamily,
+      layoutJson,
     };
+    if (options.markLast) lastFamilyFromInput = resolvedLayoutFamily;
+    if (options.overwrite === false && familyStates[resolvedLayoutFamily]) return;
+    if (shouldReplaceArticleLayoutFamilyState(familyStates[resolvedLayoutFamily], nextState)) {
+      familyStates[resolvedLayoutFamily] = nextState;
+    }
   };
+
+  const legacyState = normalizeArticleLayoutState(raw);
+  if (legacyState) {
+    ingestState(legacyState, legacyState.selection, { markLast: true });
+  }
+
+  if (raw.familyStates && typeof raw.familyStates === 'object') {
+    for (const [layoutFamilyId, value] of Object.entries(raw.familyStates)) {
+      ingestState(value, {
+        layoutFamily: layoutFamilyId || AI_LAYOUT_DEFAULT_FAMILY,
+        colorPalette: value?.selection?.colorPalette || value?.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+      }, { markLast: layoutFamilyId === raw.lastLayoutFamily });
+    }
+  }
 
   if (raw.selectionStates && typeof raw.selectionStates === 'object') {
     for (const [selectionKey, value] of Object.entries(raw.selectionStates)) {
@@ -638,7 +677,7 @@ function normalizeArticleLayoutCacheEntry(raw = {}) {
       ingestState(value, {
         layoutFamily: layoutFamilyFromKey || 'tutorial-cards',
         colorPalette: colorPaletteFromKey || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
-      });
+      }, { markLast: selectionKey === raw.lastSelectionKey });
     }
   }
 
@@ -647,17 +686,51 @@ function normalizeArticleLayoutCacheEntry(raw = {}) {
       ingestState(value, {
         layoutFamily: 'tutorial-cards',
         colorPalette: stylePackId || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
-      }, { overwrite: false });
+      }, { overwrite: false, markLast: stylePackId === raw.lastStylePack });
     }
   }
 
-  const selectionKeys = Object.keys(selectionStates);
-  if (!selectionKeys.length) return null;
-  const lastSelectionKey = coerceString(raw.lastSelectionKey);
-  return withLegacyAliases({
-    lastSelectionKey: selectionStates[lastSelectionKey] ? lastSelectionKey : selectionKeys[0],
-    selectionStates,
+  const familyKeys = Object.keys(familyStates);
+  if (!familyKeys.length) return null;
+  const requestedLastLayoutFamily = coerceString(raw.lastLayoutFamily);
+  const rawLastLayoutFamily = AI_LAYOUT_IMPLEMENTED_FAMILIES.has(requestedLastLayoutFamily)
+    ? requestedLastLayoutFamily
+    : '';
+  const lastLayoutFamily = familyStates[rawLastLayoutFamily]
+    ? rawLastLayoutFamily
+    : (familyStates[lastFamilyFromInput] ? lastFamilyFromInput : familyKeys[0]);
+  const requestedLastAutoResolvedFamily = coerceString(raw.lastAutoResolvedFamily);
+  const rawLastAutoResolvedFamily = AI_LAYOUT_IMPLEMENTED_FAMILIES.has(requestedLastAutoResolvedFamily)
+    ? requestedLastAutoResolvedFamily
+    : '';
+  const lastAutoResolvedFamily = familyStates[rawLastAutoResolvedFamily]
+    ? rawLastAutoResolvedFamily
+    : (familyStates[lastFamilyFromInput]?.selection?.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? lastFamilyFromInput : '');
+  const selectionStates = {};
+  const stylePackStates = {};
+  Object.entries(familyStates).forEach(([layoutFamilyId, state]) => {
+    const selectionKey = getArticleLayoutSelectionKey({
+      layoutFamily: layoutFamilyId,
+      colorPalette: state.selection?.colorPalette || AI_LAYOUT_SELECTION_AUTO,
+    });
+    selectionStates[selectionKey] = state;
+    const stylePack = normalizeResolvedColorPalette(state.stylePack || state.resolved?.colorPalette);
+    if (!stylePackStates[stylePack]) stylePackStates[stylePack] = state;
   });
+  const lastState = familyStates[lastLayoutFamily] || null;
+  const lastSelectionKey = getArticleLayoutSelectionKey({
+    layoutFamily: lastLayoutFamily,
+    colorPalette: lastState?.selection?.colorPalette || AI_LAYOUT_SELECTION_AUTO,
+  });
+  return {
+    lastLayoutFamily,
+    lastAutoResolvedFamily,
+    familyStates,
+    lastSelectionKey,
+    selectionStates,
+    lastStylePack: lastState?.stylePack || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+    stylePackStates,
+  };
 }
 
 function truncateMarkdownForPrompt(markdown = '', maxChars = 12000) {
@@ -730,43 +803,23 @@ function getArticleLayoutSelectionState(entry, selection = {}, defaults = {}) {
   const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
   if (!normalizedEntry) return null;
   const normalizedSelection = normalizeLayoutSelection(selection, defaults);
-  const requestedKey = getArticleLayoutSelectionKey(normalizedSelection);
-  const exactState = normalizedEntry.selectionStates?.[requestedKey] || null;
-  if (exactState) return exactState;
-
-  const lastSelectionState = normalizedEntry.selectionStates?.[normalizedEntry.lastSelectionKey] || null;
-  const selectionStates = Object.values(normalizedEntry.selectionStates || {});
-  if (!selectionStates.length) return null;
-
-  const requestedColorPalette = normalizeColorPalette(normalizedSelection.colorPalette, AI_LAYOUT_SELECTION_AUTO);
   const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO);
-  const requestedResolvedLayoutFamily = requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO
-    ? ''
-    : normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
-  const matchesColor = (state) => (
-    requestedColorPalette === AI_LAYOUT_SELECTION_AUTO
-    || normalizeResolvedColorPalette(state?.stylePack || state?.resolved?.colorPalette) === requestedColorPalette
-  );
-  const matchesLayout = (state) => (
-    requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO
-    || normalizeLayoutFamily(state?.selection?.layoutFamily, AI_LAYOUT_SELECTION_AUTO) === requestedLayoutFamily
-    || normalizeResolvedLayoutFamily(state?.layoutFamily || state?.resolved?.layoutFamily, AI_LAYOUT_DEFAULT_FAMILY) === requestedResolvedLayoutFamily
-  );
+  const familyStates = normalizedEntry.familyStates || {};
+  const familyKeys = Object.keys(familyStates);
+  if (!familyKeys.length) return null;
 
-  if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO && requestedColorPalette === AI_LAYOUT_SELECTION_AUTO) {
-    return lastSelectionState || selectionStates[0] || null;
+  if (requestedLayoutFamily !== AI_LAYOUT_SELECTION_AUTO) {
+    const requestedResolvedLayoutFamily = normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+    return familyStates[requestedResolvedLayoutFamily] || null;
   }
 
-  if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO && requestedColorPalette !== AI_LAYOUT_SELECTION_AUTO) {
-    const colorMatchedState = normalizedEntry.stylePackStates?.[requestedColorPalette] || null;
-    if (colorMatchedState) return colorMatchedState;
+  if (normalizedEntry.lastAutoResolvedFamily && familyStates[normalizedEntry.lastAutoResolvedFamily]) {
+    return familyStates[normalizedEntry.lastAutoResolvedFamily];
   }
-
-  if (lastSelectionState && matchesColor(lastSelectionState) && matchesLayout(lastSelectionState)) {
-    return lastSelectionState;
+  if (normalizedEntry.lastLayoutFamily && familyStates[normalizedEntry.lastLayoutFamily]) {
+    return familyStates[normalizedEntry.lastLayoutFamily];
   }
-
-  return selectionStates.find((state) => matchesColor(state) && matchesLayout(state)) || null;
+  return familyStates[familyKeys[0]] || null;
 }
 
 function deriveArticleLayoutStateForSelection(state, selection = {}, defaults = {}) {
@@ -854,10 +907,12 @@ function getArticleLayoutSelectionStateKey(entry, selection = {}, defaults = {})
   const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
   if (!normalizedEntry) return '';
   const normalizedSelection = normalizeLayoutSelection(selection, defaults);
-  const requestedKey = getArticleLayoutSelectionKey(normalizedSelection);
-  return normalizedEntry.selectionStates?.[requestedKey]
-    ? requestedKey
-    : (normalizedEntry.lastSelectionKey || '');
+  const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO);
+  if (requestedLayoutFamily !== AI_LAYOUT_SELECTION_AUTO) {
+    const requestedResolvedLayoutFamily = normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+    return normalizedEntry.familyStates?.[requestedResolvedLayoutFamily] ? requestedResolvedLayoutFamily : '';
+  }
+  return normalizedEntry.lastAutoResolvedFamily || normalizedEntry.lastLayoutFamily || '';
 }
 
 function listEnabledAiProviders(aiSettings = {}) {

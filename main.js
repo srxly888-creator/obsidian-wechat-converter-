@@ -6458,7 +6458,7 @@ var require_ai_layout = __commonJS({
         )
       };
     }
-    function getArticleLayoutSelectionKey2(selection = {}) {
+    function getArticleLayoutSelectionKey(selection = {}) {
       const normalized = normalizeLayoutSelection2(selection);
       return `${normalized.layoutFamily || AI_LAYOUT_SELECTION_AUTO2}::${normalized.colorPalette || AI_LAYOUT_SELECTION_AUTO2}`;
     }
@@ -6706,7 +6706,7 @@ var require_ai_layout = __commonJS({
         this.timeoutMs = Number(timeoutMs || 0);
       }
     };
-    function normalizeArticleLayoutState(raw = {}) {
+    function normalizeArticleLayoutState2(raw = {}) {
       var _a2, _b;
       if (!raw || typeof raw !== "object")
         return null;
@@ -6765,66 +6765,104 @@ var require_ai_layout = __commonJS({
         layoutJson
       };
     }
+    function getArticleLayoutFamilyCacheKey(state = {}, fallback = AI_LAYOUT_DEFAULT_FAMILY) {
+      var _a2, _b, _c, _d;
+      return normalizeResolvedLayoutFamily(
+        ((_a2 = state == null ? void 0 : state.resolved) == null ? void 0 : _a2.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || ((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.resolved) == null ? void 0 : _c.layoutFamily) || ((_d = state == null ? void 0 : state.layoutJson) == null ? void 0 : _d.layoutFamily) || fallback,
+        AI_LAYOUT_DEFAULT_FAMILY
+      );
+    }
+    function shouldReplaceArticleLayoutFamilyState(currentState = null, nextState = null) {
+      if (!currentState)
+        return true;
+      if (!nextState)
+        return false;
+      const scoreState = (state) => {
+        var _a2;
+        const hasBlocks = Array.isArray((_a2 = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a2.blocks) && state.layoutJson.blocks.length > 0;
+        return [
+          (state == null ? void 0 : state.status) === "ready" ? 4 : 0,
+          hasBlocks ? 2 : 0,
+          (state == null ? void 0 : state.lastAttemptStatus) === "success" ? 1 : 0
+        ].reduce((sum, value) => sum + value, 0);
+      };
+      const currentScore = scoreState(currentState);
+      const nextScore = scoreState(nextState);
+      if (nextScore !== currentScore)
+        return nextScore > currentScore;
+      return Number(nextState.updatedAt || 0) > Number(currentState.updatedAt || 0);
+    }
     function normalizeArticleLayoutCacheEntry2(raw = {}) {
+      var _a2, _b, _c, _d;
       if (!raw || typeof raw !== "object")
         return null;
-      const withLegacyAliases = (entry) => {
-        if (!entry || !entry.selectionStates)
-          return entry;
-        const stylePackStates = {};
-        Object.values(entry.selectionStates).forEach((state) => {
-          var _a2;
-          const paletteId = normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a2 = state == null ? void 0 : state.resolved) == null ? void 0 : _a2.colorPalette));
-          if (!stylePackStates[paletteId]) {
-            stylePackStates[paletteId] = state;
-          }
-        });
-        const lastSelectionState = entry.selectionStates[entry.lastSelectionKey] || null;
-        return {
-          ...entry,
-          lastStylePack: (lastSelectionState == null ? void 0 : lastSelectionState.stylePack) || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
-          stylePackStates
-        };
-      };
-      const legacyState = normalizeArticleLayoutState(raw);
-      if (legacyState) {
-        const selectionKey = getArticleLayoutSelectionKey2(legacyState.selection);
-        return withLegacyAliases({
-          lastSelectionKey: selectionKey,
-          selectionStates: {
-            [selectionKey]: legacyState
-          }
-        });
-      }
-      const selectionStates = {};
+      const familyStates = {};
+      let lastFamilyFromInput = "";
       const ingestState = (value, fallbackSelection = {}, options = {}) => {
-        var _a2, _b;
-        const normalizedState = normalizeArticleLayoutState(value);
+        var _a3, _b2;
+        const normalizedState = normalizeArticleLayoutState2(value);
         if (!normalizedState)
           return;
         const effectiveSelection = normalizeLayoutSelection2(normalizedState.selection, fallbackSelection);
-        const effectiveKey = getArticleLayoutSelectionKey2(effectiveSelection);
-        if (options.overwrite === false && selectionStates[effectiveKey]) {
-          return;
-        }
-        selectionStates[effectiveKey] = {
+        const resolvedLayoutFamily = getArticleLayoutFamilyCacheKey(normalizedState, effectiveSelection.layoutFamily);
+        const resolved = normalizeResolvedSelection(normalizedState.resolved, {
+          layoutFamily: resolvedLayoutFamily,
+          colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette
+        });
+        const stylePack = normalizeResolvedColorPalette(normalizedState.stylePack || resolved.colorPalette);
+        const layoutJson = {
+          ...normalizedState.layoutJson || {},
+          selection: {
+            ...((_a3 = normalizedState.layoutJson) == null ? void 0 : _a3.selection) || {},
+            ...effectiveSelection
+          },
+          resolved: {
+            ...((_b2 = normalizedState.layoutJson) == null ? void 0 : _b2.resolved) || {},
+            layoutFamily: resolvedLayoutFamily,
+            colorPalette: stylePack
+          },
+          layoutFamily: resolvedLayoutFamily,
+          stylePack
+        };
+        const nextState = {
           ...normalizedState,
           selection: effectiveSelection,
-          resolved: normalizeResolvedSelection(normalizedState.resolved, {
-            layoutFamily: normalizedState.layoutFamily || effectiveSelection.layoutFamily,
-            colorPalette: normalizedState.stylePack || effectiveSelection.colorPalette
-          }),
-          stylePack: normalizeResolvedColorPalette(normalizedState.stylePack || ((_a2 = normalizedState.resolved) == null ? void 0 : _a2.colorPalette)),
-          layoutFamily: normalizeResolvedLayoutFamily(normalizedState.layoutFamily || ((_b = normalizedState.resolved) == null ? void 0 : _b.layoutFamily))
+          resolved: {
+            ...resolved,
+            layoutFamily: resolvedLayoutFamily,
+            colorPalette: stylePack
+          },
+          stylePack,
+          layoutFamily: resolvedLayoutFamily,
+          layoutJson
         };
+        if (options.markLast)
+          lastFamilyFromInput = resolvedLayoutFamily;
+        if (options.overwrite === false && familyStates[resolvedLayoutFamily])
+          return;
+        if (shouldReplaceArticleLayoutFamilyState(familyStates[resolvedLayoutFamily], nextState)) {
+          familyStates[resolvedLayoutFamily] = nextState;
+        }
       };
+      const legacyState = normalizeArticleLayoutState2(raw);
+      if (legacyState) {
+        ingestState(legacyState, legacyState.selection, { markLast: true });
+      }
+      if (raw.familyStates && typeof raw.familyStates === "object") {
+        for (const [layoutFamilyId, value] of Object.entries(raw.familyStates)) {
+          ingestState(value, {
+            layoutFamily: layoutFamilyId || AI_LAYOUT_DEFAULT_FAMILY,
+            colorPalette: ((_a2 = value == null ? void 0 : value.selection) == null ? void 0 : _a2.colorPalette) || (value == null ? void 0 : value.stylePack) || AI_LAYOUT_DEFAULT_COLOR_PALETTE
+          }, { markLast: layoutFamilyId === raw.lastLayoutFamily });
+        }
+      }
       if (raw.selectionStates && typeof raw.selectionStates === "object") {
         for (const [selectionKey, value] of Object.entries(raw.selectionStates)) {
           const [layoutFamilyFromKey, colorPaletteFromKey] = String(selectionKey || "").split("::");
           ingestState(value, {
             layoutFamily: layoutFamilyFromKey || "tutorial-cards",
             colorPalette: colorPaletteFromKey || AI_LAYOUT_DEFAULT_COLOR_PALETTE
-          });
+          }, { markLast: selectionKey === raw.lastSelectionKey });
         }
       }
       if (raw.stylePackStates && typeof raw.stylePackStates === "object") {
@@ -6832,17 +6870,45 @@ var require_ai_layout = __commonJS({
           ingestState(value, {
             layoutFamily: "tutorial-cards",
             colorPalette: stylePackId || AI_LAYOUT_DEFAULT_COLOR_PALETTE
-          }, { overwrite: false });
+          }, { overwrite: false, markLast: stylePackId === raw.lastStylePack });
         }
       }
-      const selectionKeys = Object.keys(selectionStates);
-      if (!selectionKeys.length)
+      const familyKeys = Object.keys(familyStates);
+      if (!familyKeys.length)
         return null;
-      const lastSelectionKey = coerceString(raw.lastSelectionKey);
-      return withLegacyAliases({
-        lastSelectionKey: selectionStates[lastSelectionKey] ? lastSelectionKey : selectionKeys[0],
-        selectionStates
+      const requestedLastLayoutFamily = coerceString(raw.lastLayoutFamily);
+      const rawLastLayoutFamily = AI_LAYOUT_IMPLEMENTED_FAMILIES.has(requestedLastLayoutFamily) ? requestedLastLayoutFamily : "";
+      const lastLayoutFamily = familyStates[rawLastLayoutFamily] ? rawLastLayoutFamily : familyStates[lastFamilyFromInput] ? lastFamilyFromInput : familyKeys[0];
+      const requestedLastAutoResolvedFamily = coerceString(raw.lastAutoResolvedFamily);
+      const rawLastAutoResolvedFamily = AI_LAYOUT_IMPLEMENTED_FAMILIES.has(requestedLastAutoResolvedFamily) ? requestedLastAutoResolvedFamily : "";
+      const lastAutoResolvedFamily = familyStates[rawLastAutoResolvedFamily] ? rawLastAutoResolvedFamily : ((_c = (_b = familyStates[lastFamilyFromInput]) == null ? void 0 : _b.selection) == null ? void 0 : _c.layoutFamily) === AI_LAYOUT_SELECTION_AUTO2 ? lastFamilyFromInput : "";
+      const selectionStates = {};
+      const stylePackStates = {};
+      Object.entries(familyStates).forEach(([layoutFamilyId, state]) => {
+        var _a3, _b2;
+        const selectionKey = getArticleLayoutSelectionKey({
+          layoutFamily: layoutFamilyId,
+          colorPalette: ((_a3 = state.selection) == null ? void 0 : _a3.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+        });
+        selectionStates[selectionKey] = state;
+        const stylePack = normalizeResolvedColorPalette(state.stylePack || ((_b2 = state.resolved) == null ? void 0 : _b2.colorPalette));
+        if (!stylePackStates[stylePack])
+          stylePackStates[stylePack] = state;
       });
+      const lastState = familyStates[lastLayoutFamily] || null;
+      const lastSelectionKey = getArticleLayoutSelectionKey({
+        layoutFamily: lastLayoutFamily,
+        colorPalette: ((_d = lastState == null ? void 0 : lastState.selection) == null ? void 0 : _d.colorPalette) || AI_LAYOUT_SELECTION_AUTO2
+      });
+      return {
+        lastLayoutFamily,
+        lastAutoResolvedFamily,
+        familyStates,
+        lastSelectionKey,
+        selectionStates,
+        lastStylePack: (lastState == null ? void 0 : lastState.stylePack) || AI_LAYOUT_DEFAULT_COLOR_PALETTE,
+        stylePackStates
+      };
     }
     function truncateMarkdownForPrompt(markdown = "", maxChars = 12e3) {
       const content = String(markdown || "").trim();
@@ -6902,46 +6968,30 @@ var require_ai_layout = __commonJS({
       return getColorPaletteById2(id);
     }
     function getArticleLayoutSelectionState2(entry, selection = {}, defaults = {}) {
-      var _a2, _b, _c;
       const normalizedEntry = normalizeArticleLayoutCacheEntry2(entry);
       if (!normalizedEntry)
         return null;
       const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
-      const requestedKey = getArticleLayoutSelectionKey2(normalizedSelection);
-      const exactState = ((_a2 = normalizedEntry.selectionStates) == null ? void 0 : _a2[requestedKey]) || null;
-      if (exactState)
-        return exactState;
-      const lastSelectionState = ((_b = normalizedEntry.selectionStates) == null ? void 0 : _b[normalizedEntry.lastSelectionKey]) || null;
-      const selectionStates = Object.values(normalizedEntry.selectionStates || {});
-      if (!selectionStates.length)
-        return null;
-      const requestedColorPalette = normalizeColorPalette(normalizedSelection.colorPalette, AI_LAYOUT_SELECTION_AUTO2);
       const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
-      const requestedResolvedLayoutFamily = requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 ? "" : normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
-      const matchesColor = (state) => {
-        var _a3;
-        return requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2 || normalizeResolvedColorPalette((state == null ? void 0 : state.stylePack) || ((_a3 = state == null ? void 0 : state.resolved) == null ? void 0 : _a3.colorPalette)) === requestedColorPalette;
-      };
-      const matchesLayout = (state) => {
-        var _a3, _b2;
-        return requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 || normalizeLayoutFamily((_a3 = state == null ? void 0 : state.selection) == null ? void 0 : _a3.layoutFamily, AI_LAYOUT_SELECTION_AUTO2) === requestedLayoutFamily || normalizeResolvedLayoutFamily((state == null ? void 0 : state.layoutFamily) || ((_b2 = state == null ? void 0 : state.resolved) == null ? void 0 : _b2.layoutFamily), AI_LAYOUT_DEFAULT_FAMILY) === requestedResolvedLayoutFamily;
-      };
-      if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 && requestedColorPalette === AI_LAYOUT_SELECTION_AUTO2) {
-        return lastSelectionState || selectionStates[0] || null;
+      const familyStates = normalizedEntry.familyStates || {};
+      const familyKeys = Object.keys(familyStates);
+      if (!familyKeys.length)
+        return null;
+      if (requestedLayoutFamily !== AI_LAYOUT_SELECTION_AUTO2) {
+        const requestedResolvedLayoutFamily = normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+        return familyStates[requestedResolvedLayoutFamily] || null;
       }
-      if (requestedLayoutFamily === AI_LAYOUT_SELECTION_AUTO2 && requestedColorPalette !== AI_LAYOUT_SELECTION_AUTO2) {
-        const colorMatchedState = ((_c = normalizedEntry.stylePackStates) == null ? void 0 : _c[requestedColorPalette]) || null;
-        if (colorMatchedState)
-          return colorMatchedState;
+      if (normalizedEntry.lastAutoResolvedFamily && familyStates[normalizedEntry.lastAutoResolvedFamily]) {
+        return familyStates[normalizedEntry.lastAutoResolvedFamily];
       }
-      if (lastSelectionState && matchesColor(lastSelectionState) && matchesLayout(lastSelectionState)) {
-        return lastSelectionState;
+      if (normalizedEntry.lastLayoutFamily && familyStates[normalizedEntry.lastLayoutFamily]) {
+        return familyStates[normalizedEntry.lastLayoutFamily];
       }
-      return selectionStates.find((state) => matchesColor(state) && matchesLayout(state)) || null;
+      return familyStates[familyKeys[0]] || null;
     }
     function deriveArticleLayoutStateForSelection2(state, selection = {}, defaults = {}) {
       var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
-      const normalizedState = normalizeArticleLayoutState(state);
+      const normalizedState = normalizeArticleLayoutState2(state);
       if (!((_b = (_a2 = normalizedState == null ? void 0 : normalizedState.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b.length))
         return null;
       if (normalizedState.status !== "ready")
@@ -7001,7 +7051,7 @@ var require_ai_layout = __commonJS({
         colorPaletteLabel: nextColorPaletteLabel,
         stylePackLabel: nextColorPaletteLabel
       }, nextLayoutJson);
-      return normalizeArticleLayoutState({
+      return normalizeArticleLayoutState2({
         ...normalizedState,
         selection: nextSelection,
         resolved: {
@@ -7022,8 +7072,12 @@ var require_ai_layout = __commonJS({
       if (!normalizedEntry)
         return "";
       const normalizedSelection = normalizeLayoutSelection2(selection, defaults);
-      const requestedKey = getArticleLayoutSelectionKey2(normalizedSelection);
-      return ((_a2 = normalizedEntry.selectionStates) == null ? void 0 : _a2[requestedKey]) ? requestedKey : normalizedEntry.lastSelectionKey || "";
+      const requestedLayoutFamily = normalizeLayoutFamily(normalizedSelection.layoutFamily, AI_LAYOUT_SELECTION_AUTO2);
+      if (requestedLayoutFamily !== AI_LAYOUT_SELECTION_AUTO2) {
+        const requestedResolvedLayoutFamily = normalizeResolvedLayoutFamily(requestedLayoutFamily, AI_LAYOUT_DEFAULT_FAMILY);
+        return ((_a2 = normalizedEntry.familyStates) == null ? void 0 : _a2[requestedResolvedLayoutFamily]) ? requestedResolvedLayoutFamily : "";
+      }
+      return normalizedEntry.lastAutoResolvedFamily || normalizedEntry.lastLayoutFamily || "";
     }
     function listEnabledAiProviders(aiSettings = {}) {
       return Array.isArray(aiSettings.providers) ? aiSettings.providers.filter((provider) => provider.enabled !== false && isAiProviderRunnable2(provider)) : [];
@@ -9187,14 +9241,14 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       getAiProviderIssues: getAiProviderIssues2,
       isAiProviderRunnable: isAiProviderRunnable2,
       summarizeAiProviderIssues: summarizeAiProviderIssues2,
-      normalizeArticleLayoutState,
+      normalizeArticleLayoutState: normalizeArticleLayoutState2,
       normalizeArticleLayoutCacheEntry: normalizeArticleLayoutCacheEntry2,
       normalizeSchemaValidation,
       normalizeLayoutFamily,
       normalizeColorPalette,
       normalizeLayoutSelection: normalizeLayoutSelection2,
       normalizeResolvedSelection,
-      getArticleLayoutSelectionKey: getArticleLayoutSelectionKey2,
+      getArticleLayoutSelectionKey,
       getArticleLayoutSelectionState: getArticleLayoutSelectionState2,
       getArticleLayoutSelectionStateKey,
       getLayoutFamilyList: getLayoutFamilyList2,
@@ -10192,10 +10246,10 @@ var {
   resolveColorPaletteForRender,
   normalizeHexColor,
   normalizeLayoutSelection,
-  getArticleLayoutSelectionKey,
   getArticleLayoutSelectionState,
   resolveAiProvider,
   deriveArticleLayoutStateForSelection,
+  normalizeArticleLayoutState,
   normalizeArticleLayoutCacheEntry,
   extractImageRefsFromHtml,
   extractRenderedSectionFragments,
@@ -11454,7 +11508,7 @@ var AppleStyleView = class extends ItemView {
     const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
     if (!normalizedEntry)
       return null;
-    return ((_f = normalizedEntry.selectionStates) == null ? void 0 : _f[normalizedEntry.lastSelectionKey]) || null;
+    return ((_f = normalizedEntry.familyStates) == null ? void 0 : _f[normalizedEntry.lastLayoutFamily]) || null;
   }
   hasCurrentArticleAiLayoutCache() {
     var _a;
@@ -11493,7 +11547,7 @@ var AppleStyleView = class extends ItemView {
     this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
   }
   createAiLayoutPanel(parent) {
-    var _a, _b, _c;
+    var _a, _b;
     this.attachOverlayScrollGuard(parent, [".apple-ai-layout-debug-body"]);
     const area = parent.createDiv({ cls: "apple-ai-layout-area" });
     const header = area.createDiv({ cls: "apple-ai-layout-header" });
@@ -11504,10 +11558,12 @@ var AppleStyleView = class extends ItemView {
     });
     this.aiLayoutStatus = area.createDiv({ cls: "apple-ai-layout-status" });
     this.aiLayoutStatusBadge = this.aiLayoutStatus.createEl("span", { cls: "apple-ai-layout-badge", text: "\u672A\u751F\u6210" });
-    this.aiLayoutStatusText = this.aiLayoutStatus.createEl("span", {
+    this.aiLayoutStatusBody = this.aiLayoutStatus.createDiv({ cls: "apple-ai-layout-status-body" });
+    this.aiLayoutStatusText = this.aiLayoutStatusBody.createEl("span", {
       cls: "apple-ai-layout-status-text",
       text: "\u5C1A\u672A\u751F\u6210\u5F53\u524D\u6587\u7AE0\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002"
     });
+    this.aiCachedLayoutList = this.aiLayoutStatusBody.createDiv({ cls: "apple-ai-layout-cache-list" });
     const controlSection = area.createDiv({ cls: "apple-ai-layout-section" });
     const layoutControl = controlSection.createDiv({ cls: "apple-ai-layout-control" });
     layoutControl.createEl("label", { cls: "apple-setting-label", text: "\u5E03\u5C40" });
@@ -11585,20 +11641,17 @@ var AppleStyleView = class extends ItemView {
     this.updateAiColorPaletteControls();
     this.aiLayoutFamilySelect.addEventListener("change", () => {
       var _a2;
-      this.pendingAiLayoutFamily = this.aiLayoutFamilySelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO;
-      this.refreshAiLayoutPanel();
+      this.onAiLayoutFamilyChange(this.aiLayoutFamilySelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO);
     });
     this.aiColorPaletteSelect.addEventListener("change", () => {
       var _a2;
       this.onAiColorPaletteChange(this.aiColorPaletteSelect.value || ((_a2 = this.plugin.settings.ai) == null ? void 0 : _a2.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO);
     });
-    this.aiIncludeImagesNote = controlSection.createEl("div", {
-      cls: "apple-ai-layout-mini-note",
-      text: ((_c = this.plugin.settings.ai) == null ? void 0 : _c.includeImagesInLayout) === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
-    });
     const actionRow = area.createDiv({ cls: "apple-ai-layout-actions" });
     this.aiGenerateBtn = actionRow.createEl("button", { cls: "apple-btn-primary", text: "\u751F\u6210\u5E76\u5E94\u7528" });
     this.aiGenerateBtn.addEventListener("click", () => this.handleAiPrimaryAction());
+    this.aiRegenerateBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528" });
+    this.aiRegenerateBtn.addEventListener("click", () => this.generateAiLayoutForCurrentArticle({ applyAfterGenerate: true }));
     this.aiResetBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u666E\u901A\u9884\u89C8" });
     this.aiResetBtn.addEventListener("click", () => this.restoreBasePreview());
     this.aiRestoreBlocksBtn = actionRow.createEl("button", { cls: "apple-btn-secondary", text: "\u6062\u590D\u5DF2\u79FB\u9664" });
@@ -11683,6 +11736,25 @@ var AppleStyleView = class extends ItemView {
       button.classList.toggle("active", button.dataset.value === selectedValue);
     });
   }
+  getAiRenderLayoutJson(layoutJson = null, colorPaletteId = "") {
+    if (!layoutJson || typeof layoutJson !== "object")
+      return layoutJson;
+    const selectedPalette = colorPaletteId || this.getCurrentAiLayoutSelection().colorPalette;
+    if (!selectedPalette || selectedPalette === AI_LAYOUT_SELECTION_AUTO)
+      return layoutJson;
+    return {
+      ...layoutJson,
+      selection: {
+        ...layoutJson.selection || {},
+        colorPalette: selectedPalette
+      },
+      resolved: {
+        ...layoutJson.resolved || {},
+        colorPalette: selectedPalette
+      },
+      stylePack: selectedPalette
+    };
+  }
   async onAiColorPaletteChange(value, { skipSave = false } = {}) {
     var _a, _b, _c;
     const nextValue = value || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultColorPalette) || AI_LAYOUT_SELECTION_AUTO;
@@ -11703,6 +11775,22 @@ var AppleStyleView = class extends ItemView {
     if (this.aiPreviewApplied) {
       this.applyAiLayoutToPreview();
       return;
+    }
+    this.refreshAiLayoutPanel();
+  }
+  async onAiLayoutFamilyChange(value) {
+    var _a, _b, _c;
+    const nextValue = value || ((_a = this.plugin.settings.ai) == null ? void 0 : _a.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO;
+    this.pendingAiLayoutFamily = nextValue;
+    if (this.aiLayoutFamilySelect && this.aiLayoutFamilySelect.value !== nextValue) {
+      this.aiLayoutFamilySelect.value = nextValue;
+    }
+    if (this.aiPreviewApplied) {
+      const state = this.getCurrentArticleLayoutState();
+      if ((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length) {
+        this.applyAiLayoutToPreview({ stateOverride: state, allowStale: true });
+        return;
+      }
     }
     this.refreshAiLayoutPanel();
   }
@@ -11848,6 +11936,10 @@ var AppleStyleView = class extends ItemView {
       this.applyAiLayoutToPreview();
       return;
     }
+    if (mode === "apply-stale") {
+      this.applyAiLayoutToPreview({ allowStale: true });
+      return;
+    }
     await this.generateAiLayoutForCurrentArticle({ applyAfterGenerate: true });
   }
   toggleAiLayoutDebugMode(mode) {
@@ -11886,17 +11978,8 @@ var AppleStyleView = class extends ItemView {
     const selection = this.getCurrentAiLayoutSelection();
     if (typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
       const state = this.plugin.getArticleLayoutState(sourcePath, selection);
-      if (state && (!(selection == null ? void 0 : selection.colorPalette) || selection.colorPalette === AI_LAYOUT_SELECTION_AUTO || state.stylePack === selection.colorPalette)) {
+      if (state) {
         return this.preferFreshAiLayoutState(sourcePath, selection, state, sourceHash);
-      }
-      if (selection == null ? void 0 : selection.colorPalette) {
-        const legacyState = this.plugin.getArticleLayoutState(sourcePath, selection.colorPalette);
-        if (!legacyState)
-          return null;
-        if (selection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && legacyState.stylePack !== selection.colorPalette) {
-          return null;
-        }
-        return this.preferFreshAiLayoutState(sourcePath, selection, legacyState, sourceHash);
       }
     }
     return null;
@@ -11915,15 +11998,15 @@ var AppleStyleView = class extends ItemView {
       return candidateState;
     const normalizedPath = normalizeVaultPath(sourcePath || "");
     const entry = normalizeArticleLayoutCacheEntry((_f = (_e = (_d = (_c = this.plugin) == null ? void 0 : _c.settings) == null ? void 0 : _d.ai) == null ? void 0 : _e.articleLayoutsByPath) == null ? void 0 : _f[normalizedPath]);
-    const statesByKey = (entry == null ? void 0 : entry.selectionStates) || {};
-    const requestedKey = getArticleLayoutSelectionKey(normalizedSelection);
-    const exactState = statesByKey[requestedKey];
+    const statesByFamily = (entry == null ? void 0 : entry.familyStates) || {};
+    const requestedFamily = normalizedSelection.layoutFamily === AI_LAYOUT_SELECTION_AUTO ? "" : normalizedSelection.layoutFamily;
+    const exactState = requestedFamily ? statesByFamily[requestedFamily] : null;
     if ((exactState == null ? void 0 : exactState.sourceHash) === sourceHash && ((_h = (_g = exactState.layoutJson) == null ? void 0 : _g.blocks) == null ? void 0 : _h.length))
       return exactState;
-    const lastState = statesByKey[entry == null ? void 0 : entry.lastSelectionKey];
+    const lastState = statesByFamily[entry == null ? void 0 : entry.lastLayoutFamily];
     if ((lastState == null ? void 0 : lastState.sourceHash) === sourceHash && ((_j = (_i = lastState.layoutJson) == null ? void 0 : _i.blocks) == null ? void 0 : _j.length))
       return lastState;
-    return Object.values(statesByKey).find((state) => {
+    return Object.values(statesByFamily).find((state) => {
       var _a2, _b2;
       return (state == null ? void 0 : state.sourceHash) === sourceHash && ((_b2 = (_a2 = state.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b2.length);
     }) || candidateState;
@@ -12055,8 +12138,6 @@ var AppleStyleView = class extends ItemView {
     const family = getLayoutFamilyById(value);
     if (!family)
       return value || "\u81EA\u52A8\u63A8\u8350";
-    if (family.id === "source-first")
-      return "\u539F\u6587\u589E\u5F3A\u578B\uFF08\u5FEB\u901F\uFF09";
     return family.label || value || "\u81EA\u52A8\u63A8\u8350";
   }
   getAiColorPaletteLabel(value) {
@@ -12090,6 +12171,97 @@ var AppleStyleView = class extends ItemView {
       });
     });
   }
+  getCurrentArticleLayoutCacheEntry() {
+    var _a, _b, _c, _d;
+    const { sourcePath } = this.getCurrentLayoutContext();
+    if (!sourcePath)
+      return null;
+    const normalizedPath = normalizeVaultPath(sourcePath);
+    return normalizeArticleLayoutCacheEntry((_d = (_c = (_b = (_a = this.plugin) == null ? void 0 : _a.settings) == null ? void 0 : _b.ai) == null ? void 0 : _c.articleLayoutsByPath) == null ? void 0 : _d[normalizedPath]);
+  }
+  getCachedAiLayoutFamilyItems(context = this.getCurrentLayoutContext()) {
+    const entry = this.getCurrentArticleLayoutCacheEntry();
+    if (!(entry == null ? void 0 : entry.familyStates))
+      return [];
+    return Object.entries(entry.familyStates).map(([layoutFamily, state]) => {
+      var _a, _b, _c;
+      if (!((_b = (_a = state == null ? void 0 : state.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length))
+        return null;
+      const isCurrentContent = !!(context.sourceHash && state.sourceHash && state.sourceHash === context.sourceHash);
+      const fromAuto = ((_c = state.selection) == null ? void 0 : _c.layoutFamily) === AI_LAYOUT_SELECTION_AUTO;
+      return {
+        layoutFamily,
+        state,
+        label: this.getAiLayoutFamilyLabel(layoutFamily),
+        isCurrentContent,
+        fromAuto,
+        updatedAt: Number(state.updatedAt || 0)
+      };
+    }).filter(Boolean).sort((a, b) => {
+      if (a.isCurrentContent !== b.isCurrentContent)
+        return a.isCurrentContent ? -1 : 1;
+      return b.updatedAt - a.updatedAt;
+    });
+  }
+  renderAiCachedLayoutFamilies({ context, currentLayoutFamily = "", isLoading = false } = {}) {
+    if (!this.aiCachedLayoutList)
+      return;
+    const items = this.getCachedAiLayoutFamilyItems(context);
+    this.aiCachedLayoutList.hidden = items.length === 0;
+    this.aiCachedLayoutList.empty();
+    if (!items.length)
+      return;
+    const activeItem = items.find((item) => item.layoutFamily === currentLayoutFamily) || items[0];
+    if (items.length === 1 && activeItem) {
+      const inline = this.aiCachedLayoutList.createDiv({ cls: "apple-ai-layout-cache-inline" });
+      const sourceText = activeItem.fromAuto ? "\u7531\u81EA\u52A8\u63A8\u8350\u751F\u6210" : "\u5F53\u524D\u98CE\u683C";
+      inline.createEl("span", {
+        cls: "apple-ai-layout-cache-name",
+        text: `${sourceText} \xB7 ${activeItem.label}`
+      });
+      if (!activeItem.isCurrentContent) {
+        inline.createEl("span", { cls: "apple-ai-layout-cache-separator", text: "\xB7" });
+        inline.createEl("span", {
+          cls: "apple-ai-layout-cache-state is-stale",
+          text: "\u57FA\u4E8E\u65E7\u5185\u5BB9"
+        });
+      }
+      return;
+    }
+    this.aiCachedLayoutList.createEl("span", { cls: "apple-ai-layout-cache-caption", text: "\u5DF2\u7F13\u5B58" });
+    items.forEach((item) => {
+      const button = this.aiCachedLayoutList.createEl("button", {
+        cls: "apple-ai-layout-cache-chip",
+        title: item.isCurrentContent ? "\u9884\u89C8\u8FD9\u4EFD\u7F13\u5B58" : "\u9884\u89C8\u8FD9\u4EFD\u65E7\u5185\u5BB9\u7F13\u5B58"
+      });
+      button.classList.toggle("active", item.layoutFamily === currentLayoutFamily);
+      button.disabled = isLoading;
+      button.dataset.layoutFamily = item.layoutFamily;
+      button.createEl("span", { cls: "apple-ai-layout-cache-name", text: item.label });
+      if (item.fromAuto) {
+        button.createEl("span", { cls: "apple-ai-layout-cache-origin", text: "\u81EA\u52A8\u63A8\u8350\u751F\u6210" });
+      }
+      button.createEl("span", {
+        cls: `apple-ai-layout-cache-state ${item.isCurrentContent ? "is-current" : "is-stale"}`,
+        text: item.isCurrentContent ? "\u5F53\u524D\u5185\u5BB9" : "\u65E7\u5185\u5BB9"
+      });
+      button.addEventListener("click", () => this.previewCachedAiLayoutFamily(item.layoutFamily));
+    });
+  }
+  previewCachedAiLayoutFamily(layoutFamily = "") {
+    var _a, _b, _c;
+    const entry = this.getCurrentArticleLayoutCacheEntry();
+    const state = ((_a = entry == null ? void 0 : entry.familyStates) == null ? void 0 : _a[layoutFamily]) || null;
+    if (!((_c = (_b = state == null ? void 0 : state.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length)) {
+      new Notice("\u8FD9\u4EFD\u7F13\u5B58\u5DF2\u7ECF\u4E0D\u53EF\u7528\uFF0C\u8BF7\u91CD\u65B0\u751F\u6210");
+      this.refreshAiLayoutPanel();
+      return;
+    }
+    this.pendingAiLayoutFamily = layoutFamily;
+    if (this.aiLayoutFamilySelect)
+      this.aiLayoutFamilySelect.value = layoutFamily;
+    this.applyAiLayoutToPreview({ stateOverride: state, allowStale: true });
+  }
   getAiPrimaryActionConfig({
     hasDoc,
     aiFeatureEnabled,
@@ -12102,7 +12274,7 @@ var AppleStyleView = class extends ItemView {
     isStale,
     isLoading
   }) {
-    var _a;
+    var _a, _b;
     if (isLoading) {
       return { mode: "generate-apply", label: "\u751F\u6210\u4E2D...", disabled: true };
     }
@@ -12110,6 +12282,9 @@ var AppleStyleView = class extends ItemView {
       return { mode: "generate-apply", label: "\u751F\u6210\u5E76\u5E94\u7528", disabled: true };
     }
     if (isStale) {
+      if ((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length) {
+        return { mode: "apply-stale", label: "\u5E94\u7528\u65E7\u7F13\u5B58", disabled: false };
+      }
       return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: !canGenerateForSelection };
     }
     if (hasReusableLayout && hasLastAttemptFailure) {
@@ -12118,10 +12293,7 @@ var AppleStyleView = class extends ItemView {
       }
       return { mode: "apply", label: "\u5E94\u7528\u4E0A\u4E00\u7248", disabled: false };
     }
-    if (((_a = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _a.length) && !hasApplied) {
-      if (canGenerateForSelection) {
-        return { mode: "generate-apply", label: "\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528", disabled: false };
-      }
+    if (((_b = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _b.length) && !hasApplied) {
       return { mode: "apply", label: "\u5E94\u7528\u5F53\u524D\u7ED3\u679C", disabled: false };
     }
     if (!canGenerateForSelection) {
@@ -12452,7 +12624,7 @@ var AppleStyleView = class extends ItemView {
     this.aiDebugPanelBody.setText(this.buildAiLayoutErrorDetails({ state, providerLabel, modelLabel, isStale }));
   }
   refreshAiLayoutPanel() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w;
     if (!this.aiLayoutStatusBadge || !this.aiLayoutSummary || !this.aiBlockList)
       return;
     const aiSettings = this.plugin.settings.ai || createDefaultAiSettings();
@@ -12514,17 +12686,17 @@ var AppleStyleView = class extends ItemView {
     } else if (state && isStale) {
       if (canGenerateForSelection) {
         badge = "\u9700\u66F4\u65B0";
-        statusText = "\u6587\u7AE0\u5185\u5BB9\u6709\u66F4\u65B0\uFF0C\u5EFA\u8BAE\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528\u3002";
+        statusText = hasReusableLayout ? "\u8FD9\u4EFD\u7F16\u6392\u57FA\u4E8E\u65E7\u5185\u5BB9\uFF0C\u53EF\u5148\u5E94\u7528\u65E7\u7F13\u5B58\uFF0C\u6216\u91CD\u65B0\u751F\u6210\u6700\u65B0\u7ED3\u679C\u3002" : "\u6587\u7AE0\u5185\u5BB9\u6709\u66F4\u65B0\uFF0C\u5EFA\u8BAE\u91CD\u65B0\u751F\u6210\u5E76\u5E94\u7528\u3002";
       } else {
         badge = "\u5F85\u914D\u7F6E";
-        statusText = "\u5F53\u524D\u5DF2\u6709\u65E7\u7ED3\u679C\uFF0C\u4F46\u6587\u7AE0\u5185\u5BB9\u5DF2\u66F4\u65B0\u3002\u82E5\u8981\u91CD\u65B0\u751F\u6210\uFF0C\u8BF7\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002";
+        statusText = hasReusableLayout ? "\u8FD9\u4EFD\u7F16\u6392\u57FA\u4E8E\u65E7\u5185\u5BB9\uFF1B\u82E5\u8981\u91CD\u65B0\u751F\u6210\uFF0C\u8BF7\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002" : "\u5F53\u524D\u5DF2\u6709\u65E7\u7ED3\u679C\uFF0C\u4F46\u6587\u7AE0\u5185\u5BB9\u5DF2\u66F4\u65B0\u3002\u82E5\u8981\u91CD\u65B0\u751F\u6210\uFF0C\u8BF7\u5148\u5B8C\u6210 AI Provider \u914D\u7F6E\u3002";
       }
     } else if (hasReusableLayout && hasLastAttemptFailure) {
       badge = "\u5DF2\u4FDD\u7559\u4E0A\u4E00\u7248";
       statusText = "\u8FD9\u6B21\u751F\u6210\u6CA1\u6709\u6210\u529F\uFF0C\u5DF2\u4E3A\u4F60\u4FDD\u7559\u4E0A\u4E00\u7248\u7ED3\u679C\u3002";
     } else if (state) {
       badge = hasApplied ? "\u5DF2\u5E94\u7528" : "\u53EF\u5E94\u7528";
-      statusText = hasApplied ? "\u5F53\u524D\u7F16\u6392\u5DF2\u5E94\u7528\u5230\u9884\u89C8\u3002" : "\u5F53\u524D\u7ED3\u679C\u5DF2\u51C6\u5907\u597D\uFF0C\u53EF\u4EE5\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\u3002";
+      statusText = hasApplied ? "\u5DF2\u5E94\u7528\u5230\u9884\u89C8\u3002" : "\u53EF\u4EE5\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\u3002";
     }
     this.aiLayoutStatusBadge.setText(badge);
     this.aiLayoutStatusBadge.className = `apple-ai-layout-badge ${hasApplied ? "is-applied" : ""} ${isStale ? "is-stale" : ""} ${(state == null ? void 0 : state.status) === "error" || (state == null ? void 0 : state.status) === "schema-error" ? "is-error" : ""} ${!aiFeatureEnabled ? "is-disabled" : ""}`;
@@ -12532,6 +12704,11 @@ var AppleStyleView = class extends ItemView {
     this.applyAiLayoutPanelStylePack(
       ((_g = state == null ? void 0 : state.resolved) == null ? void 0 : _g.colorPalette) || (effectiveSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO ? effectiveSelection.colorPalette : "") || aiSettings.defaultStylePack || "tech-green"
     );
+    this.renderAiCachedLayoutFamilies({
+      context,
+      currentLayoutFamily: ((_h = state == null ? void 0 : state.resolved) == null ? void 0 : _h.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || effectiveSelection.layoutFamily,
+      isLoading
+    });
     this.aiLayoutFamilySelect.value = effectiveSelection.layoutFamily;
     this.aiColorPaletteSelect.value = effectiveSelection.colorPalette;
     if (this.aiStylePackSelect)
@@ -12555,7 +12732,7 @@ var AppleStyleView = class extends ItemView {
     if (this.aiLayoutOverlay) {
       this.aiLayoutOverlay.classList.toggle("is-loading", isLoading);
     }
-    const converterContainer = (_h = this.previewContainer) == null ? void 0 : _h.closest(".apple-converter-container");
+    const converterContainer = (_i = this.previewContainer) == null ? void 0 : _i.closest(".apple-converter-container");
     if (converterContainer) {
       converterContainer.classList.toggle("apple-ai-layout-panel-loading", isLoading);
     }
@@ -12567,9 +12744,6 @@ var AppleStyleView = class extends ItemView {
       const colorLabel = this.getAiColorPaletteLabel(effectiveSelection.colorPalette);
       this.aiLayoutLoadingMaskText.setText(`\u6B63\u5728\u751F\u6210\u300C${layoutLabel} \xB7 ${colorLabel}\u300D\u7F16\u6392...`);
     }
-    this.aiIncludeImagesNote.setText(
-      aiSettings.includeImagesInLayout === false ? "\u56FE\u7247\u53C2\u8003\u5DF2\u5173\u95ED\uFF0C\u672C\u6B21\u5C06\u53EA\u57FA\u4E8E\u6B63\u6587\u7ED3\u6784\u751F\u6210\u3002" : "\u5C06\u4F18\u5148\u53C2\u8003\u5F53\u524D\u6587\u7AE0\u91CC\u7684\u914D\u56FE\u4E0E\u622A\u56FE\u3002"
-    );
     const primaryAction = this.getAiPrimaryActionConfig({
       hasDoc,
       aiFeatureEnabled,
@@ -12585,19 +12759,24 @@ var AppleStyleView = class extends ItemView {
     this.aiPrimaryActionMode = primaryAction.mode;
     this.aiGenerateBtn.setText(primaryAction.label);
     this.aiGenerateBtn.disabled = primaryAction.disabled;
+    if (this.aiRegenerateBtn) {
+      const showRegenerate = !!(hasDoc && aiFeatureEnabled && canGenerateForSelection && !isLoading && state && primaryAction.mode !== "generate-apply");
+      this.aiRegenerateBtn.hidden = !showRegenerate;
+      this.aiRegenerateBtn.disabled = !showRegenerate;
+    }
     if (isLoading) {
       this.aiLayoutSummary.setText(`\u6B63\u5728\u4E3A\u300C${context.title || "\u5F53\u524D\u6587\u7AE0"}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u6548\u679C\u3002`);
       this.renderAiLayoutMetaChips([]);
-      (_i = this.aiLayoutMetaNote) == null ? void 0 : _i.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u79FB\u9664\u4E0D\u9700\u8981\u7684\u533A\u5757\u3002");
+      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("\u751F\u6210\u5B8C\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u4E5F\u53EF\u4EE5\u7EE7\u7EED\u79FB\u9664\u4E0D\u9700\u8981\u7684\u533A\u5757\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else if (!aiFeatureEnabled) {
       this.aiLayoutSummary.setText("\u542F\u7528 AI \u7F16\u6392\u540E\uFF0C\u8FD9\u91CC\u4F1A\u6839\u636E\u5F53\u524D\u6587\u7AE0\u751F\u6210\u7248\u5F0F\u7ED3\u679C\u3002");
-      (_j = this.aiLayoutMetaNote) == null ? void 0 : _j.setText("AI \u7F16\u6392\u53EA\u8D1F\u8D23\u7ED3\u6784\u8C03\u6574\uFF0C\u6700\u7EC8\u89C6\u89C9\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
+      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("AI \u7F16\u6392\u53EA\u8D1F\u8D23\u7ED3\u6784\u8C03\u6574\uFF0C\u6700\u7EC8\u89C6\u89C9\u6837\u5F0F\u4ECD\u7531\u63D2\u4EF6\u6E32\u67D3\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if (!hasDoc) {
       this.aiLayoutSummary.setText("\u6253\u5F00\u4E00\u7BC7\u6587\u7AE0\u540E\uFF0C\u5C31\u53EF\u4EE5\u751F\u6210\u4E13\u5C5E\u7F16\u6392\u3002");
-      (_k = this.aiLayoutMetaNote) == null ? void 0 : _k.setText("\u5F53\u524D\u652F\u6301\u539F\u6587\u589E\u5F3A\u578B\u3001\u6559\u7A0B\u5361\u7247\u578B\u3001\u8F7B\u6742\u5FD7\u578B\u4E09\u79CD\u5E03\u5C40\u3002");
+      (_l = this.aiLayoutMetaNote) == null ? void 0 : _l.setText("\u5F53\u524D\u652F\u6301\u539F\u6587\u589E\u5F3A\u578B\u3001\u6559\u7A0B\u5361\u7247\u578B\u3001\u8F7B\u6742\u5FD7\u578B\u4E09\u79CD\u5E03\u5C40\u3002");
       this.renderAiLayoutMetaChips([]);
       this.refreshAiSchemaIssuePanel(null);
     } else if ((state == null ? void 0 : state.status) === "schema-error") {
@@ -12607,7 +12786,7 @@ var AppleStyleView = class extends ItemView {
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
         ...(schemaValidation == null ? void 0 : schemaValidation.issueCount) > 0 ? [`Schema ${schemaValidation.issueCount} \u9879`] : []
       ]);
-      (_l = this.aiLayoutMetaNote) == null ? void 0 : _l.setText(hasReusableLayout ? "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u76F4\u63A5\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002" : "\u53EF\u4EE5\u91CD\u8BD5\u4E00\u6B21\uFF1B\u5982\u4ECD\u5931\u8D25\uFF0C\u518D\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u5177\u4F53\u539F\u56E0\u3002");
+      (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(hasReusableLayout ? "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u76F4\u63A5\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002" : "\u53EF\u4EE5\u91CD\u8BD5\u4E00\u6B21\uFF1B\u5982\u4ECD\u5931\u8D25\uFF0C\u518D\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u5177\u4F53\u539F\u56E0\u3002");
       this.refreshAiSchemaIssuePanel(schemaValidation);
     } else if ((state == null ? void 0 : state.status) === "error" && state.lastError) {
       this.aiLayoutSummary.setText(hasReusableLayout ? "\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002" : "\u751F\u6210\u5931\u8D25\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5\u3002");
@@ -12615,7 +12794,7 @@ var AppleStyleView = class extends ItemView {
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
       ]);
-      (_m = this.aiLayoutMetaNote) == null ? void 0 : _m.setText(hasReusableLayout ? "\u5F53\u524D\u4E0D\u4F1A\u5F71\u54CD\u4F60\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u5982\u679C\u53CD\u590D\u5931\u8D25\uFF0C\u53EF\u4EE5\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002");
+      (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(hasReusableLayout ? "\u5F53\u524D\u4E0D\u4F1A\u5F71\u54CD\u4F60\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u7ED3\u679C\u3002" : "\u5982\u679C\u53CD\u590D\u5931\u8D25\uFF0C\u53EF\u4EE5\u5230\u9AD8\u7EA7\u91CC\u67E5\u770B\u9519\u8BEF\u8BE6\u60C5\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else if (hasReusableLayout && hasLastAttemptFailure) {
       this.aiLayoutSummary.setText("\u4E0A\u4E00\u7248\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u4F7F\u7528\u3002");
@@ -12624,12 +12803,12 @@ var AppleStyleView = class extends ItemView {
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : [],
         state.lastAttemptStatus === "schema-error" ? "\u6700\u8FD1\u4E00\u6B21\u6821\u9A8C\u5931\u8D25" : "\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u5931\u8D25"
       ]);
-      (_n = this.aiLayoutMetaNote) == null ? void 0 : _n.setText(hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u5148\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002");
+      (_o = this.aiLayoutMetaNote) == null ? void 0 : _o.setText(hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "\u5982\u679C\u5F53\u524D\u6548\u679C\u8FD8\u80FD\u7528\uFF0C\u4F60\u53EF\u4EE5\u5148\u7EE7\u7EED\u4F7F\u7528\u4E0A\u4E00\u7248\u3002");
       this.refreshAiSchemaIssuePanel(state.lastAttemptStatus === "schema-error" ? schemaValidation : null);
     } else if (!state) {
       if (!hasProvider && !canUseLocalLayout) {
         this.aiLayoutSummary.setText("\u5F53\u524D\u6240\u9009\u5E03\u5C40\u4F9D\u8D56 AI Provider\u3002");
-        (_o = this.aiLayoutMetaNote) == null ? void 0 : _o.setText("\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u76F4\u63A5\u751F\u6210\u5E76\u5E94\u7528\u3002");
+        (_p = this.aiLayoutMetaNote) == null ? void 0 : _p.setText("\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u76F4\u63A5\u751F\u6210\u5E76\u5E94\u7528\u3002");
         this.renderAiLayoutMetaChips([]);
       } else {
         this.aiLayoutSummary.setText(`\u5C06\u4E3A\u300C${context.title}\u300D\u751F\u6210\u65B0\u7684\u6392\u7248\u7ED3\u679C\u3002`);
@@ -12637,7 +12816,7 @@ var AppleStyleView = class extends ItemView {
           `\u5E03\u5C40 ${this.getAiLayoutFamilyLabel(effectiveSelection.layoutFamily)}`,
           `\u989C\u8272 ${this.getAiColorPaletteLabel(effectiveSelection.colorPalette)}`
         ]);
-        (_p = this.aiLayoutMetaNote) == null ? void 0 : _p.setText("\u751F\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u518D\u51B3\u5B9A\u4FDD\u7559\u6216\u79FB\u9664\u54EA\u4E9B\u533A\u5757\u3002");
+        (_q = this.aiLayoutMetaNote) == null ? void 0 : _q.setText("\u751F\u6210\u540E\u4F1A\u76F4\u63A5\u5E94\u7528\u5230\u9884\u89C8\uFF0C\u4F60\u518D\u51B3\u5B9A\u4FDD\u7559\u6216\u79FB\u9664\u54EA\u4E9B\u533A\u5757\u3002");
       }
       this.refreshAiSchemaIssuePanel(null);
     } else if (state && isStale && !canGenerateForSelection) {
@@ -12646,10 +12825,10 @@ var AppleStyleView = class extends ItemView {
         ...providerLabel ? [`Provider ${providerLabel}`] : [],
         ...modelLabel ? [`\u6A21\u578B ${modelLabel}`] : []
       ]);
-      (_q = this.aiLayoutMetaNote) == null ? void 0 : _q.setText(canApplyVisibleLayout ? "\u5F53\u524D\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u5E94\u7528\uFF1B\u5982\u679C\u8981\u66F4\u65B0\u5185\u5BB9\uFF0C\u8BF7\u5148\u6062\u590D Provider\u3002" : "\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u57FA\u4E8E\u6700\u65B0\u5185\u5BB9\u91CD\u65B0\u751F\u6210\u3002");
+      (_r = this.aiLayoutMetaNote) == null ? void 0 : _r.setText(canApplyVisibleLayout ? "\u5F53\u524D\u7ED3\u679C\u4ECD\u53EF\u7EE7\u7EED\u5E94\u7528\uFF1B\u5982\u679C\u8981\u66F4\u65B0\u5185\u5BB9\uFF0C\u8BF7\u5148\u6062\u590D Provider\u3002" : "\u5B8C\u6210 Provider \u914D\u7F6E\u540E\uFF0C\u5C31\u53EF\u4EE5\u57FA\u4E8E\u6700\u65B0\u5185\u5BB9\u91CD\u65B0\u751F\u6210\u3002");
       this.refreshAiSchemaIssuePanel(null);
     } else {
-      const blockCount = ((_r = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _r.length) || 0;
+      const blockCount = ((_s = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _s.length) || 0;
       this.aiLayoutSummary.setText(`\u5F53\u524D\u7ED3\u679C\u5171 ${blockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u76F4\u63A5\u5E94\u7528\uFF0C\u4E5F\u53EF\u4EE5\u79FB\u9664\u4E0D\u9700\u8981\u7684\u90E8\u5206\u3002`);
       const metaChips = [];
       if (providerLabel)
@@ -12681,11 +12860,11 @@ var AppleStyleView = class extends ItemView {
       this.renderAiLayoutMetaChips(metaChips);
       const hiddenText = hiddenBlockCount > 0 ? `\u5DF2\u9690\u85CF ${hiddenBlockCount} \u4E2A\u533A\u5757\uFF0C\u53EF\u968F\u65F6\u6062\u590D\u3002` : "";
       if (hasLastAttemptFailure && state.lastAttemptError) {
-        (_s = this.aiLayoutMetaNote) == null ? void 0 : _s.setText(`\u4E0A\u4E00\u7248\u7ED3\u679C\u5DF2\u4FDD\u7559\u3002${hiddenText}`.trim());
+        (_t = this.aiLayoutMetaNote) == null ? void 0 : _t.setText(`\u4E0A\u4E00\u7248\u7ED3\u679C\u5DF2\u4FDD\u7559\u3002${hiddenText}`.trim());
       } else if ((generationMeta == null ? void 0 : generationMeta.executionMode) === "local-fallback") {
-        (_t = this.aiLayoutMetaNote) == null ? void 0 : _t.setText(`\u5F53\u524D\u4F7F\u7528\u7684\u662F\u66F4\u7A33\u5B9A\u7684\u5FEB\u901F\u589E\u5F3A\u7ED3\u679C\u3002${hiddenText}`.trim());
+        (_u = this.aiLayoutMetaNote) == null ? void 0 : _u.setText(`\u5F53\u524D\u4F7F\u7528\u7684\u662F\u66F4\u7A33\u5B9A\u7684\u5FEB\u901F\u589E\u5F3A\u7ED3\u679C\u3002${hiddenText}`.trim());
       } else {
-        (_u = this.aiLayoutMetaNote) == null ? void 0 : _u.setText(hiddenText || "\u4F60\u53EF\u4EE5\u7EE7\u7EED\u5FAE\u8C03\u533A\u5757\uFF0C\u6216\u76F4\u63A5\u4FDD\u7559\u5F53\u524D\u7ED3\u679C\u3002");
+        (_v = this.aiLayoutMetaNote) == null ? void 0 : _v.setText(hiddenText || "\u4F60\u53EF\u4EE5\u7EE7\u7EED\u5FAE\u8C03\u533A\u5757\uFF0C\u6216\u76F4\u63A5\u4FDD\u7559\u5F53\u524D\u7ED3\u679C\u3002");
       }
       this.refreshAiSchemaIssuePanel(schemaValidation);
     }
@@ -12699,7 +12878,7 @@ var AppleStyleView = class extends ItemView {
         content.createDiv({ cls: "apple-ai-layout-block-skeleton-line is-meta" });
         item.createDiv({ cls: "apple-ai-layout-block-skeleton-badge" });
       }
-    } else if ((_v = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _v.length) {
+    } else if ((_w = visibleLayout == null ? void 0 : visibleLayout.blocks) == null ? void 0 : _w.length) {
       visibleLayout.blocks.forEach((block, index) => {
         const item = this.aiBlockList.createDiv({ cls: "apple-ai-layout-block-item" });
         const origin = (visibleBlockOrigins == null ? void 0 : visibleBlockOrigins[index]) || null;
@@ -12727,6 +12906,9 @@ var AppleStyleView = class extends ItemView {
       });
     }
     this.aiResetBtn.disabled = !this.aiPreviewApplied || isLoading;
+    if (this.aiRegenerateBtn && isLoading) {
+      this.aiRegenerateBtn.disabled = true;
+    }
     if (this.aiRestoreBlocksBtn) {
       this.aiRestoreBlocksBtn.disabled = hiddenBlockCount <= 0 || isLoading;
       this.aiRestoreBlocksBtn.hidden = hiddenBlockCount <= 0;
@@ -12885,28 +13067,29 @@ var AppleStyleView = class extends ItemView {
       this.refreshAiLayoutPanel();
     }
   }
-  applyAiLayoutToPreview() {
-    var _a, _b, _c, _d, _e, _f;
+  applyAiLayoutToPreview({ stateOverride = null, allowStale = false } = {}) {
+    var _a, _b, _c, _d;
     const context = this.getCurrentLayoutContext();
-    const state = this.getCurrentArticleLayoutState();
+    const state = stateOverride || this.getCurrentArticleLayoutState();
     const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
     if (!state || !((_b = (_a = visibleSnapshot.layoutJson) == null ? void 0 : _a.blocks) == null ? void 0 : _b.length)) {
       new Notice("\u5F53\u524D\u6587\u7AE0\u8FD8\u6CA1\u6709\u53EF\u7528\u7684 AI \u7F16\u6392\u7ED3\u679C");
       return;
     }
-    if (context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+    if (!allowStale && context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
       new Notice("\u5F53\u524D\u6587\u7AE0\u5185\u5BB9\u5DF2\u53D8\u5316\uFF0C\u8BF7\u5148\u91CD\u65B0\u751F\u6210 AI \u7F16\u6392");
       this.refreshAiLayoutPanel();
       return;
     }
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
     const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || "");
-    const html = renderArticleLayoutHtml(visibleSnapshot.layoutJson, {
+    const renderLayout = this.getAiRenderLayoutJson(visibleSnapshot.layoutJson);
+    const html = renderArticleLayoutHtml(renderLayout, {
       imageRefs,
       renderedSectionFragments,
-      colorPaletteOverride: this.getAiColorPaletteOverride(((_d = (_c = visibleSnapshot.layoutJson) == null ? void 0 : _c.resolved) == null ? void 0 : _d.colorPalette) || ((_e = visibleSnapshot.layoutJson) == null ? void 0 : _e.stylePack))
+      colorPaletteOverride: this.getAiColorPaletteOverride(((_c = renderLayout == null ? void 0 : renderLayout.resolved) == null ? void 0 : _c.colorPalette) || (renderLayout == null ? void 0 : renderLayout.stylePack))
     });
-    const scrollTop = ((_f = this.previewContainer) == null ? void 0 : _f.scrollTop) || 0;
+    const scrollTop = ((_d = this.previewContainer) == null ? void 0 : _d.scrollTop) || 0;
     this.currentHtml = html;
     this.aiPreviewApplied = true;
     if (this.previewContainer) {
@@ -12918,7 +13101,7 @@ var AppleStyleView = class extends ItemView {
     this.refreshAiLayoutPanel();
   }
   getCurrentExportHtml() {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c;
     if (!this.currentHtml)
       return null;
     if (!this.aiPreviewApplied)
@@ -12934,11 +13117,12 @@ var AppleStyleView = class extends ItemView {
     }
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || "");
     const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || "");
-    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, {
+    const renderLayout = this.getAiRenderLayoutJson(visibleSnapshot.layoutJson);
+    return renderArticleLayoutHtml(renderLayout, {
       imageRefs,
       mode: "draft",
       renderedSectionFragments,
-      colorPaletteOverride: this.getAiColorPaletteOverride(((_d = (_c = visibleSnapshot.layoutJson) == null ? void 0 : _c.resolved) == null ? void 0 : _d.colorPalette) || ((_e = visibleSnapshot.layoutJson) == null ? void 0 : _e.stylePack))
+      colorPaletteOverride: this.getAiColorPaletteOverride(((_c = renderLayout == null ? void 0 : renderLayout.resolved) == null ? void 0 : _c.colorPalette) || (renderLayout == null ? void 0 : renderLayout.stylePack))
     });
   }
   restoreBasePreview() {
@@ -13573,15 +13757,6 @@ var AppleStyleView = class extends ItemView {
         let layoutState = null;
         if (sourcePath && typeof ((_a = this.plugin) == null ? void 0 : _a.getArticleLayoutState) === "function") {
           layoutState = this.plugin.getArticleLayoutState(sourcePath, activeSelection);
-          if (layoutState && (activeSelection == null ? void 0 : activeSelection.colorPalette) && activeSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && layoutState.stylePack !== activeSelection.colorPalette) {
-            layoutState = null;
-          }
-          if (!layoutState && (activeSelection == null ? void 0 : activeSelection.colorPalette)) {
-            layoutState = this.plugin.getArticleLayoutState(sourcePath, activeSelection.colorPalette);
-            if (layoutState && activeSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && layoutState.stylePack !== activeSelection.colorPalette) {
-              layoutState = null;
-            }
-          }
         }
         const canReuseAiLayout = !!(this.aiPreviewApplied && ((_c = (_b = layoutState == null ? void 0 : layoutState.layoutJson) == null ? void 0 : _b.blocks) == null ? void 0 : _c.length) && this.lastResolvedSourceHash && layoutState.sourceHash === this.lastResolvedSourceHash);
         if (canReuseAiLayout) {
@@ -14355,9 +14530,9 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
       if (!normalizedEntry)
         return count;
-      return count + Object.keys(normalizedEntry.selectionStates || {}).length;
+      return count + Object.keys(normalizedEntry.familyStates || {}).length;
     }, 0);
-    const cacheSetting = new Setting(advancedArea).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u5E03\u5C40/\u989C\u8272\u7EC4\u5408\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
+    const cacheSetting = new Setting(advancedArea).setName("AI \u7F16\u6392\u7F13\u5B58").setDesc(cachedLayoutCount > 0 ? `\u5F53\u524D\u5DF2\u7F13\u5B58 ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD\u7F16\u6392\u98CE\u683C\u7ED3\u679C\u3002` : "\u5F53\u524D\u8FD8\u6CA1\u6709\u7F13\u5B58\u7684 AI \u7F16\u6392\u7ED3\u679C\u3002");
     if (cachedLayoutCount > 0) {
       cacheSetting.addButton((button) => button.setButtonText("\u6E05\u7A7A\u7F13\u5B58").setWarning().onClick(async () => {
         if (!confirm(`\u786E\u5B9A\u8981\u6E05\u7A7A ${cachedDocCount} \u7BC7\u6587\u7AE0\u3001\u5171 ${cachedLayoutCount} \u4EFD AI \u7F16\u6392\u7F13\u5B58\u5417\uFF1F`))
@@ -14843,7 +15018,7 @@ var AppleStylePlugin = class extends Plugin {
     if (!normalizedEntry)
       return null;
     if (!selection || Object.keys(selection).length === 0) {
-      return ((_d = normalizedEntry.selectionStates) == null ? void 0 : _d[normalizedEntry.lastSelectionKey]) || null;
+      return ((_d = normalizedEntry.familyStates) == null ? void 0 : _d[normalizedEntry.lastLayoutFamily]) || null;
     }
     return getArticleLayoutSelectionState(normalizedEntry, selection, {
       layoutFamily: ((_f = (_e = this.settings) == null ? void 0 : _e.ai) == null ? void 0 : _f.defaultLayoutFamily) || AI_LAYOUT_SELECTION_AUTO,
@@ -14862,11 +15037,9 @@ var AppleStylePlugin = class extends Plugin {
       this.settings.ai.articleLayoutsByPath = {};
     }
     const existingEntry = normalizeArticleLayoutCacheEntry(this.settings.ai.articleLayoutsByPath[normalizedPath]) || {
-      lastSelectionKey: getArticleLayoutSelectionKey({
-        layoutFamily: this.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
-        colorPalette: this.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
-      }),
-      selectionStates: {}
+      lastLayoutFamily: "",
+      lastAutoResolvedFamily: "",
+      familyStates: {}
     };
     const hasExplicitSelection = typeof selection === "string" || selection && typeof selection === "object" && Object.keys(selection).length > 0;
     const requestedSelection = normalizeLayoutSelection(
@@ -14879,31 +15052,51 @@ var AppleStylePlugin = class extends Plugin {
         colorPalette: this.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO
       }
     );
-    const effectiveSelectionKey = getArticleLayoutSelectionKey(requestedSelection);
+    const getCacheFamily = (state = null) => {
+      var _a2, _b2;
+      const normalizedState = normalizeArticleLayoutState(state || {});
+      const rawFamily = ((_a2 = normalizedState == null ? void 0 : normalizedState.resolved) == null ? void 0 : _a2.layoutFamily) || (normalizedState == null ? void 0 : normalizedState.layoutFamily) || ((_b2 = state == null ? void 0 : state.resolved) == null ? void 0 : _b2.layoutFamily) || (state == null ? void 0 : state.layoutFamily) || (requestedSelection.layoutFamily !== AI_LAYOUT_SELECTION_AUTO ? requestedSelection.layoutFamily : "");
+      const normalizedFamily = normalizeLayoutSelection({ layoutFamily: rawFamily }).layoutFamily;
+      return normalizedFamily === AI_LAYOUT_SELECTION_AUTO ? "" : normalizedFamily;
+    };
+    const effectiveLayoutFamily = getCacheFamily(nextState);
     if (!nextState) {
-      if (selection && Object.keys(selection).length) {
-        delete existingEntry.selectionStates[effectiveSelectionKey];
-        const remainingSelectionKeys = Object.keys(existingEntry.selectionStates);
-        if (!remainingSelectionKeys.length) {
+      if (selection && Object.keys(selection).length && effectiveLayoutFamily) {
+        delete existingEntry.familyStates[effectiveLayoutFamily];
+        const remainingFamilies = Object.keys(existingEntry.familyStates);
+        if (!remainingFamilies.length) {
           delete this.settings.ai.articleLayoutsByPath[normalizedPath];
         } else {
-          existingEntry.lastSelectionKey = existingEntry.selectionStates[existingEntry.lastSelectionKey] ? existingEntry.lastSelectionKey : remainingSelectionKeys[0];
+          existingEntry.lastLayoutFamily = existingEntry.familyStates[existingEntry.lastLayoutFamily] ? existingEntry.lastLayoutFamily : remainingFamilies[0];
+          if (existingEntry.lastAutoResolvedFamily && !existingEntry.familyStates[existingEntry.lastAutoResolvedFamily]) {
+            existingEntry.lastAutoResolvedFamily = "";
+          }
           this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
         }
       } else {
         delete this.settings.ai.articleLayoutsByPath[normalizedPath];
       }
     } else {
-      const inferredSkillId = (nextState == null ? void 0 : nextState.skillId) || ((_d = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _d.layoutFamily) || (nextState == null ? void 0 : nextState.layoutFamily) || requestedSelection.layoutFamily;
-      const inferredSkillVersion = (nextState == null ? void 0 : nextState.skillVersion) || ((_e = nextState == null ? void 0 : nextState.generationMeta) == null ? void 0 : _e.skillVersion) || ((_f = getLayoutFamilyById(inferredSkillId)) == null ? void 0 : _f.version) || "";
-      existingEntry.selectionStates[effectiveSelectionKey] = {
+      const resolvedLayoutFamily = effectiveLayoutFamily || "source-first";
+      const inferredSkillId = (nextState == null ? void 0 : nextState.skillId) || resolvedLayoutFamily || requestedSelection.layoutFamily;
+      const inferredSkillVersion = (nextState == null ? void 0 : nextState.skillVersion) || ((_d = nextState == null ? void 0 : nextState.generationMeta) == null ? void 0 : _d.skillVersion) || ((_e = getLayoutFamilyById(inferredSkillId)) == null ? void 0 : _e.version) || "";
+      existingEntry.familyStates[resolvedLayoutFamily] = {
         ...nextState,
         skillId: inferredSkillId,
         skillVersion: inferredSkillVersion,
         selection: requestedSelection,
+        resolved: {
+          ...(nextState == null ? void 0 : nextState.resolved) || {},
+          layoutFamily: resolvedLayoutFamily,
+          colorPalette: (nextState == null ? void 0 : nextState.stylePack) || ((_f = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _f.colorPalette) || "tech-green"
+        },
+        layoutFamily: resolvedLayoutFamily,
         stylePack: (nextState == null ? void 0 : nextState.stylePack) || ((_g = nextState == null ? void 0 : nextState.resolved) == null ? void 0 : _g.colorPalette) || "tech-green"
       };
-      existingEntry.lastSelectionKey = effectiveSelectionKey;
+      existingEntry.lastLayoutFamily = resolvedLayoutFamily;
+      if (requestedSelection.layoutFamily === AI_LAYOUT_SELECTION_AUTO) {
+        existingEntry.lastAutoResolvedFamily = resolvedLayoutFamily;
+      }
       this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
     }
     return this.saveSettings();

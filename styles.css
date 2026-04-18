@@ -469,6 +469,14 @@
   border: 1px solid var(--apple-border);
 }
 
+.apple-ai-layout-status-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .apple-ai-layout-badge {
   display: inline-flex;
   align-items: center;
@@ -503,8 +511,7 @@
 }
 
 .apple-ai-layout-status-text {
-  flex: 1;
-  min-width: 0;
+  order: 2;
   font-size: 12px;
   line-height: 1.6;
   color: var(--apple-secondary);
@@ -621,6 +628,88 @@
   background: color-mix(in srgb, var(--ai-layout-accent) 10%, transparent);
   color: var(--ai-layout-accent-deep);
   border-color: color-mix(in srgb, var(--ai-layout-accent-border) 30%, var(--apple-border));
+}
+
+.apple-ai-layout-cache-list {
+  order: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  min-height: 18px;
+}
+
+.apple-ai-layout-cache-list[hidden] {
+  display: none;
+}
+
+.apple-ai-layout-cache-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  color: var(--apple-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.apple-ai-layout-cache-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 2px 8px;
+  border: 1px solid var(--apple-border);
+  border-radius: 7px;
+  background: var(--apple-background);
+  color: var(--apple-primary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.apple-ai-layout-cache-chip:hover {
+  border-color: color-mix(in srgb, var(--ai-layout-accent-border) 34%, var(--apple-border));
+  background: color-mix(in srgb, var(--ai-layout-accent) 6%, transparent);
+}
+
+.apple-ai-layout-cache-chip.active {
+  border-color: color-mix(in srgb, var(--ai-layout-accent-border) 45%, var(--apple-border));
+  background: color-mix(in srgb, var(--ai-layout-accent) 6%, transparent);
+  color: var(--ai-layout-accent-deep);
+}
+
+.apple-ai-layout-cache-chip:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.apple-ai-layout-cache-caption {
+  color: var(--apple-tertiary, var(--apple-secondary));
+  font-size: 11px;
+}
+
+.apple-ai-layout-cache-name {
+  font-weight: 650;
+  color: var(--apple-primary);
+}
+
+.apple-ai-layout-cache-separator {
+  color: var(--apple-tertiary, var(--apple-secondary));
+}
+
+.apple-ai-layout-cache-origin,
+.apple-ai-layout-cache-state {
+  font-size: 11px;
+  color: var(--apple-secondary);
+}
+
+.apple-ai-layout-cache-state.is-current {
+  color: var(--ai-layout-accent-deep);
+}
+
+.apple-ai-layout-cache-state.is-stale {
+  color: var(--apple-warning, #b45309);
 }
 
 .apple-ai-custom-color-input {

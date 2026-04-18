@@ -16,6 +16,7 @@ const {
   extractMarkdownSignals,
   buildFallbackLayout,
   normalizeArticleLayout,
+  normalizeArticleLayoutCacheEntry,
   normalizeLayoutGenerationMeta,
   deriveArticleLayoutStateForSelection,
   getArticleLayoutSelectionState,
@@ -1201,12 +1202,13 @@ title: 示例
   });
 
   it('should let auto selection reuse migrated legacy cache entries', () => {
+    const now = Date.now();
     const migratedEntry = {
-      lastSelectionKey: 'tutorial-cards::tech-green',
+      lastSelectionKey: 'tutorial-cards::ocean-blue',
       selectionStates: {
         'tutorial-cards::tech-green': {
           version: 1,
-          updatedAt: Date.now(),
+          updatedAt: now - 1000,
           sourceHash: '123',
           stylePack: 'tech-green',
           status: 'ready',
@@ -1216,17 +1218,31 @@ title: 示例
             blocks: [{ type: 'hero', title: '历史缓存' }],
           },
         },
+        'tutorial-cards::ocean-blue': {
+          version: 1,
+          updatedAt: now,
+          sourceHash: '123',
+          stylePack: 'ocean-blue',
+          status: 'ready',
+          layoutJson: {
+            articleType: 'tutorial',
+            stylePack: 'ocean-blue',
+            blocks: [{ type: 'hero', title: '更新缓存' }],
+          },
+        },
       },
     };
+    const normalizedEntry = normalizeArticleLayoutCacheEntry(migratedEntry);
 
     expect(getArticleLayoutSelectionState(migratedEntry, {
       layoutFamily: 'auto',
       colorPalette: 'auto',
-    })?.layoutJson?.blocks?.[0]?.title).toBe('历史缓存');
+    })?.layoutJson?.blocks?.[0]?.title).toBe('更新缓存');
     expect(getArticleLayoutSelectionState(migratedEntry, {
       layoutFamily: 'auto',
       colorPalette: 'tech-green',
-    })?.stylePack).toBe('tech-green');
+    })?.stylePack).toBe('ocean-blue');
+    expect(Object.keys(normalizedEntry.familyStates)).toEqual(['tutorial-cards']);
   });
 
   it('should keep schema-sized part nav, bullets and image ids during normalization', () => {

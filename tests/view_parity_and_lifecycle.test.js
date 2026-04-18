@@ -728,6 +728,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.refreshAiLayoutPanel();
 
     expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 5 个区块');
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果')).toBe(true);
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '重新生成并应用')).toBe(true);
     expect(container.querySelector('.apple-ai-layout-advanced-body')?.hidden).toBe(true);
     expect(container.querySelector('.apple-ai-layout-block-type')).toBeNull();
@@ -740,7 +741,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(container.querySelector('.apple-ai-layout-meta-chips')?.textContent).toContain('补全 2 块');
   });
 
-  it('refreshAiLayoutPanel should reset to initial state when selected color palette has no cached result', () => {
+  it('refreshAiLayoutPanel should keep cached layout available when only the selected color changes', () => {
     const cachedState = {
       version: 1,
       updatedAt: Date.now(),
@@ -826,14 +827,21 @@ describe('AppleStyleView native render + lifecycle', () => {
     const container = createObsidianLikeElement();
     view.createSettingsPanel(container);
     view.pendingAiStylePack = 'ocean-blue';
+    view.pendingAiColorPalette = 'ocean-blue';
     view.refreshAiLayoutPanel();
 
-    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('未生成');
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('选择布局和颜色后，点击“生成并应用”查看效果');
-    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('将为');
-    expect(container.querySelector('.apple-ai-layout-empty')?.textContent).toContain('生成后会展示区块清单');
-    expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(0);
-    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '生成并应用')).toBe(true);
+    expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('可应用');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('可以直接应用到预览');
+    expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 2 个区块');
+    expect(container.querySelectorAll('.apple-ai-layout-block-item')).toHaveLength(2);
+    expect(container.querySelector('.apple-ai-layout-cache-inline')?.textContent).toContain('当前风格');
+    expect(container.querySelector('.apple-ai-layout-cache-inline')?.textContent).toContain('教程卡片');
+    expect(container.querySelector('.apple-ai-layout-cache-inline')?.textContent).not.toContain('当前内容');
+    expect(container.querySelector('.apple-ai-layout-status .apple-ai-layout-cache-inline')).toBeTruthy();
+    expect(container.querySelector('.apple-ai-layout-cache-chip')).toBeNull();
+    expect(container.querySelector('.apple-ai-layout-cache-section')).toBeNull();
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果')).toBe(true);
+    expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '重新生成并应用')).toBe(true);
   });
 
   it('refreshAiLayoutPanel should keep apply available for cached results even when the provider is unavailable', () => {
@@ -913,12 +921,12 @@ describe('AppleStyleView native render + lifecycle', () => {
     const aiBtn = container.querySelector('.apple-icon-btn[aria-label="AI 编排"]');
     expect(aiBtn.hidden).toBe(false);
     expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('可应用');
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('当前结果已准备好');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('可以直接应用到预览');
     expect(container.querySelector('.apple-ai-layout-summary')?.textContent).toContain('当前结果共 1 个区块');
     expect(Array.from(container.querySelectorAll('.apple-ai-layout-actions button')).some((button) => button.textContent === '应用当前结果' && button.disabled === false)).toBe(true);
   });
 
-  it('refreshAiLayoutPanel should offer regeneration for cached results when a provider is available', () => {
+  it('refreshAiLayoutPanel should apply cached results first while offering regeneration when a provider is available', () => {
     const cachedState = {
       version: 1,
       updatedAt: Date.now(),
@@ -992,11 +1000,11 @@ describe('AppleStyleView native render + lifecycle', () => {
 
     const actionButtons = Array.from(container.querySelectorAll('.apple-ai-layout-actions button'));
     expect(actionButtons.some((button) => button.textContent === '重新生成并应用' && button.disabled === false)).toBe(true);
-    expect(actionButtons.some((button) => button.textContent === '应用当前结果')).toBe(false);
-    expect(view.aiPrimaryActionMode).toBe('generate-apply');
+    expect(actionButtons.some((button) => button.textContent === '应用当前结果' && button.disabled === false)).toBe(true);
+    expect(view.aiPrimaryActionMode).toBe('apply');
   });
 
-  it('refreshAiLayoutPanel should offer regeneration instead of applying cached results when content changed', () => {
+  it('refreshAiLayoutPanel should allow applying old cache while offering regeneration when content changed', () => {
     const cachedState = {
       version: 1,
       updatedAt: Date.now(),
@@ -1068,14 +1076,14 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.refreshAiLayoutPanel();
 
     expect(container.querySelector('.apple-ai-layout-badge')?.textContent).toContain('需更新');
-    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('文章内容有更新');
+    expect(container.querySelector('.apple-ai-layout-status-text')?.textContent).toContain('基于旧内容');
     const actionButtons = Array.from(container.querySelectorAll('.apple-ai-layout-actions button'));
     expect(actionButtons.some((button) => button.textContent === '重新生成并应用' && button.disabled === false)).toBe(true);
-    expect(actionButtons.some((button) => button.textContent === '应用当前结果')).toBe(false);
-    expect(view.aiPrimaryActionMode).toBe('generate-apply');
+    expect(actionButtons.some((button) => button.textContent === '应用旧缓存' && button.disabled === false)).toBe(true);
+    expect(view.aiPrimaryActionMode).toBe('apply-stale');
   });
 
-  it('refreshAiLayoutPanel should restore cached blocks when switching back to another generated color palette', () => {
+  it('refreshAiLayoutPanel should reuse the same cached blocks when switching color palettes', () => {
     const greenState = {
       version: 1,
       updatedAt: Date.now(),
@@ -1124,8 +1132,8 @@ describe('AppleStyleView native render + lifecycle', () => {
       },
     };
 
-    const getArticleLayoutState = vi.fn((_, stylePack) => {
-      if (stylePack === 'ocean-blue') return blueState;
+    const getArticleLayoutState = vi.fn((_, selection) => {
+      if (selection?.layoutFamily === 'source-first') return blueState;
       return greenState;
     });
 
@@ -1171,17 +1179,32 @@ describe('AppleStyleView native render + lifecycle', () => {
 
     const container = createObsidianLikeElement();
     view.createSettingsPanel(container);
+    expect(view.aiLayoutFamilySelect.querySelector('option[value="source-first"]')?.textContent).toBe('原文增强型');
 
     view.pendingAiStylePack = 'ocean-blue';
+    view.pendingAiColorPalette = 'ocean-blue';
     view.refreshAiLayoutPanel();
-    expect(container.querySelector('.apple-ai-layout-block-name')?.textContent).toContain('深海蓝标题');
+    expect(container.querySelector('.apple-ai-layout-block-name')?.textContent).toContain('科技绿标题');
 
     view.pendingAiStylePack = 'tech-green';
+    view.pendingAiColorPalette = 'tech-green';
     view.refreshAiLayoutPanel();
     expect(container.querySelector('.apple-ai-layout-block-name')?.textContent).toContain('科技绿标题');
     expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', expect.objectContaining({ colorPalette: 'tech-green' }));
     expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', expect.objectContaining({ colorPalette: 'ocean-blue' }));
-    expect(getArticleLayoutState).toHaveBeenCalledWith('notes/demo.md', 'ocean-blue');
+    expect(getArticleLayoutState).not.toHaveBeenCalledWith('notes/demo.md', 'ocean-blue');
+
+    view.aiPreviewApplied = true;
+    view.previewContainer = createObsidianLikeElement();
+    view.baseRenderedHtml = '<section><p>base</p></section>';
+    view.currentHtml = view.baseRenderedHtml;
+    view.previewContainer.innerHTML = view.baseRenderedHtml;
+    view.aiLayoutFamilySelect.value = 'source-first';
+    view.aiLayoutFamilySelect.dispatchEvent(new Event('change'));
+
+    expect(view.pendingAiLayoutFamily).toBe('source-first');
+    expect(view.currentHtml).toContain('深海蓝标题');
+    expect(view.previewContainer.innerHTML).toContain('深海蓝标题');
   });
 
   it('getCurrentExportHtml should keep ai preview html untouched while returning draft-safe export html', () => {
@@ -1454,7 +1477,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(exportHtml).not.toContain('降级正文');
   });
 
-  it('ensureAiLayoutSelectionState should derive and persist a new color variant from the current layout', async () => {
+  it('ensureAiLayoutSelectionState should not persist a new cache when only the color changes', async () => {
     const greenState = {
       version: 1,
       updatedAt: Date.now(),
@@ -1501,10 +1524,7 @@ describe('AppleStyleView native render + lifecycle', () => {
       },
     };
 
-    const getArticleLayoutState = vi.fn((_, selection) => {
-      if (selection && typeof selection === 'object' && selection.colorPalette === 'ocean-blue') return null;
-      return greenState;
-    });
+    const getArticleLayoutState = vi.fn(() => greenState);
     const saveArticleLayoutState = vi.fn().mockResolvedValue(true);
 
     const view = new AppleStyleView(null, {
@@ -1536,21 +1556,8 @@ describe('AppleStyleView native render + lifecycle', () => {
       colorPalette: 'ocean-blue',
     });
 
-    expect(derivedState).toBeTruthy();
-    expect(derivedState.stylePack).toBe('ocean-blue');
-    expect(derivedState.layoutJson.stylePack).toBe('ocean-blue');
-    expect(derivedState.selection.colorPalette).toBe('ocean-blue');
-    expect(saveArticleLayoutState).toHaveBeenCalledWith(
-      'notes/demo.md',
-      expect.objectContaining({
-        stylePack: 'ocean-blue',
-        selection: expect.objectContaining({ colorPalette: 'ocean-blue' }),
-      }),
-      expect.objectContaining({
-        layoutFamily: 'editorial-lite',
-        colorPalette: 'ocean-blue',
-      })
-    );
+    expect(derivedState).toBe(greenState);
+    expect(saveArticleLayoutState).not.toHaveBeenCalled();
   });
 
   it('refreshAiLayoutPanel should hide dismissed blocks and enable restore action', () => {

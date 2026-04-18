@@ -23,10 +23,10 @@ const {
   resolveColorPaletteForRender,
   normalizeHexColor,
   normalizeLayoutSelection,
-  getArticleLayoutSelectionKey,
   getArticleLayoutSelectionState,
   resolveAiProvider,
   deriveArticleLayoutStateForSelection,
+  normalizeArticleLayoutState,
   normalizeArticleLayoutCacheEntry,
   extractImageRefsFromHtml,
   extractRenderedSectionFragments,
@@ -1561,7 +1561,7 @@ class AppleStyleView extends ItemView {
     const entry = this.plugin?.settings?.ai?.articleLayoutsByPath?.[normalizedPath] || null;
     const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
     if (!normalizedEntry) return null;
-    return normalizedEntry.selectionStates?.[normalizedEntry.lastSelectionKey] || null;
+    return normalizedEntry.familyStates?.[normalizedEntry.lastLayoutFamily] || null;
   }
 
   hasCurrentArticleAiLayoutCache() {
@@ -1615,10 +1615,12 @@ class AppleStyleView extends ItemView {
 
     this.aiLayoutStatus = area.createDiv({ cls: 'apple-ai-layout-status' });
     this.aiLayoutStatusBadge = this.aiLayoutStatus.createEl('span', { cls: 'apple-ai-layout-badge', text: '未生成' });
-    this.aiLayoutStatusText = this.aiLayoutStatus.createEl('span', {
+    this.aiLayoutStatusBody = this.aiLayoutStatus.createDiv({ cls: 'apple-ai-layout-status-body' });
+    this.aiLayoutStatusText = this.aiLayoutStatusBody.createEl('span', {
       cls: 'apple-ai-layout-status-text',
       text: '尚未生成当前文章的 AI 编排结果。',
     });
+    this.aiCachedLayoutList = this.aiLayoutStatusBody.createDiv({ cls: 'apple-ai-layout-cache-list' });
 
     const controlSection = area.createDiv({ cls: 'apple-ai-layout-section' });
     const layoutControl = controlSection.createDiv({ cls: 'apple-ai-layout-control' });
@@ -1693,23 +1695,18 @@ class AppleStyleView extends ItemView {
     });
     this.updateAiColorPaletteControls();
     this.aiLayoutFamilySelect.addEventListener('change', () => {
-      this.pendingAiLayoutFamily = this.aiLayoutFamilySelect.value || this.plugin.settings.ai?.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO;
-      this.refreshAiLayoutPanel();
+      this.onAiLayoutFamilyChange(this.aiLayoutFamilySelect.value || this.plugin.settings.ai?.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO);
     });
     this.aiColorPaletteSelect.addEventListener('change', () => {
       this.onAiColorPaletteChange(this.aiColorPaletteSelect.value || this.plugin.settings.ai?.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO);
     });
 
-    this.aiIncludeImagesNote = controlSection.createEl('div', {
-      cls: 'apple-ai-layout-mini-note',
-      text: this.plugin.settings.ai?.includeImagesInLayout === false
-        ? '图片参考已关闭，本次将只基于正文结构生成。'
-        : '将优先参考当前文章里的配图与截图。',
-    });
-
     const actionRow = area.createDiv({ cls: 'apple-ai-layout-actions' });
     this.aiGenerateBtn = actionRow.createEl('button', { cls: 'apple-btn-primary', text: '生成并应用' });
     this.aiGenerateBtn.addEventListener('click', () => this.handleAiPrimaryAction());
+
+    this.aiRegenerateBtn = actionRow.createEl('button', { cls: 'apple-btn-secondary', text: '重新生成并应用' });
+    this.aiRegenerateBtn.addEventListener('click', () => this.generateAiLayoutForCurrentArticle({ applyAfterGenerate: true }));
 
     this.aiResetBtn = actionRow.createEl('button', { cls: 'apple-btn-secondary', text: '恢复普通预览' });
     this.aiResetBtn.addEventListener('click', () => this.restoreBasePreview());
@@ -1806,6 +1803,24 @@ class AppleStyleView extends ItemView {
     });
   }
 
+  getAiRenderLayoutJson(layoutJson = null, colorPaletteId = '') {
+    if (!layoutJson || typeof layoutJson !== 'object') return layoutJson;
+    const selectedPalette = colorPaletteId || this.getCurrentAiLayoutSelection().colorPalette;
+    if (!selectedPalette || selectedPalette === AI_LAYOUT_SELECTION_AUTO) return layoutJson;
+    return {
+      ...layoutJson,
+      selection: {
+        ...(layoutJson.selection || {}),
+        colorPalette: selectedPalette,
+      },
+      resolved: {
+        ...(layoutJson.resolved || {}),
+        colorPalette: selectedPalette,
+      },
+      stylePack: selectedPalette,
+    };
+  }
+
   async onAiColorPaletteChange(value, { skipSave = false } = {}) {
     const nextValue = value || this.plugin.settings.ai?.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO;
     const previousState = this.getCurrentArticleLayoutState();
@@ -1827,6 +1842,24 @@ class AppleStyleView extends ItemView {
       this.applyAiLayoutToPreview();
       return;
     }
+    this.refreshAiLayoutPanel();
+  }
+
+  async onAiLayoutFamilyChange(value) {
+    const nextValue = value || this.plugin.settings.ai?.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO;
+    this.pendingAiLayoutFamily = nextValue;
+    if (this.aiLayoutFamilySelect && this.aiLayoutFamilySelect.value !== nextValue) {
+      this.aiLayoutFamilySelect.value = nextValue;
+    }
+
+    if (this.aiPreviewApplied) {
+      const state = this.getCurrentArticleLayoutState();
+      if (state?.layoutJson?.blocks?.length) {
+        this.applyAiLayoutToPreview({ stateOverride: state, allowStale: true });
+        return;
+      }
+    }
+
     this.refreshAiLayoutPanel();
   }
 
@@ -1986,6 +2019,10 @@ class AppleStyleView extends ItemView {
       this.applyAiLayoutToPreview();
       return;
     }
+    if (mode === 'apply-stale') {
+      this.applyAiLayoutToPreview({ allowStale: true });
+      return;
+    }
     await this.generateAiLayoutForCurrentArticle({ applyAfterGenerate: true });
   }
 
@@ -2024,16 +2061,8 @@ class AppleStyleView extends ItemView {
     const selection = this.getCurrentAiLayoutSelection();
     if (typeof this.plugin?.getArticleLayoutState === 'function') {
       const state = this.plugin.getArticleLayoutState(sourcePath, selection);
-      if (state && (!selection?.colorPalette || selection.colorPalette === AI_LAYOUT_SELECTION_AUTO || state.stylePack === selection.colorPalette)) {
+      if (state) {
         return this.preferFreshAiLayoutState(sourcePath, selection, state, sourceHash);
-      }
-      if (selection?.colorPalette) {
-        const legacyState = this.plugin.getArticleLayoutState(sourcePath, selection.colorPalette);
-        if (!legacyState) return null;
-        if (selection.colorPalette !== AI_LAYOUT_SELECTION_AUTO && legacyState.stylePack !== selection.colorPalette) {
-          return null;
-        }
-        return this.preferFreshAiLayoutState(sourcePath, selection, legacyState, sourceHash);
       }
     }
     return null;
@@ -2053,15 +2082,17 @@ class AppleStyleView extends ItemView {
 
     const normalizedPath = normalizeVaultPath(sourcePath || '');
     const entry = normalizeArticleLayoutCacheEntry(this.plugin?.settings?.ai?.articleLayoutsByPath?.[normalizedPath]);
-    const statesByKey = entry?.selectionStates || {};
-    const requestedKey = getArticleLayoutSelectionKey(normalizedSelection);
-    const exactState = statesByKey[requestedKey];
+    const statesByFamily = entry?.familyStates || {};
+    const requestedFamily = normalizedSelection.layoutFamily === AI_LAYOUT_SELECTION_AUTO
+      ? ''
+      : normalizedSelection.layoutFamily;
+    const exactState = requestedFamily ? statesByFamily[requestedFamily] : null;
     if (exactState?.sourceHash === sourceHash && exactState.layoutJson?.blocks?.length) return exactState;
 
-    const lastState = statesByKey[entry?.lastSelectionKey];
+    const lastState = statesByFamily[entry?.lastLayoutFamily];
     if (lastState?.sourceHash === sourceHash && lastState.layoutJson?.blocks?.length) return lastState;
 
-    return Object.values(statesByKey).find((state) => (
+    return Object.values(statesByFamily).find((state) => (
       state?.sourceHash === sourceHash
       && state.layoutJson?.blocks?.length
     )) || candidateState;
@@ -2194,7 +2225,6 @@ class AppleStyleView extends ItemView {
     if (value === AI_LAYOUT_SELECTION_AUTO) return '自动推荐';
     const family = getLayoutFamilyById(value);
     if (!family) return value || '自动推荐';
-    if (family.id === 'source-first') return '原文增强型（快速）';
     return family.label || value || '自动推荐';
   }
 
@@ -2226,6 +2256,96 @@ class AppleStyleView extends ItemView {
     });
   }
 
+  getCurrentArticleLayoutCacheEntry() {
+    const { sourcePath } = this.getCurrentLayoutContext();
+    if (!sourcePath) return null;
+    const normalizedPath = normalizeVaultPath(sourcePath);
+    return normalizeArticleLayoutCacheEntry(this.plugin?.settings?.ai?.articleLayoutsByPath?.[normalizedPath]);
+  }
+
+  getCachedAiLayoutFamilyItems(context = this.getCurrentLayoutContext()) {
+    const entry = this.getCurrentArticleLayoutCacheEntry();
+    if (!entry?.familyStates) return [];
+    return Object.entries(entry.familyStates)
+      .map(([layoutFamily, state]) => {
+        if (!state?.layoutJson?.blocks?.length) return null;
+        const isCurrentContent = !!(context.sourceHash && state.sourceHash && state.sourceHash === context.sourceHash);
+        const fromAuto = state.selection?.layoutFamily === AI_LAYOUT_SELECTION_AUTO;
+        return {
+          layoutFamily,
+          state,
+          label: this.getAiLayoutFamilyLabel(layoutFamily),
+          isCurrentContent,
+          fromAuto,
+          updatedAt: Number(state.updatedAt || 0),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        if (a.isCurrentContent !== b.isCurrentContent) return a.isCurrentContent ? -1 : 1;
+        return b.updatedAt - a.updatedAt;
+      });
+  }
+
+  renderAiCachedLayoutFamilies({ context, currentLayoutFamily = '', isLoading = false } = {}) {
+    if (!this.aiCachedLayoutList) return;
+    const items = this.getCachedAiLayoutFamilyItems(context);
+    this.aiCachedLayoutList.hidden = items.length === 0;
+    this.aiCachedLayoutList.empty();
+    if (!items.length) return;
+
+    const activeItem = items.find((item) => item.layoutFamily === currentLayoutFamily) || items[0];
+    if (items.length === 1 && activeItem) {
+      const inline = this.aiCachedLayoutList.createDiv({ cls: 'apple-ai-layout-cache-inline' });
+      const sourceText = activeItem.fromAuto ? '由自动推荐生成' : '当前风格';
+      inline.createEl('span', {
+        cls: 'apple-ai-layout-cache-name',
+        text: `${sourceText} · ${activeItem.label}`,
+      });
+      if (!activeItem.isCurrentContent) {
+        inline.createEl('span', { cls: 'apple-ai-layout-cache-separator', text: '·' });
+        inline.createEl('span', {
+          cls: 'apple-ai-layout-cache-state is-stale',
+          text: '基于旧内容',
+        });
+      }
+      return;
+    }
+
+    this.aiCachedLayoutList.createEl('span', { cls: 'apple-ai-layout-cache-caption', text: '已缓存' });
+    items.forEach((item) => {
+      const button = this.aiCachedLayoutList.createEl('button', {
+        cls: 'apple-ai-layout-cache-chip',
+        title: item.isCurrentContent ? '预览这份缓存' : '预览这份旧内容缓存',
+      });
+      button.classList.toggle('active', item.layoutFamily === currentLayoutFamily);
+      button.disabled = isLoading;
+      button.dataset.layoutFamily = item.layoutFamily;
+      button.createEl('span', { cls: 'apple-ai-layout-cache-name', text: item.label });
+      if (item.fromAuto) {
+        button.createEl('span', { cls: 'apple-ai-layout-cache-origin', text: '自动推荐生成' });
+      }
+      button.createEl('span', {
+        cls: `apple-ai-layout-cache-state ${item.isCurrentContent ? 'is-current' : 'is-stale'}`,
+        text: item.isCurrentContent ? '当前内容' : '旧内容',
+      });
+      button.addEventListener('click', () => this.previewCachedAiLayoutFamily(item.layoutFamily));
+    });
+  }
+
+  previewCachedAiLayoutFamily(layoutFamily = '') {
+    const entry = this.getCurrentArticleLayoutCacheEntry();
+    const state = entry?.familyStates?.[layoutFamily] || null;
+    if (!state?.layoutJson?.blocks?.length) {
+      new Notice('这份缓存已经不可用，请重新生成');
+      this.refreshAiLayoutPanel();
+      return;
+    }
+    this.pendingAiLayoutFamily = layoutFamily;
+    if (this.aiLayoutFamilySelect) this.aiLayoutFamilySelect.value = layoutFamily;
+    this.applyAiLayoutToPreview({ stateOverride: state, allowStale: true });
+  }
+
   getAiPrimaryActionConfig({
     hasDoc,
     aiFeatureEnabled,
@@ -2245,6 +2365,9 @@ class AppleStyleView extends ItemView {
       return { mode: 'generate-apply', label: '生成并应用', disabled: true };
     }
     if (isStale) {
+      if (visibleLayout?.blocks?.length) {
+        return { mode: 'apply-stale', label: '应用旧缓存', disabled: false };
+      }
       return { mode: 'generate-apply', label: '重新生成并应用', disabled: !canGenerateForSelection };
     }
     if (hasReusableLayout && hasLastAttemptFailure) {
@@ -2254,9 +2377,6 @@ class AppleStyleView extends ItemView {
       return { mode: 'apply', label: '应用上一版', disabled: false };
     }
     if (visibleLayout?.blocks?.length && !hasApplied) {
-      if (canGenerateForSelection) {
-        return { mode: 'generate-apply', label: '重新生成并应用', disabled: false };
-      }
       return { mode: 'apply', label: '应用当前结果', disabled: false };
     }
     if (!canGenerateForSelection) {
@@ -2680,10 +2800,14 @@ class AppleStyleView extends ItemView {
     } else if (state && isStale) {
       if (canGenerateForSelection) {
         badge = '需更新';
-        statusText = '文章内容有更新，建议重新生成并应用。';
+        statusText = hasReusableLayout
+          ? '这份编排基于旧内容，可先应用旧缓存，或重新生成最新结果。'
+          : '文章内容有更新，建议重新生成并应用。';
       } else {
         badge = '待配置';
-        statusText = '当前已有旧结果，但文章内容已更新。若要重新生成，请先完成 AI Provider 配置。';
+        statusText = hasReusableLayout
+          ? '这份编排基于旧内容；若要重新生成，请先完成 AI Provider 配置。'
+          : '当前已有旧结果，但文章内容已更新。若要重新生成，请先完成 AI Provider 配置。';
       }
     } else if (hasReusableLayout && hasLastAttemptFailure) {
       badge = '已保留上一版';
@@ -2691,8 +2815,8 @@ class AppleStyleView extends ItemView {
     } else if (state) {
       badge = hasApplied ? '已应用' : '可应用';
       statusText = hasApplied
-        ? '当前编排已应用到预览。'
-        : '当前结果已准备好，可以直接应用到预览。';
+        ? '已应用到预览。'
+        : '可以直接应用到预览。';
     }
 
     this.aiLayoutStatusBadge.setText(badge);
@@ -2704,6 +2828,11 @@ class AppleStyleView extends ItemView {
       || aiSettings.defaultStylePack
       || 'tech-green'
     );
+    this.renderAiCachedLayoutFamilies({
+      context,
+      currentLayoutFamily: state?.resolved?.layoutFamily || state?.layoutFamily || effectiveSelection.layoutFamily,
+      isLoading,
+    });
     this.aiLayoutFamilySelect.value = effectiveSelection.layoutFamily;
     this.aiColorPaletteSelect.value = effectiveSelection.colorPalette;
     if (this.aiStylePackSelect) this.aiStylePackSelect.value = effectiveSelection.colorPalette;
@@ -2737,12 +2866,6 @@ class AppleStyleView extends ItemView {
       const colorLabel = this.getAiColorPaletteLabel(effectiveSelection.colorPalette);
       this.aiLayoutLoadingMaskText.setText(`正在生成「${layoutLabel} · ${colorLabel}」编排...`);
     }
-    this.aiIncludeImagesNote.setText(
-      aiSettings.includeImagesInLayout === false
-        ? '图片参考已关闭，本次将只基于正文结构生成。'
-        : '将优先参考当前文章里的配图与截图。'
-    );
-
     const primaryAction = this.getAiPrimaryActionConfig({
       hasDoc,
       aiFeatureEnabled,
@@ -2758,6 +2881,18 @@ class AppleStyleView extends ItemView {
     this.aiPrimaryActionMode = primaryAction.mode;
     this.aiGenerateBtn.setText(primaryAction.label);
     this.aiGenerateBtn.disabled = primaryAction.disabled;
+    if (this.aiRegenerateBtn) {
+      const showRegenerate = !!(
+        hasDoc
+        && aiFeatureEnabled
+        && canGenerateForSelection
+        && !isLoading
+        && state
+        && primaryAction.mode !== 'generate-apply'
+      );
+      this.aiRegenerateBtn.hidden = !showRegenerate;
+      this.aiRegenerateBtn.disabled = !showRegenerate;
+    }
 
     if (isLoading) {
       this.aiLayoutSummary.setText(`正在为「${context.title || '当前文章'}」生成新的排版效果。`);
@@ -2898,6 +3033,9 @@ class AppleStyleView extends ItemView {
     }
 
     this.aiResetBtn.disabled = !this.aiPreviewApplied || isLoading;
+    if (this.aiRegenerateBtn && isLoading) {
+      this.aiRegenerateBtn.disabled = true;
+    }
     if (this.aiRestoreBlocksBtn) {
       this.aiRestoreBlocksBtn.disabled = hiddenBlockCount <= 0 || isLoading;
       this.aiRestoreBlocksBtn.hidden = hiddenBlockCount <= 0;
@@ -3077,15 +3215,15 @@ class AppleStyleView extends ItemView {
     }
   }
 
-  applyAiLayoutToPreview() {
+  applyAiLayoutToPreview({ stateOverride = null, allowStale = false } = {}) {
     const context = this.getCurrentLayoutContext();
-    const state = this.getCurrentArticleLayoutState();
+    const state = stateOverride || this.getCurrentArticleLayoutState();
     const visibleSnapshot = this.getVisibleAiLayoutSnapshot(state);
     if (!state || !visibleSnapshot.layoutJson?.blocks?.length) {
       new Notice('当前文章还没有可用的 AI 编排结果');
       return;
     }
-    if (context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
+    if (!allowStale && context.sourceHash && state.sourceHash && context.sourceHash !== state.sourceHash) {
       new Notice('当前文章内容已变化，请先重新生成 AI 编排');
       this.refreshAiLayoutPanel();
       return;
@@ -3093,10 +3231,11 @@ class AppleStyleView extends ItemView {
 
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
     const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || '');
-    const html = renderArticleLayoutHtml(visibleSnapshot.layoutJson, {
+    const renderLayout = this.getAiRenderLayoutJson(visibleSnapshot.layoutJson);
+    const html = renderArticleLayoutHtml(renderLayout, {
       imageRefs,
       renderedSectionFragments,
-      colorPaletteOverride: this.getAiColorPaletteOverride(visibleSnapshot.layoutJson?.resolved?.colorPalette || visibleSnapshot.layoutJson?.stylePack),
+      colorPaletteOverride: this.getAiColorPaletteOverride(renderLayout?.resolved?.colorPalette || renderLayout?.stylePack),
     });
     const scrollTop = this.previewContainer?.scrollTop || 0;
     this.currentHtml = html;
@@ -3126,11 +3265,12 @@ class AppleStyleView extends ItemView {
 
     const imageRefs = extractImageRefsFromHtml(this.baseRenderedHtml || this.currentHtml || '');
     const renderedSectionFragments = extractRenderedSectionFragments(this.baseRenderedHtml || this.currentHtml || '');
-    return renderArticleLayoutHtml(visibleSnapshot.layoutJson, {
+    const renderLayout = this.getAiRenderLayoutJson(visibleSnapshot.layoutJson);
+    return renderArticleLayoutHtml(renderLayout, {
       imageRefs,
       mode: 'draft',
       renderedSectionFragments,
-      colorPaletteOverride: this.getAiColorPaletteOverride(visibleSnapshot.layoutJson?.resolved?.colorPalette || visibleSnapshot.layoutJson?.stylePack),
+      colorPaletteOverride: this.getAiColorPaletteOverride(renderLayout?.resolved?.colorPalette || renderLayout?.stylePack),
     });
   }
 
@@ -3876,24 +4016,6 @@ class AppleStyleView extends ItemView {
         let layoutState = null;
         if (sourcePath && typeof this.plugin?.getArticleLayoutState === 'function') {
           layoutState = this.plugin.getArticleLayoutState(sourcePath, activeSelection);
-          if (
-            layoutState
-            && activeSelection?.colorPalette
-            && activeSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO
-            && layoutState.stylePack !== activeSelection.colorPalette
-          ) {
-            layoutState = null;
-          }
-          if (!layoutState && activeSelection?.colorPalette) {
-            layoutState = this.plugin.getArticleLayoutState(sourcePath, activeSelection.colorPalette);
-            if (
-              layoutState
-              && activeSelection.colorPalette !== AI_LAYOUT_SELECTION_AUTO
-              && layoutState.stylePack !== activeSelection.colorPalette
-            ) {
-              layoutState = null;
-            }
-          }
         }
         const canReuseAiLayout = !!(
           this.aiPreviewApplied
@@ -4899,12 +5021,12 @@ class AppleStyleSettingTab extends PluginSettingTab {
     const cachedLayoutCount = layoutCacheEntries.reduce((count, entry) => {
       const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
       if (!normalizedEntry) return count;
-      return count + Object.keys(normalizedEntry.selectionStates || {}).length;
+      return count + Object.keys(normalizedEntry.familyStates || {}).length;
     }, 0);
     const cacheSetting = new Setting(advancedArea)
       .setName('AI 编排缓存')
       .setDesc(cachedLayoutCount > 0
-        ? `当前已缓存 ${cachedDocCount} 篇文章、共 ${cachedLayoutCount} 份布局/颜色组合结果。`
+        ? `当前已缓存 ${cachedDocCount} 篇文章、共 ${cachedLayoutCount} 份编排风格结果。`
         : '当前还没有缓存的 AI 编排结果。');
 
     if (cachedLayoutCount > 0) {
@@ -5467,7 +5589,7 @@ class AppleStylePlugin extends Plugin {
     const normalizedEntry = normalizeArticleLayoutCacheEntry(entry);
     if (!normalizedEntry) return null;
     if (!selection || Object.keys(selection).length === 0) {
-      return normalizedEntry.selectionStates?.[normalizedEntry.lastSelectionKey] || null;
+      return normalizedEntry.familyStates?.[normalizedEntry.lastLayoutFamily] || null;
     }
     return getArticleLayoutSelectionState(normalizedEntry, selection, {
       layoutFamily: this.settings?.ai?.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
@@ -5485,11 +5607,9 @@ class AppleStylePlugin extends Plugin {
       this.settings.ai.articleLayoutsByPath = {};
     }
     const existingEntry = normalizeArticleLayoutCacheEntry(this.settings.ai.articleLayoutsByPath[normalizedPath]) || {
-      lastSelectionKey: getArticleLayoutSelectionKey({
-        layoutFamily: this.settings.ai.defaultLayoutFamily || AI_LAYOUT_SELECTION_AUTO,
-        colorPalette: this.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO,
-      }),
-      selectionStates: {},
+      lastLayoutFamily: '',
+      lastAutoResolvedFamily: '',
+      familyStates: {},
     };
     const hasExplicitSelection = typeof selection === 'string'
       || (selection && typeof selection === 'object' && Object.keys(selection).length > 0);
@@ -5503,40 +5623,62 @@ class AppleStylePlugin extends Plugin {
         colorPalette: this.settings.ai.defaultColorPalette || AI_LAYOUT_SELECTION_AUTO,
       }
     );
-    const effectiveSelectionKey = getArticleLayoutSelectionKey(requestedSelection);
+    const getCacheFamily = (state = null) => {
+      const normalizedState = normalizeArticleLayoutState(state || {});
+      const rawFamily = normalizedState?.resolved?.layoutFamily
+        || normalizedState?.layoutFamily
+        || state?.resolved?.layoutFamily
+        || state?.layoutFamily
+        || (requestedSelection.layoutFamily !== AI_LAYOUT_SELECTION_AUTO ? requestedSelection.layoutFamily : '');
+      const normalizedFamily = normalizeLayoutSelection({ layoutFamily: rawFamily }).layoutFamily;
+      return normalizedFamily === AI_LAYOUT_SELECTION_AUTO ? '' : normalizedFamily;
+    };
+    const effectiveLayoutFamily = getCacheFamily(nextState);
 
     if (!nextState) {
-      if (selection && Object.keys(selection).length) {
-        delete existingEntry.selectionStates[effectiveSelectionKey];
-        const remainingSelectionKeys = Object.keys(existingEntry.selectionStates);
-        if (!remainingSelectionKeys.length) {
+      if (selection && Object.keys(selection).length && effectiveLayoutFamily) {
+        delete existingEntry.familyStates[effectiveLayoutFamily];
+        const remainingFamilies = Object.keys(existingEntry.familyStates);
+        if (!remainingFamilies.length) {
           delete this.settings.ai.articleLayoutsByPath[normalizedPath];
         } else {
-          existingEntry.lastSelectionKey = existingEntry.selectionStates[existingEntry.lastSelectionKey]
-            ? existingEntry.lastSelectionKey
-            : remainingSelectionKeys[0];
+          existingEntry.lastLayoutFamily = existingEntry.familyStates[existingEntry.lastLayoutFamily]
+            ? existingEntry.lastLayoutFamily
+            : remainingFamilies[0];
+          if (existingEntry.lastAutoResolvedFamily && !existingEntry.familyStates[existingEntry.lastAutoResolvedFamily]) {
+            existingEntry.lastAutoResolvedFamily = '';
+          }
           this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
         }
       } else {
         delete this.settings.ai.articleLayoutsByPath[normalizedPath];
       }
     } else {
+      const resolvedLayoutFamily = effectiveLayoutFamily || 'source-first';
       const inferredSkillId = nextState?.skillId
-        || nextState?.resolved?.layoutFamily
-        || nextState?.layoutFamily
+        || resolvedLayoutFamily
         || requestedSelection.layoutFamily;
       const inferredSkillVersion = nextState?.skillVersion
         || nextState?.generationMeta?.skillVersion
         || getLayoutFamilyById(inferredSkillId)?.version
         || '';
-      existingEntry.selectionStates[effectiveSelectionKey] = {
+      existingEntry.familyStates[resolvedLayoutFamily] = {
         ...nextState,
         skillId: inferredSkillId,
         skillVersion: inferredSkillVersion,
         selection: requestedSelection,
+        resolved: {
+          ...(nextState?.resolved || {}),
+          layoutFamily: resolvedLayoutFamily,
+          colorPalette: nextState?.stylePack || nextState?.resolved?.colorPalette || 'tech-green',
+        },
+        layoutFamily: resolvedLayoutFamily,
         stylePack: nextState?.stylePack || nextState?.resolved?.colorPalette || 'tech-green',
       };
-      existingEntry.lastSelectionKey = effectiveSelectionKey;
+      existingEntry.lastLayoutFamily = resolvedLayoutFamily;
+      if (requestedSelection.layoutFamily === AI_LAYOUT_SELECTION_AUTO) {
+        existingEntry.lastAutoResolvedFamily = resolvedLayoutFamily;
+      }
       this.settings.ai.articleLayoutsByPath[normalizedPath] = normalizeArticleLayoutCacheEntry(existingEntry) || existingEntry;
     }
     return this.saveSettings();
