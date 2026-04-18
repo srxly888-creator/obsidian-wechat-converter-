@@ -40,28 +40,6 @@ If this plugin saves you time when formatting, copying, or syncing WeChat articl
 - Draft sync gained account-level publish defaults for supported WeChat fields, so each Official Account profile can keep its own source URL and comment preferences.
 - Quote and callout styling now includes a neutral gray mode for calmer reading, plus semantic accents for common callout types such as `note`, `tip`, `warning`, and `danger`.
 
-## Installation
-
-### Manual install
-
-1. Download the latest release from [GitHub Releases](https://github.com/DavidLam-oss/obsidian-wechat-converter/releases).
-2. Extract the plugin into your vault under `.obsidian/plugins/obsidian-wechat-converter/`.
-3. Make sure the folder contains:
-   - `main.js`
-   - `manifest.json`
-   - `styles.css`
-4. Reload Obsidian and enable the plugin.
-
-### BRAT
-
-1. Install and enable BRAT.
-2. Add the repository `DavidLam-oss/obsidian-wechat-converter`.
-3. After installation, do a quick smoke test:
-   - Open the converter panel
-   - Check preview rendering
-   - Copy once to WeChat
-   - Optionally test draft sync
-
 ## Usage
 
 1. Open the plugin from the left ribbon icon or the command palette with `Open Wechat Converter`.
@@ -145,6 +123,28 @@ If WeChat API IP allowlisting is a problem in your network, you can use a Cloudf
 - Obsidian users publishing to WeChat Official Accounts
 - Technical writers who need code, math, and image fidelity
 - Chinese-language creators who want a faster publishing workflow
+
+## Installation
+
+### Manual install
+
+1. Download the latest release from [GitHub Releases](https://github.com/DavidLam-oss/obsidian-wechat-converter/releases).
+2. Extract the plugin into your vault under `.obsidian/plugins/obsidian-wechat-converter/`.
+3. Make sure the folder contains:
+   - `main.js`
+   - `manifest.json`
+   - `styles.css`
+4. Reload Obsidian and enable the plugin.
+
+### BRAT
+
+1. Install and enable BRAT.
+2. Add the repository `DavidLam-oss/obsidian-wechat-converter`.
+3. After installation, do a quick smoke test:
+   - Open the converter panel
+   - Check preview rendering
+   - Copy once to WeChat
+   - Optionally test draft sync
 
 ## More docs
 

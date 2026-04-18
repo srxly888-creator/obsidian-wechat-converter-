@@ -120,31 +120,6 @@
 - **多账号发布默认值**：每个公众号账号都可以单独保存原文链接、留言开关和“仅粉丝可留言”，减少每次同步前的重复设置。
 - **引用 / Callout 风格更克制**：新增中性灰引用模式，常见 Callout 会按语义类型自动着色，未知类型统一回退为信息类样式。
 
-## 🚀 安装
-
-1. 从 [GitHub Releases](https://github.com/DavidLam-oss/obsidian-wechat-converter/releases) 下载最新的 `obsidian-wechat-converter.zip` 插件包。
-2. 解压并将其中的文件夹放入 Obsidian vault 的 `.obsidian/plugins/` 目录中。
-   > 最终路径应为：`.../.obsidian/plugins/obsidian-wechat-converter/`
-3. 确保文件夹内至少包含以下文件（三件套运行时）：
-   - `main.js`
-   - `manifest.json`
-   - `styles.css`
-4. 重启 Obsidian 或在设置中刷新插件列表，并启用插件。
-
-### BRAT 安装/更新
-
-如果你使用 BRAT 管理插件更新：
-
-1. 安装并启用 BRAT 插件。
-2. 在 BRAT 中添加仓库：`DavidLam-oss/obsidian-wechat-converter`。
-3. 安装后执行一次冒烟检查：
-   - 打开转换面板
-   - 预览渲染
-   - 复制到公众号
-   - （可选）一键同步到草稿箱
-
-> 说明：当前版本已支持标准三件套运行时，BRAT 更新路径与 Obsidian 插件标准发布方式一致。
-
 ## 📖 使用方法
 
 1. **唤起插件**
@@ -439,6 +414,32 @@
    ```
 
    该代理仅建议自用，请不要公开分享 Worker 地址，也不要将其部署为公共服务。
+
+
+## 🚀 安装
+
+1. 从 [GitHub Releases](https://github.com/DavidLam-oss/obsidian-wechat-converter/releases) 下载最新的 `obsidian-wechat-converter.zip` 插件包。
+2. 解压并将其中的文件夹放入 Obsidian vault 的 `.obsidian/plugins/` 目录中。
+   > 最终路径应为：`.../.obsidian/plugins/obsidian-wechat-converter/`
+3. 确保文件夹内至少包含以下文件（三件套运行时）：
+   - `main.js`
+   - `manifest.json`
+   - `styles.css`
+4. 重启 Obsidian 或在设置中刷新插件列表，并启用插件。
+
+### BRAT 安装/更新
+
+如果你使用 BRAT 管理插件更新：
+
+1. 安装并启用 BRAT 插件。
+2. 在 BRAT 中添加仓库：`DavidLam-oss/obsidian-wechat-converter`。
+3. 安装后执行一次冒烟检查：
+   - 打开转换面板
+   - 预览渲染
+   - 复制到公众号
+   - （可选）一键同步到草稿箱
+
+> 说明：当前版本已支持标准三件套运行时，BRAT 更新路径与 Obsidian 插件标准发布方式一致。
 
 
 ## 🤝 贡献 (Contributing)
