@@ -52,6 +52,12 @@ describe('Security Sanitization', () => {
     expect(sanitized).toContain('<div>Safe</div>');
   });
 
+  it('should strip pasted document wrapper tags and fragment comments', () => {
+    const pasted = '<html><body><!--StartFragment--><p>Safe</p><!--EndFragment--></body></html>';
+    const sanitized = converter.sanitizeHtml(pasted);
+    expect(sanitized).toBe('<p>Safe</p>');
+  });
+
   it('should remove onerror and other event handlers', () => {
     const malicious = '<img src=x onerror=alert(1) onclick="malicious()">';
     const sanitized = converter.sanitizeHtml(malicious);

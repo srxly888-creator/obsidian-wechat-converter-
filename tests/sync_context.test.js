@@ -77,6 +77,11 @@ describe('Sync Context Service', () => {
     expect(msg).toContain('文章太长，微信接口拒收');
   });
 
+  it('toSyncFriendlyMessage should map invalid content errors to user friendly message', () => {
+    const msg = toSyncFriendlyMessage('创建草稿失败:invalld content hint: [x] (45166)');
+    expect(msg).toContain('微信接口拒收正文内容');
+  });
+
   it('toSyncFriendlyMessage should keep other errors unchanged', () => {
     expect(toSyncFriendlyMessage('network error')).toBe('network error');
   });

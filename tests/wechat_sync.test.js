@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-const { createWechatSyncService } = require('../services/wechat-sync');
+import fs from 'fs';
+import path from 'path';
+const { replaceUnuploadedDraftImagesWithPlaceholders, createWechatSyncService } = require('../services/wechat-sync');
 
 describe('Wechat Sync Service', () => {
   function createMockApi() {
@@ -90,7 +92,10 @@ describe('Wechat Sync Service', () => {
       '<p>x</p>',
       api,
       expect.any(Function),
-      { accountId: 'acc-1' }
+      expect.objectContaining({
+        accountId: 'acc-1',
+        onImageFailure: expect.any(Function),
+      })
     );
   });
 
@@ -160,9 +165,10 @@ describe('Wechat Sync Service', () => {
     })).rejects.toThrow('未设置封面图，同步失败。请在弹窗中上传封面。');
   });
 
-  it('should block when cleaned html still contains base64 images', async () => {
+  it('should replace leftover base64 images with placeholders and still create draft', async () => {
+    const api = createMockApi();
     const service = createWechatSyncService({
-      createApi: vi.fn(() => createMockApi()),
+      createApi: vi.fn(() => api),
       srcToBlob: vi.fn(async () => new Blob(['cover'], { type: 'image/png' })),
       prepareHtmlForDraft: vi.fn(async (html) => html),
       processAllImages: vi.fn(async () => '<p>x</p>'),
@@ -172,7 +178,7 @@ describe('Wechat Sync Service', () => {
       getFirstImageFromArticle: vi.fn(() => 'app://fallback-cover'),
     });
 
-    await expect(service.syncToDraft({
+    await service.syncToDraft({
       account: { appId: 'wx1', appSecret: 'sec' },
       proxyUrl: '',
       currentHtml: '<p>x</p>',
@@ -180,7 +186,74 @@ describe('Wechat Sync Service', () => {
       publishMeta: { coverSrc: null },
       sessionCoverBase64: 'data:image/png;base64,abc',
       sessionDigest: '',
-    })).rejects.toThrow('检测到 1 张图片未成功上传');
+    });
+
+    expect(api.createDraft).toHaveBeenCalledWith(expect.objectContaining({
+      content: expect.stringContaining('图片未同步，请在微信后台手动补传'),
+    }));
+  });
+
+  it('should replace leftover non-WeChat image sources with placeholders and still create draft', async () => {
+    const api = createMockApi();
+    const service = createWechatSyncService({
+      createApi: vi.fn(() => api),
+      srcToBlob: vi.fn(async () => new Blob(['cover'], { type: 'image/png' })),
+      prepareHtmlForDraft: vi.fn(async (html) => html),
+      processAllImages: vi.fn(async () => '<p><img src="assets/example-image.png"></p>'),
+      processMathFormulas: vi.fn(async (html) => html),
+      cleanHtmlForDraft: vi.fn((html) => html),
+      cleanupConfiguredDirectory: vi.fn(async () => ({})),
+      getFirstImageFromArticle: vi.fn(() => 'app://fallback-cover'),
+    });
+
+    await service.syncToDraft({
+      account: { appId: 'wx1', appSecret: 'sec' },
+      proxyUrl: '',
+      currentHtml: '<p>x</p>',
+      activeFile: { basename: 't' },
+      publishMeta: { coverSrc: null },
+      sessionCoverBase64: 'data:image/png;base64,abc',
+      sessionDigest: '',
+    });
+
+    expect(api.createDraft).toHaveBeenCalledWith(expect.objectContaining({
+      content: expect.stringContaining('图片未同步，请在微信后台手动补传：assets/example-image.png'),
+    }));
+  });
+
+  it('replaceUnuploadedDraftImagesWithPlaceholders should allow WeChat CDN images only', () => {
+    const output = replaceUnuploadedDraftImagesWithPlaceholders([
+      '<p>',
+      '<img src="https://mmbiz.qpic.cn/mmbiz_png/ok/0">',
+      '<img src="http://mmbiz.qlogo.cn/logo/0">',
+      '<img src="https://example.com/not-uploaded.png">',
+      '<img src="assets/local.png">',
+      '</p>',
+    ].join(''));
+
+    expect(output.imageSources).toEqual([
+      'https://example.com/not-uploaded.png',
+      'assets/local.png',
+    ]);
+    expect(output.html).toContain('https://mmbiz.qpic.cn/mmbiz_png/ok/0');
+    expect(output.html).toContain('http://mmbiz.qlogo.cn/logo/0');
+    expect(output.html).not.toContain('https://example.com/not-uploaded.png"');
+    expect(output.html).toContain('图片未同步，请在微信后台手动补传');
+  });
+
+  it('should keep issue #23 fragment syncable by replacing invalid image srcs', () => {
+    const fixture = fs.readFileSync(
+      path.resolve(__dirname, 'fixtures/issue-23-invalid-content-fragment.html'),
+      'utf8'
+    );
+    const output = replaceUnuploadedDraftImagesWithPlaceholders(fixture);
+
+    expect(output.imageSources).toEqual(['Note', 'assets/example-image.png']);
+    expect(output.html).toContain('https://mmbiz.qpic.cn/mmbiz_png/uploaded/0');
+    expect(output.html).not.toContain('src="Note"');
+    expect(output.html).not.toContain('src="assets/example-image.png"');
+    expect(output.html).toContain('图片未同步，请在微信后台手动补传：Note');
+    expect(output.html).toContain('图片未同步，请在微信后台手动补传：assets/example-image.png');
   });
 
   it('should preprocess draft html before image upload pipeline', async () => {
@@ -213,7 +286,10 @@ describe('Wechat Sync Service', () => {
       '<table><tr><td>code</td></tr></table><img src="data:image/png;base64,mermaid">',
       api,
       expect.any(Function),
-      { accountId: '' }
+      expect.objectContaining({
+        accountId: '',
+        onImageFailure: expect.any(Function),
+      })
     );
   });
 });

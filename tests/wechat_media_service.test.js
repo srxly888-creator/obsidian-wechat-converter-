@@ -194,4 +194,32 @@ describe('Wechat Media Service', () => {
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
   });
+
+  it('processAllImages should replace failed images with placeholders and continue', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const html = '<p><img src="app://missing-image.png"></p>';
+    const srcToBlob = vi.fn().mockRejectedValue(new Error('not found'));
+    const uploadImage = vi.fn();
+    const onImageFailure = vi.fn();
+
+    const output = await processAllImages({
+      html,
+      api: { uploadImage },
+      progressCallback: null,
+      pMap: serialPMap,
+      srcToBlob,
+      imageUploadCache: new Map(),
+      cacheNamespace: 'acc-1',
+      onImageFailure,
+    });
+
+    expect(uploadImage).not.toHaveBeenCalled();
+    expect(output).toContain('图片上传失败，请在微信后台手动补传');
+    expect(output).not.toContain('<img');
+    expect(onImageFailure).toHaveBeenCalledWith([
+      expect.objectContaining({ src: 'app://missing-image.png' }),
+    ]);
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
 });

@@ -3793,7 +3793,7 @@ class AppleStyleView extends ItemView {
         getFirstImageFromArticle: this.getFirstImageFromArticle.bind(this),
       });
 
-      const { cleanupResult } = await syncService.syncToDraft({
+      const { cleanupResult, imageUploadFailures, placeholderImageSources } = await syncService.syncToDraft({
         account,
         proxyUrl: this.plugin.settings.proxyUrl,
         currentHtml: this.getCurrentExportHtml(),
@@ -3817,6 +3817,15 @@ class AppleStyleView extends ItemView {
 
       notice.hide();
       new Notice('✅ 同步成功！请前往微信公众号后台草稿箱查看');
+      const failedImageSources = Array.from(new Set([
+        ...(Array.isArray(imageUploadFailures) ? imageUploadFailures.map(item => item?.src).filter(Boolean) : []),
+        ...(Array.isArray(placeholderImageSources) ? placeholderImageSources.filter(Boolean) : []),
+      ]));
+      if (failedImageSources.length > 0) {
+        const preview = failedImageSources.slice(0, 3).join('、');
+        const suffix = failedImageSources.length > 3 ? ` 等 ${failedImageSources.length} 张` : '';
+        new Notice(`⚠️ 草稿已创建，但有 ${failedImageSources.length} 张正文图片未同步：${preview}${suffix}。请在微信后台手动补传。`, 10000);
+      }
       if (cleanupResult?.warning) {
         new Notice(`⚠️ 资源清理失败：${cleanupResult.warning}`, 7000);
       }
@@ -3870,6 +3879,7 @@ class AppleStyleView extends ItemView {
       srcToBlob: this.srcToBlob.bind(this),
       imageUploadCache: this.imageUploadCache,
       cacheNamespace: accountId,
+      onImageFailure: cacheContext?.onImageFailure,
     });
   }
 

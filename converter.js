@@ -799,12 +799,15 @@ ${macHeader}
     let sanitized = html.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*>[\s\S]*?<\/\1>/gi, '');
     // 2. Remove self-closing dangerous tags
     sanitized = sanitized.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*\/?>/gi, '');
-    // 3. Remove all on* event handlers (e.g., onerror, onclick)
+    // 3. Remove document wrapper tags/comments that may appear when users paste browser fragments.
+    sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
+    sanitized = sanitized.replace(/<\/?(?:html|body|head|meta|title|link)[^>]*>/gi, '');
+    // 4. Remove all on* event handlers (e.g., onerror, onclick)
     sanitized = sanitized.replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '');
     sanitized = sanitized.replace(/\s+on\w+\s*=\s*'[^']*'/gi, '');
     sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '');
 
-    // 4. Sanitize href and src in remaining HTML tags to prevent protocol bypass (e.g. <a href="javascript:...")
+    // 5. Sanitize href and src in remaining HTML tags to prevent protocol bypass (e.g. <a href="javascript:...")
     sanitized = sanitized.replace(/<(a|img|source|video|audio|area)\b([^>]*)>/gi, (match, tag, attrs) => {
       const isImageTag = /^(img|source)$/i.test(tag);
       let newAttrs = attrs.replace(/\b(href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi, (attrMatch, attrName, qVal, sqVal, uVal) => {

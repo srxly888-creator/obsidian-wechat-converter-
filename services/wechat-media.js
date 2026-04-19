@@ -37,6 +37,7 @@ async function processAllImages({
   srcToBlob,
   imageUploadCache,
   cacheNamespace = '',
+  onImageFailure = null,
 }) {
 
     const div = document.createElement('div');
@@ -54,6 +55,7 @@ async function processAllImages({
 
     const total = uniqueUrls.size;
     let completed = 0;
+    const failedImages = [];
 
     // 2. 定义并发上传任务
     const tasks = Array.from(uniqueUrls);
@@ -96,9 +98,12 @@ async function processAllImages({
             urlMap.set(src, cached.url);
           } else {
             console.error('图片处理失败，已跳过:', src, error);
+            failedImages.push({
+              src,
+              message: error?.message || String(error || ''),
+            });
           }
-          // 仅在控制台记录，不中断流程，也不频繁弹窗打扰用户
-          // 用户会在预览中看到该图片未被替换
+          // 先记录失败项，稍后在正文中替换为占位提示，草稿同步继续进行。
         }
 
         completed++;
@@ -107,11 +112,22 @@ async function processAllImages({
         }
     }, 3); // 并发数限制为 3
 
+    const failedSrcs = new Set(failedImages.map(item => item.src));
+
     // 3. 替换 DOM 中的图片链接
     for (const img of imgs) {
       if (urlMap.has(img.src)) {
         img.src = urlMap.get(img.src);
+      } else if (failedSrcs.has(img.src)) {
+        const placeholder = document.createElement('p');
+        placeholder.setAttribute('style', 'margin:12px 0;padding:10px 12px;border:1px dashed #d0d7de;border-radius:6px;color:#8c6d1f;background:#fff8e5;font-size:13px;line-height:1.7;');
+        placeholder.textContent = `图片上传失败，请在微信后台手动补传：${img.getAttribute('src') || img.src}`;
+        img.replaceWith(placeholder);
       }
+    }
+
+    if (failedImages.length > 0 && typeof onImageFailure === 'function') {
+      onImageFailure(failedImages);
     }
 
     return div.innerHTML;
