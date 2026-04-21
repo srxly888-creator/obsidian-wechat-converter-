@@ -930,6 +930,7 @@ class AppleStyleView extends ItemView {
         const btn = grid.createEl('button', {
           cls: `apple-btn-theme ${this.plugin.settings.theme === t.value ? 'active' : ''}`,
           text: t.label,
+          attr: { title: t.label },
         });
         btn.dataset.value = t.value;
         btn.addEventListener('click', () => this.onThemeChange(t.value, grid));

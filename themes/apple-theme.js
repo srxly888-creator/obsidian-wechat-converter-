@@ -212,7 +212,7 @@ window.AppleTheme = class AppleTheme {
    * 获取当前主题配置
    */
   getThemeConfig() {
-    return AppleTheme.THEME_CONFIGS[this.themeName] || AppleTheme.THEME_CONFIGS.github;
+    return AppleTheme.getAllThemeConfigs()[this.themeName] || AppleTheme.THEME_CONFIGS.github;
   }
 
   /**
@@ -250,6 +250,10 @@ window.AppleTheme = class AppleTheme {
     // 标题颜色逻辑：使用专门的深色系标题色
     // 注意：某些特殊主题装饰(h1Decoration)可能已经包含了颜色设置，这里主要针对文字本身
     const headingColor = this.getHeadingColorValue();
+
+    if (config.kind === 'imported-css-candidate') {
+      return this.getImportedCandidateStyle(tagName, config, sizes, font);
+    }
 
     switch (tagName) {
       case 'section':
@@ -457,6 +461,99 @@ window.AppleTheme = class AppleTheme {
     }
   }
 
+  getImportedCandidateStyle(tagName, config, sizes, font) {
+    const overrides = config.overrides || {};
+    const base = this.getImportedCandidateBaseStyle(tagName, sizes, font);
+    const override = overrides[tagName] || '';
+    const guard = this.getImportedCandidateGuardStyle(tagName);
+    return this.joinStyleStrings(base, override, guard);
+  }
+
+  getImportedCandidateBaseStyle(tagName, sizes, font) {
+    switch (tagName) {
+      case 'section':
+        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: 1.8; color: #3e3e3e; background: #ffffff; text-align: justify;`;
+      case 'h1':
+        return `font-family: ${font}; font-size: ${sizes.h1}px; font-weight: bold; margin: 30px auto 20px; color: #3e3e3e; text-align: center; line-height: 1.2;`;
+      case 'h2':
+        return `font-family: ${font}; font-size: ${sizes.h2}px; font-weight: bold; margin: 32px auto 16px; color: #3e3e3e; text-align: center; line-height: 1.25;`;
+      case 'h3':
+        return `font-family: ${font}; font-size: ${sizes.h3}px; font-weight: bold; margin: 20px 0 12px; color: #3e3e3e; text-align: left; line-height: 1.3;`;
+      case 'h4':
+        return `font-family: ${font}; font-size: ${sizes.h4}px; font-weight: bold; margin: 15px 0 10px; color: #3e3e3e; text-align: left; line-height: 1.35;`;
+      case 'h5':
+      case 'h6':
+        return `font-family: ${font}; font-size: ${sizes[tagName]}px; font-weight: bold; color: #3e3e3e; margin: 10px 0; text-align: left; line-height: 1.4;`;
+      case 'p':
+        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: 1.8; color: inherit; margin: 0 0 20px 0; text-align: justify; letter-spacing: 0;`;
+      case 'blockquote':
+        return `font-size: ${sizes.base}px; line-height: 1.8; color: #595959; background: #f7f7f7; margin: 16px 0; padding: 16px; border-left: 4px solid #d0d7de; border-radius: 3px;`;
+      case 'pre':
+        return `background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 16px; margin: 16px 0; overflow-x: auto; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px; line-height: 1.6; color: #24292e;`;
+      case 'code':
+        return `background: rgba(0,0,0,0.05); color: inherit; padding: 2px 4px; border-radius: 3px; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px;`;
+      case 'ul':
+        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: 1.8; color: inherit; margin: 12px 0; padding-left: 20px; list-style-type: disc;`;
+      case 'ol':
+        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: 1.8; color: inherit; margin: 12px 0; padding-left: 20px; list-style-type: decimal;`;
+      case 'li':
+        return `font-size: ${sizes.base}px; line-height: 1.8; color: inherit; margin: 4px 0;`;
+      case 'li p':
+        return `margin: 0; padding: 0; line-height: 1.8;`;
+      case 'figure':
+        return `display: block; margin: 20px 0; text-align: center;`;
+      case 'figcaption':
+        return `font-size: ${sizes.caption}px; color: #999; text-align: center; margin-top: 8px;`;
+      case 'img':
+        return `display: block; margin: 0 auto; max-width: 100%; border-radius: 4px;`;
+      case 'a':
+        return `color: ${this.getThemeColorValue()}; text-decoration: underline;`;
+      case 'table':
+        return `border-collapse: collapse; width: 100%; margin: 16px 0; border: 1px solid #e1e4e8;`;
+      case 'th':
+        return `background: rgba(0,0,0,0.04); font-weight: bold; color: inherit; border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;
+      case 'td':
+        return `border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;
+      case 'thead':
+        return `background: #f6f8fa;`;
+      case 'hr':
+        return `border: 0; border-top: 1px solid rgba(0,0,0,0.08); margin: 40px 0;`;
+      case 'strong':
+        return `font-weight: bold;`;
+      case 'em':
+        return `font-style: italic;`;
+      case 'del':
+        return `text-decoration: line-through; color: #999;`;
+      case 'mark':
+        return `background: rgba(255, 235, 59, 0.5); padding: 0 2px;`;
+      default:
+        return '';
+    }
+  }
+
+  getImportedCandidateGuardStyle(tagName) {
+    switch (tagName) {
+      case 'section':
+        return `padding: 20px ${this.sidePadding}px; max-width: 100%; word-wrap: break-word; box-sizing: border-box;`;
+      case 'img':
+        return `max-width: 100%; height: auto;`;
+      case 'table':
+        return `width: 100%; border-collapse: collapse;`;
+      case 'pre':
+        return `max-width: 100%; overflow-x: auto;`;
+      default:
+        return '';
+    }
+  }
+
+  joinStyleStrings(...styles) {
+    return styles
+      .map((style) => (style || '').trim())
+      .filter(Boolean)
+      .map((style) => style.endsWith(';') ? style : `${style};`)
+      .join(' ');
+  }
+
   /**
    * 更新配置
    */
@@ -477,10 +574,23 @@ window.AppleTheme = class AppleTheme {
    * 获取主题列表
    */
   static getThemeList() {
-    return Object.entries(AppleTheme.THEME_CONFIGS).map(([key, config]) => ({
+    return Object.entries(AppleTheme.getAllThemeConfigs()).map(([key, config]) => ({
       value: key,
       label: config.name,
     }));
+  }
+
+  static getImportedThemeConfigs() {
+    const imported = window.AppleImportedThemeConfigs;
+    if (!imported || typeof imported !== 'object') return {};
+    return imported;
+  }
+
+  static getAllThemeConfigs() {
+    return {
+      ...AppleTheme.THEME_CONFIGS,
+      ...AppleTheme.getImportedThemeConfigs(),
+    };
   }
 
   /**

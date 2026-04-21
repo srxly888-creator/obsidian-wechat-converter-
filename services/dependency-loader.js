@@ -97,6 +97,22 @@ async function loadConverterDependencies({
     logger.error('MathJax plugin load failed:', error);
   }
 
+  try {
+    const importedThemeContent = await readEmbeddedOrFile({
+      key: 'importedThemeCandidates',
+      adapter,
+      path: `${basePath}/themes/imported-theme-candidates.js`,
+      required: false,
+      logger,
+      embeddedScripts,
+    });
+    if (importedThemeContent) {
+      execute(importedThemeContent);
+    }
+  } catch (error) {
+    logger.error('Imported theme candidates load failed:', error);
+  }
+
   const themeContent = await readEmbeddedOrFile({
     key: 'theme',
     adapter,

@@ -10,6 +10,17 @@ describe('AppleTheme Color Logic', () => {
   let AppleTheme;
 
   beforeAll(() => {
+    global.window.AppleImportedThemeConfigs = {
+      'candidate-test-theme': {
+        name: '候选·测试主题',
+        kind: 'imported-css-candidate',
+        overrides: {
+          section: 'background-color: #f8f0df; color: #333333;',
+          h1: 'color: #123456; margin: 8px 0;',
+        },
+      },
+    };
+
     // Load the AppleTheme class directly from the file
     // Note: In a real module system we would import it, but since it's a non-exported browser script
     // we read and eval it.
@@ -99,6 +110,34 @@ describe('AppleTheme Color Logic', () => {
       expect(captionStyle).toContain('display: inline-block !important;');
       expect(captionStyle).toContain('vertical-align: middle !important;');
       expect(headerStyle).toContain('flex-wrap: nowrap !important;');
+    });
+  });
+
+  describe('Imported Candidate Themes', () => {
+    it('should expose imported candidate themes alongside built-in themes', () => {
+      const themeList = AppleTheme.getThemeList();
+
+      expect(themeList).toContainEqual({
+        value: 'candidate-test-theme',
+        label: '候选·测试主题',
+      });
+    });
+
+    it('should merge imported candidate overrides with inline-safe base styles', () => {
+      const theme = new AppleTheme({
+        theme: 'candidate-test-theme',
+        sidePadding: 24,
+      });
+
+      const h1Style = theme.getStyle('h1');
+      const sectionStyle = theme.getStyle('section');
+
+      expect(h1Style).toContain('font-size: 30px;');
+      expect(h1Style).toContain('color: #123456;');
+      expect(h1Style).toContain('margin: 8px 0;');
+      expect(sectionStyle).toContain('background-color: #f8f0df;');
+      expect(sectionStyle).toContain('padding: 20px 24px;');
+      expect(sectionStyle).toContain('max-width: 100%;');
     });
   });
 
