@@ -14114,6 +14114,23 @@ var AppleStyleView = class extends ItemView {
       const background = backgroundMatch ? backgroundMatch[1].trim() : "#0d1117";
       const border = borderMatch ? borderMatch[1].trim() : "1px solid #30363d";
       const borderRadius = radiusMatch ? radiusMatch[1].trim() : "8px";
+      const sectionNodes = Array.from(codePre.querySelectorAll("section"));
+      const lineNumberColumn = sectionNodes.find((node) => {
+        const style = (node.getAttribute("style") || "").toLowerCase();
+        return style.includes("border-right") && style.includes("user-select");
+      });
+      const codeLinesNode = sectionNodes.filter((node) => {
+        const style = (node.getAttribute("style") || "").toLowerCase();
+        return style.includes("white-space:nowrap") || style.includes("white-space: nowrap");
+      }).sort((a, b) => {
+        const score = (node) => {
+          const html = node.innerHTML || "";
+          return (html.includes("<br") ? 1e4 : 0) + (node.textContent || "").length;
+        };
+        return score(b) - score(a);
+      })[0];
+      const codeLinesHtml = codeLinesNode ? codeLinesNode.innerHTML : codeHtml;
+      const codeLinesStyle = (codeLinesNode == null ? void 0 : codeLinesNode.getAttribute("style")) || "white-space:nowrap !important;display:inline-block !important;min-width:100% !important;word-break:keep-all !important;overflow-wrap:normal !important;line-height:1.75 !important;font-size:13px !important;margin:0 !important;";
       const table = document.createElement("table");
       table.setAttribute("style", `width:100% !important;border-collapse:collapse !important;margin:12px 0 !important;background:${background} !important;border:${border} !important;border-radius:${borderRadius} !important;overflow:hidden !important;`);
       const toolbarRow = document.createElement("tr");
@@ -14128,11 +14145,37 @@ var AppleStyleView = class extends ItemView {
       table.appendChild(toolbarRow);
       const codeRow = document.createElement("tr");
       const codeCell = document.createElement("td");
-      codeCell.setAttribute("style", `padding:0 !important;border:none !important;background:${background} !important;color:#f0f6fc !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:1.75 !important;overflow-x:auto !important;`);
-      const newPre = document.createElement("pre");
-      newPre.setAttribute("style", `margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:#f0f6fc !important;white-space:nowrap !important;overflow-x:visible !important;display:inline-block !important;min-width:100% !important;`);
-      newPre.innerHTML = codeHtml;
-      codeCell.appendChild(newPre);
+      codeCell.setAttribute("style", `padding:0 !important;border:none !important;background:${background} !important;color:#f0f6fc !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:1.75 !important;`);
+      const scrollSection = document.createElement("section");
+      scrollSection.setAttribute("style", "display:block !important;width:100% !important;max-width:100% !important;overflow-x:scroll !important;overflow-y:hidden !important;-webkit-overflow-scrolling:touch !important;box-sizing:border-box !important;margin:0 !important;padding:0 !important;white-space:nowrap !important;");
+      const buildPre = () => {
+        const newPre = document.createElement("pre");
+        newPre.setAttribute("style", `margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:#f0f6fc !important;white-space:nowrap !important;overflow:visible !important;display:inline-block !important;min-width:100% !important;max-width:none !important;`);
+        const codeLines = document.createElement("section");
+        codeLines.setAttribute("style", codeLinesStyle);
+        codeLines.innerHTML = codeLinesHtml;
+        newPre.appendChild(codeLines);
+        return newPre;
+      };
+      if (lineNumberColumn && codeLinesNode) {
+        const innerTable = document.createElement("table");
+        innerTable.setAttribute("style", `border-collapse:collapse !important;border-spacing:0 !important;border:none !important;width:auto !important;min-width:100% !important;margin:0 !important;background:${background} !important;`);
+        const innerRow = document.createElement("tr");
+        const lineNumberCell = document.createElement("td");
+        lineNumberCell.setAttribute("style", "text-align:right !important;padding:12px 0 12px 0 !important;border:none !important;border-right:1px solid rgba(255,255,255,0.1) !important;user-select:none !important;background:transparent !important;vertical-align:top !important;min-width:3.5em !important;margin:0 !important;");
+        lineNumberCell.innerHTML = lineNumberColumn.innerHTML;
+        const codeContentCell = document.createElement("td");
+        codeContentCell.setAttribute("style", "padding:12px 12px 12px 16px !important;border:none !important;background:transparent !important;vertical-align:top !important;");
+        codeContentCell.appendChild(buildPre());
+        innerRow.appendChild(lineNumberCell);
+        innerRow.appendChild(codeContentCell);
+        innerTable.appendChild(innerRow);
+        scrollSection.appendChild(innerTable);
+      } else {
+        scrollSection.setAttribute("style", `${scrollSection.getAttribute("style")}padding:12px !important;`);
+        scrollSection.appendChild(buildPre());
+      }
+      codeCell.appendChild(scrollSection);
       codeRow.appendChild(codeCell);
       table.appendChild(codeRow);
       block.replaceWith(table);

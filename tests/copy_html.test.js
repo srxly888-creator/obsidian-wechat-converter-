@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 // Alias configured in vitest.config.mjs handles the mock
 const obsidian = require('obsidian');
 const { AppleStyleView } = require('../input.js');
+const { createLegacyConverter } = require('./helpers/render-runtime');
 
 describe('AppleStyleView - copyHTML clipboard behavior', () => {
   let view;
@@ -123,6 +124,34 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     expect(html).toContain('background:#161b22');
     expect(html).toContain('background:#ff5f57');
     expect(html).not.toContain('<svg');
+  });
+
+  it('should keep long code blocks horizontally scrollable after clipboard conversion', async () => {
+    const converter = await createLegacyConverter({
+      themeOptions: {
+        macCodeBlock: true,
+        codeLineNumber: true,
+      },
+    });
+    const longIdentifier = 'really_long_identifier_' + 'abcdef_'.repeat(24);
+    view.currentHtml = await converter.convert([
+      '```js',
+      `const ${longIdentifier} = "scroll me sideways";`,
+      'console.log(' + longIdentifier + ');',
+      '```',
+    ].join('\n'));
+    view.cleanHtmlForDraft = vi.fn((html) => html);
+
+    await view.copyHTML();
+
+    const item = writeMock.mock.calls[0][0][0];
+    const html = await blobToText(item.items['text/html']);
+    expect(html).toContain('overflow-x:scroll');
+    expect(html).toContain('-webkit-overflow-scrolling:touch');
+    expect(html).toContain('border-right:1px solid rgba(255,255,255,0.1)');
+    expect(html).toContain('max-width:none');
+    expect(html).toContain('really_long_identifier');
+    expect(html).not.toContain('display:flex !important;align-items:flex-start');
   });
 
   it('should convert Mermaid diagrams to images before writing clipboard html', async () => {
