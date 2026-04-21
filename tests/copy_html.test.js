@@ -112,7 +112,7 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
     vi.useRealTimers();
   });
 
-  it('should convert mac code blocks to table layout for clipboard compatibility', async () => {
+  it('should convert mac code blocks to pre/code layout for WeChat mobile scrolling', async () => {
     view.currentHtml = '<section class="code-snippet__fix" style="width:100% !important;margin:12px 0 !important;background:#0d1117 !important;border:1px solid #30363d !important;border-radius:8px !important;overflow:hidden !important;display:block !important;"><section style="display:block !important;background:#161b22 !important;padding:10px !important;border-bottom:1px solid #30363d !important;"><span><svg xmlns="http://www.w3.org/2000/svg" width="45" height="13"><ellipse cx="5" cy="6" rx="5" ry="5"></ellipse></svg></span></section><section><pre style="margin:0 !important;"><section>const x = 1;</section></pre></section></section>';
     view.cleanHtmlForDraft = vi.fn((html) => html);
 
@@ -120,9 +120,13 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
 
     const item = writeMock.mock.calls[0][0][0];
     const html = await blobToText(item.items['text/html']);
-    expect(html).toContain('<table');
+    expect(html).toContain('<pre class="hljs code__pre"');
+    expect(html).toContain('<code style=');
+    expect(html).toContain('overflow-x:auto');
+    expect(html).toContain('width:max-content');
     expect(html).toContain('background:#161b22');
     expect(html).toContain('background:#ff5f57');
+    expect(html).not.toContain('<table');
     expect(html).not.toContain('<svg');
   });
 
@@ -146,12 +150,15 @@ describe('AppleStyleView - copyHTML clipboard behavior', () => {
 
     const item = writeMock.mock.calls[0][0][0];
     const html = await blobToText(item.items['text/html']);
-    expect(html).toContain('overflow-x:scroll');
+    expect(html).toContain('<pre class="hljs code__pre"');
+    expect(html).toContain('overflow-x:auto');
     expect(html).toContain('-webkit-overflow-scrolling:touch');
-    expect(html).toContain('border-right:1px solid rgba(255,255,255,0.1)');
-    expect(html).toContain('max-width:none');
+    expect(html).toContain('class="line-numbers"');
+    expect(html).toContain('class="code-scroll"');
+    expect(html).toContain('min-width:max-content');
+    expect(html).toContain('color:#95989C');
     expect(html).toContain('really_long_identifier');
-    expect(html).not.toContain('display:flex !important;align-items:flex-start');
+    expect(html).not.toContain('<table');
   });
 
   it('should convert Mermaid diagrams to images before writing clipboard html', async () => {
