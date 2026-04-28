@@ -252,7 +252,8 @@ window.AppleStyleConverter = class AppleStyleConverter {
     };
 
     this.md.renderer.rules.hr = () => `<hr style="${this.getInlineStyle('hr')}">`;
-    this.md.renderer.rules.table_open = () => `<table style="${this.getInlineStyle('table')}">`;
+    this.md.renderer.rules.table_open = () => `<section style="${this.getInlineStyle('table-wrapper')}"><table style="${this.getInlineStyle('table')}">`;
+    this.md.renderer.rules.table_close = () => `</table></section>`;
     this.md.renderer.rules.thead_open = () => `<thead style="${this.getInlineStyle('thead')}">`;
     this.md.renderer.rules.th_open = () => `<th style="${this.getInlineStyle('th')}">`;
     this.md.renderer.rules.td_open = () => `<td style="${this.getInlineStyle('td')}">`;

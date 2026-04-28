@@ -490,8 +490,10 @@ window.AppleTheme = class AppleTheme {
       case 'a':
         return `color: ${color}; text-decoration: ${config.linkDecoration}; border-bottom: ${config.linkDecoration === 'none' ? `1px dashed ${color}` : 'none'};`;
 
+      case 'table-wrapper':
+        return `box-sizing: border-box; max-width: 100%; overflow-x: auto; margin: ${s.md}px 0; padding-bottom: 10px;`;
       case 'table':
-        return `border-collapse: collapse; width: 100%; margin: ${s.md}px 0; border: 1px solid ${config.tableBorderColor || '#e1e4e8'};`;
+        return `border-collapse: collapse; width: 100%; min-width: max-content; border: 1px solid ${config.tableBorderColor || '#e1e4e8'};`;
       case 'th':
         return `background: ${config.tableHeaderBg || color + '1F'}; font-weight: bold; color: ${config.textColor}; border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left;`;
       case 'td':
