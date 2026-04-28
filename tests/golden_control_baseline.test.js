@@ -59,6 +59,26 @@ describe('Golden Control Baseline (Main + Micro Samples)', () => {
     expect(html).not.toContain('<script');
   });
 
+  it('legacy converter should render markdown tables as swipeable wide blocks', async () => {
+    const html = await converter.convert([
+      '| 缩写 | 英文全称 | 中文全称 |',
+      '| --- | --- | --- |',
+      '| CRE | Carbapenem-Resistant Enterobacterales | 碳青霉烯类耐药肠杆菌目细菌 |',
+    ].join('\n'));
+
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    const table = container.querySelector('table');
+    const wrapper = table?.parentElement;
+
+    expect(wrapper?.tagName).toBe('SECTION');
+    expect(wrapper?.getAttribute('style') || '').toContain('overflow-x: scroll');
+    expect(wrapper?.getAttribute('style') || '').toContain('-webkit-overflow-scrolling: touch');
+    expect(table?.getAttribute('style') || '').toContain('width: 770px');
+    expect(table?.getAttribute('style') || '').toContain('min-width: 100%');
+    expect(container.querySelector('th')?.getAttribute('style') || '').toContain('white-space: nowrap');
+  });
+
   it('micro control sample should preserve current sanitization baseline', async () => {
     const md = readFixture('control-micro.md');
     const html = await converter.convert(md);

@@ -762,6 +762,72 @@ function applyThemeInlineStyles(container, converter) {
   }
 }
 
+function getTableColumnCount(table) {
+  if (!table) return 0;
+  const rows = Array.from(table.querySelectorAll('tr'));
+  for (const row of rows) {
+    const cells = Array.from(row.children).filter((child) => {
+      const tagName = child.tagName?.toLowerCase?.();
+      return tagName === 'th' || tagName === 'td';
+    });
+    if (cells.length === 0) continue;
+
+    return cells.reduce((total, cell) => {
+      const colspan = Number.parseInt(cell.getAttribute('colspan') || '1', 10);
+      return total + (Number.isFinite(colspan) && colspan > 0 ? colspan : 1);
+    }, 0);
+  }
+  return 0;
+}
+
+function getWechatTableWidth(table) {
+  const columns = getTableColumnCount(table);
+  if (!columns) return 720;
+  const width = columns <= 2 ? (columns * 180 + 80) : (columns * 230 + 80);
+  return Math.max(360, Math.min(1200, width));
+}
+
+function replaceStyleDeclaration(style, property, value) {
+  const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`(?:^|;)\\s*${escaped}\\s*:\\s*[^;]+;?`, 'gi');
+  const cleaned = String(style || '')
+    .replace(pattern, ';')
+    .replace(/;{2,}/g, ';')
+    .replace(/^\s*;\s*/, '')
+    .trim();
+  const normalized = cleaned && !cleaned.endsWith(';') ? `${cleaned};` : cleaned;
+  return `${property}: ${value}; ${normalized}`.trim();
+}
+
+function isHorizontallyScrollableWrapper(el) {
+  if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
+  const style = el.getAttribute('style') || '';
+  return /overflow-x\s*:\s*(?:auto|scroll)/i.test(style);
+}
+
+function wrapTablesForHorizontalScroll(container, converter) {
+  if (!container) return;
+  const wrapperStyle = getTagStyle(converter, 'table-wrapper')
+    || 'display: block; box-sizing: border-box; width: 100%; max-width: 100%; overflow-x: scroll; overflow-y: hidden; -webkit-overflow-scrolling: touch; margin: 16px 0; padding-bottom: 10px;';
+
+  Array.from(container.querySelectorAll('table')).forEach((table) => {
+    const width = getWechatTableWidth(table);
+    let tableStyle = table.getAttribute('style') || getTagStyle(converter, 'table') || '';
+    tableStyle = replaceStyleDeclaration(tableStyle, 'width', `${width}px`);
+    tableStyle = replaceStyleDeclaration(tableStyle, 'min-width', '100%');
+    tableStyle = replaceStyleDeclaration(tableStyle, 'max-width', 'none');
+    table.setAttribute('style', tableStyle);
+
+    const parent = table.parentElement;
+    if (isHorizontallyScrollableWrapper(parent)) return;
+
+    const wrapper = document.createElement('section');
+    wrapper.setAttribute('style', wrapperStyle);
+    table.replaceWith(wrapper);
+    wrapper.appendChild(table);
+  });
+}
+
 function stripDangerousTags(container, { preserveSvgStyleTags = false } = {}) {
   if (!container) return;
   container.querySelectorAll('script,iframe,object,embed,form,input,button,style').forEach((el) => {
@@ -1118,6 +1184,7 @@ function serializeObsidianRenderedHtml({
   convertPreBlocks(container, converter);
   convertStandaloneImages(container, converter);
   applyThemeInlineStyles(container, converter);
+  wrapTablesForHorizontalScroll(container, converter);
   pruneObsidianOnlyAttributes(container, { finalStage: true });
   trimLeadingWhitespaceInBlockText(container);
   trimTrailingWhitespaceInBlockText(container);

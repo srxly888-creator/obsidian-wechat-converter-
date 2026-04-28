@@ -114,6 +114,28 @@ describe('Native Renderer', () => {
     expect(orphanImages.length).toBe(0);
   });
 
+  it('should keep wide tables horizontally scrollable in native output', async () => {
+    const html = await renderNativeMarkdown({
+      converter,
+      markdown: [
+        '| 缩写 | 英文全称 | 中文全称 |',
+        '| --- | --- | --- |',
+        '| CRE | Carbapenem-Resistant Enterobacterales | 碳青霉烯类耐药肠杆菌目细菌 |',
+      ].join('\n'),
+      sourcePath: '',
+    });
+
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    const table = container.querySelector('table');
+    const wrapper = table?.parentElement;
+
+    expect(wrapper?.tagName).toBe('SECTION');
+    expect(wrapper?.getAttribute('style') || '').toContain('overflow-x: scroll');
+    expect(table?.getAttribute('style') || '').toContain('width: 770px');
+    expect(container.querySelector('th')?.getAttribute('style') || '').toContain('white-space: nowrap');
+  });
+
   it('should throw when converter is missing', async () => {
     await expect(
       renderNativeMarkdown({

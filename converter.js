@@ -252,11 +252,61 @@ window.AppleStyleConverter = class AppleStyleConverter {
     };
 
     this.md.renderer.rules.hr = () => `<hr style="${this.getInlineStyle('hr')}">`;
-    this.md.renderer.rules.table_open = () => `<section style="${this.getInlineStyle('table-wrapper')}"><table style="${this.getInlineStyle('table')}">`;
+    this.md.renderer.rules.table_open = (tokens, idx) => `<section style="${this.getInlineStyle('table-wrapper')}"><table style="${this.getTableStyle(tokens, idx)}">`;
     this.md.renderer.rules.table_close = () => `</table></section>`;
     this.md.renderer.rules.thead_open = () => `<thead style="${this.getInlineStyle('thead')}">`;
     this.md.renderer.rules.th_open = () => `<th style="${this.getInlineStyle('th')}">`;
     this.md.renderer.rules.td_open = () => `<td style="${this.getInlineStyle('td')}">`;
+  }
+
+  getTableColumnCount(tokens, tableIdx) {
+    if (!Array.isArray(tokens)) return 0;
+
+    let rowOpen = false;
+    let count = 0;
+    for (let i = tableIdx + 1; i < tokens.length; i += 1) {
+      const token = tokens[i];
+      if (!token) continue;
+      if (token.type === 'table_close') break;
+      if (token.type === 'tr_open') {
+        rowOpen = true;
+        count = 0;
+        continue;
+      }
+      if (token.type === 'tr_close' && rowOpen) {
+        if (count > 0) return count;
+        rowOpen = false;
+        continue;
+      }
+      if (!rowOpen || (token.type !== 'th_open' && token.type !== 'td_open')) continue;
+
+      const colspanAttr = typeof token.attrGet === 'function' ? token.attrGet('colspan') : null;
+      const colspan = Number.parseInt(colspanAttr || '1', 10);
+      count += Number.isFinite(colspan) && colspan > 0 ? colspan : 1;
+    }
+
+    return count;
+  }
+
+  getTableMinWidth(tokens, tableIdx) {
+    const columns = this.getTableColumnCount(tokens, tableIdx);
+    if (!columns) return 720;
+    const width = columns <= 2 ? (columns * 180 + 80) : (columns * 230 + 80);
+    return Math.max(360, Math.min(1200, width));
+  }
+
+  getTableStyle(tokens, tableIdx) {
+    const baseStyle = this.getInlineStyle('table');
+    const minWidth = this.getTableMinWidth(tokens, tableIdx);
+    const withoutWidth = baseStyle
+      .replace(/(?:^|;)\s*width\s*:\s*[^;]+;?/gi, ';')
+      .replace(/(?:^|;)\s*min-width\s*:\s*[^;]+;?/gi, ';')
+      .replace(/(?:^|;)\s*max-width\s*:\s*[^;]+;?/gi, ';')
+      .replace(/;{2,}/g, ';')
+      .replace(/^\s*;\s*/, '')
+      .trim();
+    const normalized = withoutWidth && !withoutWidth.endsWith(';') ? `${withoutWidth};` : withoutWidth;
+    return `width: ${minWidth}px; min-width: 100%; max-width: none; ${normalized}`;
   }
 
   /**
