@@ -381,15 +381,9 @@ window.AppleStyleConverter = class AppleStyleConverter {
     const color = this.theme.getThemeColorValue();
     const sizes = this.theme.getSizes();
     const font = this.theme.getFontFamily();
-    const themeName = this.theme.themeName;
     const quoteCalloutStyleMode = typeof this.theme.getQuoteCalloutStyleMode === 'function'
       ? this.theme.getQuoteCalloutStyleMode()
       : 'theme';
-
-    // 优雅主题：居中样式（与其引用块风格一致）
-    if (themeName === 'serif') {
-      return this.renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode);
-    }
 
     if (quoteCalloutStyleMode === 'neutral') {
       return this.renderCalloutOpenNeutral(calloutInfo, color, sizes, font);
@@ -475,56 +469,6 @@ window.AppleStyleConverter = class AppleStyleConverter {
       <section style="${headerStyle}">
         <span style="${iconStyle}">${calloutInfo.icon}</span>
         <span style="${titleStyle}">${safeTitle}</span>
-      </section>
-      <section style="${contentStyle}">`;
-  }
-
-  /**
-   * 渲染居中样式的 Callout（用于优雅主题）
-   * @param {Object} calloutInfo - { type, title, icon }
-   * @param {string} color - 主题色
-   * @param {Object} sizes - 字体尺寸配置
-   * @param {string} font - 字体族
-   * @param {string} quoteCalloutStyleMode - 引用/Callout 风格模式
-   * @returns {string} - HTML 字符串
-   */
-  renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode = 'theme') {
-    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
-    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);
-    const isNeutral = quoteCalloutStyleMode === 'neutral';
-    // 居中样式：无左边框，水平居中，圆角边框
-    const containerStyle = `
-      margin: 30px 60px;
-      background: ${isNeutral ? '#f9f9f9' : `${color}1F`};
-      border-radius: ${isNeutral ? '8px' : '4px'};
-      overflow: hidden;
-    `.replace(/\s+/g, ' ').trim();
-
-    // 标题栏：靠左对齐，与其他主题保持一致
-    const headerStyle = `
-      display: flex;
-      align-items: center;
-      padding: 12px 20px;
-      background: ${isNeutral ? `${accentColor}12` : `${color}26`};
-      font-weight: bold;
-      font-size: ${sizes.base}px;
-      font-family: ${font};
-      color: ${isNeutral ? accentColor : '#333'};
-    `.replace(/\s+/g, ' ').trim();
-
-    const contentStyle = `
-      padding: 16px 20px;
-      font-size: ${sizes.base}px;
-      line-height: 1.8;
-      color: #555;
-      text-align: center;
-      background: ${isNeutral ? '#f9f9f9' : 'transparent'};
-    `.replace(/\s+/g, ' ').trim();
-
-    return `<section style="${containerStyle}">
-      <section style="${headerStyle}">
-        <span style="margin-right: 8px; color: ${isNeutral ? accentColor : '#333'};">${calloutInfo.icon}</span>
-        <span>${safeTitle}</span>
       </section>
       <section style="${contentStyle}">`;
   }

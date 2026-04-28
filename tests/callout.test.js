@@ -327,7 +327,7 @@ describe('Callout Syntax Support', () => {
       label: '备注',
     };
 
-    it('should render centered style for serif theme', () => {
+    it('should render semantic card style for serif theme', () => {
       const serifTheme = new window.AppleTheme({
         theme: 'serif',
         themeColor: 'purple',
@@ -337,11 +337,11 @@ describe('Callout Syntax Support', () => {
 
       const html = serifConverter.renderCalloutOpen(calloutInfo);
 
-      // Centered style: no left border, centered text
-      expect(html).toContain('text-align: center');
       expect(html).not.toContain('border-left:');
-      // Wider margins for centered style
-      expect(html).toContain('margin: 30px 60px');
+      expect(html).toContain('border: 1px solid #2f6fdd24');
+      expect(html).toContain('margin: 16px 0 16px 8px');
+      expect(html).not.toContain('text-align: center');
+      expect(html).not.toContain('margin: 30px 60px');
     });
 
     it('should render semantic card style for github theme', () => {
@@ -399,7 +399,7 @@ describe('Callout Syntax Support', () => {
       expect(githubHtml).not.toContain('border-left:');
     });
 
-    it('should keep serif centered structure in neutral mode while dropping themed background', () => {
+    it('should render serif neutral callouts with the same full semantic card sizing', () => {
       const serifTheme = new window.AppleTheme({
         theme: 'serif',
         themeColor: 'purple',
@@ -410,9 +410,37 @@ describe('Callout Syntax Support', () => {
 
       const html = serifConverter.renderCalloutOpen(calloutInfo);
 
-      expect(html).toContain('text-align: center');
+      expect(html).not.toContain('text-align: center');
+      expect(html).toContain('margin: 16px 0 16px 8px');
       expect(html).toContain('background: #f9f9f9');
       expect(html).not.toContain('background: #6f42c11F');
+    });
+
+    it('should use semantic colors for different callout types in serif theme', () => {
+      const serifTheme = new window.AppleTheme({
+        theme: 'serif',
+        themeColor: 'purple',
+        fontSize: 3,
+      });
+      const serifConverter = new window.AppleStyleConverter(serifTheme, '', true, null, '');
+
+      const warningHtml = serifConverter.renderCalloutOpen({
+        type: 'warning',
+        title: 'Warning',
+        icon: '⚠️',
+        label: '警告',
+      });
+      const tipHtml = serifConverter.renderCalloutOpen({
+        type: 'tip',
+        title: '小技巧',
+        icon: '💡',
+        label: '提示',
+      });
+
+      expect(warningHtml).toContain('border: 1px solid #b26a0024');
+      expect(warningHtml).toContain('color: #b26a00');
+      expect(tipHtml).toContain('border: 1px solid #1f8c7a24');
+      expect(tipHtml).toContain('color: #1f8c7a');
     });
   });
 
@@ -519,7 +547,7 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
 
     const blockquoteStyle = theme.getStyle('blockquote');
 
-    expect(blockquoteStyle).toContain('border-left: 3px solid #6f42c199');
+    expect(blockquoteStyle).not.toContain('border-left:');
     expect(blockquoteStyle).toContain('font-family: \'Times New Roman\', Georgia, \'SimSun\', serif');
     expect(blockquoteStyle).not.toContain('text-align: center');
     expect(blockquoteStyle).not.toContain('border: 1px solid');
@@ -574,7 +602,7 @@ describe('Neutral Quote And Callout Style Mode', () => {
     expect(blockquoteStyle).not.toContain('99');
   });
 
-  it('should keep serif blockquote left-marked in neutral mode', () => {
+  it('should keep serif blockquote unmarked in neutral mode', () => {
     const theme = new window.AppleTheme({
       theme: 'serif',
       themeColor: 'purple',
@@ -584,7 +612,7 @@ describe('Neutral Quote And Callout Style Mode', () => {
 
     const blockquoteStyle = theme.getStyle('blockquote');
 
-    expect(blockquoteStyle).toContain('border-left: 3px solid #d9d9d9');
+    expect(blockquoteStyle).not.toContain('border-left:');
     expect(blockquoteStyle).toContain('background: #f9f9f9');
     expect(blockquoteStyle).toContain('border-radius: 4px');
     expect(blockquoteStyle).not.toContain('border: 1px solid');

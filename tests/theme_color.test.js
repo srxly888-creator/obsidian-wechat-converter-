@@ -205,6 +205,15 @@ describe('AppleTheme Color Logic', () => {
       expect(blockquoteStyle).not.toContain('border: 1px solid #d9d9d9');
     });
 
+    it('should render serif blockquotes without a left accent bar', () => {
+      const theme = new AppleTheme({ theme: 'serif', themeColor: 'blue' });
+      const blockquoteStyle = theme.getStyle('blockquote');
+
+      expect(blockquoteStyle).not.toContain('border-left:');
+      expect(blockquoteStyle).toContain('margin: 22px 0;');
+      expect(blockquoteStyle).toContain("font-family: 'Times New Roman', Georgia, 'SimSun', serif;");
+    });
+
     it('should give Typo an independent long-form typography structure', () => {
       const theme = new AppleTheme({ theme: 'typo' });
 

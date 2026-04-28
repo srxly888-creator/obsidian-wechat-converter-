@@ -411,10 +411,7 @@ window.AppleTheme = class AppleTheme {
           const centeredBackground = quoteCalloutStyleMode === 'neutral'
             ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG
             : (config.blockquoteBg || color + '1F');
-          const centeredBorder = quoteCalloutStyleMode === 'neutral'
-            ? AppleTheme.QUOTE_NEUTRAL_BORDER
-            : `${color}99`;
-          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${centeredBackground}; margin: 22px 0 22px 8px; padding: 16px 18px; text-align: justify; border-left: 3px solid ${centeredBorder}; border-radius: ${r.sm}px;`;
+          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${centeredBackground}; margin: 22px 0; padding: 16px 18px; text-align: justify; border-radius: ${r.sm}px;`;
         }
         if (config.blockquoteStyle === 'paper') {
           const paperBg = quoteCalloutStyleMode === 'neutral'
