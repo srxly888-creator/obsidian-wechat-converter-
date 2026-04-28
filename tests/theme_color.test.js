@@ -156,8 +156,8 @@ describe('AppleTheme Color Logic', () => {
       const colorful = new AppleTheme({ theme: 'colorful', themeColor: 'purple' });
 
       expect(paper.getStyle('h1')).toContain('border-top: 2px solid #e83e8c;');
-      expect(grid.getStyle('h2')).toContain('border: 1px solid #20c99755;');
-      expect(media.getStyle('h2')).toContain('background-image: linear-gradient(to right, #fd7e14, #fd7e1433);');
+      expect(grid.getStyle('h2')).toContain('border-left: 3px solid #20c997;');
+      expect(media.getStyle('h2')).toContain('background-size: 60% 2px;');
       expect(colorful.getStyle('h1')).toContain('background: #6f42c1;');
     });
 
@@ -168,13 +168,13 @@ describe('AppleTheme Color Logic', () => {
       const media = new AppleTheme({ theme: 'media', themeColor: 'orange' });
       const colorful = new AppleTheme({ theme: 'colorful', themeColor: 'purple' });
 
-      expect(paper.getStyle('h2')).toContain('border-top: 2px solid #e83e8c;');
-      expect(paper.getStyle('h3')).toContain('border-bottom: 1px solid #e83e8c55;');
-      expect(grid.getStyle('h2')).toContain('border: 1px solid #20c99755;');
-      expect(grid.getStyle('h3')).toContain('border-bottom: 1px solid #20c99766;');
-      expect(typo.getStyle('h2')).toContain('border-bottom: 1px solid #d8d8d8;');
-      expect(media.getStyle('h2')).toContain('background-size: 100% 2px;');
-      expect(colorful.getStyle('h2')).toContain('background: #6f42c1;');
+      expect(paper.getStyle('h2')).toContain('border-bottom: 2px solid #e83e8c;');
+      expect(paper.getStyle('h3')).toContain('border-top: 1px solid #e83e8c55;');
+      expect(grid.getStyle('h2')).toContain('border-left: 3px solid #20c997;');
+      expect(grid.getStyle('h3')).toContain('background-image: linear-gradient(#20c997, #20c997);');
+      expect(typo.getStyle('h2')).toContain('background-image: linear-gradient(#d8d8d8, #d8d8d8);');
+      expect(media.getStyle('h2')).toContain('background-size: 60% 2px;');
+      expect(colorful.getStyle('h2')).toContain('border-left: 4px solid #6f42c1;');
     });
 
     it('should keep new theme surfaces and regular quotes distinct from callout cards', () => {
@@ -239,7 +239,7 @@ describe('AppleTheme Color Logic', () => {
       const h3Style = theme.getStyle('h3');
 
       expect(h2Style).toContain('font-size: 22px;');
-      expect(h2Style).toContain('margin: 34px auto 18px;');
+      expect(h2Style).toContain('margin: 34px auto 20px;');
       expect(h3Style).toContain('font-size: 18px;');
       expect(h3Style).toContain('margin: 24px 0 12px;');
     });
@@ -255,11 +255,9 @@ describe('AppleTheme Color Logic', () => {
       const h3Style = theme.getStyle('h3');
 
       expect(h2Style).toContain("font-family: 'Times New Roman', Georgia, 'SimSun', serif;");
-      expect(h2Style).toContain('border-top: 1px solid #0366d633;');
-      expect(h2Style).toContain('border-bottom: 1px solid #0366d666;');
-      expect(h2Style).not.toContain('background-image');
-      expect(h3Style).toContain('border-bottom: 1px solid #0366d666;');
-      expect(h3Style).not.toContain('border-left');
+      expect(h2Style).toContain('background-image: linear-gradient(to right, transparent, #0366d6, transparent);');
+      expect(h3Style).toContain('border-left: 3px solid #0366d6;');
+      expect(h3Style).toContain('background: #0366d60A;');
     });
   });
 });

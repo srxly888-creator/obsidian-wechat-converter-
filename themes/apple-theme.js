@@ -87,7 +87,7 @@ window.AppleTheme = class AppleTheme {
       lineHeight: 1.8,
       paragraphGap: 24,
       h1Decoration: 'classic-title',
-      h2Decoration: 'classic-section',
+      h2Decoration: 'classic-title',
       h3Decoration: 'classic-subhead',
       h4Decoration: 'classic-minor',
       headingWeight: 700,
@@ -120,7 +120,7 @@ window.AppleTheme = class AppleTheme {
       lineHeight: 1.9,
       paragraphGap: 22,
       h1Decoration: 'paper-title',
-      h2Decoration: 'paper-title',
+      h2Decoration: 'paper-chapter',
       h3Decoration: 'paper-section',
       h4Decoration: 'paper-kicker',
       h5Decoration: 'simple',
@@ -144,7 +144,7 @@ window.AppleTheme = class AppleTheme {
       lineHeight: 1.82,
       paragraphGap: 20,
       h1Decoration: 'grid-title',
-      h2Decoration: 'grid-title',
+      h2Decoration: 'grid-chapter',
       h3Decoration: 'grid-section',
       h4Decoration: 'grid-kicker',
       h5Decoration: 'light-bg',
@@ -171,7 +171,7 @@ window.AppleTheme = class AppleTheme {
       h2Decoration: 'typo-title',
       h3Decoration: 'typo-section',
       h4Decoration: 'typo-subhead',
-      h5Decoration: 'simple',
+      h5Decoration: 'dashed-bottom',
       h6Decoration: 'quiet',
       headingWeight: 700,
       headingLetterSpacing: 0,
@@ -191,9 +191,9 @@ window.AppleTheme = class AppleTheme {
       lineHeight: 1.86,
       paragraphGap: 18,
       h1Decoration: 'media-title',
-      h2Decoration: 'media-title',
+      h2Decoration: 'media-chapter',
       h3Decoration: 'media-section',
-      h4Decoration: 'bottom-line-left',
+      h4Decoration: 'left-border',
       h5Decoration: 'light-bg',
       h6Decoration: 'quiet',
       headingWeight: 700,
@@ -215,7 +215,7 @@ window.AppleTheme = class AppleTheme {
       lineHeight: 1.82,
       paragraphGap: 20,
       h1Decoration: 'colorful-title',
-      h2Decoration: 'colorful-title',
+      h2Decoration: 'colorful-chapter',
       h3Decoration: 'colorful-section',
       h4Decoration: 'colorful-kicker',
       h5Decoration: 'light-bg',
@@ -546,7 +546,7 @@ window.AppleTheme = class AppleTheme {
       case 'border-box':
         return `${base} border: 1px solid ${color}; padding: 10px 20px; border-radius: 4px; display: inline-block; width: auto;`;
       case 'classic-title':
-        return `${base} margin: 32px auto 22px; padding: 14px 0 12px; border-top: 1px solid ${color}33; border-bottom: 2px solid ${color}66; letter-spacing: 0.5px;`;
+        return `${base} margin: 34px auto 22px; padding: 0; background-image: linear-gradient(to right, transparent, ${color}, transparent); background-size: 120px 2px; background-repeat: no-repeat; background-position: bottom center; padding-bottom: 14px;`;
       case 'paper-title':
         return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 24px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1px; border-top: 2px solid ${color}; border-bottom: 1px solid ${color}66; padding: 16px 0 14px;`;
       case 'grid-title':
@@ -586,18 +586,26 @@ window.AppleTheme = class AppleTheme {
         return `${base} background-color: ${color}; color: #fff; padding: 5px 20px; border-radius: 20px; display: inline-block; width: auto;`;
       case 'bottom-line-center':
         return `${base} display: inline-block; border-bottom: 1px solid ${color}; padding-bottom: 5px; width: auto;`;
-      case 'classic-section':
-        return `${base} margin: 34px auto 18px; padding: 10px 0 9px; border-top: 1px solid ${color}33; border-bottom: 1px solid ${color}66; letter-spacing: 0.5px;`;
+      case 'classic-title':
+        return `${base} margin: 34px auto 20px; padding: 0; background-image: linear-gradient(to right, transparent, ${color}, transparent); background-size: 120px 2px; background-repeat: no-repeat; background-position: bottom center; padding-bottom: 14px;`;
       case 'paper-title':
         return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1px; border-top: 2px solid ${color}; border-bottom: 1px solid ${color}66; padding: 14px 0 12px;`;
+      case 'paper-chapter':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1.5px; border-bottom: 2px solid ${color}; padding-bottom: 12px;`;
       case 'grid-title':
         return `${base} text-align: left; border: 1px solid ${color}55; border-radius: 4px; padding: 10px 12px; background: ${color}0F;`;
+      case 'grid-chapter':
+        return `${base} text-align: left; border-left: 3px solid ${color}; border-radius: 0 4px 4px 0; padding: 8px 12px; background: ${color}08;`;
       case 'typo-title':
-        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px 0 18px; color: ${headingColor}; text-align: left; line-height: 1.3; border-bottom: 1px solid #d8d8d8; padding-bottom: 12px;`;
+        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px 0 18px; color: ${headingColor}; text-align: left; line-height: 1.3; background-image: linear-gradient(#d8d8d8, #d8d8d8); background-size: 40% 1px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;
       case 'media-title':
         return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, ${color}33); background-size: 100% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;
+      case 'media-chapter':
+        return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, transparent); background-size: 60% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;
       case 'colorful-title':
         return `${base} color: #ffffff; background: ${color}; padding: 10px 16px; border-radius: 6px; box-shadow: 5px 5px 0 ${color}33;`;
+      case 'colorful-chapter':
+        return `${base} text-align: left; border-left: 4px solid ${color}; background: ${color}12; padding: 10px 14px; border-radius: 0 4px 4px 0;`;
       case 'paper-section':
         return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px 0 16px; color: ${headingColor}; text-align: left; line-height: 1.35; border-bottom: 1px solid ${color}55; padding-bottom: 8px;`;
       case 'grid-section':
@@ -626,13 +634,13 @@ window.AppleTheme = class AppleTheme {
       case 'bottom-line-left':
         return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;
       case 'classic-subhead':
-        return `${base} margin: 24px 0 12px; padding-bottom: 5px; border-bottom: 1px solid ${color}66;`;
+        return `${base} border-left: 3px solid ${color}; background: ${color}0A; padding: 6px 10px; margin: 24px 0 12px;`;
       case 'paper-section':
-        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 28px 0 14px; color: ${headingColor}; text-align: left; line-height: 1.35; border-bottom: 1px solid ${color}55; padding-bottom: 6px;`;
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 28px 0 14px; color: ${headingColor}; text-align: left; line-height: 1.35; border-top: 1px solid ${color}55; padding-top: 8px;`;
       case 'grid-section':
-        return `${base} border-bottom: 1px solid ${color}66; padding-bottom: 6px;`;
+        return `${base} background-image: linear-gradient(${color}, ${color}); background-size: 3px 55%; background-position: left center; background-repeat: no-repeat; padding-left: 12px;`;
       case 'typo-section':
-        return `${base} font-weight: 700; margin: 28px 0 14px; line-height: 1.35;`;
+        return `${base} font-weight: 700; margin: 28px 0 14px; line-height: 1.35; border-left: 2px solid #d8d8d8; padding-left: 10px;`;
       case 'media-section':
         return `${base} display: inline-block; width: auto; background: ${color}14; border: 1px solid ${color}33; padding: 5px 10px; border-radius: 2px;`;
       case 'colorful-section':
@@ -659,17 +667,17 @@ window.AppleTheme = class AppleTheme {
         // Background uses bright color tint (low opacity), Text uses deep headingColor
         return `${base} background-color: ${color}15; padding: 4px 8px; border-radius: 4px; display: inline-block;`;
       case 'classic-minor':
-        return `${base} display: inline-block; color: ${headingColor}; background: ${color}0D; border: 1px solid ${color}26; padding: 4px 8px; border-radius: 3px;`;
+        return `${base} border-left: 2px solid ${color}55; padding-left: 8px;`;
       case 'left-border':
         return `${base} border-left: 3px solid ${color}; padding-left: 9px;`;
       case 'bottom-line-left':
         return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;
       case 'paper-kicker':
         return `font-family: ${AppleTheme.FONTS.serif}; display: inline-block; font-size: ${fontSize}px; font-weight: bold; margin: 22px 0 10px; color: ${headingColor}; text-align: left; line-height: 1.35; border-bottom: 1px double ${color}99; padding-bottom: 2px;`;
-      case 'typo-subhead':
-        return `${base} font-weight: 700;`;
       case 'grid-kicker':
-        return `${base} display: inline-block; border-bottom: 1px solid ${color}99; padding-bottom: 2px;`;
+        return `${base} display: inline-block; border-bottom: 1px dashed ${color}44; padding-bottom: 2px;`;
+      case 'typo-subhead':
+        return `${base} font-weight: 700; letter-spacing: 1.5px;`;
       case 'colorful-kicker':
         return `${base} color: ${color}; background: ${color}12; padding: 4px 8px; border-radius: 4px; display: inline-block;`;
       case 'italic-serif':
@@ -687,6 +695,8 @@ window.AppleTheme = class AppleTheme {
     switch (type) {
       case 'light-bg':
         return `${base} background-color: ${color}12; padding: 3px 7px; border-radius: 4px; display: inline-block;`;
+      case 'dashed-bottom':
+        return `${base} font-weight: 600; border-bottom: 1px dashed ${color}33; display: inline-block; padding-bottom: 1px;`;
       case 'simple':
       default:
         return base;

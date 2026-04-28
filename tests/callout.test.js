@@ -491,8 +491,9 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
     expect(blockquoteStyle).toContain('border-left: 3px solid #0366d699');
     expect(blockquoteStyle).not.toContain('border: 1px solid');
 
-    expect(h3Style).toContain('border-bottom: 1px solid #0366d666');
-    expect(h3Style).not.toContain('border-left');
+    expect(h3Style).toContain('border-left: 3px solid #0366d6');
+    expect(h3Style).toContain('background: #0366d60A');
+    expect(h3Style).toContain('padding: 6px 10px');
   });
 
   it('should NOT apply special blockquote style for github theme', () => {
@@ -550,7 +551,8 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
     expect(blockquoteStyle).toContain('background: #f8fafc');
     expect(blockquoteStyle).toContain('border-left: 3px solid #0366d699');
     expect(blockquoteStyle).not.toContain('border: 1px solid');
-    expect(h3Style).toContain('border-bottom: 1px solid #0366d666');
+    expect(h3Style).toContain('border-left: 3px solid #0366d6');
+    expect(h3Style).toContain('background: #0366d60A');
     expect(h3Style).not.toContain('background: #f8fafc');
   });
 });
