@@ -495,9 +495,9 @@ window.AppleTheme = class AppleTheme {
       case 'table':
         return `border-collapse: collapse; width: 100%; min-width: max-content; border: 1px solid ${config.tableBorderColor || '#e1e4e8'};`;
       case 'th':
-        return `background: ${config.tableHeaderBg || color + '1F'}; font-weight: bold; color: ${config.textColor}; border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left;`;
+        return `background: ${config.tableHeaderBg || color + '1F'}; font-weight: bold; color: ${config.textColor}; border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left; word-break: keep-all;`;
       case 'td':
-        return `border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left;`;
+        return `border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left; word-break: keep-all;`;
       case 'thead':
         return `background: #f6f8fa;`;
 
