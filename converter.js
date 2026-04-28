@@ -345,42 +345,37 @@ window.AppleStyleConverter = class AppleStyleConverter {
     }
 
     const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
-    // 简约/经典主题：左边框样式
-    const isWechat = themeName === 'wechat';
-    const marginLeft = isWechat ? '4px' : '0';
-    const borderWidth = isWechat ? '3px' : '4px';
-    const borderColor = isWechat ? `${color}99` : color;
+    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);
 
-    // 外层容器：左边框风格
     const containerStyle = `
-      margin: 16px 0 16px ${marginLeft};
-      border-left: ${borderWidth} solid ${borderColor};
-      background: ${color}1A;
-      border-radius: 3px;
+      margin: 16px 0 16px 8px;
+      background: ${accentColor}0D;
+      border: 1px solid ${accentColor}24;
+      border-radius: 4px;
       overflow: hidden;
     `.replace(/\s+/g, ' ').trim();
 
-    // 标题栏：深色背景 + 图标 + 标题
     const headerStyle = `
       display: flex;
       align-items: center;
       padding: 8px 12px;
-      background: ${color}26;
+      background: ${accentColor}14;
+      border-bottom: 1px solid ${accentColor}24;
       font-weight: bold;
       font-size: ${sizes.base}px;
       font-family: ${font};
-      color: #333;
+      color: ${accentColor};
     `.replace(/\s+/g, ' ').trim();
 
-    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px;`;
-    const titleStyle = `flex: 1;`;
+    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;
+    const titleStyle = `flex: 1; color: ${accentColor};`;
 
-    // 内容区：正文内容
     const contentStyle = `
       padding: 12px 16px;
       font-size: ${sizes.base}px;
       line-height: 1.8;
       color: #595959;
+      background: ${accentColor}0D;
     `.replace(/\s+/g, ' ').trim();
 
     return `<section style="${containerStyle}">

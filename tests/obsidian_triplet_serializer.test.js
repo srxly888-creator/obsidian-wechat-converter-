@@ -186,7 +186,8 @@ describe('Obsidian Triplet Serializer', () => {
     container.innerHTML = html;
 
     expect(html).not.toContain('class="callout"');
-    expect(html).toContain('border-left');
+    expect(html).not.toContain('border-left');
+    expect(html).toContain('border: 1px solid #2f6fdd24');
     expect(html).toContain('>ℹ️<');
     expect(html).toContain('>Tips<');
     expect(container.textContent).toContain('这是一段 callout 内容。');

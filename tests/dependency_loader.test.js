@@ -64,10 +64,6 @@ describe('Dependency Loader Service', () => {
         global.hljs = { highlightAuto: () => ({ value: '' }) };
       } else if (code === '__MATH__') {
         window.ObsidianWechatMath = vi.fn();
-      } else if (code === '__CANDIDATES__') {
-        window.AppleImportedThemeConfigs = {
-          'candidate-test-theme': { name: '候选·测试主题', overrides: {} },
-        };
       } else if (code === '__THEME__') {
         window.AppleTheme = class AppleThemeMock {
           constructor(options) {
@@ -113,7 +109,6 @@ describe('Dependency Loader Service', () => {
         markdownIt: '__MD__',
         highlight: '__HLJS__',
         mathjax: '__MATH__',
-        importedThemeCandidates: '__CANDIDATES__',
         theme: '__THEME__',
         converter: '__CONVERTER__',
       },
@@ -202,7 +197,6 @@ describe('Dependency Loader Service', () => {
     expect(read).toHaveBeenCalledWith('/plugin/themes/apple-theme.js');
     expect(read).toHaveBeenCalledWith('/plugin/converter.js');
     expect(exists).toHaveBeenCalledWith('/plugin/lib/mathjax-plugin.js');
-    expect(exists).toHaveBeenCalledWith('/plugin/themes/imported-theme-candidates.js');
   });
 
   it('readEmbeddedOrFile should throw for missing required source without adapter', async () => {

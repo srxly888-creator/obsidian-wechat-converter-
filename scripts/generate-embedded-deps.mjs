@@ -9,7 +9,6 @@ const SOURCE_FILES = {
   markdownIt: path.join(ROOT, 'lib', 'markdown-it.min.js'),
   highlight: path.join(ROOT, 'lib', 'highlight.min.js'),
   mathjax: path.join(ROOT, 'lib', 'mathjax-plugin.js'),
-  importedThemeCandidates: path.join(ROOT, 'themes', 'imported-theme-candidates.js'),
   theme: path.join(ROOT, 'themes', 'apple-theme.js'),
   converter: path.join(ROOT, 'converter.js'),
 };
