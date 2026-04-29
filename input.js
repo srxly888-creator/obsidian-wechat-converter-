@@ -481,7 +481,6 @@ class AppleStyleView extends ItemView {
     this.loadingGeneration = 0;
     this.loadingVisibilityTimer = null;
     this.sidePaddingPreviewTimer = null;
-    this.aiLayoutRefreshTimer = null;
     this.lastResolvedMarkdown = '';
     this.lastResolvedSourcePath = '';
     this.lastResolvedSourceHash = '';
@@ -603,9 +602,6 @@ class AppleStyleView extends ItemView {
           this.registerScrollSync(activeView);
         }
 
-        if (this.shouldSyncAiLayoutUi()) {
-          this.scheduleAiLayoutPanelRefresh();
-        }
       })
     );
 
@@ -664,19 +660,6 @@ class AppleStyleView extends ItemView {
         sourceOverride,
       });
     }, 0);
-  }
-
-  scheduleAiLayoutPanelRefresh(delay = 0) {
-    if (this.aiLayoutRefreshTimer) {
-      clearTimeout(this.aiLayoutRefreshTimer);
-      this.aiLayoutRefreshTimer = null;
-    }
-    this.aiLayoutRefreshTimer = setTimeout(() => {
-      this.aiLayoutRefreshTimer = null;
-      if (this.shouldSyncAiLayoutUi()) {
-        this.refreshAiLayoutPanel();
-      }
-    }, delay);
   }
 
   scheduleSidePaddingPreview(delay = 120) {
@@ -4697,10 +4680,6 @@ class AppleStyleView extends ItemView {
     if (this.aiLayoutStaleSuppressTimer) {
       clearTimeout(this.aiLayoutStaleSuppressTimer);
       this.aiLayoutStaleSuppressTimer = null;
-    }
-    if (this.aiLayoutRefreshTimer) {
-      clearTimeout(this.aiLayoutRefreshTimer);
-      this.aiLayoutRefreshTimer = null;
     }
     this.setPreviewLoading(false);
 
