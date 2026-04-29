@@ -160,7 +160,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.scheduleActiveLeafRender();
 
     expect(convertSpy).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(16);
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(convertSpy).toHaveBeenCalledTimes(1);
     expect(convertSpy).toHaveBeenCalledWith(true, {
@@ -170,6 +170,47 @@ describe('AppleStyleView native render + lifecycle', () => {
       sourceOverride: null,
     });
     expect(view.activeLeafRenderTimer).toBeNull();
+  });
+
+  it('active leaf change should start preview render before refreshing the AI panel', async () => {
+    vi.useFakeTimers();
+    const callOrder = [];
+    let activeLeafHandler;
+    const activeView = {
+      editor: { getValue: () => '# next' },
+      file: { path: 'fixtures/next.md', basename: 'next' },
+    };
+    const view = new AppleStyleView(null, { settings: {} });
+    view.converter = {};
+    view.aiLayoutOverlay = createObsidianLikeElement();
+    view.aiLayoutOverlay.addClass('visible');
+    view.app = {
+      workspace: {
+        getActiveViewOfType: vi.fn(() => activeView),
+        on: vi.fn((eventName, handler) => {
+          if (eventName === 'active-leaf-change') activeLeafHandler = handler;
+          return { eventName };
+        }),
+      },
+    };
+    view.registerEvent = vi.fn();
+    vi.spyOn(view, 'registerScrollSync').mockImplementation(() => {});
+    vi.spyOn(view, 'convertCurrent').mockImplementation(() => {
+      callOrder.push('preview');
+      return Promise.resolve();
+    });
+    vi.spyOn(view, 'refreshAiLayoutPanel').mockImplementation(() => {
+      callOrder.push('ai-panel');
+    });
+
+    view.registerActiveFileChange();
+    await activeLeafHandler();
+
+    expect(callOrder).toEqual([]);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(callOrder).toEqual(['preview', 'ai-panel']);
+    vi.clearAllTimers();
   });
 
   it('scheduleSidePaddingPreview should debounce convertCurrent calls', async () => {
@@ -396,6 +437,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     view.scheduleSidePaddingPreview(120);
     view.loadingVisibilityTimer = setTimeout(() => {}, 200);
     view.aiLayoutStaleSuppressTimer = setTimeout(() => {}, 200);
+    view.aiLayoutRefreshTimer = setTimeout(() => {}, 200);
 
     await view.onClose();
     await vi.runAllTimersAsync();
@@ -405,6 +447,7 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(view.sidePaddingPreviewTimer).toBeNull();
     expect(view.loadingVisibilityTimer).toBeNull();
     expect(view.aiLayoutStaleSuppressTimer).toBeNull();
+    expect(view.aiLayoutRefreshTimer).toBeNull();
   });
 
   it('createSettingsPanel should keep mobile DOM state aligned (overlay + actions)', () => {

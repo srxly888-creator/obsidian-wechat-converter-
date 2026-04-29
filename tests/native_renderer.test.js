@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 const {
+  canUseNativePreviewFastPath,
   isSafeRawImageSrc,
   preprocessMarkdownForNative,
   renderNativeMarkdown,
@@ -157,5 +158,27 @@ describe('Native Renderer', () => {
     const container = document.createElement('div');
     container.innerHTML = html;
     expect(container.querySelector('img[src="x"]')).toBeNull();
+  });
+
+  it('should allow fast preview for ordinary markdown with remote images', () => {
+    const markdown = [
+      '# 标题',
+      '',
+      '普通段落。',
+      '',
+      '![CleanShot 2026-04-07 at 21.58.50.gif|400](https://example.com/CleanShot%202026.gif)',
+      '![image](data:image/png;base64,abc)',
+      '参考 [[Obsidian 入门15：搜索完全指南，让笔记永远找得到]]。',
+    ].join('\n');
+
+    expect(canUseNativePreviewFastPath(markdown)).toBe(true);
+  });
+
+  it('should keep Obsidian-specific markdown on the triplet path', () => {
+    expect(canUseNativePreviewFastPath('![[local image.png|400]]')).toBe(false);
+    expect(canUseNativePreviewFastPath('![local](images/a.png)')).toBe(false);
+    expect(canUseNativePreviewFastPath('![ref][image-ref]\n\n[image-ref]: images/a.png')).toBe(false);
+    expect(canUseNativePreviewFastPath('```mermaid\ngraph TD; A-->B;\n```')).toBe(false);
+    expect(canUseNativePreviewFastPath('行内公式 $a+b$')).toBe(false);
   });
 });

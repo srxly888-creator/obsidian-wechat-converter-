@@ -4580,6 +4580,110 @@ var require_obsidian_triplet_renderer = __commonJS({
   }
 });
 
+// services/native-renderer.js
+var require_native_renderer = __commonJS({
+  "services/native-renderer.js"(exports2, module2) {
+    function isSafeRawImageSrc(src) {
+      if (!src || typeof src !== "string")
+        return false;
+      const trimmed = src.trim();
+      if (!trimmed || trimmed.startsWith("#"))
+        return false;
+      const safeProtocols = ["http:", "https:", "data:", "app:", "capacitor:", "obsidian:"];
+      try {
+        const parsed = new URL(trimmed);
+        return safeProtocols.includes(parsed.protocol);
+      } catch (error) {
+        return false;
+      }
+    }
+    function preprocessMarkdownForNative(markdown) {
+      if (typeof markdown !== "string" || markdown.length === 0)
+        return "";
+      let output = markdown;
+      output = output.replace(/<(script|iframe|object|embed|form|input|button|style)\b[^>]*>[\s\S]*?<\/\1>/gi, "\n");
+      output = output.replace(/<(script|iframe|object|embed|form|input|button|style)\b[^>]*\/?>/gi, "\n");
+      output = output.replace(/<img\b[^>]*>/gi, (tag) => {
+        const hasEventHandler = /\son\w+\s*=/.test(tag);
+        const srcMatch = tag.match(/\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+        const src = srcMatch ? srcMatch[1] || srcMatch[2] || srcMatch[3] || "" : "";
+        if (hasEventHandler || !isSafeRawImageSrc(src)) {
+          return "\n";
+        }
+        return tag;
+      });
+      return output;
+    }
+    function cleanupNativeRenderedHtml(html) {
+      if (typeof document === "undefined" || typeof html !== "string" || html.length === 0) {
+        return html;
+      }
+      const container = document.createElement("div");
+      container.innerHTML = html;
+      Array.from(container.querySelectorAll("img")).forEach((img) => {
+        const inFigure = !!img.closest("figure");
+        const isMathImage = img.classList.contains("math-formula-image");
+        if (!inFigure && !isMathImage) {
+          img.remove();
+        }
+      });
+      return container.innerHTML;
+    }
+    function extractInlineImageTargets(markdown) {
+      const source = String(markdown || "");
+      const targets = [];
+      if (!source || !source.includes("!["))
+        return targets;
+      const inlineImagePattern = /!\[[^\]]*]\(([^)\r\n]+)\)/g;
+      let match = inlineImagePattern.exec(source);
+      while (match) {
+        const rawTarget = String(match[1] || "").trim();
+        const target = rawTarget.startsWith("<") ? rawTarget.slice(1, rawTarget.indexOf(">") > 0 ? rawTarget.indexOf(">") : void 0).trim() : rawTarget.split(/\s+/)[0].trim();
+        targets.push(target);
+        match = inlineImagePattern.exec(source);
+      }
+      return targets;
+    }
+    function canUseNativePreviewFastPath2(markdown) {
+      const source = String(markdown || "");
+      if (!source.trim())
+        return false;
+      if (source.includes("![["))
+        return false;
+      if (/^\s{0,3}(?:`{3,}|~{3,})\s*mermaid\b/im.test(source))
+        return false;
+      if (/^\s*\$\$\s*$/m.test(source) || /(^|[^\\])\$[^$\n]+\$/m.test(source))
+        return false;
+      const targets = extractInlineImageTargets(source);
+      if (source.includes("![") && targets.length === 0)
+        return false;
+      return targets.every((target) => /^(https?:\/\/|data:image\/)/i.test(target));
+    }
+    async function renderNativeMarkdown2({
+      converter,
+      markdown,
+      sourcePath = ""
+    }) {
+      if (!converter || typeof converter.convert !== "function") {
+        throw new Error("Native converter is not ready");
+      }
+      if (typeof converter.updateSourcePath === "function") {
+        converter.updateSourcePath(sourcePath);
+      }
+      const preprocessed = preprocessMarkdownForNative(markdown);
+      const html = await converter.convert(preprocessed);
+      return cleanupNativeRenderedHtml(html);
+    }
+    module2.exports = {
+      canUseNativePreviewFastPath: canUseNativePreviewFastPath2,
+      isSafeRawImageSrc,
+      preprocessMarkdownForNative,
+      cleanupNativeRenderedHtml,
+      renderNativeMarkdown: renderNativeMarkdown2
+    };
+  }
+});
+
 // services/ai-layout-runtime/generated-skills.js
 var require_generated_skills = __commonJS({
   "services/ai-layout-runtime/generated-skills.js"(exports2, module2) {
@@ -10334,6 +10438,7 @@ var { buildRenderRuntime } = require_dependency_loader();
 var { resolveMarkdownSource } = require_markdown_source();
 var { normalizeVaultPath, isAbsolutePathLike } = require_path_utils();
 var { renderObsidianTripletMarkdown } = require_obsidian_triplet_renderer();
+var { canUseNativePreviewFastPath, renderNativeMarkdown } = require_native_renderer();
 var { convertRenderedMermaidDiagramsToImages } = require_rendered_mermaid();
 var {
   AI_LAYOUT_SCHEMA_VERSION,
@@ -10715,6 +10820,7 @@ var AppleStyleView = class extends ItemView {
     this.loadingGeneration = 0;
     this.loadingVisibilityTimer = null;
     this.sidePaddingPreviewTimer = null;
+    this.aiLayoutRefreshTimer = null;
     this.lastResolvedMarkdown = "";
     this.lastResolvedSourcePath = "";
     this.lastResolvedSourceHash = "";
@@ -10795,15 +10901,15 @@ var AppleStyleView = class extends ItemView {
             this.markAiLayoutSourceSwitch(nextSourcePath);
           }
         }
-        this.updateCurrentDoc();
-        if (this.shouldSyncAiLayoutUi()) {
-          this.refreshAiLayoutPanel();
+        if (activeView && this.converter) {
+          this.scheduleActiveLeafRender(activeView);
         }
+        this.updateCurrentDoc();
         if (activeView) {
           this.registerScrollSync(activeView);
         }
-        if (activeView && this.converter) {
-          this.scheduleActiveLeafRender(activeView);
+        if (this.shouldSyncAiLayoutUi()) {
+          this.scheduleAiLayoutPanelRefresh();
         }
       })
     );
@@ -10850,7 +10956,19 @@ var AppleStyleView = class extends ItemView {
         loadingDelay: 120,
         sourceOverride
       });
-    }, 16);
+    }, 0);
+  }
+  scheduleAiLayoutPanelRefresh(delay = 0) {
+    if (this.aiLayoutRefreshTimer) {
+      clearTimeout(this.aiLayoutRefreshTimer);
+      this.aiLayoutRefreshTimer = null;
+    }
+    this.aiLayoutRefreshTimer = setTimeout(() => {
+      this.aiLayoutRefreshTimer = null;
+      if (this.shouldSyncAiLayoutUi()) {
+        this.refreshAiLayoutPanel();
+      }
+    }, delay);
   }
   scheduleSidePaddingPreview(delay = 120) {
     if (this.sidePaddingPreviewTimer) {
@@ -11001,6 +11119,13 @@ var AppleStyleView = class extends ItemView {
       this.converter = runtime.converter;
       const { nativePipeline } = createRenderPipelines({
         candidateRenderer: async (markdown, context = {}) => {
+          if (canUseNativePreviewFastPath(markdown)) {
+            return renderNativeMarkdown({
+              converter: this.converter,
+              markdown,
+              sourcePath: context.sourcePath || ""
+            });
+          }
           return renderObsidianTripletMarkdown({
             app: this.app,
             converter: this.converter,
@@ -14408,6 +14533,10 @@ var AppleStyleView = class extends ItemView {
     if (this.aiLayoutStaleSuppressTimer) {
       clearTimeout(this.aiLayoutStaleSuppressTimer);
       this.aiLayoutStaleSuppressTimer = null;
+    }
+    if (this.aiLayoutRefreshTimer) {
+      clearTimeout(this.aiLayoutRefreshTimer);
+      this.aiLayoutRefreshTimer = null;
     }
     this.setPreviewLoading(false);
     if (this.activeEditorScroller && this.editorScrollListener) {
