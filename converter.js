@@ -745,18 +745,87 @@ ${macHeader}
    * A blank line inside Markdown blockquotes renders as multiple paragraphs.
    */
   removeBlockquoteParagraphMargins(html) {
-    return html.replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/g, (match, content) => {
-      const paragraphCount = (content.match(/<p\b[^>]*style="/g) || []).length;
-      let paragraphIndex = 0;
-      const newContent = content.replace(/<p style="([^"]*)">/g, (paragraphOpen, styleText) => {
-        const isLastParagraph = paragraphIndex === paragraphCount - 1;
-        paragraphIndex += 1;
-        const marginValue = paragraphCount > 1 && !isLastParagraph ? '0 0 0.8em 0' : '0';
-        const updatedStyle = this.replaceStyleDeclaration(styleText, 'margin', marginValue);
-        return `<p style="${updatedStyle}">`;
-      });
-      return match.replace(content, newContent);
-    });
+    const containerTags = new Set([
+      'blockquote', 'section', 'div', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tfoot',
+      'tr', 'th', 'td', 'ul', 'ol', 'li', 'pre', 'article', 'aside',
+    ]);
+    const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
+    const blockquoteStack = [];
+    const replacements = [];
+    const tagPattern = /<\/?([a-zA-Z][\w:-]*)(?:\s[^<>]*)?>/g;
+
+    let match;
+    while ((match = tagPattern.exec(html)) !== null) {
+      const rawTag = match[0];
+      const tagName = String(match[1] || '').toLowerCase();
+      const isClosing = /^<\//.test(rawTag);
+      const isSelfClosing = /\/\s*>$/.test(rawTag) || voidTags.has(tagName);
+
+      if (tagName === 'blockquote') {
+        if (isClosing) {
+          const frame = blockquoteStack.pop();
+          if (frame) {
+            const paragraphCount = frame.paragraphs.length;
+            frame.paragraphs.forEach((paragraph, index) => {
+              const isLastParagraph = index === paragraphCount - 1;
+              const marginValue = paragraphCount > 1 && !isLastParagraph ? '0 0 0.8em 0' : '0';
+              const updatedStyle = this.replaceStyleDeclaration(paragraph.styleText, 'margin', marginValue);
+              replacements.push({
+                start: paragraph.start,
+                end: paragraph.end,
+                value: paragraph.rawTag.replace(/style="([^"]*)"/, `style="${updatedStyle}"`),
+              });
+            });
+          }
+          if (blockquoteStack.length > 0) {
+            const parentFrame = blockquoteStack[blockquoteStack.length - 1];
+            parentFrame.containerDepth = Math.max(0, parentFrame.containerDepth - 1);
+          }
+        } else {
+          if (blockquoteStack.length > 0) {
+            blockquoteStack[blockquoteStack.length - 1].containerDepth += 1;
+          }
+          blockquoteStack.push({ containerDepth: 0, paragraphs: [] });
+        }
+        continue;
+      }
+
+      if (blockquoteStack.length === 0) continue;
+
+      const frame = blockquoteStack[blockquoteStack.length - 1];
+      if (!isClosing && tagName === 'p') {
+        const styleMatch = rawTag.match(/\bstyle="([^"]*)"/);
+        if (styleMatch && frame.containerDepth === 0) {
+          frame.paragraphs.push({
+            start: match.index,
+            end: match.index + rawTag.length,
+            rawTag,
+            styleText: styleMatch[1],
+          });
+        } else if (styleMatch) {
+          const updatedStyle = this.replaceStyleDeclaration(styleMatch[1], 'margin', '0');
+          replacements.push({
+            start: match.index,
+            end: match.index + rawTag.length,
+            value: rawTag.replace(/style="([^"]*)"/, `style="${updatedStyle}"`),
+          });
+        }
+        continue;
+      }
+
+      if (!containerTags.has(tagName) || tagName === 'p') continue;
+      if (isClosing) {
+        frame.containerDepth = Math.max(0, frame.containerDepth - 1);
+      } else if (!isSelfClosing) {
+        frame.containerDepth += 1;
+      }
+    }
+
+    return replacements
+      .sort((a, b) => b.start - a.start)
+      .reduce((output, replacement) => (
+        output.slice(0, replacement.start) + replacement.value + output.slice(replacement.end)
+      ), html);
   }
 
   /**

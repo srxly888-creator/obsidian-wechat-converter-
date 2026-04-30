@@ -467,6 +467,25 @@ describe('Callout Syntax Support', () => {
       expect(result).toContain('margin: 0 0 0.8em 0; text-align: justify;">第一段引用');
       expect(result).toContain('margin: 0; text-align: justify;">第二段引用');
     });
+
+    it('should not count nested callout paragraphs as outer blockquote paragraphs', () => {
+      const html = [
+        '<blockquote style="padding: 16px;">',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">外层引用</p>',
+        '<section style="margin: 16px 0 16px 8px;">',
+        '<section style="padding: 12px 16px;">',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">嵌套 callout</p>',
+        '</section>',
+        '</section>',
+        '</blockquote>',
+      ].join('');
+
+      const result = converter.removeBlockquoteParagraphMargins(html);
+
+      expect(result).toContain('margin: 0; text-align: justify;">外层引用');
+      expect(result).toContain('margin: 0; text-align: justify;">嵌套 callout');
+      expect(result).not.toContain('外层引用</p><section style="margin: 16px 0 16px 8px;"><section style="padding: 12px 16px;"><p style="font-size: 16px; margin: 0 0 0.8em 0;');
+    });
   });
 
   describe('Integration: convert() and Marker Preservation', () => {
