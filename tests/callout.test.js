@@ -444,6 +444,31 @@ describe('Callout Syntax Support', () => {
     });
   });
 
+  describe('removeBlockquoteParagraphMargins', () => {
+    it('should keep a single blockquote paragraph vertically balanced', () => {
+      const html = '<blockquote style="padding: 16px;"><p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">单段引用</p></blockquote>';
+
+      const result = converter.removeBlockquoteParagraphMargins(html);
+
+      expect(result).toContain('margin: 0;');
+      expect(result).not.toContain('0.8em');
+    });
+
+    it('should preserve gaps created by blank lines inside blockquotes', () => {
+      const html = [
+        '<blockquote style="padding: 16px;">',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">第一段引用</p>',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">第二段引用</p>',
+        '</blockquote>',
+      ].join('');
+
+      const result = converter.removeBlockquoteParagraphMargins(html);
+
+      expect(result).toContain('margin: 0 0 0.8em 0; text-align: justify;">第一段引用');
+      expect(result).toContain('margin: 0; text-align: justify;">第二段引用');
+    });
+  });
+
   describe('Integration: convert() and Marker Preservation', () => {
     // For these tests, we need a slightly more functional markdown-it mock
     // that actually uses our rules
@@ -549,6 +574,9 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
 
     expect(blockquoteStyle).not.toContain('border-left:');
     expect(blockquoteStyle).toContain('font-family: \'Times New Roman\', Georgia, \'SimSun\', serif');
+    expect(blockquoteStyle).toContain('width: 92%');
+    expect(blockquoteStyle).toContain('border-top: 1px solid #6f42c155');
+    expect(blockquoteStyle).toContain('border-bottom: 1px solid #6f42c155');
     expect(blockquoteStyle).not.toContain('text-align: center');
     expect(blockquoteStyle).not.toContain('border: 1px solid');
   });
@@ -614,6 +642,8 @@ describe('Neutral Quote And Callout Style Mode', () => {
 
     expect(blockquoteStyle).not.toContain('border-left:');
     expect(blockquoteStyle).toContain('background: #f9f9f9');
+    expect(blockquoteStyle).toContain('border-top: 1px solid #d9d9d9');
+    expect(blockquoteStyle).toContain('border-bottom: 1px solid #d9d9d9');
     expect(blockquoteStyle).toContain('border-radius: 4px');
     expect(blockquoteStyle).not.toContain('border: 1px solid');
   });

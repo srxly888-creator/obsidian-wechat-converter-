@@ -210,7 +210,10 @@ describe('AppleTheme Color Logic', () => {
       const blockquoteStyle = theme.getStyle('blockquote');
 
       expect(blockquoteStyle).not.toContain('border-left:');
-      expect(blockquoteStyle).toContain('margin: 22px 0;');
+      expect(blockquoteStyle).toContain('width: 92%;');
+      expect(blockquoteStyle).toContain('margin: 24px auto;');
+      expect(blockquoteStyle).toContain('border-top: 1px solid #0366d655;');
+      expect(blockquoteStyle).toContain('border-bottom: 1px solid #0366d655;');
       expect(blockquoteStyle).toContain("font-family: 'Times New Roman', Georgia, 'SimSun', serif;");
     });
 
@@ -220,6 +223,19 @@ describe('AppleTheme Color Logic', () => {
       expect(theme.getStyle('p')).toContain('text-indent: 2em;');
       expect(theme.getStyle('h1')).toContain('text-align: left;');
       expect(theme.getStyle('h1')).toContain('border-bottom: 1px solid #d8d8d8;');
+    });
+
+    it('should keep paragraph indentation exclusive to Typo', () => {
+      const themeNames = AppleTheme.getThemeList().map((theme) => theme.value);
+
+      for (const themeName of themeNames) {
+        const paragraphStyle = new AppleTheme({ theme: themeName }).getStyle('p');
+        if (themeName === 'typo') {
+          expect(paragraphStyle).toContain('text-indent: 2em;');
+        } else {
+          expect(paragraphStyle).not.toContain('text-indent:');
+        }
+      }
     });
   });
 

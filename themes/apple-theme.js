@@ -205,7 +205,6 @@ window.AppleTheme = class AppleTheme {
       blockquoteBorderWidth: 3,
       blockquoteBg: '#f3fbf8',
       blockquoteStyle: 'soft',
-      paragraphTextIndent: '1em',
       tableHeaderBg: '#f3fbf8',
       tableBorderColor: '#dbeee8',
       figureBorderColor: '#dcefeb',
@@ -411,7 +410,10 @@ window.AppleTheme = class AppleTheme {
           const centeredBackground = quoteCalloutStyleMode === 'neutral'
             ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG
             : (config.blockquoteBg || color + '1F');
-          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${centeredBackground}; margin: 22px 0; padding: 16px 18px; text-align: justify; border-radius: ${r.sm}px;`;
+          const centeredRuleColor = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_NEUTRAL_BORDER
+            : `${color}55`;
+          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.85; color: #4f4a45; background: ${centeredBackground}; width: 92%; box-sizing: border-box; margin: 24px auto; padding: 18px 20px; text-align: justify; border-top: 1px solid ${centeredRuleColor}; border-bottom: 1px solid ${centeredRuleColor}; border-radius: ${r.sm}px;`;
         }
         if (config.blockquoteStyle === 'paper') {
           const paperBg = quoteCalloutStyleMode === 'neutral'
