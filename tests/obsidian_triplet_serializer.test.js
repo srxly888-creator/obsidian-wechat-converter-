@@ -50,6 +50,29 @@ describe('Obsidian Triplet Serializer', () => {
     expect(normalized).toMatch(/const\s+x\s*=\s*1/);
   });
 
+  it('should wrap native-rendered tables for horizontal scrolling', () => {
+    const root = document.createElement('div');
+    root.innerHTML = [
+      '<table>',
+      '<thead><tr><th>缩写</th><th>英文全称</th><th>中文全称</th></tr></thead>',
+      '<tbody><tr><td>CRE</td><td>Carbapenem-Resistant Enterobacterales</td><td>碳青霉烯类耐药肠杆菌目细菌</td></tr></tbody>',
+      '</table>',
+    ].join('');
+
+    const html = serializeObsidianRenderedHtml({ root, converter });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    const table = container.querySelector('table');
+    const wrapper = table?.parentElement;
+    expect(wrapper?.tagName).toBe('SECTION');
+    expect(wrapper?.getAttribute('style') || '').toContain('overflow-x: scroll');
+    expect(wrapper?.getAttribute('style') || '').toContain('-webkit-overflow-scrolling: touch');
+    expect(table?.getAttribute('style') || '').toContain('width: 770px');
+    expect(table?.getAttribute('style') || '').toContain('min-width: 100%');
+    expect(container.querySelector('td')?.getAttribute('style') || '').toContain('white-space: nowrap');
+  });
+
   it('should keep Mac code window controls as inline circle lights through draft cleaning', () => {
     const root = document.createElement('div');
     root.innerHTML = '<pre><code class="language-js">const x = 1;</code></pre>';
@@ -186,7 +209,8 @@ describe('Obsidian Triplet Serializer', () => {
     container.innerHTML = html;
 
     expect(html).not.toContain('class="callout"');
-    expect(html).toContain('border-left');
+    expect(html).not.toContain('border-left');
+    expect(html).toContain('border: 1px solid #2f6fdd24');
     expect(html).toContain('>ℹ️<');
     expect(html).toContain('>Tips<');
     expect(container.textContent).toContain('这是一段 callout 内容。');

@@ -214,10 +214,11 @@ describe('Callout Syntax Support', () => {
 
       const html = converter.renderCalloutOpen(calloutInfo);
 
-      // Check container structure
       expect(html).toContain('<section');
-      expect(html).toContain('border-left: 3px solid');
-      expect(html).toContain('99'); // 60% opacity suffix
+      expect(html).not.toContain('border-left:');
+      expect(html).toContain('border: 1px solid #2f6fdd24');
+      expect(html).toContain('background: #2f6fdd14');
+      expect(html).toContain('color: #2f6fdd');
 
       // Check header
       expect(html).toContain('ℹ️');
@@ -227,10 +228,7 @@ describe('Callout Syntax Support', () => {
       expect(html).toContain('padding: 12px 16px');
     });
 
-    it('should use theme color for styling', () => {
-      // Get the theme color
-      const themeColor = theme.getThemeColorValue();
-
+    it('should use semantic type color for styling', () => {
       const calloutInfo = {
         type: 'warning',
         title: '警告',
@@ -240,10 +238,10 @@ describe('Callout Syntax Support', () => {
 
       const html = converter.renderCalloutOpen(calloutInfo);
 
-      // Should contain theme color with opacity
-      expect(html).toContain(`${themeColor}99`); // Border color (60% opacity)
-      expect(html).toContain(`${themeColor}1A`); // Background (light tint)
-      expect(html).toContain(`${themeColor}26`); // Header background
+      expect(html).not.toContain('border-left:');
+      expect(html).toContain('border: 1px solid #b26a0024');
+      expect(html).toContain('background: #b26a0014');
+      expect(html).toContain('color: #b26a00');
     });
 
     it('should include flex layout for header', () => {
@@ -329,7 +327,7 @@ describe('Callout Syntax Support', () => {
       label: '备注',
     };
 
-    it('should render centered style for serif theme', () => {
+    it('should render semantic card style for serif theme', () => {
       const serifTheme = new window.AppleTheme({
         theme: 'serif',
         themeColor: 'purple',
@@ -339,14 +337,14 @@ describe('Callout Syntax Support', () => {
 
       const html = serifConverter.renderCalloutOpen(calloutInfo);
 
-      // Centered style: no left border, centered text
-      expect(html).toContain('text-align: center');
       expect(html).not.toContain('border-left:');
-      // Wider margins for centered style
-      expect(html).toContain('margin: 30px 60px');
+      expect(html).toContain('border: 1px solid #2f6fdd24');
+      expect(html).toContain('margin: 16px 0 16px 8px');
+      expect(html).not.toContain('text-align: center');
+      expect(html).not.toContain('margin: 30px 60px');
     });
 
-    it('should render left-border style for github theme', () => {
+    it('should render semantic card style for github theme', () => {
       const githubTheme = new window.AppleTheme({
         theme: 'github',
         themeColor: 'blue',
@@ -356,13 +354,13 @@ describe('Callout Syntax Support', () => {
 
       const html = githubConverter.renderCalloutOpen(calloutInfo);
 
-      // Left border style: 4px border, no margin offset
-      expect(html).toContain('border-left: 4px solid');
-      expect(html).toContain('margin: 16px 0 16px 0');
+      expect(html).not.toContain('border-left:');
+      expect(html).toContain('border: 1px solid #2f6fdd24');
+      expect(html).toContain('margin: 16px 0 16px 8px');
       expect(html).not.toContain('text-align: center');
     });
 
-    it('should render left-border style with offset for wechat theme', () => {
+    it('should render semantic card style for wechat theme', () => {
       const wechatTheme = new window.AppleTheme({
         theme: 'wechat',
         themeColor: 'blue',
@@ -372,13 +370,13 @@ describe('Callout Syntax Support', () => {
 
       const html = wechatConverter.renderCalloutOpen(calloutInfo);
 
-      // Wechat style: 3px border with 4px left margin offset
-      expect(html).toContain('border-left: 3px solid');
-      expect(html).toContain('margin: 16px 0 16px 4px');
+      expect(html).not.toContain('border-left:');
+      expect(html).toContain('border: 1px solid #2f6fdd24');
+      expect(html).toContain('margin: 16px 0 16px 8px');
       expect(html).not.toContain('text-align: center');
     });
 
-    it('should use 60% opacity border for wechat, full opacity for github', () => {
+    it('should use consistent semantic color for callout type across themes', () => {
       const wechatTheme = new window.AppleTheme({
         theme: 'wechat',
         themeColor: 'blue',
@@ -395,15 +393,13 @@ describe('Callout Syntax Support', () => {
       const wechatHtml = wechatConverter.renderCalloutOpen(calloutInfo);
       const githubHtml = githubConverter.renderCalloutOpen(calloutInfo);
 
-      const themeColor = wechatTheme.getThemeColorValue();
-
-      // Wechat uses 60% opacity (99 suffix)
-      expect(wechatHtml).toContain(`${themeColor}99`);
-      // Github uses full opacity (no suffix)
-      expect(githubHtml).toContain(`solid ${themeColor};`);
+      expect(wechatHtml).toContain('border: 1px solid #2f6fdd24');
+      expect(githubHtml).toContain('border: 1px solid #2f6fdd24');
+      expect(wechatHtml).not.toContain('border-left:');
+      expect(githubHtml).not.toContain('border-left:');
     });
 
-    it('should keep serif centered structure in neutral mode while dropping themed background', () => {
+    it('should render serif neutral callouts with the same full semantic card sizing', () => {
       const serifTheme = new window.AppleTheme({
         theme: 'serif',
         themeColor: 'purple',
@@ -414,9 +410,81 @@ describe('Callout Syntax Support', () => {
 
       const html = serifConverter.renderCalloutOpen(calloutInfo);
 
-      expect(html).toContain('text-align: center');
+      expect(html).not.toContain('text-align: center');
+      expect(html).toContain('margin: 16px 0 16px 8px');
       expect(html).toContain('background: #f9f9f9');
       expect(html).not.toContain('background: #6f42c11F');
+    });
+
+    it('should use semantic colors for different callout types in serif theme', () => {
+      const serifTheme = new window.AppleTheme({
+        theme: 'serif',
+        themeColor: 'purple',
+        fontSize: 3,
+      });
+      const serifConverter = new window.AppleStyleConverter(serifTheme, '', true, null, '');
+
+      const warningHtml = serifConverter.renderCalloutOpen({
+        type: 'warning',
+        title: 'Warning',
+        icon: '⚠️',
+        label: '警告',
+      });
+      const tipHtml = serifConverter.renderCalloutOpen({
+        type: 'tip',
+        title: '小技巧',
+        icon: '💡',
+        label: '提示',
+      });
+
+      expect(warningHtml).toContain('border: 1px solid #b26a0024');
+      expect(warningHtml).toContain('color: #b26a00');
+      expect(tipHtml).toContain('border: 1px solid #1f8c7a24');
+      expect(tipHtml).toContain('color: #1f8c7a');
+    });
+  });
+
+  describe('removeBlockquoteParagraphMargins', () => {
+    it('should keep a single blockquote paragraph vertically balanced', () => {
+      const html = '<blockquote style="padding: 16px;"><p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">单段引用</p></blockquote>';
+
+      const result = converter.removeBlockquoteParagraphMargins(html);
+
+      expect(result).toContain('margin: 0;');
+      expect(result).not.toContain('0.8em');
+    });
+
+    it('should preserve gaps created by blank lines inside blockquotes', () => {
+      const html = [
+        '<blockquote style="padding: 16px;">',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">第一段引用</p>',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">第二段引用</p>',
+        '</blockquote>',
+      ].join('');
+
+      const result = converter.removeBlockquoteParagraphMargins(html);
+
+      expect(result).toContain('margin: 0 0 0.8em 0; text-align: justify;">第一段引用');
+      expect(result).toContain('margin: 0; text-align: justify;">第二段引用');
+    });
+
+    it('should not count nested callout paragraphs as outer blockquote paragraphs', () => {
+      const html = [
+        '<blockquote style="padding: 16px;">',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">外层引用</p>',
+        '<section style="margin: 16px 0 16px 8px;">',
+        '<section style="padding: 12px 16px;">',
+        '<p style="font-size: 16px; margin: 0 0 24px 0; text-align: justify;">嵌套 callout</p>',
+        '</section>',
+        '</section>',
+        '</blockquote>',
+      ].join('');
+
+      const result = converter.removeBlockquoteParagraphMargins(html);
+
+      expect(result).toContain('margin: 0; text-align: justify;">外层引用');
+      expect(result).toContain('margin: 0; text-align: justify;">嵌套 callout');
+      expect(result).not.toContain('外层引用</p><section style="margin: 16px 0 16px 8px;"><section style="padding: 12px 16px;"><p style="font-size: 16px; margin: 0 0 0.8em 0;');
     });
   });
 
@@ -491,18 +559,13 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
     const blockquoteStyle = theme.getStyle('blockquote');
     const h3Style = theme.getStyle('h3');
 
-    // Blockquote should have:
-    // - 3px border (not 4px like H3)
-    // - 99 suffix (60% opacity)
-    // - 4px left margin
-    expect(blockquoteStyle).toContain('border-left: 3px solid');
-    expect(blockquoteStyle).toContain('99'); // 60% opacity
-    expect(blockquoteStyle).toMatch(/margin.*4px/); // Has 4px margin offset
+    expect(blockquoteStyle).toContain('background: #f8fafc');
+    expect(blockquoteStyle).toContain('border-left: 3px solid #0366d699');
+    expect(blockquoteStyle).not.toContain('border: 1px solid');
 
-    // H3 should have:
-    // - 4px border
-    // - Full opacity color (no 99 suffix in border definition)
-    expect(h3Style).toContain('border-left: 4px solid');
+    expect(h3Style).toContain('border-left: 3px solid #0366d6');
+    expect(h3Style).toContain('background: #0366d60A');
+    expect(h3Style).toContain('padding: 6px 10px');
   });
 
   it('should NOT apply special blockquote style for github theme', () => {
@@ -519,7 +582,7 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
     expect(blockquoteStyle).not.toMatch(/margin.*0.*0.*4px/); // No 4px offset pattern
   });
 
-  it('should NOT apply special blockquote style for serif theme', () => {
+  it('should keep regular serif blockquotes distinct from callout cards', () => {
     const theme = new window.AppleTheme({
       theme: 'serif',
       themeColor: 'purple',
@@ -528,8 +591,13 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
 
     const blockquoteStyle = theme.getStyle('blockquote');
 
-    // Serif theme uses centered blockquote style
-    expect(blockquoteStyle).toContain('text-align: center');
+    expect(blockquoteStyle).not.toContain('border-left:');
+    expect(blockquoteStyle).toContain('font-family: \'Times New Roman\', Georgia, \'SimSun\', serif');
+    expect(blockquoteStyle).toContain('width: 92%');
+    expect(blockquoteStyle).toContain('border-top: 1px solid #6f42c155');
+    expect(blockquoteStyle).toContain('border-bottom: 1px solid #6f42c155');
+    expect(blockquoteStyle).not.toContain('text-align: center');
+    expect(blockquoteStyle).not.toContain('border: 1px solid');
   });
 
   it('should use theme color in blockquote border', () => {
@@ -542,7 +610,7 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
     const greenColor = window.AppleTheme.THEME_COLORS.green;
     const blockquoteStyle = theme.getStyle('blockquote');
 
-    expect(blockquoteStyle).toContain(`${greenColor}99`);
+    expect(blockquoteStyle).toContain(`border-left: 3px solid ${greenColor}99`);
   });
 
   it('should differentiate blockquote from H3 visually in wechat theme', () => {
@@ -555,20 +623,12 @@ describe('Classic Theme Blockquote Style Differentiation', () => {
     const blockquoteStyle = theme.getStyle('blockquote');
     const h3Style = theme.getStyle('h3');
 
-    // Extract border width from both
-    const blockquoteBorderMatch = blockquoteStyle.match(/border-left:\s*(\d+)px/);
-    const h3BorderMatch = h3Style.match(/border-left:\s*(\d+)px/);
-
-    expect(blockquoteBorderMatch).not.toBeNull();
-    expect(h3BorderMatch).not.toBeNull();
-
-    const blockquoteBorderWidth = parseInt(blockquoteBorderMatch[1]);
-    const h3BorderWidth = parseInt(h3BorderMatch[1]);
-
-    // H3 should have thicker border than blockquote
-    expect(h3BorderWidth).toBeGreaterThan(blockquoteBorderWidth);
-    expect(h3BorderWidth).toBe(4);
-    expect(blockquoteBorderWidth).toBe(3);
+    expect(blockquoteStyle).toContain('background: #f8fafc');
+    expect(blockquoteStyle).toContain('border-left: 3px solid #0366d699');
+    expect(blockquoteStyle).not.toContain('border: 1px solid');
+    expect(h3Style).toContain('border-left: 3px solid #0366d6');
+    expect(h3Style).toContain('background: #0366d60A');
+    expect(h3Style).not.toContain('background: #f8fafc');
   });
 });
 
@@ -589,7 +649,7 @@ describe('Neutral Quote And Callout Style Mode', () => {
     expect(blockquoteStyle).not.toContain('99');
   });
 
-  it('should keep serif blockquote centered in neutral mode', () => {
+  it('should keep serif blockquote unmarked in neutral mode', () => {
     const theme = new window.AppleTheme({
       theme: 'serif',
       themeColor: 'purple',
@@ -599,8 +659,11 @@ describe('Neutral Quote And Callout Style Mode', () => {
 
     const blockquoteStyle = theme.getStyle('blockquote');
 
-    expect(blockquoteStyle).toContain('text-align: center');
+    expect(blockquoteStyle).not.toContain('border-left:');
     expect(blockquoteStyle).toContain('background: #f9f9f9');
-    expect(blockquoteStyle).toContain('border-radius: 8px');
+    expect(blockquoteStyle).toContain('border-top: 1px solid #d9d9d9');
+    expect(blockquoteStyle).toContain('border-bottom: 1px solid #d9d9d9');
+    expect(blockquoteStyle).toContain('border-radius: 4px');
+    expect(blockquoteStyle).not.toContain('border: 1px solid');
   });
 });

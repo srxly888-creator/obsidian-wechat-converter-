@@ -5,6 +5,7 @@ const { buildRenderRuntime } = require('./services/dependency-loader');
 const { resolveMarkdownSource } = require('./services/markdown-source');
 const { normalizeVaultPath, isAbsolutePathLike } = require('./services/path-utils');
 const { renderObsidianTripletMarkdown } = require('./services/obsidian-triplet-renderer');
+const { canUseNativePreviewFastPath, renderNativeMarkdown } = require('./services/native-renderer');
 const { convertRenderedMermaidDiagramsToImages } = require('./services/rendered-mermaid');
 const {
   AI_LAYOUT_SCHEMA_VERSION,
@@ -591,19 +592,16 @@ class AppleStyleView extends ItemView {
             this.markAiLayoutSourceSwitch(nextSourcePath);
           }
         }
-        this.updateCurrentDoc();
-        if (this.shouldSyncAiLayoutUi()) {
-          this.refreshAiLayoutPanel();
+        if (activeView && this.converter) {
+          this.scheduleActiveLeafRender(activeView);
         }
+        this.updateCurrentDoc();
 
         // 更新滚动同步绑定
         if (activeView) {
           this.registerScrollSync(activeView);
         }
 
-        if (activeView && this.converter) {
-          this.scheduleActiveLeafRender(activeView);
-        }
       })
     );
 
@@ -645,7 +643,7 @@ class AppleStyleView extends ItemView {
       this.activeLeafRenderTimer = null;
     }
 
-    // 下一帧立即触发，避免切文档固定等待带来的卡顿感。
+    // 让出当前 active-leaf 事件栈，但不额外等待一帧，避免切文档时可见卡顿。
     this.activeLeafRenderTimer = setTimeout(() => {
       this.activeLeafRenderTimer = null;
       const activeView = activeViewOverride || this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -661,7 +659,7 @@ class AppleStyleView extends ItemView {
         loadingDelay: 120,
         sourceOverride,
       });
-    }, 16);
+    }, 0);
   }
 
   scheduleSidePaddingPreview(delay = 120) {
@@ -849,6 +847,13 @@ class AppleStyleView extends ItemView {
       this.converter = runtime.converter;
       const { nativePipeline } = createRenderPipelines({
         candidateRenderer: async (markdown, context = {}) => {
+          if (canUseNativePreviewFastPath(markdown)) {
+            return renderNativeMarkdown({
+              converter: this.converter,
+              markdown,
+              sourcePath: context.sourcePath || '',
+            });
+          }
           return renderObsidianTripletMarkdown({
             app: this.app,
             converter: this.converter,
@@ -930,6 +935,7 @@ class AppleStyleView extends ItemView {
         const btn = grid.createEl('button', {
           cls: `apple-btn-theme ${this.plugin.settings.theme === t.value ? 'active' : ''}`,
           text: t.label,
+          attr: { title: t.label },
         });
         btn.dataset.value = t.value;
         btn.addEventListener('click', () => this.onThemeChange(t.value, grid));

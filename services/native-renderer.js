@@ -61,6 +61,38 @@ function cleanupNativeRenderedHtml(html) {
   return container.innerHTML;
 }
 
+function extractInlineImageTargets(markdown) {
+  const source = String(markdown || '');
+  const targets = [];
+  if (!source || !source.includes('![')) return targets;
+
+  const inlineImagePattern = /!\[[^\]]*]\(([^)\r\n]+)\)/g;
+  let match = inlineImagePattern.exec(source);
+  while (match) {
+    const rawTarget = String(match[1] || '').trim();
+    const target = rawTarget.startsWith('<')
+      ? rawTarget.slice(1, rawTarget.indexOf('>') > 0 ? rawTarget.indexOf('>') : undefined).trim()
+      : rawTarget.split(/\s+/)[0].trim();
+    targets.push(target);
+    match = inlineImagePattern.exec(source);
+  }
+
+  return targets;
+}
+
+function canUseNativePreviewFastPath(markdown) {
+  const source = String(markdown || '');
+  if (!source.trim()) return false;
+
+  if (source.includes('![[')) return false;
+  if (/^\s{0,3}(?:`{3,}|~{3,})\s*mermaid\b/im.test(source)) return false;
+  if (/^\s*\$\$\s*$/m.test(source) || /(^|[^\\])\$[^$\n]+\$/m.test(source)) return false;
+
+  const targets = extractInlineImageTargets(source);
+  if (source.includes('![') && targets.length === 0) return false;
+  return targets.every((target) => /^(https?:\/\/|data:image\/)/i.test(target));
+}
+
 async function renderNativeMarkdown({
   converter,
   markdown,
@@ -80,6 +112,7 @@ async function renderNativeMarkdown({
 }
 
 module.exports = {
+  canUseNativePreviewFastPath,
   isSafeRawImageSrc,
   preprocessMarkdownForNative,
   cleanupNativeRenderedHtml,

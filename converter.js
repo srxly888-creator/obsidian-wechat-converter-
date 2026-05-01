@@ -252,10 +252,61 @@ window.AppleStyleConverter = class AppleStyleConverter {
     };
 
     this.md.renderer.rules.hr = () => `<hr style="${this.getInlineStyle('hr')}">`;
-    this.md.renderer.rules.table_open = () => `<table style="${this.getInlineStyle('table')}">`;
+    this.md.renderer.rules.table_open = (tokens, idx) => `<section style="${this.getInlineStyle('table-wrapper')}"><table style="${this.getTableStyle(tokens, idx)}">`;
+    this.md.renderer.rules.table_close = () => `</table></section>`;
     this.md.renderer.rules.thead_open = () => `<thead style="${this.getInlineStyle('thead')}">`;
     this.md.renderer.rules.th_open = () => `<th style="${this.getInlineStyle('th')}">`;
     this.md.renderer.rules.td_open = () => `<td style="${this.getInlineStyle('td')}">`;
+  }
+
+  getTableColumnCount(tokens, tableIdx) {
+    if (!Array.isArray(tokens)) return 0;
+
+    let rowOpen = false;
+    let count = 0;
+    for (let i = tableIdx + 1; i < tokens.length; i += 1) {
+      const token = tokens[i];
+      if (!token) continue;
+      if (token.type === 'table_close') break;
+      if (token.type === 'tr_open') {
+        rowOpen = true;
+        count = 0;
+        continue;
+      }
+      if (token.type === 'tr_close' && rowOpen) {
+        if (count > 0) return count;
+        rowOpen = false;
+        continue;
+      }
+      if (!rowOpen || (token.type !== 'th_open' && token.type !== 'td_open')) continue;
+
+      const colspanAttr = typeof token.attrGet === 'function' ? token.attrGet('colspan') : null;
+      const colspan = Number.parseInt(colspanAttr || '1', 10);
+      count += Number.isFinite(colspan) && colspan > 0 ? colspan : 1;
+    }
+
+    return count;
+  }
+
+  getTableMinWidth(tokens, tableIdx) {
+    const columns = this.getTableColumnCount(tokens, tableIdx);
+    if (!columns) return 720;
+    const width = columns <= 2 ? (columns * 180 + 80) : (columns * 230 + 80);
+    return Math.max(360, Math.min(1200, width));
+  }
+
+  getTableStyle(tokens, tableIdx) {
+    const baseStyle = this.getInlineStyle('table');
+    const minWidth = this.getTableMinWidth(tokens, tableIdx);
+    const withoutWidth = baseStyle
+      .replace(/(?:^|;)\s*width\s*:\s*[^;]+;?/gi, ';')
+      .replace(/(?:^|;)\s*min-width\s*:\s*[^;]+;?/gi, ';')
+      .replace(/(?:^|;)\s*max-width\s*:\s*[^;]+;?/gi, ';')
+      .replace(/;{2,}/g, ';')
+      .replace(/^\s*;\s*/, '')
+      .trim();
+    const normalized = withoutWidth && !withoutWidth.endsWith(';') ? `${withoutWidth};` : withoutWidth;
+    return `width: ${minWidth}px; min-width: 100%; max-width: none; ${normalized}`;
   }
 
   /**
@@ -330,57 +381,46 @@ window.AppleStyleConverter = class AppleStyleConverter {
     const color = this.theme.getThemeColorValue();
     const sizes = this.theme.getSizes();
     const font = this.theme.getFontFamily();
-    const themeName = this.theme.themeName;
     const quoteCalloutStyleMode = typeof this.theme.getQuoteCalloutStyleMode === 'function'
       ? this.theme.getQuoteCalloutStyleMode()
       : 'theme';
-
-    // 优雅主题：居中样式（与其引用块风格一致）
-    if (themeName === 'serif') {
-      return this.renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode);
-    }
 
     if (quoteCalloutStyleMode === 'neutral') {
       return this.renderCalloutOpenNeutral(calloutInfo, color, sizes, font);
     }
 
     const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
-    // 简约/经典主题：左边框样式
-    const isWechat = themeName === 'wechat';
-    const marginLeft = isWechat ? '4px' : '0';
-    const borderWidth = isWechat ? '3px' : '4px';
-    const borderColor = isWechat ? `${color}99` : color;
+    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);
 
-    // 外层容器：左边框风格
     const containerStyle = `
-      margin: 16px 0 16px ${marginLeft};
-      border-left: ${borderWidth} solid ${borderColor};
-      background: ${color}1A;
-      border-radius: 3px;
+      margin: 16px 0 16px 8px;
+      background: ${accentColor}0D;
+      border: 1px solid ${accentColor}24;
+      border-radius: 4px;
       overflow: hidden;
     `.replace(/\s+/g, ' ').trim();
 
-    // 标题栏：深色背景 + 图标 + 标题
     const headerStyle = `
       display: flex;
       align-items: center;
       padding: 8px 12px;
-      background: ${color}26;
+      background: ${accentColor}14;
+      border-bottom: 1px solid ${accentColor}24;
       font-weight: bold;
       font-size: ${sizes.base}px;
       font-family: ${font};
-      color: #333;
+      color: ${accentColor};
     `.replace(/\s+/g, ' ').trim();
 
-    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px;`;
-    const titleStyle = `flex: 1;`;
+    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;
+    const titleStyle = `flex: 1; color: ${accentColor};`;
 
-    // 内容区：正文内容
     const contentStyle = `
       padding: 12px 16px;
       font-size: ${sizes.base}px;
       line-height: 1.8;
       color: #595959;
+      background: ${accentColor}0D;
     `.replace(/\s+/g, ' ').trim();
 
     return `<section style="${containerStyle}">
@@ -429,56 +469,6 @@ window.AppleStyleConverter = class AppleStyleConverter {
       <section style="${headerStyle}">
         <span style="${iconStyle}">${calloutInfo.icon}</span>
         <span style="${titleStyle}">${safeTitle}</span>
-      </section>
-      <section style="${contentStyle}">`;
-  }
-
-  /**
-   * 渲染居中样式的 Callout（用于优雅主题）
-   * @param {Object} calloutInfo - { type, title, icon }
-   * @param {string} color - 主题色
-   * @param {Object} sizes - 字体尺寸配置
-   * @param {string} font - 字体族
-   * @param {string} quoteCalloutStyleMode - 引用/Callout 风格模式
-   * @returns {string} - HTML 字符串
-   */
-  renderCalloutOpenCentered(calloutInfo, color, sizes, font, quoteCalloutStyleMode = 'theme') {
-    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));
-    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);
-    const isNeutral = quoteCalloutStyleMode === 'neutral';
-    // 居中样式：无左边框，水平居中，圆角边框
-    const containerStyle = `
-      margin: 30px 60px;
-      background: ${isNeutral ? '#f9f9f9' : `${color}1F`};
-      border-radius: ${isNeutral ? '8px' : '4px'};
-      overflow: hidden;
-    `.replace(/\s+/g, ' ').trim();
-
-    // 标题栏：靠左对齐，与其他主题保持一致
-    const headerStyle = `
-      display: flex;
-      align-items: center;
-      padding: 12px 20px;
-      background: ${isNeutral ? `${accentColor}12` : `${color}26`};
-      font-weight: bold;
-      font-size: ${sizes.base}px;
-      font-family: ${font};
-      color: ${isNeutral ? accentColor : '#333'};
-    `.replace(/\s+/g, ' ').trim();
-
-    const contentStyle = `
-      padding: 16px 20px;
-      font-size: ${sizes.base}px;
-      line-height: 1.8;
-      color: #555;
-      text-align: center;
-      background: ${isNeutral ? '#f9f9f9' : 'transparent'};
-    `.replace(/\s+/g, ' ').trim();
-
-    return `<section style="${containerStyle}">
-      <section style="${headerStyle}">
-        <span style="margin-right: 8px; color: ${isNeutral ? accentColor : '#333'};">${calloutInfo.icon}</span>
-        <span>${safeTitle}</span>
       </section>
       <section style="${contentStyle}">`;
   }
@@ -737,22 +727,105 @@ ${macHeader}
     return html.replace(/<li[^>]*>[\s\S]*?<\/li>/g, m => m.replace(/<p style="[^"]*">/g, `<p style="${style}">`));
   }
 
+  replaceStyleDeclaration(styleText, property, value) {
+    const style = String(styleText || '');
+    const declaration = `${property}: ${value}`;
+    const propertyPattern = new RegExp(`(^|;)\\s*${property}\\s*:\\s*[^;"]*`, 'i');
+
+    if (propertyPattern.test(style)) {
+      return style.replace(propertyPattern, (_match, prefix) => `${prefix ? `${prefix} ` : ''}${declaration}`);
+    }
+
+    const normalizedStyle = style.trim().replace(/;?\s*$/, '');
+    return normalizedStyle ? `${normalizedStyle}; ${declaration}` : declaration;
+  }
+
   /**
-   * Fix: Remove margins from <p> inside <blockquote>
-   * Blockquotes use padding for spacing. If <p> inside has margin-bottom (default),
-   * the text appears top-aligned instead of centered.
+   * Keep blockquote padding in control while preserving intentional blank lines.
+   * A blank line inside Markdown blockquotes renders as multiple paragraphs.
    */
   removeBlockquoteParagraphMargins(html) {
-    return html.replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/g, (match, content) => {
-      // Replace margin: ... with margin: 0 in <p> styles
-      const newContent = content.replace(/<p style="([^"]*)margin:[^;"]*(;?)/g, '<p style="$1margin: 0$2');
-      // Also handle case where margin is not present yet (less likely if style plugin is used)
-      // or if we want to force it.
-      // Since we know our theme adds margin to all p, we just override it.
-      // Actually, regex replace above handles "margin:..." replacement.
-      // If margin is at the end or middle.
-      return match.replace(content, newContent);
-    });
+    const containerTags = new Set([
+      'blockquote', 'section', 'div', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tfoot',
+      'tr', 'th', 'td', 'ul', 'ol', 'li', 'pre', 'article', 'aside',
+    ]);
+    const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
+    const blockquoteStack = [];
+    const replacements = [];
+    const tagPattern = /<\/?([a-zA-Z][\w:-]*)(?:\s[^<>]*)?>/g;
+
+    let match;
+    while ((match = tagPattern.exec(html)) !== null) {
+      const rawTag = match[0];
+      const tagName = String(match[1] || '').toLowerCase();
+      const isClosing = /^<\//.test(rawTag);
+      const isSelfClosing = /\/\s*>$/.test(rawTag) || voidTags.has(tagName);
+
+      if (tagName === 'blockquote') {
+        if (isClosing) {
+          const frame = blockquoteStack.pop();
+          if (frame) {
+            const paragraphCount = frame.paragraphs.length;
+            frame.paragraphs.forEach((paragraph, index) => {
+              const isLastParagraph = index === paragraphCount - 1;
+              const marginValue = paragraphCount > 1 && !isLastParagraph ? '0 0 0.8em 0' : '0';
+              const updatedStyle = this.replaceStyleDeclaration(paragraph.styleText, 'margin', marginValue);
+              replacements.push({
+                start: paragraph.start,
+                end: paragraph.end,
+                value: paragraph.rawTag.replace(/style="([^"]*)"/, `style="${updatedStyle}"`),
+              });
+            });
+          }
+          if (blockquoteStack.length > 0) {
+            const parentFrame = blockquoteStack[blockquoteStack.length - 1];
+            parentFrame.containerDepth = Math.max(0, parentFrame.containerDepth - 1);
+          }
+        } else {
+          if (blockquoteStack.length > 0) {
+            blockquoteStack[blockquoteStack.length - 1].containerDepth += 1;
+          }
+          blockquoteStack.push({ containerDepth: 0, paragraphs: [] });
+        }
+        continue;
+      }
+
+      if (blockquoteStack.length === 0) continue;
+
+      const frame = blockquoteStack[blockquoteStack.length - 1];
+      if (!isClosing && tagName === 'p') {
+        const styleMatch = rawTag.match(/\bstyle="([^"]*)"/);
+        if (styleMatch && frame.containerDepth === 0) {
+          frame.paragraphs.push({
+            start: match.index,
+            end: match.index + rawTag.length,
+            rawTag,
+            styleText: styleMatch[1],
+          });
+        } else if (styleMatch) {
+          const updatedStyle = this.replaceStyleDeclaration(styleMatch[1], 'margin', '0');
+          replacements.push({
+            start: match.index,
+            end: match.index + rawTag.length,
+            value: rawTag.replace(/style="([^"]*)"/, `style="${updatedStyle}"`),
+          });
+        }
+        continue;
+      }
+
+      if (!containerTags.has(tagName) || tagName === 'p') continue;
+      if (isClosing) {
+        frame.containerDepth = Math.max(0, frame.containerDepth - 1);
+      } else if (!isSelfClosing) {
+        frame.containerDepth += 1;
+      }
+    }
+
+    return replacements
+      .sort((a, b) => b.start - a.start)
+      .reduce((output, replacement) => (
+        output.slice(0, replacement.start) + replacement.value + output.slice(replacement.end)
+      ), html);
   }
 
   /**

@@ -62,19 +62,23 @@ window.AppleTheme = class AppleTheme {
 
     github: {
       name: '简约',
-      lineHeight: 1.8,
-      paragraphGap: 20,
+      lineHeight: 1.82,
+      paragraphGap: 18,
       h1Decoration: 'none',
       h2Decoration: 'none',
-      h3Decoration: 'none',
+      h3Decoration: 'bottom-line-left',
       h4Decoration: 'none',
       headingWeight: 800,
-      headingLetterSpacing: -0.5,
+      headingLetterSpacing: 0,
       textColor: '#3e3e3e',
       headingColor: '#3e3e3e',
 
       linkDecoration: 'underline',
       blockquoteBorderWidth: 4,
+      tableHeaderBg: '#f6f8fa',
+      tableCellPadding: 10,
+      figurePadding: 8,
+      figureBorderColor: '#e8eaed',
       // Removed blockquoteBorderColor to allow theme color (was #d0d7de)
       // Removed blockquoteBg to allow theme color tint (was #ffffff)
     },
@@ -82,16 +86,18 @@ window.AppleTheme = class AppleTheme {
       name: '经典',
       lineHeight: 1.8,
       paragraphGap: 24,
-      h1Decoration: 'bottom-line',       // 底部短线
-      h2Decoration: 'bottom-line',       // 底部短线 (原胶囊)
-      h3Decoration: 'left-border',       // 左边框
-      h4Decoration: 'light-bg',          // 浅色背景
+      h1Decoration: 'classic-title',
+      h2Decoration: 'classic-title',
+      h3Decoration: 'classic-subhead',
+      h4Decoration: 'classic-minor',
       headingWeight: 700,
       headingLetterSpacing: 0,
       textColor: '#3e3e3e',
       headingColor: '#3e3e3e',
       linkDecoration: 'none',
       blockquoteBorderWidth: 4,
+      blockquoteBg: '#f8fafc',
+      blockquoteStyle: 'soft',
     },
     serif: {
       name: '优雅',
@@ -108,6 +114,128 @@ window.AppleTheme = class AppleTheme {
       linkDecoration: 'none',
       blockquoteBorderWidth: 0,          // 居中样式不需要左边框
       blockquoteStyle: 'center',         // 新增：居中引用
+    },
+    paper: {
+      name: '纸张长文',
+      lineHeight: 1.9,
+      paragraphGap: 22,
+      shiftHeadingDecorationsDown: true,
+      h1Decoration: 'paper-title',
+      h2Decoration: 'paper-chapter',
+      h3Decoration: 'paper-section',
+      h4Decoration: 'paper-kicker',
+      h5Decoration: 'simple',
+      h6Decoration: 'quiet',
+      headingWeight: 700,
+      headingLetterSpacing: 0,
+      textColor: '#3f3a33',
+      headingColor: '#3e3e3e',
+      sectionBg: '#fffdf8',
+      mutedTextColor: '#786f63',
+      linkDecoration: 'none',
+      blockquoteBorderWidth: 0,
+      blockquoteBg: '#f7f1e7',
+      blockquoteStyle: 'paper',
+      tableHeaderBg: '#f7f1e7',
+      tableBorderColor: '#e6dccd',
+      figureBorderColor: '#eadfce',
+    },
+    grid: {
+      name: '网格文档',
+      lineHeight: 1.82,
+      paragraphGap: 20,
+      shiftHeadingDecorationsDown: true,
+      h1Decoration: 'grid-title',
+      h2Decoration: 'grid-chapter',
+      h3Decoration: 'grid-section',
+      h4Decoration: 'grid-kicker',
+      h5Decoration: 'light-bg',
+      h6Decoration: 'quiet',
+      headingWeight: 800,
+      headingLetterSpacing: 0,
+      textColor: '#344054',
+      headingColor: '#263238',
+      sectionBgStyle: 'grid',
+      sectionBgSize: '18px 18px',
+      mutedTextColor: '#667085',
+      linkDecoration: 'none',
+      blockquoteBorderWidth: 4,
+      blockquoteBg: '#f6f9fc',
+      blockquoteStyle: 'soft',
+      tableHeaderBg: '#f3f7fb',
+      tableBorderColor: '#dbe5ef',
+    },
+    typo: {
+      name: 'Typo',
+      lineHeight: 1.92,
+      paragraphGap: 22,
+      shiftHeadingDecorationsDown: true,
+      h1Decoration: 'typo-title',
+      h2Decoration: 'typo-title',
+      h3Decoration: 'typo-section',
+      h4Decoration: 'typo-subhead',
+      h5Decoration: 'dashed-bottom',
+      h6Decoration: 'quiet',
+      headingWeight: 700,
+      headingLetterSpacing: 0,
+      textColor: '#333333',
+      headingColor: '#222222',
+      mutedTextColor: '#6b6b6b',
+      linkDecoration: 'underline',
+      blockquoteBorderWidth: 2,
+      blockquoteBg: '#fafafa',
+      blockquoteStyle: 'soft',
+      paragraphTextIndent: '2em',
+      tableHeaderBg: '#f7f7f7',
+      figureBorderColor: '#ededed',
+    },
+    media: {
+      name: '清爽媒体',
+      lineHeight: 1.86,
+      paragraphGap: 18,
+      shiftHeadingDecorationsDown: true,
+      h1Decoration: 'media-title',
+      h2Decoration: 'media-chapter',
+      h3Decoration: 'media-section',
+      h4Decoration: 'left-border',
+      h5Decoration: 'light-bg',
+      h6Decoration: 'quiet',
+      headingWeight: 700,
+      headingLetterSpacing: 0,
+      textColor: '#3b4648',
+      headingColor: '#263238',
+      mutedTextColor: '#667476',
+      linkDecoration: 'none',
+      blockquoteBorderWidth: 3,
+      blockquoteBg: '#f3fbf8',
+      blockquoteStyle: 'soft',
+      tableHeaderBg: '#f3fbf8',
+      tableBorderColor: '#dbeee8',
+      figureBorderColor: '#dcefeb',
+    },
+    colorful: {
+      name: '彩色强调',
+      lineHeight: 1.82,
+      paragraphGap: 20,
+      shiftHeadingDecorationsDown: true,
+      h1Decoration: 'colorful-title',
+      h2Decoration: 'colorful-chapter',
+      h3Decoration: 'colorful-section',
+      h4Decoration: 'colorful-kicker',
+      h5Decoration: 'light-bg',
+      h6Decoration: 'quiet',
+      headingWeight: 800,
+      headingLetterSpacing: 0,
+      textColor: '#3e3e3e',
+      headingColor: '#3e3e3e',
+      mutedTextColor: '#6b7280',
+      linkDecoration: 'none',
+      blockquoteBorderWidth: 4,
+      blockquoteBg: '#fffaf5',
+      blockquoteStyle: 'soft',
+      tableHeaderBg: '#fff8ed',
+      figureBorderColor: '#f0e4d4',
+      strongBg: true,
     },
   };
 
@@ -254,20 +382,38 @@ window.AppleTheme = class AppleTheme {
     switch (tagName) {
       case 'section':
         // 使用配置的 sidePadding
-        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; padding: 20px ${this.sidePadding}px; background: #ffffff; max-width: 100%; word-wrap: break-word; text-align: justify;`;
+        const sectionBackground = config.sectionBgStyle === 'grid'
+          ? `linear-gradient(${color}09 1px, transparent 1px), linear-gradient(90deg, ${color}09 1px, transparent 1px), #ffffff`
+          : (config.sectionBg || '#ffffff');
+        return this.joinStyleStrings(
+          `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; padding: 20px ${this.sidePadding}px; background: ${sectionBackground}; max-width: 100%; word-wrap: break-word; text-align: justify`,
+          config.sectionBgSize ? `background-size: ${config.sectionBgSize}` : ''
+        );
 
-      case 'h1': return this.getH1Style(config.h1Decoration, color, sizes.h1, font, headingColor);
-      case 'h2': return this.getH2Style(config.h2Decoration, color, sizes.h2, font, headingColor);
-      case 'h3': return this.getH3Style(config.h3Decoration, color, sizes.h3, font, headingColor);
-      case 'h4': return this.getH4Style(config.h4Decoration, color, sizes.h4, font, headingColor);
+      case 'h1': return this.getH1Style(config.h1Decoration, color, sizes.h1, font, headingColor, config);
+      case 'h2':
+        return config.shiftHeadingDecorationsDown
+          ? this.getH1Style(config.h1Decoration, color, sizes.h2, font, headingColor, config)
+          : this.getH2Style(config.h2Decoration, color, sizes.h2, font, headingColor, config);
+      case 'h3':
+        return config.shiftHeadingDecorationsDown
+          ? this.getH2Style(config.h2Decoration, color, sizes.h3, font, headingColor, config)
+          : this.getH3Style(config.h3Decoration, color, sizes.h3, font, headingColor, config);
+      case 'h4':
+        return config.shiftHeadingDecorationsDown
+          ? this.getH3Style(config.h3Decoration, color, sizes.h4, font, headingColor, config)
+          : this.getH4Style(config.h4Decoration, color, sizes.h4, font, headingColor);
 
       case 'h5':
-        return `font-family: ${font}; font-size: ${sizes.h5}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;
+        return this.getH5Style(config.h5Decoration, color, sizes.h5, font, headingColor);
       case 'h6':
-        return `font-family: ${font}; font-size: ${sizes.h6}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;
+        return this.getH6Style(config.h6Decoration, color, sizes.h6, font, headingColor, config.mutedTextColor);
 
       case 'p':
-        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 0 0 ${config.paragraphGap}px 0; text-align: justify; letter-spacing: 0;`;
+        return this.joinStyleStrings(
+          `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 0 0 ${config.paragraphGap}px 0; text-align: justify; letter-spacing: 0`,
+          config.paragraphTextIndent ? `text-indent: ${config.paragraphTextIndent}` : ''
+        );
 
 
 
@@ -278,8 +424,31 @@ window.AppleTheme = class AppleTheme {
           const centeredBackground = quoteCalloutStyleMode === 'neutral'
             ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG
             : (config.blockquoteBg || color + '1F');
-          const centeredRadius = quoteCalloutStyleMode === 'neutral' ? r.md : r.sm;
-          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.8; color: #555; background: ${centeredBackground}; margin: 30px 60px; padding: 20px; text-align: center; border: none; position: relative; border-radius: ${centeredRadius}px;`;
+          const centeredRuleColor = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_NEUTRAL_BORDER
+            : `${color}55`;
+          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.85; color: #4f4a45; background: ${centeredBackground}; width: 92%; box-sizing: border-box; margin: 24px auto; padding: 18px 20px; text-align: justify; border-top: 1px solid ${centeredRuleColor}; border-bottom: 1px solid ${centeredRuleColor}; border-radius: ${r.sm}px;`;
+        }
+        if (config.blockquoteStyle === 'paper') {
+          const paperBg = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG
+            : (config.blockquoteBg || color + '1F');
+          const paperBorder = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_NEUTRAL_BORDER
+            : `${color}99`;
+          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #5f574c; background: ${paperBg}; margin: 22px 0 22px 8px; padding: 16px 18px; border-left: 3px solid ${paperBorder}; border-radius: ${r.sm}px; text-align: justify;`;
+        }
+        if (config.blockquoteStyle === 'soft') {
+          const softBg = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG
+            : (config.blockquoteBg || color + '14');
+          const softBorderColor = quoteCalloutStyleMode === 'neutral'
+            ? AppleTheme.QUOTE_NEUTRAL_BORDER
+            : `${color}99`;
+          const softBorderWidth = this.themeName === 'wechat'
+            ? 3
+            : (config.blockquoteBorderWidth || 4);
+          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${softBg}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${softBorderWidth}px solid ${softBorderColor}; border-radius: ${r.sm}px;`;
         }
 
         if (quoteCalloutStyleMode === 'neutral') {
@@ -323,7 +492,7 @@ window.AppleTheme = class AppleTheme {
       case 'figure':
         // Fix: Restoring wireframe (border/padding) & balanced spacing (20px top/bottom)
         // No shadow for cleaner look
-        return `display: block; margin: 20px 0; text-align: center; border: 1px solid #e1e4e8; border-radius: ${r.md}px; padding: 10px;`;
+        return `display: block; margin: 20px 0; text-align: center; border: 1px solid ${config.figureBorderColor || '#e1e4e8'}; border-radius: ${r.md}px; padding: ${config.figurePadding || 10}px;`;
 
       case 'figcaption':
         return `font-size: ${sizes.caption}px; color: #999; text-align: center; margin-top: ${s.sm}px;`;
@@ -334,12 +503,14 @@ window.AppleTheme = class AppleTheme {
       case 'a':
         return `color: ${color}; text-decoration: ${config.linkDecoration}; border-bottom: ${config.linkDecoration === 'none' ? `1px dashed ${color}` : 'none'};`;
 
+      case 'table-wrapper':
+        return `display: block; box-sizing: border-box; width: 100%; max-width: 100%; overflow-x: scroll; overflow-y: hidden; -webkit-overflow-scrolling: touch; margin: ${s.md}px 0; padding-bottom: 10px;`;
       case 'table':
-        return `border-collapse: collapse; width: 100%; margin: ${s.md}px 0; border: 1px solid #e1e4e8;`;
+        return `border-collapse: collapse; width: 720px; min-width: 100%; max-width: none; table-layout: auto; border: 1px solid ${config.tableBorderColor || '#e1e4e8'};`;
       case 'th':
-        return `background: ${color}1F; font-weight: bold; color: ${config.textColor}; border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;
+        return `background: ${config.tableHeaderBg || color + '1F'}; font-weight: bold; color: ${config.textColor}; border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left; white-space: nowrap; word-break: keep-all; overflow-wrap: normal;`;
       case 'td':
-        return `border: 1px solid #e1e4e8; padding: 12px; text-align: left;`;
+        return `border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left; white-space: nowrap; word-break: keep-all; overflow-wrap: normal;`;
       case 'thead':
         return `background: #f6f8fa;`;
 
@@ -347,7 +518,9 @@ window.AppleTheme = class AppleTheme {
         return `border: 0; border-top: 1px solid rgba(0,0,0,0.08); margin: 40px 0;`;
 
       case 'strong':
-        return `font-weight: bold; color: ${color};`;
+        return config.strongBg
+          ? `font-weight: bold; color: ${color}; background: ${color}18; padding: 0 3px; border-radius: 3px;`
+          : `font-weight: bold; color: ${color};`;
       case 'em':
         return `font-style: italic;`;
       case 'del':
@@ -367,7 +540,7 @@ window.AppleTheme = class AppleTheme {
 
   // === Helper Methods ===
 
-  getH1Style(type, color, fontSize, font, headingColor) {
+  getH1Style(type, color, fontSize, font, headingColor, config = {}) {
     const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;`;
     switch (type) {
       case 'editorial-h1': // Magazine Style: Forced Serif + Golden Line
@@ -387,12 +560,24 @@ window.AppleTheme = class AppleTheme {
           padding-bottom: 15px;`;
       case 'border-box':
         return `${base} border: 1px solid ${color}; padding: 10px 20px; border-radius: 4px; display: inline-block; width: auto;`;
+      case 'classic-title':
+        return `${base} margin: 34px auto 22px; padding: 0; background-image: linear-gradient(to right, transparent, ${color}, transparent); background-size: 120px 2px; background-repeat: no-repeat; background-position: bottom center; padding-bottom: 14px;`;
+      case 'paper-title':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 24px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1px; border-top: 2px solid ${color}; border-bottom: 1px solid ${color}66; padding: 16px 0 14px;`;
+      case 'grid-title':
+        return `${base} text-align: left; border: 1px solid ${color}55; border-radius: 4px; padding: 10px 12px; background: ${color}0F;`;
+      case 'typo-title':
+        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px auto 22px; color: ${headingColor}; text-align: left; line-height: 1.28; border-bottom: 1px solid #d8d8d8; padding-bottom: 14px;`;
+      case 'media-title':
+        return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, ${color}33); background-size: 100% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 14px;`;
+      case 'colorful-title':
+        return `${base} color: #ffffff; background: ${color}; padding: 12px 18px; border-radius: 6px; box-shadow: 6px 6px 0 ${color}33;`;
       default: // none or unknown
-        return base;
+        return this.joinStyleStrings(base, config.headingLetterSpacing ? `letter-spacing: ${config.headingLetterSpacing}px` : '');
     }
   }
 
-  getH2Style(type, color, fontSize, font, headingColor) {
+  getH2Style(type, color, fontSize, font, headingColor, config = {}) {
     const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 32px auto 16px; text-align: center; color: ${headingColor}; line-height: 1.25;`;
     switch (type) {
       case 'editorial-h1': // Golden Line (Shifted from H1)
@@ -416,12 +601,42 @@ window.AppleTheme = class AppleTheme {
         return `${base} background-color: ${color}; color: #fff; padding: 5px 20px; border-radius: 20px; display: inline-block; width: auto;`;
       case 'bottom-line-center':
         return `${base} display: inline-block; border-bottom: 1px solid ${color}; padding-bottom: 5px; width: auto;`;
+      case 'classic-title':
+        return `${base} margin: 34px auto 20px; padding: 0; background-image: linear-gradient(to right, transparent, ${color}, transparent); background-size: 120px 2px; background-repeat: no-repeat; background-position: bottom center; padding-bottom: 14px;`;
+      case 'paper-title':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1px; border-top: 2px solid ${color}; border-bottom: 1px solid ${color}66; padding: 14px 0 12px;`;
+      case 'paper-chapter':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1.5px; border-bottom: 2px solid ${color}; padding-bottom: 12px;`;
+      case 'grid-title':
+        return `${base} text-align: left; border: 1px solid ${color}55; border-radius: 4px; padding: 10px 12px; background: ${color}0F;`;
+      case 'grid-chapter':
+        return `${base} text-align: left; border-left: 3px solid ${color}; border-radius: 0 4px 4px 0; padding: 8px 12px; background: ${color}08;`;
+      case 'typo-title':
+        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px 0 18px; color: ${headingColor}; text-align: left; line-height: 1.3; background-image: linear-gradient(#d8d8d8, #d8d8d8); background-size: 40% 1px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;
+      case 'media-title':
+        return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, ${color}33); background-size: 100% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;
+      case 'media-chapter':
+        return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, transparent); background-size: 60% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;
+      case 'colorful-title':
+        return `${base} color: #ffffff; background: ${color}; padding: 10px 16px; border-radius: 6px; box-shadow: 5px 5px 0 ${color}33;`;
+      case 'colorful-chapter':
+        return `${base} text-align: left; border-left: 4px solid ${color}; background: ${color}12; padding: 10px 14px; border-radius: 0 4px 4px 0;`;
+      case 'paper-section':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px 0 16px; color: ${headingColor}; text-align: left; line-height: 1.35; border-bottom: 1px solid ${color}55; padding-bottom: 8px;`;
+      case 'grid-section':
+        return `${base} text-align: left; border-bottom: 1px solid ${color}66; padding: 4px 0 8px;`;
+      case 'typo-section':
+        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px 0 16px; color: ${headingColor}; text-align: left; line-height: 1.35;`;
+      case 'media-section':
+        return `${base} display: inline-block; width: auto; text-align: left; background: ${color}14; border: 1px solid ${color}33; padding: 6px 12px; border-radius: 2px;`;
+      case 'colorful-section':
+        return `${base} display: inline-block; width: auto; text-align: left; background: ${color}18; border-bottom: 3px solid ${color}; padding: 6px 10px 5px; border-radius: 4px 4px 0 0;`;
       default:
-        return base;
+        return this.joinStyleStrings(base, config.headingLetterSpacing ? `letter-spacing: ${config.headingLetterSpacing}px` : '');
     }
   }
 
-  getH3Style(type, color, fontSize, font, headingColor) {
+  getH3Style(type, color, fontSize, font, headingColor, config = {}) {
     const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 20px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.3;`;
     switch (type) {
       case 'editorial-h2': // Italic Serif (Left Aligned for H3)
@@ -433,8 +648,24 @@ window.AppleTheme = class AppleTheme {
         return `${base} border-left: 4px solid ${color}; padding-left: 10px;`;
       case 'bottom-line-left':
         return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;
+      case 'classic-subhead':
+        return `${base} border-left: 3px solid ${color}; background: ${color}0A; padding: 6px 10px; margin: 24px 0 12px;`;
+      case 'paper-section':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 28px 0 14px; color: ${headingColor}; text-align: left; line-height: 1.35; border-top: 1px solid ${color}55; padding-top: 8px;`;
+      case 'grid-section':
+        return `${base} background-image: linear-gradient(${color}, ${color}); background-size: 3px 55%; background-position: left center; background-repeat: no-repeat; padding-left: 12px;`;
+      case 'typo-section':
+        return `${base} font-weight: 700; margin: 28px 0 14px; line-height: 1.35; border-left: 2px solid #d8d8d8; padding-left: 10px;`;
+      case 'media-section':
+        return `${base} display: inline-block; width: auto; background: ${color}14; border: 1px solid ${color}33; padding: 5px 10px; border-radius: 2px;`;
+      case 'colorful-section':
+        return `${base} display: inline-block; width: auto; background: ${color}18; border-bottom: 2px solid ${color}; padding: 5px 9px 4px; border-radius: 4px 4px 0 0;`;
+      case 'paper-kicker':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 24px 0 12px; color: ${headingColor}; text-align: left; line-height: 1.35; padding-left: 10px; border-left: 3px double ${color};`;
+      case 'typo-subhead':
+        return `${base} font-weight: 700; color: ${headingColor};`;
       default:
-        return base;
+        return this.joinStyleStrings(base, config.headingLetterSpacing ? `letter-spacing: ${config.headingLetterSpacing}px` : '');
     }
   }
 
@@ -450,11 +681,62 @@ window.AppleTheme = class AppleTheme {
       case 'light-bg':
         // Background uses bright color tint (low opacity), Text uses deep headingColor
         return `${base} background-color: ${color}15; padding: 4px 8px; border-radius: 4px; display: inline-block;`;
+      case 'classic-minor':
+        return `${base} border-left: 2px solid ${color}55; padding-left: 8px;`;
+      case 'left-border':
+        return `${base} border-left: 3px solid ${color}; padding-left: 9px;`;
+      case 'bottom-line-left':
+        return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;
+      case 'paper-kicker':
+        return `font-family: ${AppleTheme.FONTS.serif}; display: inline-block; font-size: ${fontSize}px; font-weight: bold; margin: 22px 0 10px; color: ${headingColor}; text-align: left; line-height: 1.35; border-bottom: 1px double ${color}99; padding-bottom: 2px;`;
+      case 'grid-kicker':
+        return `${base} display: inline-block; border-bottom: 1px dashed ${color}44; padding-bottom: 2px;`;
+      case 'typo-subhead':
+        return `${base} font-weight: 700; letter-spacing: 1.5px;`;
+      case 'colorful-kicker':
+        return `${base} color: ${color}; background: ${color}12; padding: 4px 8px; border-radius: 4px; display: inline-block;`;
       case 'italic-serif':
         return `${base} font-style: italic; font-family: serif; border-bottom: 1px dashed #ccc; display: inline-block; padding-bottom: 2px;`;
       default:
         return base;
     }
+  }
+
+  getH5Style(type, color, fontSize, font, headingColor) {
+    if (!type) {
+      return `font-family: ${font}; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;
+    }
+    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 12px 0 8px; text-align: left; line-height: 1.4;`;
+    switch (type) {
+      case 'light-bg':
+        return `${base} background-color: ${color}12; padding: 3px 7px; border-radius: 4px; display: inline-block;`;
+      case 'dashed-bottom':
+        return `${base} font-weight: 600; border-bottom: 1px dashed ${color}33; display: inline-block; padding-bottom: 1px;`;
+      case 'simple':
+      default:
+        return base;
+    }
+  }
+
+  getH6Style(type, color, fontSize, font, headingColor, mutedColor = '#6b7280') {
+    if (!type) {
+      return `font-family: ${font}; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;
+    }
+    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 10px 0 6px; text-align: left; line-height: 1.4;`;
+    switch (type) {
+      case 'quiet':
+        return `${base} color: ${mutedColor}; font-weight: 600;`;
+      default:
+        return base;
+    }
+  }
+
+  joinStyleStrings(...styles) {
+    return styles
+      .map((style) => (style || '').trim())
+      .filter(Boolean)
+      .map((style) => style.endsWith(';') ? style : `${style};`)
+      .join(' ');
   }
 
   /**

@@ -10,6 +10,17 @@ describe('AppleTheme Color Logic', () => {
   let AppleTheme;
 
   beforeAll(() => {
+    global.window.AppleImportedThemeConfigs = {
+      'candidate-test-theme': {
+        name: '候选·测试主题',
+        kind: 'imported-css-candidate',
+        overrides: {
+          section: 'background-color: #f8f0df; color: #333333;',
+          h1: 'color: #123456; margin: 8px 0;',
+        },
+      },
+    };
+
     // Load the AppleTheme class directly from the file
     // Note: In a real module system we would import it, but since it's a non-exported browser script
     // we read and eval it.
@@ -102,6 +113,141 @@ describe('AppleTheme Color Logic', () => {
     });
   });
 
+  describe('Consolidated Theme List', () => {
+    it('should expose only the consolidated built-in theme set', () => {
+      const themeList = AppleTheme.getThemeList();
+
+      expect(themeList).toEqual([
+        { value: 'github', label: '简约' },
+        { value: 'wechat', label: '经典' },
+        { value: 'serif', label: '优雅' },
+        { value: 'paper', label: '纸张长文' },
+        { value: 'grid', label: '网格文档' },
+        { value: 'typo', label: 'Typo' },
+        { value: 'media', label: '清爽媒体' },
+        { value: 'colorful', label: '彩色强调' },
+      ]);
+    });
+
+    it('should ignore stale imported candidate theme globals', () => {
+      const themeList = AppleTheme.getThemeList();
+
+      expect(themeList.some((theme) => theme.value.startsWith('candidate-'))).toBe(false);
+      expect(new AppleTheme({ theme: 'candidate-test-theme' }).getThemeConfig().name).toBe('简约');
+    });
+  });
+
+  describe('Consolidated Theme Templates', () => {
+    it('should enhance the default minimal theme without adding a Maple duplicate', () => {
+      const theme = new AppleTheme({
+        theme: 'github',
+        themeColor: 'green',
+      });
+
+      expect(theme.getStyle('p')).toContain('margin: 0 0 18px 0;');
+      expect(theme.getStyle('h3')).toContain('border-bottom: 2px solid #28a745;');
+      expect(theme.getStyle('th')).toContain('background: #f6f8fa;');
+    });
+
+    it('should keep the new templates driven by the selected theme color', () => {
+      const paper = new AppleTheme({ theme: 'paper', themeColor: 'rose' });
+      const grid = new AppleTheme({ theme: 'grid', themeColor: 'teal' });
+      const media = new AppleTheme({ theme: 'media', themeColor: 'orange' });
+      const colorful = new AppleTheme({ theme: 'colorful', themeColor: 'purple' });
+
+      expect(paper.getStyle('h1')).toContain('border-top: 2px solid #e83e8c;');
+      expect(grid.getStyle('h2')).toContain('border: 1px solid #20c99755;');
+      expect(media.getStyle('h2')).toContain('background-size: 100% 2px;');
+      expect(colorful.getStyle('h1')).toContain('background: #6f42c1;');
+    });
+
+    it('should shift distinctive new-theme heading treatments down to article section levels', () => {
+      const paper = new AppleTheme({ theme: 'paper', themeColor: 'rose' });
+      const grid = new AppleTheme({ theme: 'grid', themeColor: 'teal' });
+      const typo = new AppleTheme({ theme: 'typo' });
+      const media = new AppleTheme({ theme: 'media', themeColor: 'orange' });
+      const colorful = new AppleTheme({ theme: 'colorful', themeColor: 'purple' });
+
+      expect(paper.getStyle('h2')).toContain('border-top: 2px solid #e83e8c;');
+      expect(paper.getStyle('h2')).toContain('font-size: 22px;');
+      expect(paper.getStyle('h3')).toContain('border-bottom: 2px solid #e83e8c;');
+      expect(paper.getStyle('h4')).toContain('border-top: 1px solid #e83e8c55;');
+      expect(grid.getStyle('h2')).toContain('border: 1px solid #20c99755;');
+      expect(grid.getStyle('h3')).toContain('border-left: 3px solid #20c997;');
+      expect(grid.getStyle('h4')).toContain('background-image: linear-gradient(#20c997, #20c997);');
+      expect(typo.getStyle('h2')).toContain('border-bottom: 1px solid #d8d8d8;');
+      expect(typo.getStyle('h3')).toContain('background-image: linear-gradient(#d8d8d8, #d8d8d8);');
+      expect(typo.getStyle('h4')).toContain('border-left: 2px solid #d8d8d8;');
+      expect(media.getStyle('h2')).toContain('background-size: 100% 2px;');
+      expect(media.getStyle('h3')).toContain('background-size: 60% 2px;');
+      expect(media.getStyle('h4')).toContain('border: 1px solid #fd7e1433;');
+      expect(colorful.getStyle('h2')).toContain('background: #6f42c1;');
+      expect(colorful.getStyle('h3')).toContain('border-left: 4px solid #6f42c1;');
+      expect(colorful.getStyle('h4')).toContain('border-bottom: 2px solid #6f42c1;');
+    });
+
+    it('should keep new theme surfaces and regular quotes distinct from callout cards', () => {
+      const grid = new AppleTheme({ theme: 'grid', themeColor: 'teal' });
+      const media = new AppleTheme({ theme: 'media', themeColor: 'orange' });
+      const colorful = new AppleTheme({ theme: 'colorful', themeColor: 'purple' });
+
+      expect(grid.getStyle('section')).toContain('linear-gradient(#20c99709 1px, transparent 1px)');
+      expect(grid.getStyle('blockquote')).toContain('border-left: 4px solid #20c99799;');
+      expect(media.getStyle('blockquote')).toContain('border-left: 3px solid #fd7e1499;');
+      expect(colorful.getStyle('blockquote')).toContain('border-left: 4px solid #6f42c199;');
+      expect(grid.getStyle('blockquote')).not.toContain('border: 1px solid');
+      expect(media.getStyle('blockquote')).not.toContain('border: 1px solid');
+      expect(colorful.getStyle('blockquote')).not.toContain('border: 1px solid');
+    });
+
+    it('should keep neutral quote styling distinct from neutral callouts in soft themes', () => {
+      const theme = new AppleTheme({
+        theme: 'wechat',
+        themeColor: 'blue',
+        quoteCalloutStyleMode: 'neutral',
+      });
+
+      const blockquoteStyle = theme.getStyle('blockquote');
+
+      expect(blockquoteStyle).toContain('border-left: 3px solid #d9d9d9');
+      expect(blockquoteStyle).toContain('margin: 16px 0 16px 8px');
+      expect(blockquoteStyle).not.toContain('border: 1px solid #d9d9d9');
+    });
+
+    it('should render serif blockquotes without a left accent bar', () => {
+      const theme = new AppleTheme({ theme: 'serif', themeColor: 'blue' });
+      const blockquoteStyle = theme.getStyle('blockquote');
+
+      expect(blockquoteStyle).not.toContain('border-left:');
+      expect(blockquoteStyle).toContain('width: 92%;');
+      expect(blockquoteStyle).toContain('margin: 24px auto;');
+      expect(blockquoteStyle).toContain('border-top: 1px solid #0366d655;');
+      expect(blockquoteStyle).toContain('border-bottom: 1px solid #0366d655;');
+      expect(blockquoteStyle).toContain("font-family: 'Times New Roman', Georgia, 'SimSun', serif;");
+    });
+
+    it('should give Typo an independent long-form typography structure', () => {
+      const theme = new AppleTheme({ theme: 'typo' });
+
+      expect(theme.getStyle('p')).toContain('text-indent: 2em;');
+      expect(theme.getStyle('h1')).toContain('text-align: left;');
+      expect(theme.getStyle('h1')).toContain('border-bottom: 1px solid #d8d8d8;');
+    });
+
+    it('should keep paragraph indentation exclusive to Typo', () => {
+      const themeNames = AppleTheme.getThemeList().map((theme) => theme.value);
+
+      for (const themeName of themeNames) {
+        const paragraphStyle = new AppleTheme({ theme: themeName }).getStyle('p');
+        if (themeName === 'typo') {
+          expect(paragraphStyle).toContain('text-indent: 2em;');
+        } else {
+          expect(paragraphStyle).not.toContain('text-indent:');
+        }
+      }
+    });
+  });
+
   describe('Heading Typography Scale', () => {
     it('should keep the recommended size preset in a compact WeChat-friendly range', () => {
       const recommended = AppleTheme.FONT_SIZES[3];
@@ -127,9 +273,25 @@ describe('AppleTheme Color Logic', () => {
       const h3Style = theme.getStyle('h3');
 
       expect(h2Style).toContain('font-size: 22px;');
-      expect(h2Style).toContain('margin: 32px auto 16px;');
+      expect(h2Style).toContain('margin: 34px auto 20px;');
       expect(h3Style).toContain('font-size: 18px;');
-      expect(h3Style).toContain('margin: 20px 0 12px;');
+      expect(h3Style).toContain('margin: 24px 0 12px;');
+    });
+
+    it('should keep classic heading decorations compatible with serif fonts', () => {
+      const theme = new AppleTheme({
+        theme: 'wechat',
+        themeColor: 'blue',
+        fontFamily: 'serif',
+      });
+
+      const h2Style = theme.getStyle('h2');
+      const h3Style = theme.getStyle('h3');
+
+      expect(h2Style).toContain("font-family: 'Times New Roman', Georgia, 'SimSun', serif;");
+      expect(h2Style).toContain('background-image: linear-gradient(to right, transparent, #0366d6, transparent);');
+      expect(h3Style).toContain('border-left: 3px solid #0366d6;');
+      expect(h3Style).toContain('background: #0366d60A;');
     });
   });
 });
