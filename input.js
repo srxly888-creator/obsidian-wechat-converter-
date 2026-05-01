@@ -973,7 +973,7 @@ class AppleStyleView extends ItemView {
 
     // [设置] 按钮
     this.settingsBtn = createIconBtn('sliders-horizontal', '样式设置', () => {
-      this.togglePanel(this.settingsOverlay, this.settingsBtn);
+      this.togglePanel(this.settingsOverlay, this.settingsBtn, () => this.resetSettingsPanelViewState());
     });
 
     this.aiLayoutBtn = createIconBtn('sparkles', 'AI 编排', () => this.onAiLayoutButtonClick());
@@ -991,6 +991,7 @@ class AppleStyleView extends ItemView {
     // 2. 创建悬浮设置层 (初始隐藏)
     this.settingsOverlay = container.createEl('div', { cls: 'apple-settings-overlay' });
     const settingsArea = this.settingsOverlay.createEl('div', { cls: 'apple-settings-area' });
+    this.settingsArea = settingsArea;
 
     // === 主题选择 ===
     this.createSection(settingsArea, '主题', (section) => {
@@ -1148,11 +1149,13 @@ class AppleStyleView extends ItemView {
     });
 
     const advancedOptions = settingsArea.createEl('details', { cls: 'apple-settings-details' });
+    this.settingsAdvancedOptions = advancedOptions;
     advancedOptions.createEl('summary', {
       cls: 'apple-settings-summary',
       text: '高级选项'
     });
     const advancedArea = advancedOptions.createDiv({ cls: 'apple-settings-area apple-settings-advanced-area' });
+    this.settingsAdvancedArea = advancedArea;
 
     // === 引用样式 ===
     const quoteStyleSection = this.createSection(advancedArea, '引用样式', (section) => {
@@ -1621,6 +1624,28 @@ class AppleStyleView extends ItemView {
     const content = section.createEl('div', { cls: 'apple-setting-content' });
     builder(content);
     return section;
+  }
+
+  resetSettingsPanelViewState() {
+    const advancedOptions = this.settingsAdvancedOptions || this.settingsOverlay?.querySelector('.apple-settings-details');
+    if (advancedOptions) advancedOptions.open = false;
+
+    const scrollTargets = [
+      this.settingsOverlay,
+      this.settingsArea,
+      this.settingsAdvancedArea,
+    ].filter(Boolean);
+
+    const resetScroll = () => {
+      scrollTargets.forEach((target) => {
+        target.scrollTop = 0;
+      });
+    };
+
+    resetScroll();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(resetScroll);
+    }
   }
 
   togglePanel(overlay, button, onOpen) {

@@ -495,6 +495,35 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(container.querySelector('.apple-icon-btn[aria-label="复制到公众号"]')).toBeNull();
   });
 
+  it('resetSettingsPanelViewState should collapse advanced options and scroll to top without changing settings', () => {
+    const settings = { theme: 'wechat', fontSize: 4 };
+    const view = new AppleStyleView(null, { settings });
+
+    const overlay = createObsidianLikeElement();
+    const settingsArea = createObsidianLikeElement();
+    const advancedArea = createObsidianLikeElement();
+    const advancedOptions = createObsidianLikeElement('details');
+    advancedOptions.open = true;
+
+    view.settingsOverlay = overlay;
+    view.settingsArea = settingsArea;
+    view.settingsAdvancedArea = advancedArea;
+    view.settingsAdvancedOptions = advancedOptions;
+
+    overlay.scrollTop = 180;
+    settingsArea.scrollTop = 80;
+    advancedArea.scrollTop = 40;
+
+    view.resetSettingsPanelViewState();
+
+    expect(advancedOptions.open).toBe(false);
+    expect(overlay.scrollTop).toBe(0);
+    expect(settingsArea.scrollTop).toBe(0);
+    expect(advancedArea.scrollTop).toBe(0);
+    expect(view.plugin.settings).toBe(settings);
+    expect(view.plugin.settings).toEqual({ theme: 'wechat', fontSize: 4 });
+  });
+
   it('createSettingsPanel should hide AI entry when feature toggle is off', () => {
     const view = new AppleStyleView(null, {
       settings: {

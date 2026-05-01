@@ -11560,7 +11560,7 @@ var AppleStyleView = class extends ItemView {
       return btn;
     };
     this.settingsBtn = createIconBtn("sliders-horizontal", "\u6837\u5F0F\u8BBE\u7F6E", () => {
-      this.togglePanel(this.settingsOverlay, this.settingsBtn);
+      this.togglePanel(this.settingsOverlay, this.settingsBtn, () => this.resetSettingsPanelViewState());
     });
     this.aiLayoutBtn = createIconBtn("sparkles", "AI \u7F16\u6392", () => this.onAiLayoutButtonClick());
     if (!isMobileClient(this.app)) {
@@ -11571,6 +11571,7 @@ var AppleStyleView = class extends ItemView {
     createIconBtn("send", "\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1", () => this.showSyncModal());
     this.settingsOverlay = container.createEl("div", { cls: "apple-settings-overlay" });
     const settingsArea = this.settingsOverlay.createEl("div", { cls: "apple-settings-area" });
+    this.settingsArea = settingsArea;
     this.createSection(settingsArea, "\u4E3B\u9898", (section) => {
       const grid = section.createEl("div", { cls: "apple-btn-grid" });
       const themes = AppleTheme.getThemeList();
@@ -11698,11 +11699,13 @@ var AppleStyleView = class extends ItemView {
       });
     });
     const advancedOptions = settingsArea.createEl("details", { cls: "apple-settings-details" });
+    this.settingsAdvancedOptions = advancedOptions;
     advancedOptions.createEl("summary", {
       cls: "apple-settings-summary",
       text: "\u9AD8\u7EA7\u9009\u9879"
     });
     const advancedArea = advancedOptions.createDiv({ cls: "apple-settings-area apple-settings-advanced-area" });
+    this.settingsAdvancedArea = advancedArea;
     const quoteStyleSection = this.createSection(advancedArea, "\u5F15\u7528\u6837\u5F0F", (section) => {
       const select = section.createEl("select", { cls: "apple-select" });
       [
@@ -12117,6 +12120,26 @@ var AppleStyleView = class extends ItemView {
     const content = section.createEl("div", { cls: "apple-setting-content" });
     builder(content);
     return section;
+  }
+  resetSettingsPanelViewState() {
+    var _a;
+    const advancedOptions = this.settingsAdvancedOptions || ((_a = this.settingsOverlay) == null ? void 0 : _a.querySelector(".apple-settings-details"));
+    if (advancedOptions)
+      advancedOptions.open = false;
+    const scrollTargets = [
+      this.settingsOverlay,
+      this.settingsArea,
+      this.settingsAdvancedArea
+    ].filter(Boolean);
+    const resetScroll = () => {
+      scrollTargets.forEach((target) => {
+        target.scrollTop = 0;
+      });
+    };
+    resetScroll();
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(resetScroll);
+    }
   }
   togglePanel(overlay, button, onOpen) {
     if (!overlay || !button)
