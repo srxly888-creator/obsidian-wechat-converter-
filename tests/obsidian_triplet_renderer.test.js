@@ -83,9 +83,9 @@ describe('Obsidian Triplet Renderer', () => {
     expect(output).not.toContain('[!image-swipe]');
   });
 
-  it('should preprocess sensitive-image callouts with a warning panel and multiple images', () => {
+  it('should preprocess image-sensitive callouts with a warning panel and multiple images', () => {
     const input = [
-      '> [!sensitive-image] 此类图片可能引发不适，向左滑动查看',
+      '> [!image-sensitive] 此类图片可能引发不适，向左滑动查看',
       '> ![图一](images/a.png)',
       '> ![[images/b.png|图二]]',
     ].join('\n');
@@ -93,22 +93,22 @@ describe('Obsidian Triplet Renderer', () => {
     const { markdown: output } = preprocessMarkdownForTriplet(input, {});
 
     expect(output).toContain('data-owc-image-swipe="1"');
-    expect(output).toContain('data-owc-image-swipe-type="sensitive-image"');
+    expect(output).toContain('data-owc-image-swipe-type="image-sensitive"');
     expect(output).toContain('data-owc-image-swipe-warning="%E6%AD%A4%E7%B1%BB');
     expect(output).toContain('<img src="images/a.png" alt="图一">');
     expect(output).toContain('<img src="images/b.png" alt="图二">');
   });
 
-  it('should leave fenced sensitive-image syntax untouched', () => {
+  it('should leave fenced image-sensitive syntax untouched', () => {
     const input = [
-      ':::sensitive-image 此类图片可能引发不适，向左滑动查看',
+      ':::image-sensitive 此类图片可能引发不适，向左滑动查看',
       '![图一](images/a.png)',
       ':::',
     ].join('\n');
 
     const { markdown: output } = preprocessMarkdownForTriplet(input, {});
 
-    expect(output).toContain(':::sensitive-image 此类图片可能引发不适，向左滑动查看');
+    expect(output).toContain(':::image-sensitive 此类图片可能引发不适，向左滑动查看');
     expect(output).not.toContain('data-owc-image-swipe="1"');
   });
 
@@ -119,7 +119,7 @@ describe('Obsidian Triplet Renderer', () => {
       '> ![A](a.png)',
       '```',
       '',
-      '> [!sensitive-image] 此类图片可能引发不适',
+      '> [!image-sensitive] 此类图片可能引发不适',
       '> ![B](b.png)',
     ].join('\n');
 
@@ -128,7 +128,7 @@ describe('Obsidian Triplet Renderer', () => {
     expect(output).toContain('```markdown');
     expect(output).toContain('> [!image-swipe] 左右滑动查看图片');
     expect(output).toContain('> ![A](a.png)');
-    expect(output).toContain('data-owc-image-swipe-type="sensitive-image"');
+    expect(output).toContain('data-owc-image-swipe-type="image-sensitive"');
     expect(output).not.toContain('<img src="a.png" alt="A">');
   });
 

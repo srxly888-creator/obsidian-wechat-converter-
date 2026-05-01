@@ -80,7 +80,7 @@ describe('Native Renderer', () => {
     ].join('\n'))).toBe(false);
 
     expect(canUseNativePreviewFastPath([
-      '> [!sensitive-image] 向左滑动查看',
+      '> [!image-sensitive] 向左滑动查看',
       '> ![A](https://example.com/a.png)',
     ].join('\n'))).toBe(false);
   });

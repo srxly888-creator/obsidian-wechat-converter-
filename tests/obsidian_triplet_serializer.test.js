@@ -82,10 +82,10 @@ describe('Obsidian Triplet Serializer', () => {
     expect(html).toContain('width:100%');
   });
 
-  it('should convert sensitive-image sections into warning-first horizontal panels', () => {
+  it('should convert image-sensitive sections into warning-first horizontal panels', () => {
     const root = document.createElement('div');
     root.innerHTML = [
-      '<section data-owc-image-swipe="1" data-owc-image-swipe-type="sensitive-image" data-owc-image-swipe-warning="%E6%AD%A4%E7%B1%BB%E5%9B%BE%E7%89%87%E5%8F%AF%E8%83%BD%E5%BC%95%E5%8F%91%E4%B8%8D%E9%80%82">',
+      '<section data-owc-image-swipe="1" data-owc-image-swipe-type="image-sensitive" data-owc-image-swipe-warning="%E6%AD%A4%E7%B1%BB%E5%9B%BE%E7%89%87%E5%8F%AF%E8%83%BD%E5%BC%95%E5%8F%91%E4%B8%8D%E9%80%82">',
       '<img src="images/a.png" alt="图一">',
       '<img src="images/b.png" alt="图二">',
       '</section>',

@@ -2254,9 +2254,9 @@ var require_obsidian_triplet_serializer = __commonJS({
         const scroll = document.createElement("section");
         setImageSwipeSectionStyle(scroll, "display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;margin:0;padding:0;white-space:nowrap;");
         const row = document.createElement("section");
-        const panelCount = imgs.length + (type === "sensitive-image" ? 1 : 0);
+        const panelCount = imgs.length + (type === "image-sensitive" ? 1 : 0);
         setImageSwipeSectionStyle(row, `display:table;table-layout:fixed;width:${panelCount * 100}%;min-width:${panelCount * 100}%;border-spacing:0;font-size:0;line-height:0;margin:0;padding:0;`);
-        if (type === "sensitive-image") {
+        if (type === "image-sensitive") {
           const warning = decodeImageSwipeValue(block.getAttribute("data-owc-image-swipe-warning") || "") || IMAGE_SWIPE_DEFAULT_WARNING;
           row.appendChild(createImageSwipeWarningPanel(warning));
         }
@@ -4401,7 +4401,7 @@ var require_obsidian_triplet_renderer = __commonJS({
     }
     var IMAGE_SWIPE_DEFAULT_WARNING = "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
     var IMAGE_SWIPE_DEFAULT_HINT = "\u5DE6\u53F3\u6ED1\u52A8\u67E5\u770B\u56FE\u7247";
-    var IMAGE_SWIPE_TYPES = /* @__PURE__ */ new Set(["image-swipe", "sensitive-image"]);
+    var IMAGE_SWIPE_TYPES = /* @__PURE__ */ new Set(["image-swipe", "image-sensitive"]);
     function encodeImageSwipeValue(value) {
       return encodeURIComponent(String(value || ""));
     }
@@ -4471,7 +4471,7 @@ var require_obsidian_triplet_renderer = __commonJS({
         'data-owc-image-swipe="1"',
         `data-owc-image-swipe-type="${type}"`
       ];
-      if (type === "sensitive-image") {
+      if (type === "image-sensitive") {
         attrs.push(`data-owc-image-swipe-warning="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_WARNING))}"`);
       } else {
         attrs.push(`data-owc-image-swipe-hint="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_HINT))}"`);
@@ -4916,7 +4916,7 @@ var require_native_renderer = __commonJS({
       const source = String(markdown || "");
       if (!source.trim())
         return false;
-      if (/^\s{0,3}>\s?\[!\s*(?:image-swipe|sensitive-image)\s*](?:[+-])?/im.test(source))
+      if (/^\s{0,3}>\s?\[!\s*(?:image-swipe|image-sensitive)\s*](?:[+-])?/im.test(source))
         return false;
       if (source.includes("![["))
         return false;
@@ -10837,7 +10837,7 @@ var IMAGE_SWIPE_COMMAND_COPY = {
     zhNotice: "\u5DF2\u63D2\u5165\u56FE\u7247\u5757",
     enNotice: "Image block inserted"
   },
-  "sensitive-image": {
+  "image-sensitive": {
     zhName: "\u63D2\u5165\u654F\u611F\u56FE\u7247\u5757",
     enName: "Insert sensitive image block",
     zhTitle: "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B",
@@ -11792,7 +11792,7 @@ var AppleStyleView = class extends ItemView {
         }
       });
       const imageBlockCommand = getImageSwipeCommandCopy(this.app, "image-swipe").name;
-      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, "sensitive-image").name;
+      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, "image-sensitive").name;
       section.createEl("span", {
         text: `\u6A2A\u6ED1\u591A\u56FE\uFF1A\u9009\u4E2D\u56FE\u7247\u540E\u8FD0\u884C\u300C${imageBlockCommand}\u300D\u6216\u300C${sensitiveImageBlockCommand}\u300D\u3002`,
         attr: {
@@ -15678,10 +15678,10 @@ var AppleStylePlugin = class extends Plugin {
       }
     });
     this.addCommand({
-      id: "insert-sensitive-image-block",
-      name: getImageSwipeCommandCopy(this.app, "sensitive-image").name,
+      id: "insert-image-sensitive-block",
+      name: getImageSwipeCommandCopy(this.app, "image-sensitive").name,
       editorCallback: (editor) => {
-        this.insertImageSwipeCallout(editor, "sensitive-image");
+        this.insertImageSwipeCallout(editor, "image-sensitive");
       }
     });
     this.addSettingTab(new AppleStyleSettingTab(this.app, this));

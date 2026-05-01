@@ -23,12 +23,12 @@ describe('Image swipe editor commands', () => {
     ].join('\n'));
   });
 
-  it('should insert a sensitive-image template when nothing is selected', () => {
-    const markdown = createImageSwipeCalloutMarkdown('sensitive-image', '', {
+  it('should insert an image-sensitive template when nothing is selected', () => {
+    const markdown = createImageSwipeCalloutMarkdown('image-sensitive', '', {
       vault: { getConfig: () => 'zh-CN' },
     });
 
-    expect(markdown).toContain('> [!sensitive-image] 此类图片可能引发不适，向左滑动查看');
+    expect(markdown).toContain('> [!image-sensitive] 此类图片可能引发不适，向左滑动查看');
     expect(markdown).toContain('> ![[图片1.png]]');
     expect(markdown).toContain('> ![[图片2.png]]');
   });
@@ -39,7 +39,7 @@ describe('Image swipe editor commands', () => {
     }, 'image-swipe');
     const sensitiveCopy = getImageSwipeCommandCopy({
       vault: { getConfig: () => 'en' },
-    }, 'sensitive-image');
+    }, 'image-sensitive');
 
     expect(imageCopy.name).toBe('Insert image block');
     expect(sensitiveCopy.name).toBe('Insert sensitive image block');

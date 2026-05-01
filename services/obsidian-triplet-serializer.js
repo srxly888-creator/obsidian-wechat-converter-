@@ -665,10 +665,10 @@ function convertImageSwipeBlocks(container, converter) {
     const scroll = document.createElement('section');
     setImageSwipeSectionStyle(scroll, 'display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;margin:0;padding:0;white-space:nowrap;');
     const row = document.createElement('section');
-    const panelCount = imgs.length + (type === 'sensitive-image' ? 1 : 0);
+    const panelCount = imgs.length + (type === 'image-sensitive' ? 1 : 0);
     setImageSwipeSectionStyle(row, `display:table;table-layout:fixed;width:${panelCount * 100}%;min-width:${panelCount * 100}%;border-spacing:0;font-size:0;line-height:0;margin:0;padding:0;`);
 
-    if (type === 'sensitive-image') {
+    if (type === 'image-sensitive') {
       const warning = decodeImageSwipeValue(block.getAttribute('data-owc-image-swipe-warning') || '') || IMAGE_SWIPE_DEFAULT_WARNING;
       row.appendChild(createImageSwipeWarningPanel(warning));
     }

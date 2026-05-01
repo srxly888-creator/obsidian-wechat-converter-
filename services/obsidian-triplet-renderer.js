@@ -442,7 +442,7 @@ function preRenderMathFormulas(markdown, converter) {
 
 const IMAGE_SWIPE_DEFAULT_WARNING = '此类图片可能引发不适，向左滑动查看';
 const IMAGE_SWIPE_DEFAULT_HINT = '左右滑动查看图片';
-const IMAGE_SWIPE_TYPES = new Set(['image-swipe', 'sensitive-image']);
+const IMAGE_SWIPE_TYPES = new Set(['image-swipe', 'image-sensitive']);
 
 function encodeImageSwipeValue(value) {
   return encodeURIComponent(String(value || ''));
@@ -520,7 +520,7 @@ function renderImageSwipeHtmlBlock(type, blockLines, optionText) {
     'data-owc-image-swipe="1"',
     `data-owc-image-swipe-type="${type}"`,
   ];
-  if (type === 'sensitive-image') {
+  if (type === 'image-sensitive') {
     attrs.push(`data-owc-image-swipe-warning="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_WARNING))}"`);
   } else {
     attrs.push(`data-owc-image-swipe-hint="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_HINT))}"`);

@@ -84,7 +84,7 @@ function canUseNativePreviewFastPath(markdown) {
   const source = String(markdown || '');
   if (!source.trim()) return false;
 
-  if (/^\s{0,3}>\s?\[!\s*(?:image-swipe|sensitive-image)\s*](?:[+-])?/im.test(source)) return false;
+  if (/^\s{0,3}>\s?\[!\s*(?:image-swipe|image-sensitive)\s*](?:[+-])?/im.test(source)) return false;
   if (source.includes('![[')) return false;
   if (/^\s{0,3}(?:`{3,}|~{3,})\s*mermaid\b/im.test(source)) return false;
   if (/^\s*\$\$\s*$/m.test(source) || /(^|[^\\])\$[^$\n]+\$/m.test(source)) return false;

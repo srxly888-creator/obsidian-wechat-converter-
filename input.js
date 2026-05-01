@@ -57,7 +57,7 @@ const IMAGE_SWIPE_COMMAND_COPY = {
     zhNotice: '已插入图片块',
     enNotice: 'Image block inserted',
   },
-  'sensitive-image': {
+  'image-sensitive': {
     zhName: '插入敏感图片块',
     enName: 'Insert sensitive image block',
     zhTitle: '此类图片可能引发不适，向左滑动查看',
@@ -1263,7 +1263,7 @@ class AppleStyleView extends ItemView {
         }
       });
       const imageBlockCommand = getImageSwipeCommandCopy(this.app, 'image-swipe').name;
-      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, 'sensitive-image').name;
+      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, 'image-sensitive').name;
       section.createEl('span', {
         text: `横滑多图：选中图片后运行「${imageBlockCommand}」或「${sensitiveImageBlockCommand}」。`,
         attr: {
@@ -5712,10 +5712,10 @@ class AppleStylePlugin extends Plugin {
     });
 
     this.addCommand({
-      id: 'insert-sensitive-image-block',
-      name: getImageSwipeCommandCopy(this.app, 'sensitive-image').name,
+      id: 'insert-image-sensitive-block',
+      name: getImageSwipeCommandCopy(this.app, 'image-sensitive').name,
       editorCallback: (editor) => {
-        this.insertImageSwipeCallout(editor, 'sensitive-image');
+        this.insertImageSwipeCallout(editor, 'image-sensitive');
       },
     });
 
