@@ -1363,7 +1363,7 @@ juice/lib/utils.js:
 */
 `,
         "theme": "/**\n * \u{1F34E} Apple Style \u591A\u4E3B\u9898\u7CFB\u7EDF\n * \u652F\u6301\u591A\u79CD\u4E3B\u9898\u98CE\u683C\uFF1A\u7B80\u7EA6\u3001\u7ECF\u5178\u3001\u6C34\u58A8\u3001\u6781\u5149\u7B49\n * \u8BBE\u8BA1\u7406\u5FF5\uFF1A\u514B\u5236\u3001\u4F18\u96C5\u3001\u6CE8\u91CD\u7EC6\u8282\n */\n\n// Use assignment expression to avoid \"Identifier has already been declared\" errors if re-eval'd\nwindow.AppleTheme = class AppleTheme {\n  /**\n   * \u{1F3A8} \u4E3B\u9898\u8272\u677F - 8\u79CD\u9884\u8BBE\u989C\u8272\n   */\n  static THEME_COLORS = {\n    blue: '#0366d6',\n    green: '#28a745',\n    purple: '#6f42c1',\n    orange: '#fd7e14',\n    teal: '#20c997',\n    rose: '#e83e8c',\n    ruby: '#dc3545',\n    slate: '#6c757d',\n  };\n\n  /**\n   * \u{1F3A8} \u6807\u9898\u4E13\u7528\u6DF1\u8272\u677F (Tone-on-Tone)\n   * \u76F8\u6BD4\u4E3B\u9898\u8272\u52A0\u6DF1 15-20%\uFF0C\u7528\u4E8E\u6807\u9898\u4EE5\u589E\u52A0\u89C6\u89C9\u7A33\u91CD\u611F\uFF0C\u907F\u514D\u4E0E\u6B63\u6587\u9AD8\u4EAE\u8272\u51B2\u7A81\n   */\n  static THEME_COLORS_DEEP = {\n    blue: '#004795',    // Deep Blue\n    green: '#1e7e34',   // Deep Green\n    purple: '#4a2b82',  // Deep Purple\n    orange: '#c75e0b',  // Deep Orange\n    teal: '#158765',    // Deep Teal\n    rose: '#b81f66',    // Deep Rose\n    ruby: '#a81825',    // Deep Ruby\n    slate: '#495057',   // Deep Slate\n  };\n\n  /**\n   * \u{1F4D0} \u5B57\u4F53\u5927\u5C0F\u7CFB\u7EDF - 5\u6863\n   */\n  static FONT_SIZES = {\n    1: { base: 14, h1: 26, h2: 20, h3: 16, h4: 14, h5: 14, h6: 14, code: 12, caption: 12 },\n    2: { base: 15, h1: 28, h2: 21, h3: 17, h4: 15, h5: 15, h6: 15, code: 13, caption: 12 },\n    3: { base: 16, h1: 30, h2: 22, h3: 18, h4: 16, h5: 16, h6: 16, code: 14, caption: 13 }, // \u63A8\u8350\n    4: { base: 17, h1: 32, h2: 24, h3: 19, h4: 17, h5: 17, h6: 17, code: 15, caption: 14 },\n    5: { base: 18, h1: 34, h2: 26, h3: 20, h4: 18, h5: 18, h6: 18, code: 16, caption: 14 },\n  };\n\n  /**\n   * \u{1F524} \u5B57\u4F53\u6808\n   */\n  static FONTS = {\n    'sans-serif': `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif`,\n    'serif': `'Times New Roman', Georgia, 'SimSun', serif`,\n    'monospace': `'SF Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace`,\n  };\n\n  /**\n   * \u{1F3A8} \u4E3B\u9898\u914D\u7F6E - \u6BCF\u79CD\u4E3B\u9898\u7684\u72EC\u7279\u914D\u8272\u548C\u89C4\u5219\n   */\n  static THEME_CONFIGS = {\n\n    github: {\n      name: '\u7B80\u7EA6',\n      lineHeight: 1.82,\n      paragraphGap: 18,\n      h1Decoration: 'none',\n      h2Decoration: 'none',\n      h3Decoration: 'bottom-line-left',\n      h4Decoration: 'none',\n      headingWeight: 800,\n      headingLetterSpacing: 0,\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n\n      linkDecoration: 'underline',\n      blockquoteBorderWidth: 4,\n      tableHeaderBg: '#f6f8fa',\n      tableCellPadding: 10,\n      figurePadding: 8,\n      figureBorderColor: '#e8eaed',\n      // Removed blockquoteBorderColor to allow theme color (was #d0d7de)\n      // Removed blockquoteBg to allow theme color tint (was #ffffff)\n    },\n    wechat: {\n      name: '\u7ECF\u5178',\n      lineHeight: 1.8,\n      paragraphGap: 24,\n      h1Decoration: 'classic-title',\n      h2Decoration: 'classic-title',\n      h3Decoration: 'classic-subhead',\n      h4Decoration: 'classic-minor',\n      headingWeight: 700,\n      headingLetterSpacing: 0,\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 4,\n      blockquoteBg: '#f8fafc',\n      blockquoteStyle: 'soft',\n    },\n    serif: {\n      name: '\u4F18\u96C5',\n      lineHeight: 1.8,\n      paragraphGap: 20,\n      h1Decoration: 'editorial-h1',      // \u6742\u5FD7\u5927\u6807\u9898 (\u91D1\u7EBF)\n      h2Decoration: 'editorial-h1',      // H2 \u6B64\u65F6\u4E5F\u662F\u91D1\u7EBF (Level 2 = Level 1)\n      h3Decoration: 'editorial-h2',      // H3 \u4F7F\u7528\u539F H2 \u6837\u5F0F (\u659C\u4F53\uFF0C\u73B0\u5728\u7684 helper \u5DF2\u5F3A\u5236\u5DE6\u5BF9\u9F50)\n      h4Decoration: 'editorial-h3',      // H4 \u4F7F\u7528\u539F H3 (\u5DE6\u5BF9\u9F50\u4E0B\u5212\u7EBF)\n      headingWeight: 700,\n      headingLetterSpacing: 1,           // \u4F18\u96C5\u4E3B\u9898\u589E\u52A0\u5B57\u95F4\u8DDD\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 0,          // \u5C45\u4E2D\u6837\u5F0F\u4E0D\u9700\u8981\u5DE6\u8FB9\u6846\n      blockquoteStyle: 'center',         // \u65B0\u589E\uFF1A\u5C45\u4E2D\u5F15\u7528\n    },\n    paper: {\n      name: '\u7EB8\u5F20\u957F\u6587',\n      lineHeight: 1.9,\n      paragraphGap: 22,\n      shiftHeadingDecorationsDown: true,\n      h1Decoration: 'paper-title',\n      h2Decoration: 'paper-chapter',\n      h3Decoration: 'paper-section',\n      h4Decoration: 'paper-kicker',\n      h5Decoration: 'simple',\n      h6Decoration: 'quiet',\n      headingWeight: 700,\n      headingLetterSpacing: 0,\n      textColor: '#3f3a33',\n      headingColor: '#3e3e3e',\n      sectionBg: '#fffdf8',\n      mutedTextColor: '#786f63',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 0,\n      blockquoteBg: '#f7f1e7',\n      blockquoteStyle: 'paper',\n      tableHeaderBg: '#f7f1e7',\n      tableBorderColor: '#e6dccd',\n      figureBorderColor: '#eadfce',\n    },\n    grid: {\n      name: '\u7F51\u683C\u6587\u6863',\n      lineHeight: 1.82,\n      paragraphGap: 20,\n      shiftHeadingDecorationsDown: true,\n      h1Decoration: 'grid-title',\n      h2Decoration: 'grid-chapter',\n      h3Decoration: 'grid-section',\n      h4Decoration: 'grid-kicker',\n      h5Decoration: 'light-bg',\n      h6Decoration: 'quiet',\n      headingWeight: 800,\n      headingLetterSpacing: 0,\n      textColor: '#344054',\n      headingColor: '#263238',\n      sectionBgStyle: 'grid',\n      sectionBgSize: '18px 18px',\n      mutedTextColor: '#667085',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 4,\n      blockquoteBg: '#f6f9fc',\n      blockquoteStyle: 'soft',\n      tableHeaderBg: '#f3f7fb',\n      tableBorderColor: '#dbe5ef',\n    },\n    typo: {\n      name: 'Typo',\n      lineHeight: 1.92,\n      paragraphGap: 22,\n      shiftHeadingDecorationsDown: true,\n      h1Decoration: 'typo-title',\n      h2Decoration: 'typo-title',\n      h3Decoration: 'typo-section',\n      h4Decoration: 'typo-subhead',\n      h5Decoration: 'dashed-bottom',\n      h6Decoration: 'quiet',\n      headingWeight: 700,\n      headingLetterSpacing: 0,\n      textColor: '#333333',\n      headingColor: '#222222',\n      mutedTextColor: '#6b6b6b',\n      linkDecoration: 'underline',\n      blockquoteBorderWidth: 2,\n      blockquoteBg: '#fafafa',\n      blockquoteStyle: 'soft',\n      paragraphTextIndent: '2em',\n      tableHeaderBg: '#f7f7f7',\n      figureBorderColor: '#ededed',\n    },\n    media: {\n      name: '\u6E05\u723D\u5A92\u4F53',\n      lineHeight: 1.86,\n      paragraphGap: 18,\n      shiftHeadingDecorationsDown: true,\n      h1Decoration: 'media-title',\n      h2Decoration: 'media-chapter',\n      h3Decoration: 'media-section',\n      h4Decoration: 'left-border',\n      h5Decoration: 'light-bg',\n      h6Decoration: 'quiet',\n      headingWeight: 700,\n      headingLetterSpacing: 0,\n      textColor: '#3b4648',\n      headingColor: '#263238',\n      mutedTextColor: '#667476',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 3,\n      blockquoteBg: '#f3fbf8',\n      blockquoteStyle: 'soft',\n      tableHeaderBg: '#f3fbf8',\n      tableBorderColor: '#dbeee8',\n      figureBorderColor: '#dcefeb',\n    },\n    colorful: {\n      name: '\u5F69\u8272\u5F3A\u8C03',\n      lineHeight: 1.82,\n      paragraphGap: 20,\n      shiftHeadingDecorationsDown: true,\n      h1Decoration: 'colorful-title',\n      h2Decoration: 'colorful-chapter',\n      h3Decoration: 'colorful-section',\n      h4Decoration: 'colorful-kicker',\n      h5Decoration: 'light-bg',\n      h6Decoration: 'quiet',\n      headingWeight: 800,\n      headingLetterSpacing: 0,\n      textColor: '#3e3e3e',\n      headingColor: '#3e3e3e',\n      mutedTextColor: '#6b7280',\n      linkDecoration: 'none',\n      blockquoteBorderWidth: 4,\n      blockquoteBg: '#fffaf5',\n      blockquoteStyle: 'soft',\n      tableHeaderBg: '#fff8ed',\n      figureBorderColor: '#f0e4d4',\n      strongBg: true,\n    },\n  };\n\n  /**\n   * \u{1F4D0} \u95F4\u8DDD\u7CFB\u7EDF - 8px \u57FA\u51C6\n   */\n  static SPACING = {\n    xs: 4,\n    sm: 8,\n    md: 16,\n    lg: 24,\n    xl: 32,\n    xxl: 48,\n  };\n\n  /**\n   * \u{1F3AF} \u5706\u89D2\u7CFB\u7EDF\n   */\n  static RADIUS = {\n    sm: 4,\n    md: 8,\n    lg: 12,\n  };\n\n  static QUOTE_CALLOUT_NEUTRAL_BG = '#f9f9f9';\n  static QUOTE_NEUTRAL_BORDER = '#d9d9d9';\n\n  /**\n   * \u5F53\u524D\u914D\u7F6E\n   */\n  constructor(options = {}) {\n    this.themeName = options.theme || 'github';\n    this.themeColor = options.themeColor || 'blue';\n    this.customColor = options.customColor || null;\n    this.quoteCalloutStyleMode = options.quoteCalloutStyleMode || 'theme';\n    this.fontFamily = options.fontFamily || 'sans-serif';\n    this.fontSize = options.fontSize || 3;\n    this.macCodeBlock = options.macCodeBlock !== false;\n    this.codeLineNumber = options.codeLineNumber || false;\n    // \u4FA7\u8FB9\u8DDD\u8BBE\u7F6E (\u9ED8\u8BA4 16px)\n    this.sidePadding = options.sidePadding !== undefined ? options.sidePadding : 16;\n    // \u6807\u9898\u67D3\u8272\u8BBE\u7F6E\n    this.coloredHeader = options.coloredHeader || false;\n  }\n\n  /**\n   * \u83B7\u53D6\u5F53\u524D\u4E3B\u9898\u8272\u503C\n   */\n  getThemeColorValue() {\n    if (this.themeColor === 'custom' && this.customColor) {\n      return this.customColor;\n    }\n    return AppleTheme.THEME_COLORS[this.themeColor] || AppleTheme.THEME_COLORS.blue;\n  }\n\n  /**\n   * \u83B7\u53D6\u6807\u9898\u4E13\u7528\u6DF1\u8272\u503C\n   */\n  getHeadingColorValue() {\n    // 1. \u5982\u679C\u672A\u5F00\u542F\u6807\u9898\u67D3\u8272\uFF0C\u8FD4\u56DE\u9ED8\u8BA4\u6DF1\u7070\n    if (!this.coloredHeader) {\n      return '#3e3e3e';\n    }\n\n    // 2. \u81EA\u5B9A\u4E49\u989C\u8272\uFF1A\u81EA\u52A8\u8BA1\u7B97\u53D8\u6DF1 20%\n    if (this.themeColor === 'custom' && this.customColor) {\n      return this.adjustColorBrightness(this.customColor, -20);\n    }\n\n    // 3. \u9884\u8BBE\u989C\u8272\uFF1A\u8FD4\u56DE\u6DF1\u8272\u677F\u5BF9\u5E94\u503C\n    return AppleTheme.THEME_COLORS_DEEP[this.themeColor] || AppleTheme.THEME_COLORS_DEEP.blue;\n  }\n\n  /**\n   * \u8F85\u52A9\uFF1A\u8C03\u6574 Hex \u989C\u8272\u4EAE\u5EA6\n   * @param {string} hex - #RRGGBB\n   * @param {number} percent - -100 to 100\n   */\n  adjustColorBrightness(hex, percent) {\n    hex = hex.replace(/^#/, '');\n    let r = parseInt(hex.substring(0, 2), 16);\n    let g = parseInt(hex.substring(2, 4), 16);\n    let b = parseInt(hex.substring(4, 6), 16);\n\n    r = Math.round(r * (100 + percent) / 100);\n    g = Math.round(g * (100 + percent) / 100);\n    b = Math.round(b * (100 + percent) / 100);\n\n    r = (r < 255) ? r : 255;\n    g = (g < 255) ? g : 255;\n    b = (b < 255) ? b : 255;\n\n    // Pad with 0 if necessary\n    const rr = ((r.toString(16).length === 1) ? '0' + r.toString(16) : r.toString(16));\n    const gg = ((g.toString(16).length === 1) ? '0' + g.toString(16) : g.toString(16));\n    const bb = ((b.toString(16).length === 1) ? '0' + b.toString(16) : b.toString(16));\n\n    return `#${rr}${gg}${bb}`;\n  }\n\n  /**\n   * \u83B7\u53D6\u5F53\u524D\u4E3B\u9898\u914D\u7F6E\n   */\n  getThemeConfig() {\n    return AppleTheme.THEME_CONFIGS[this.themeName] || AppleTheme.THEME_CONFIGS.github;\n  }\n\n  /**\n   * \u83B7\u53D6\u5B57\u4F53\u5C3A\u5BF8\u914D\u7F6E\n   */\n  getSizes() {\n    return AppleTheme.FONT_SIZES[this.fontSize] || AppleTheme.FONT_SIZES[3];\n  }\n\n  /**\n   * \u83B7\u53D6\u5B57\u4F53\u6808\n   */\n  getFontFamily() {\n    return AppleTheme.FONTS[this.fontFamily] || AppleTheme.FONTS['sans-serif'];\n  }\n\n  getQuoteCalloutStyleMode() {\n    return this.quoteCalloutStyleMode === 'neutral' ? 'neutral' : 'theme';\n  }\n\n  /**\n   * \u83B7\u53D6\u5143\u7D20\u6837\u5F0F\n   * @param {string} tagName - HTML \u6807\u7B7E\u540D\n   * @returns {string} - CSS \u6837\u5F0F\u5B57\u7B26\u4E32\n   */\n  getStyle(tagName) {\n    const config = this.getThemeConfig();\n    const sizes = this.getSizes();\n    const font = this.getFontFamily();\n    const color = this.getThemeColorValue();\n    const quoteCalloutStyleMode = this.getQuoteCalloutStyleMode();\n    const s = AppleTheme.SPACING;\n    const r = AppleTheme.RADIUS;\n\n    // \u6807\u9898\u989C\u8272\u903B\u8F91\uFF1A\u4F7F\u7528\u4E13\u95E8\u7684\u6DF1\u8272\u7CFB\u6807\u9898\u8272\n    // \u6CE8\u610F\uFF1A\u67D0\u4E9B\u7279\u6B8A\u4E3B\u9898\u88C5\u9970(h1Decoration)\u53EF\u80FD\u5DF2\u7ECF\u5305\u542B\u4E86\u989C\u8272\u8BBE\u7F6E\uFF0C\u8FD9\u91CC\u4E3B\u8981\u9488\u5BF9\u6587\u5B57\u672C\u8EAB\n    const headingColor = this.getHeadingColorValue();\n\n    switch (tagName) {\n      case 'section':\n        // \u4F7F\u7528\u914D\u7F6E\u7684 sidePadding\n        const sectionBackground = config.sectionBgStyle === 'grid'\n          ? `linear-gradient(${color}09 1px, transparent 1px), linear-gradient(90deg, ${color}09 1px, transparent 1px), #ffffff`\n          : (config.sectionBg || '#ffffff');\n        return this.joinStyleStrings(\n          `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; padding: 20px ${this.sidePadding}px; background: ${sectionBackground}; max-width: 100%; word-wrap: break-word; text-align: justify`,\n          config.sectionBgSize ? `background-size: ${config.sectionBgSize}` : ''\n        );\n\n      case 'h1': return this.getH1Style(config.h1Decoration, color, sizes.h1, font, headingColor, config);\n      case 'h2':\n        return config.shiftHeadingDecorationsDown\n          ? this.getH1Style(config.h1Decoration, color, sizes.h2, font, headingColor, config)\n          : this.getH2Style(config.h2Decoration, color, sizes.h2, font, headingColor, config);\n      case 'h3':\n        return config.shiftHeadingDecorationsDown\n          ? this.getH2Style(config.h2Decoration, color, sizes.h3, font, headingColor, config)\n          : this.getH3Style(config.h3Decoration, color, sizes.h3, font, headingColor, config);\n      case 'h4':\n        return config.shiftHeadingDecorationsDown\n          ? this.getH3Style(config.h3Decoration, color, sizes.h4, font, headingColor, config)\n          : this.getH4Style(config.h4Decoration, color, sizes.h4, font, headingColor);\n\n      case 'h5':\n        return this.getH5Style(config.h5Decoration, color, sizes.h5, font, headingColor);\n      case 'h6':\n        return this.getH6Style(config.h6Decoration, color, sizes.h6, font, headingColor, config.mutedTextColor);\n\n      case 'p':\n        return this.joinStyleStrings(\n          `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 0 0 ${config.paragraphGap}px 0; text-align: justify; letter-spacing: 0`,\n          config.paragraphTextIndent ? `text-indent: ${config.paragraphTextIndent}` : ''\n        );\n\n\n\n\n\n      case 'blockquote':\n        if (config.blockquoteStyle === 'center') {\n          const centeredBackground = quoteCalloutStyleMode === 'neutral'\n            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG\n            : (config.blockquoteBg || color + '1F');\n          const centeredRuleColor = quoteCalloutStyleMode === 'neutral'\n            ? AppleTheme.QUOTE_NEUTRAL_BORDER\n            : `${color}55`;\n          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: 1.85; color: #4f4a45; background: ${centeredBackground}; width: 92%; box-sizing: border-box; margin: 24px auto; padding: 18px 20px; text-align: justify; border-top: 1px solid ${centeredRuleColor}; border-bottom: 1px solid ${centeredRuleColor}; border-radius: ${r.sm}px;`;\n        }\n        if (config.blockquoteStyle === 'paper') {\n          const paperBg = quoteCalloutStyleMode === 'neutral'\n            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG\n            : (config.blockquoteBg || color + '1F');\n          const paperBorder = quoteCalloutStyleMode === 'neutral'\n            ? AppleTheme.QUOTE_NEUTRAL_BORDER\n            : `${color}99`;\n          return `font-family: ${AppleTheme.FONTS.serif}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #5f574c; background: ${paperBg}; margin: 22px 0 22px 8px; padding: 16px 18px; border-left: 3px solid ${paperBorder}; border-radius: ${r.sm}px; text-align: justify;`;\n        }\n        if (config.blockquoteStyle === 'soft') {\n          const softBg = quoteCalloutStyleMode === 'neutral'\n            ? AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG\n            : (config.blockquoteBg || color + '14');\n          const softBorderColor = quoteCalloutStyleMode === 'neutral'\n            ? AppleTheme.QUOTE_NEUTRAL_BORDER\n            : `${color}99`;\n          const softBorderWidth = this.themeName === 'wechat'\n            ? 3\n            : (config.blockquoteBorderWidth || 4);\n          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${softBg}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${softBorderWidth}px solid ${softBorderColor}; border-radius: ${r.sm}px;`;\n        }\n\n        if (quoteCalloutStyleMode === 'neutral') {\n          const neutralBorderWidth = this.themeName === 'wechat'\n            ? 3\n            : (config.blockquoteBorderWidth || 4);\n          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${AppleTheme.QUOTE_CALLOUT_NEUTRAL_BG}; margin: ${s.md}px 0 ${s.md}px 8px; padding: ${s.md}px; border-left: ${neutralBorderWidth}px solid ${AppleTheme.QUOTE_NEUTRAL_BORDER}; border-radius: ${r.sm}px;`;\n        }\n\n        // \u7ECF\u5178\u4E3B\u9898\uFF08wechat\uFF09\uFF1A\u4F7F\u7528\u66F4\u7EC6\u7684\u8FB9\u6846\u548C\u66F4\u6D45\u7684\u989C\u8272\uFF0C\u4E0E H3 \u533A\u5206\n        // H3: 4px \u4E3B\u9898\u8272 100% \u5DE6\u8FB9\u6846\uFF0C\u9876\u683C\n        // \u5F15\u7528\u5757: 3px \u4E3B\u9898\u8272 60% \u5DE6\u8FB9\u6846\uFF0C\u7F29\u8FDB 4px\n        if (this.themeName === 'wechat') {\n          return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${config.blockquoteBg || color + '1F'}; margin: ${s.md}px 0 ${s.md}px 4px; padding: ${s.md}px; border-left: 3px solid ${color}99; border-radius: 3px;`;\n        }\n\n        // Standard Blockquote: Restoring Italic and adjusting padding/background to match the screenshot\n        // Background: Light opacity of theme color (1F) for better visibility\n        // Border: Solid theme color\n        // Font: Normal (removed italic) for better legibility on mobile\n        return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: #595959; background: ${config.blockquoteBg || color + '1F'}; margin: ${s.md}px 0; padding: ${s.md}px; border-left: ${config.blockquoteBorderWidth}px solid ${config.blockquoteBorderColor || color}; border-radius: 3px;`;\n\n      case 'pre':\n        return `background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: ${r.md}px; padding: ${s.md}px; margin: ${s.md}px 0; overflow-x: auto; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px; line-height: 1.6; color: #24292e;`;\n\n      case 'code':\n        return `background: ${color}1A; color: ${color}; padding: 2px 4px; border-radius: 3px; font-family: ${AppleTheme.FONTS.monospace}; font-size: ${sizes.code}px;`;\n\n      case 'ul':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 12px 0; padding-left: 20px; list-style-type: disc;`;\n      case 'ol':\n        return `font-family: ${font}; font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 12px 0; padding-left: 20px; list-style-type: decimal;`;\n      case 'li':\n        return `font-size: ${sizes.base}px; line-height: ${config.lineHeight}; color: ${config.textColor}; margin: 4px 0;`;\n      case 'li p':\n        return `margin: 0; padding: 0; line-height: ${config.lineHeight};`;\n\n\n\n\n      case 'figure':\n        // Fix: Restoring wireframe (border/padding) & balanced spacing (20px top/bottom)\n        // No shadow for cleaner look\n        return `display: block; margin: 20px 0; text-align: center; border: 1px solid ${config.figureBorderColor || '#e1e4e8'}; border-radius: ${r.md}px; padding: ${config.figurePadding || 10}px;`;\n\n      case 'figcaption':\n        return `font-size: ${sizes.caption}px; color: #999; text-align: center; margin-top: ${s.sm}px;`;\n\n      case 'img':\n        return `display: block; margin: 0 auto; max-width: 100%; border-radius: 4px;`;\n\n      case 'a':\n        return `color: ${color}; text-decoration: ${config.linkDecoration}; border-bottom: ${config.linkDecoration === 'none' ? `1px dashed ${color}` : 'none'};`;\n\n      case 'table-wrapper':\n        return `display: block; box-sizing: border-box; width: 100%; max-width: 100%; overflow-x: scroll; overflow-y: hidden; -webkit-overflow-scrolling: touch; margin: ${s.md}px 0; padding-bottom: 10px;`;\n      case 'table':\n        return `border-collapse: collapse; width: 720px; min-width: 100%; max-width: none; table-layout: auto; border: 1px solid ${config.tableBorderColor || '#e1e4e8'};`;\n      case 'th':\n        return `background: ${config.tableHeaderBg || color + '1F'}; font-weight: bold; color: ${config.textColor}; border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left; white-space: nowrap; word-break: keep-all; overflow-wrap: normal;`;\n      case 'td':\n        return `border: 1px solid ${config.tableBorderColor || '#e1e4e8'}; padding: ${config.tableCellPadding || 12}px; text-align: left; white-space: nowrap; word-break: keep-all; overflow-wrap: normal;`;\n      case 'thead':\n        return `background: #f6f8fa;`;\n\n      case 'hr':\n        return `border: 0; border-top: 1px solid rgba(0,0,0,0.08); margin: 40px 0;`;\n\n      case 'strong':\n        return config.strongBg\n          ? `font-weight: bold; color: ${color}; background: ${color}18; padding: 0 3px; border-radius: 3px;`\n          : `font-weight: bold; color: ${color};`;\n      case 'em':\n        return `font-style: italic;`;\n      case 'del':\n        return `text-decoration: line-through; color: #999;`;\n\n      case 'avatar-header':\n        return `margin: 0 0 ${s.sm}px 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; width: 100%; flex-direction: row !important; flex-wrap: nowrap !important; text-align: left !important;`;\n      case 'avatar':\n        return `display: inline-block !important; vertical-align: middle !important; margin: 0 !important; width: 32px !important; height: 32px !important; border-radius: 50%; object-fit: cover; border: 1px solid #e8e8ed; flex-shrink: 0;`;\n      case 'avatar-caption':\n        return `display: inline-block !important; vertical-align: middle !important; font-size: ${sizes.caption}px; color: #666; margin-left: 10px; line-height: 1.4; text-align: left !important;`;\n\n      default:\n        return '';\n    }\n  }\n\n  // === Helper Methods ===\n\n  getH1Style(type, color, fontSize, font, headingColor, config = {}) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;`;\n    switch (type) {\n      case 'editorial-h1': // Magazine Style: Forced Serif + Golden Line\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 30px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.2;\n          background-image: linear-gradient(to right, transparent, ${color}, transparent);\n          background-size: 100px 1px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 20px; letter-spacing: 1px;`;\n      case 'bottom-line':\n        // Pure CSS centered short line using linear-gradient (simulating image)\n        return `${base}\n          background-image: linear-gradient(to right, ${color}, ${color});\n          background-size: 80px 3px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 15px;`;\n      case 'border-box':\n        return `${base} border: 1px solid ${color}; padding: 10px 20px; border-radius: 4px; display: inline-block; width: auto;`;\n      case 'classic-title':\n        return `${base} margin: 34px auto 22px; padding: 0; background-image: linear-gradient(to right, transparent, ${color}, transparent); background-size: 120px 2px; background-repeat: no-repeat; background-position: bottom center; padding-bottom: 14px;`;\n      case 'paper-title':\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 24px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1px; border-top: 2px solid ${color}; border-bottom: 1px solid ${color}66; padding: 16px 0 14px;`;\n      case 'grid-title':\n        return `${base} text-align: left; border: 1px solid ${color}55; border-radius: 4px; padding: 10px 12px; background: ${color}0F;`;\n      case 'typo-title':\n        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px auto 22px; color: ${headingColor}; text-align: left; line-height: 1.28; border-bottom: 1px solid #d8d8d8; padding-bottom: 14px;`;\n      case 'media-title':\n        return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, ${color}33); background-size: 100% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 14px;`;\n      case 'colorful-title':\n        return `${base} color: #ffffff; background: ${color}; padding: 12px 18px; border-radius: 6px; box-shadow: 6px 6px 0 ${color}33;`;\n      default: // none or unknown\n        return this.joinStyleStrings(base, config.headingLetterSpacing ? `letter-spacing: ${config.headingLetterSpacing}px` : '');\n    }\n  }\n\n  getH2Style(type, color, fontSize, font, headingColor, config = {}) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 32px auto 16px; text-align: center; color: ${headingColor}; line-height: 1.25;`;\n    switch (type) {\n      case 'editorial-h1': // Golden Line (Shifted from H1)\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 32px auto 16px; color: ${headingColor}; text-align: center; line-height: 1.2;\n          background-image: linear-gradient(to right, transparent, ${color}, transparent);\n          background-size: 100px 1px;\n          background-repeat: no-repeat;\n          background-position: bottom center;\n          padding-bottom: 20px; letter-spacing: 1px;`;\n      case 'editorial-h2': // Magazine Subtitle\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 32px auto 16px; text-align: center; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;\n      case 'bottom-line':\n        // Pure CSS centered short line (thinner/shorter for H2)\n        return `${base}\n           background-image: linear-gradient(to right, ${color}, ${color});\n           background-size: 50px 2px;\n           background-repeat: no-repeat;\n           background-position: bottom center;\n           padding-bottom: 12px;`;\n      case 'filled-pill':\n        return `${base} background-color: ${color}; color: #fff; padding: 5px 20px; border-radius: 20px; display: inline-block; width: auto;`;\n      case 'bottom-line-center':\n        return `${base} display: inline-block; border-bottom: 1px solid ${color}; padding-bottom: 5px; width: auto;`;\n      case 'classic-title':\n        return `${base} margin: 34px auto 20px; padding: 0; background-image: linear-gradient(to right, transparent, ${color}, transparent); background-size: 120px 2px; background-repeat: no-repeat; background-position: bottom center; padding-bottom: 14px;`;\n      case 'paper-title':\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1px; border-top: 2px solid ${color}; border-bottom: 1px solid ${color}66; padding: 14px 0 12px;`;\n      case 'paper-chapter':\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px auto 20px; color: ${headingColor}; text-align: center; line-height: 1.35; letter-spacing: 1.5px; border-bottom: 2px solid ${color}; padding-bottom: 12px;`;\n      case 'grid-title':\n        return `${base} text-align: left; border: 1px solid ${color}55; border-radius: 4px; padding: 10px 12px; background: ${color}0F;`;\n      case 'grid-chapter':\n        return `${base} text-align: left; border-left: 3px solid ${color}; border-radius: 0 4px 4px 0; padding: 8px 12px; background: ${color}08;`;\n      case 'typo-title':\n        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px 0 18px; color: ${headingColor}; text-align: left; line-height: 1.3; background-image: linear-gradient(#d8d8d8, #d8d8d8); background-size: 40% 1px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;\n      case 'media-title':\n        return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, ${color}33); background-size: 100% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;\n      case 'media-chapter':\n        return `${base} text-align: left; color: ${headingColor}; background-image: linear-gradient(to right, ${color}, transparent); background-size: 60% 2px; background-repeat: no-repeat; background-position: bottom left; padding-bottom: 12px;`;\n      case 'colorful-title':\n        return `${base} color: #ffffff; background: ${color}; padding: 10px 16px; border-radius: 6px; box-shadow: 5px 5px 0 ${color}33;`;\n      case 'colorful-chapter':\n        return `${base} text-align: left; border-left: 4px solid ${color}; background: ${color}12; padding: 10px 14px; border-radius: 0 4px 4px 0;`;\n      case 'paper-section':\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 34px 0 16px; color: ${headingColor}; text-align: left; line-height: 1.35; border-bottom: 1px solid ${color}55; padding-bottom: 8px;`;\n      case 'grid-section':\n        return `${base} text-align: left; border-bottom: 1px solid ${color}66; padding: 4px 0 8px;`;\n      case 'typo-section':\n        return `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: 700; margin: 34px 0 16px; color: ${headingColor}; text-align: left; line-height: 1.35;`;\n      case 'media-section':\n        return `${base} display: inline-block; width: auto; text-align: left; background: ${color}14; border: 1px solid ${color}33; padding: 6px 12px; border-radius: 2px;`;\n      case 'colorful-section':\n        return `${base} display: inline-block; width: auto; text-align: left; background: ${color}18; border-bottom: 3px solid ${color}; padding: 6px 10px 5px; border-radius: 4px 4px 0 0;`;\n      default:\n        return this.joinStyleStrings(base, config.headingLetterSpacing ? `letter-spacing: ${config.headingLetterSpacing}px` : '');\n    }\n  }\n\n  getH3Style(type, color, fontSize, font, headingColor, config = {}) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 20px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.3;`;\n    switch (type) {\n      case 'editorial-h2': // Italic Serif (Left Aligned for H3)\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: normal; margin: 24px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.4; font-style: italic; letter-spacing: 1px;`;\n      case 'editorial-h3': // Magazine Section: Forced Serif + Left Underline\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 24px 0 12px; text-align: left; color: ${headingColor}; line-height: 1.3;\n           border-bottom: 1px solid ${color}; padding-bottom: 4px; display: inline-block; width: auto; letter-spacing: 0.5px;`;\n      case 'left-border':\n        return `${base} border-left: 4px solid ${color}; padding-left: 10px;`;\n      case 'bottom-line-left':\n        return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;\n      case 'classic-subhead':\n        return `${base} border-left: 3px solid ${color}; background: ${color}0A; padding: 6px 10px; margin: 24px 0 12px;`;\n      case 'paper-section':\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 28px 0 14px; color: ${headingColor}; text-align: left; line-height: 1.35; border-top: 1px solid ${color}55; padding-top: 8px;`;\n      case 'grid-section':\n        return `${base} background-image: linear-gradient(${color}, ${color}); background-size: 3px 55%; background-position: left center; background-repeat: no-repeat; padding-left: 12px;`;\n      case 'typo-section':\n        return `${base} font-weight: 700; margin: 28px 0 14px; line-height: 1.35; border-left: 2px solid #d8d8d8; padding-left: 10px;`;\n      case 'media-section':\n        return `${base} display: inline-block; width: auto; background: ${color}14; border: 1px solid ${color}33; padding: 5px 10px; border-radius: 2px;`;\n      case 'colorful-section':\n        return `${base} display: inline-block; width: auto; background: ${color}18; border-bottom: 2px solid ${color}; padding: 5px 9px 4px; border-radius: 4px 4px 0 0;`;\n      case 'paper-kicker':\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 24px 0 12px; color: ${headingColor}; text-align: left; line-height: 1.35; padding-left: 10px; border-left: 3px double ${color};`;\n      case 'typo-subhead':\n        return `${base} font-weight: 700; color: ${headingColor};`;\n      default:\n        return this.joinStyleStrings(base, config.headingLetterSpacing ? `letter-spacing: ${config.headingLetterSpacing}px` : '');\n    }\n  }\n\n  getH4Style(type, color, fontSize, font, headingColor) {\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 15px 0 10px; text-align: left; color: ${headingColor}; line-height: 1.35;`;\n    switch (type) {\n      case 'editorial-h3': // Inherit H3 style for H4\n        return `font-family: ${AppleTheme.FONTS.serif}; display: block; font-size: ${fontSize}px; font-weight: bold; margin: 15px 0 10px; text-align: left; color: ${headingColor}; line-height: 1.35;\n           border-bottom: 1px solid ${color}; padding-bottom: 3px; display: inline-block; width: auto; letter-spacing: 0.5px;`;\n      case 'simple': // Simple Bold (User Font)\n        // Use headingColor (Deep) instead of color (Bright)\n        return `${base}`;\n      case 'light-bg':\n        // Background uses bright color tint (low opacity), Text uses deep headingColor\n        return `${base} background-color: ${color}15; padding: 4px 8px; border-radius: 4px; display: inline-block;`;\n      case 'classic-minor':\n        return `${base} border-left: 2px solid ${color}55; padding-left: 8px;`;\n      case 'left-border':\n        return `${base} border-left: 3px solid ${color}; padding-left: 9px;`;\n      case 'bottom-line-left':\n        return `${base} display: inline-block; border-bottom: 2px solid ${color}; padding-bottom: 2px; margin-right: auto;`;\n      case 'paper-kicker':\n        return `font-family: ${AppleTheme.FONTS.serif}; display: inline-block; font-size: ${fontSize}px; font-weight: bold; margin: 22px 0 10px; color: ${headingColor}; text-align: left; line-height: 1.35; border-bottom: 1px double ${color}99; padding-bottom: 2px;`;\n      case 'grid-kicker':\n        return `${base} display: inline-block; border-bottom: 1px dashed ${color}44; padding-bottom: 2px;`;\n      case 'typo-subhead':\n        return `${base} font-weight: 700; letter-spacing: 1.5px;`;\n      case 'colorful-kicker':\n        return `${base} color: ${color}; background: ${color}12; padding: 4px 8px; border-radius: 4px; display: inline-block;`;\n      case 'italic-serif':\n        return `${base} font-style: italic; font-family: serif; border-bottom: 1px dashed #ccc; display: inline-block; padding-bottom: 2px;`;\n      default:\n        return base;\n    }\n  }\n\n  getH5Style(type, color, fontSize, font, headingColor) {\n    if (!type) {\n      return `font-family: ${font}; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;\n    }\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 12px 0 8px; text-align: left; line-height: 1.4;`;\n    switch (type) {\n      case 'light-bg':\n        return `${base} background-color: ${color}12; padding: 3px 7px; border-radius: 4px; display: inline-block;`;\n      case 'dashed-bottom':\n        return `${base} font-weight: 600; border-bottom: 1px dashed ${color}33; display: inline-block; padding-bottom: 1px;`;\n      case 'simple':\n      default:\n        return base;\n    }\n  }\n\n  getH6Style(type, color, fontSize, font, headingColor, mutedColor = '#6b7280') {\n    if (!type) {\n      return `font-family: ${font}; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 10px 0; text-align: left; line-height: 1.4;`;\n    }\n    const base = `font-family: ${font}; display: block; font-size: ${fontSize}px; font-weight: bold; color: ${headingColor}; margin: 10px 0 6px; text-align: left; line-height: 1.4;`;\n    switch (type) {\n      case 'quiet':\n        return `${base} color: ${mutedColor}; font-weight: 600;`;\n      default:\n        return base;\n    }\n  }\n\n  joinStyleStrings(...styles) {\n    return styles\n      .map((style) => (style || '').trim())\n      .filter(Boolean)\n      .map((style) => style.endsWith(';') ? style : `${style};`)\n      .join(' ');\n  }\n\n  /**\n   * \u66F4\u65B0\u914D\u7F6E\n   */\n  update(options) {\n    if (options.theme !== undefined) this.themeName = options.theme;\n    if (options.themeColor !== undefined) this.themeColor = options.themeColor;\n    if (options.customColor !== undefined) this.customColor = options.customColor;\n    if (options.quoteCalloutStyleMode !== undefined) this.quoteCalloutStyleMode = options.quoteCalloutStyleMode;\n    if (options.fontFamily !== undefined) this.fontFamily = options.fontFamily;\n    if (options.fontSize !== undefined) this.fontSize = options.fontSize;\n    if (options.macCodeBlock !== undefined) this.macCodeBlock = options.macCodeBlock;\n    if (options.codeLineNumber !== undefined) this.codeLineNumber = options.codeLineNumber;\n    if (options.sidePadding !== undefined) this.sidePadding = options.sidePadding;\n    if (options.coloredHeader !== undefined) this.coloredHeader = options.coloredHeader;\n  }\n\n  /**\n   * \u83B7\u53D6\u4E3B\u9898\u5217\u8868\n   */\n  static getThemeList() {\n    return Object.entries(AppleTheme.THEME_CONFIGS).map(([key, config]) => ({\n      value: key,\n      label: config.name,\n    }));\n  }\n\n  /**\n   * \u83B7\u53D6\u4E3B\u9898\u8272\u5217\u8868\n   */\n  static getColorList() {\n    return Object.entries(AppleTheme.THEME_COLORS).map(([key, value]) => ({\n      value: key,\n      color: value,\n    }));\n  }\n}\n\n// \u5BFC\u51FA\u5230\u5168\u5C40\u4F5C\u7528\u57DF\nwindow.AppleTheme = AppleTheme;\n",
-        "converter": "/**\n * \u{1F34E} Apple Style Markdown \u8F6C\u6362\u5668\n * \u76F4\u63A5\u7167\u6284 wechat-tool \u7684\u4EE3\u7801\u5757\u5B9E\u73B0\n * \u9488\u5BF9\u5FAE\u4FE1\u516C\u4F17\u53F7\u4F18\u5316\uFF1A\u4F7F\u7528 section \u7ED3\u6784\uFF0C\u589E\u5F3A\u517C\u5BB9\u6027\n */\n\n// Callout \u56FE\u6807\u914D\u7F6E\uFF08\u989C\u8272\u8DDF\u968F\u4E3B\u9898\u8272\uFF09\nconst CALLOUT_ICONS = {\n  // \u4FE1\u606F\u7C7B\n  note: { icon: '\u2139\uFE0F', label: '\u5907\u6CE8' },\n  info: { icon: '\u2139\uFE0F', label: '\u4FE1\u606F' },\n  todo: { icon: '\u2611\uFE0F', label: '\u5F85\u529E' },\n  // \u6458\u8981\u7C7B\n  abstract: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  summary: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  tldr: { icon: '\u{1F4C4}', label: 'TL;DR' },\n  // \u63D0\u793A\u7C7B\n  tip: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  hint: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  important: { icon: '\u{1F4A1}', label: '\u91CD\u8981' },\n  // \u6210\u529F\u7C7B\n  success: { icon: '\u2705', label: '\u6210\u529F' },\n  check: { icon: '\u2705', label: '\u5B8C\u6210' },\n  done: { icon: '\u2705', label: '\u5B8C\u6210' },\n  // \u95EE\u9898\u7C7B\n  question: { icon: '\u2753', label: '\u95EE\u9898' },\n  help: { icon: '\u2753', label: '\u5E2E\u52A9' },\n  faq: { icon: '\u2753', label: 'FAQ' },\n  // \u8B66\u544A\u7C7B\n  warning: { icon: '\u26A0\uFE0F', label: '\u8B66\u544A' },\n  caution: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  attention: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  // \u5931\u8D25/\u5371\u9669\u7C7B\n  failure: { icon: '\u274C', label: '\u5931\u8D25' },\n  fail: { icon: '\u274C', label: '\u5931\u8D25' },\n  missing: { icon: '\u274C', label: '\u7F3A\u5931' },\n  danger: { icon: '\u{1F6A8}', label: '\u5371\u9669' },\n  error: { icon: '\u274C', label: '\u9519\u8BEF' },\n  bug: { icon: '\u{1F41B}', label: 'Bug' },\n  // \u5F15\u7528\u7C7B\n  quote: { icon: '\u{1F4AC}', label: '\u5F15\u7528' },\n  cite: { icon: '\u{1F4DD}', label: '\u5F15\u7528' },\n  // \u793A\u4F8B\u7C7B\n  example: { icon: '\u{1F4CB}', label: '\u793A\u4F8B' },\n};\n\nconst CALLOUT_SEMANTIC_GROUPS = {\n  note: 'info',\n  info: 'info',\n  todo: 'info',\n  abstract: 'info',\n  summary: 'info',\n  tldr: 'info',\n  tip: 'tip',\n  hint: 'tip',\n  important: 'tip',\n  success: 'success',\n  check: 'success',\n  done: 'success',\n  question: 'question',\n  help: 'question',\n  faq: 'question',\n  warning: 'warning',\n  caution: 'warning',\n  attention: 'warning',\n  failure: 'danger',\n  fail: 'danger',\n  missing: 'danger',\n  danger: 'danger',\n  error: 'danger',\n  bug: 'danger',\n  quote: 'quote',\n  cite: 'quote',\n  example: 'quote',\n};\n\nconst CALLOUT_SEMANTIC_COLORS = {\n  info: '#2f6fdd',\n  tip: '#1f8c7a',\n  success: '#2d8a4a',\n  question: '#7251b5',\n  warning: '#b26a00',\n  danger: '#c44747',\n  quote: '#5f6b7a',\n};\n\nfunction resolveCalloutSemanticColor(type, fallbackColor) {\n  const key = String(type || '').trim().toLowerCase();\n  const group = CALLOUT_SEMANTIC_GROUPS[key] || 'info';\n  return CALLOUT_SEMANTIC_COLORS[group] || fallbackColor;\n}\n\nwindow.AppleStyleConverter = class AppleStyleConverter {\n  constructor(theme, avatarUrl = '', showImageCaption = true, app = null, sourcePath = '') {\n    this.theme = theme;\n    this.avatarUrl = avatarUrl;\n    this.showImageCaption = showImageCaption;\n    this.app = app; // Obsidian App instance\n    this.sourcePath = sourcePath; // Current file path for relative resolution\n    this.md = null;\n    this.hljs = null;\n  }\n\n  async initMarkdownIt() {\n    if (this.md) return;\n    if (typeof markdownit === 'undefined') throw new Error('markdown-it \u672A\u52A0\u8F7D');\n    this.hljs = typeof hljs !== 'undefined' ? hljs : null;\n    this.md = markdownit({ html: true, breaks: true, linkify: true, typographer: true });\n\n    // Enable MathJax if available\n    if (window.ObsidianWechatMath) {\n      window.ObsidianWechatMath(this.md);\n    }\n\n    this.setupRenderRules();\n  }\n\n  reinit() { this.md = null; }\n\n  updateConfig(config) {\n    if (config.showImageCaption !== undefined) {\n      this.showImageCaption = config.showImageCaption;\n    }\n    if (config.avatarUrl !== undefined) {\n      this.avatarUrl = config.avatarUrl;\n    }\n  }\n\n  updateSourcePath(path) {\n    this.sourcePath = path;\n  }\n\n  resolveImagePath(src) {\n    if (!this.app) return src;\n    // IF remote url, bypass\n    if (/^(https?:\\/\\/|data:)/i.test(src)) return src;\n\n    try {\n      // Markdown-it might encode the URL (e.g. %20 for space), but Obsidian expects decoded paths\n      const linkPath = decodeURI(src);\n      const sourcePath = this.sourcePath;\n      // Resolve using Obsidian's standard API\n      const tFile = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);\n      if (tFile) {\n        return this.app.vault.getResourcePath(tFile);\n      }\n    } catch (e) {\n      console.error('Image resolution failed:', src, e);\n    }\n    return src;\n  }\n\n  setupRenderRules() {\n    // Callout & Blockquote \u667A\u80FD\u68C0\u6D4B\u6E32\u67D3\n    this.md.renderer.rules.blockquote_open = (tokens, idx, options, env, self) => {\n      // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A\u6587\u672C\u5185\u5BB9\uFF0C\u68C0\u6D4B\u662F\u5426\u4E3A callout \u8BED\u6CD5\n      const calloutInfo = this.detectCallout(tokens, idx);\n\n      // \u4F7F\u7528\u6808\u7BA1\u7406 callout \u72B6\u6001\uFF0C\u652F\u6301\u5D4C\u5957\n      if (!env._calloutStack) env._calloutStack = [];\n      env._calloutStack.push(calloutInfo);\n\n      if (calloutInfo) {\n        return this.renderCalloutOpen(calloutInfo);\n      }\n      // \u666E\u901A blockquote\n      return `<blockquote style=\"${this.getInlineStyle('blockquote')}\">`;\n    };\n\n    this.md.renderer.rules.blockquote_close = (tokens, idx, options, env, self) => {\n      const calloutInfo = env._calloutStack ? env._calloutStack.pop() : null;\n      if (calloutInfo) {\n        return `</section></section>`; // \u5173\u95ED\u5185\u5BB9\u533A\u548C\u5916\u5C42\u5BB9\u5668\n      }\n      return `</blockquote>`;\n    };\n\n    this.md.renderer.rules.paragraph_open = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `<p style=\"${this.getInlineStyle('p')}\">`;\n    };\n\n    this.md.renderer.rules.paragraph_close = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `</p>`;\n    };\n    this.md.renderer.rules.heading_open = (tokens, idx) => `<${tokens[idx].tag} style=\"${this.getInlineStyle(tokens[idx].tag)}\">`;\n    this.md.renderer.rules.bullet_list_open = () => `<ul style=\"${this.getInlineStyle('ul')}\">`;\n    this.md.renderer.rules.ordered_list_open = () => `<ol style=\"${this.getInlineStyle('ol')}\">`;\n    this.md.renderer.rules.list_item_open = () => `<li style=\"${this.getInlineStyle('li')}\">`;\n\n    this.md.renderer.rules.code_inline = (tokens, idx) =>\n      `<code style=\"${this.getInlineStyle('code')}\">${this.escapeHtml(tokens[idx].content)}</code>`;\n\n    this.md.renderer.rules.fence = (tokens, idx) => {\n      const content = tokens[idx].content;\n      const lang = tokens[idx].info || 'text';\n      return this.createCodeBlock(content, lang);\n    };\n\n    this.md.renderer.rules.link_open = (tokens, idx) => {\n      const href = tokens[idx].attrGet('href');\n      const safeHref = this.validateLink(href);\n      return `<a href=\"${safeHref}\" style=\"${this.getInlineStyle('a')}\">`;\n    };\n    this.md.renderer.rules.strong_open = () => `<strong style=\"${this.getInlineStyle('strong')}\">`;\n    this.md.renderer.rules.em_open = () => `<em style=\"${this.getInlineStyle('em')}\">`;\n    this.md.renderer.rules.s_open = () => `<del style=\"${this.getInlineStyle('del')}\">`;\n\n    this.md.renderer.rules.image = (tokens, idx) => {\n      let src = tokens[idx].attrGet('src');\n      const alt = tokens[idx].content;\n\n      // Resolve Local Path for Preview\n      src = this.resolveImagePath(src);\n\n\n      let caption = '';\n\n      if (!alt) {\n        // Logic 1: ![]() -> Extract filename, clean query/ext\n        caption = decodeURIComponent(this.extractFileName(src));\n        caption = caption.replace(/\\?.*$/, '');\n        caption = caption.replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');\n      } else {\n        // Logic 2: ![alt]() -> Use alt, clean resize/ext\n        caption = alt;\n        caption = caption.replace(/\\|\\s*\\d+(x\\d+)?\\s*$/, '');\n        caption = caption.replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');\n      }\n\n\n      if (this.avatarUrl) {\n        // \u6C34\u5370\u6A21\u5F0F\uFF1A\u663E\u793A\u5934\u50CF + \u56FE\u7247\u540D\u79F0\uFF0C\u4F7F\u7528\u5E26\u8FB9\u6846\u7684\u6837\u5F0F\n        const avatarHeaderStyle = this.getInlineStyle('avatar-header');\n        const spacerStyle = 'display:block;height:8px;line-height:8px;font-size:0;';\n        // Fix: Force text-align: left for the figure container in watermark mode to prevent centering\n        // We strip the default text-align: center from the figure style and add text-align: left\n        let figureStyle = this.getInlineStyle('figure');\n        figureStyle = figureStyle.replace('text-align: center;', 'text-align: left;');\n\n        return `<figure style=\"${figureStyle}\"><div style=\"${avatarHeaderStyle}\"><img src=\"${this.avatarUrl}\" alt=\"logo\" style=\"${this.getInlineStyle('avatar')}\"><span style=\"${this.getInlineStyle('avatar-caption')}\">${caption}</span></div><section style=\"${spacerStyle}\">&nbsp;</section><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n\n      // \u975E\u6C34\u5370\u6A21\u5F0F\uFF1A\u65E0\u8FB9\u6846\u6837\u5F0F\n      const simpleFigureStyle = 'display:block;margin:16px 0;text-align:center;';\n      if (this.showImageCaption) {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"><figcaption style=\"${this.getInlineStyle('figcaption')}\">${caption}</figcaption></figure>`;\n      } else {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n    };\n\n    this.md.renderer.rules.hr = () => `<hr style=\"${this.getInlineStyle('hr')}\">`;\n    this.md.renderer.rules.table_open = (tokens, idx) => `<section style=\"${this.getInlineStyle('table-wrapper')}\"><table style=\"${this.getTableStyle(tokens, idx)}\">`;\n    this.md.renderer.rules.table_close = () => `</table></section>`;\n    this.md.renderer.rules.thead_open = () => `<thead style=\"${this.getInlineStyle('thead')}\">`;\n    this.md.renderer.rules.th_open = () => `<th style=\"${this.getInlineStyle('th')}\">`;\n    this.md.renderer.rules.td_open = () => `<td style=\"${this.getInlineStyle('td')}\">`;\n  }\n\n  getTableColumnCount(tokens, tableIdx) {\n    if (!Array.isArray(tokens)) return 0;\n\n    let rowOpen = false;\n    let count = 0;\n    for (let i = tableIdx + 1; i < tokens.length; i += 1) {\n      const token = tokens[i];\n      if (!token) continue;\n      if (token.type === 'table_close') break;\n      if (token.type === 'tr_open') {\n        rowOpen = true;\n        count = 0;\n        continue;\n      }\n      if (token.type === 'tr_close' && rowOpen) {\n        if (count > 0) return count;\n        rowOpen = false;\n        continue;\n      }\n      if (!rowOpen || (token.type !== 'th_open' && token.type !== 'td_open')) continue;\n\n      const colspanAttr = typeof token.attrGet === 'function' ? token.attrGet('colspan') : null;\n      const colspan = Number.parseInt(colspanAttr || '1', 10);\n      count += Number.isFinite(colspan) && colspan > 0 ? colspan : 1;\n    }\n\n    return count;\n  }\n\n  getTableMinWidth(tokens, tableIdx) {\n    const columns = this.getTableColumnCount(tokens, tableIdx);\n    if (!columns) return 720;\n    const width = columns <= 2 ? (columns * 180 + 80) : (columns * 230 + 80);\n    return Math.max(360, Math.min(1200, width));\n  }\n\n  getTableStyle(tokens, tableIdx) {\n    const baseStyle = this.getInlineStyle('table');\n    const minWidth = this.getTableMinWidth(tokens, tableIdx);\n    const withoutWidth = baseStyle\n      .replace(/(?:^|;)\\s*width\\s*:\\s*[^;]+;?/gi, ';')\n      .replace(/(?:^|;)\\s*min-width\\s*:\\s*[^;]+;?/gi, ';')\n      .replace(/(?:^|;)\\s*max-width\\s*:\\s*[^;]+;?/gi, ';')\n      .replace(/;{2,}/g, ';')\n      .replace(/^\\s*;\\s*/, '')\n      .trim();\n    const normalized = withoutWidth && !withoutWidth.endsWith(';') ? `${withoutWidth};` : withoutWidth;\n    return `width: ${minWidth}px; min-width: 100%; max-width: none; ${normalized}`;\n  }\n\n  /**\n   * \u68C0\u6D4B blockquote \u662F\u5426\u4E3A Callout \u8BED\u6CD5\n   * \u5E76\u6E05\u7406 marker \u6807\u8BC6\u7B26\n   * @param {Array} tokens - markdown-it tokens\n   * @param {number} idx - blockquote_open \u7684\u7D22\u5F15\n   * @returns {Object|null} - callout \u4FE1\u606F { type, title, icon, label } \u6216 null\n   */\n  detectCallout(tokens, idx) {\n    // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A inline token\n    for (let i = idx + 1; i < tokens.length; i++) {\n      if (tokens[i].type === 'blockquote_close') break;\n      if (tokens[i].type === 'inline' && tokens[i].content) {\n        // \u53EA\u53D6\u7B2C\u4E00\u884C\u5185\u5BB9\u8FDB\u884C\u5339\u914D\n        const firstLine = tokens[i].content.split('\\n')[0];\n        // \u652F\u6301\u81EA\u5B9A\u4E49 callout \u7C7B\u578B\uFF08\u5305\u542B\u4E2D\u6587\u3001\u8FDE\u5B57\u7B26\u7B49\uFF09\uFF0C\u4F8B\u5982 [!\u5B66\u4E60\u7814\u7A76] / [!custom-type]\n        const match = firstLine.match(/^\\[!\\s*([^\\]\\r\\n]+?)\\s*\\](?:\\s+(.*))?/);\n        if (match) {\n          const rawType = match[1].trim();\n          if (!rawType || !/\\S/u.test(rawType)) return null;\n          const type = rawType.toLowerCase();\n          const customTitle = match[2] ? match[2].trim() : null;\n          const mappedConfig = CALLOUT_ICONS[type];\n          const config = mappedConfig || { icon: CALLOUT_ICONS.note.icon, label: type };\n          const defaultTitle = type.charAt(0).toUpperCase() + type.slice(1);\n\n          // --- \u5728 Token \u9636\u6BB5\u6E05\u7406 Marker ---\n          // 1. \u66F4\u65B0 content\uFF1A\u79FB\u9664\u5305\u542B marker \u7684\u7B2C\u4E00\u884C\n          const lines = tokens[i].content.split('\\n');\n          lines.shift();\n          tokens[i].content = lines.join('\\n');\n\n          // 2. \u66F4\u65B0 children\uFF1A\u540C\u6B65\u79FB\u9664\u7B2C\u4E00\u884C\u5BF9\u5E94\u7684 tokens\n          if (tokens[i].children) {\n            const breakIdx = tokens[i].children.findIndex(c => c.type === 'softbreak' || c.type === 'hardbreak');\n            if (breakIdx !== -1) {\n              // \u79FB\u9664\u7B2C\u4E00\u4E2A\u6362\u884C\u7B26\u53CA\u5176\u4E4B\u524D\u7684\u6240\u6709\u5185\u5BB9\n              tokens[i].children = tokens[i].children.slice(breakIdx + 1);\n            } else {\n              // \u53EA\u6709\u4E00\u884C\uFF0C\u76F4\u63A5\u6E05\u7A7A\n              tokens[i].children = [];\n            }\n          }\n\n          // 3. \u5982\u679C\u8BE5\u6BB5\u843D\u53D8\u4E3A\u7A7A\uFF08\u8BF4\u660E marker \u72EC\u5360\u4E00\u884C\uFF09\uFF0C\u9690\u85CF\u8BE5\u6BB5\u843D\u5BB9\u5668\n          if (tokens[i].content.trim() === '') {\n            if (i > 0 && tokens[i-1].type === 'paragraph_open') tokens[i-1].hidden = true;\n            tokens[i].hidden = true; // \u9690\u85CF inline token \u672C\u8EAB\n            if (i < tokens.length - 1 && tokens[i+1].type === 'paragraph_close') tokens[i+1].hidden = true;\n          }\n\n          return {\n            type,\n            title: customTitle || defaultTitle,\n            icon: config.icon,\n            label: config.label,\n          };\n        }\n        break; // \u53EA\u68C0\u67E5\u7B2C\u4E00\u4E2A inline\n      }\n    }\n    return null;\n  }\n\n  /**\n   * \u6E32\u67D3 Callout \u5F00\u59CB\u6807\u7B7E\n   * @param {Object} calloutInfo - { type, title, icon }\n   * @returns {string} - HTML \u5B57\u7B26\u4E32\n   */\n  renderCalloutOpen(calloutInfo) {\n    const color = this.theme.getThemeColorValue();\n    const sizes = this.theme.getSizes();\n    const font = this.theme.getFontFamily();\n    const quoteCalloutStyleMode = typeof this.theme.getQuoteCalloutStyleMode === 'function'\n      ? this.theme.getQuoteCalloutStyleMode()\n      : 'theme';\n\n    if (quoteCalloutStyleMode === 'neutral') {\n      return this.renderCalloutOpenNeutral(calloutInfo, color, sizes, font);\n    }\n\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);\n\n    const containerStyle = `\n      margin: 16px 0 16px 8px;\n      background: ${accentColor}0D;\n      border: 1px solid ${accentColor}24;\n      border-radius: 4px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 8px 12px;\n      background: ${accentColor}14;\n      border-bottom: 1px solid ${accentColor}24;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: ${accentColor};\n    `.replace(/\\s+/g, ' ').trim();\n\n    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;\n    const titleStyle = `flex: 1; color: ${accentColor};`;\n\n    const contentStyle = `\n      padding: 12px 16px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #595959;\n      background: ${accentColor}0D;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"${iconStyle}\">${calloutInfo.icon}</span>\n        <span style=\"${titleStyle}\">${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  renderCalloutOpenNeutral(calloutInfo, themeColor, sizes, font) {\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, themeColor);\n\n    const containerStyle = `\n      margin: 16px 0 16px 8px;\n      background: #f9f9f9;\n      border: 1px solid ${accentColor}24;\n      border-radius: 4px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 8px 12px;\n      background: ${accentColor}14;\n      border-bottom: 1px solid ${accentColor}24;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: ${accentColor};\n    `.replace(/\\s+/g, ' ').trim();\n\n    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;\n    const titleStyle = `flex: 1; color: ${accentColor};`;\n    const contentStyle = `\n      padding: 12px 16px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #595959;\n      background: #f9f9f9;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"${iconStyle}\">${calloutInfo.icon}</span>\n        <span style=\"${titleStyle}\">${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  highlightCode(code, lang) {\n    if (!this.hljs) return this.escapeHtml(code);\n    try {\n      if (lang && this.hljs.getLanguage(lang)) return this.hljs.highlight(code, { language: lang }).value;\n      return this.hljs.highlightAuto(code).value;\n    } catch (e) { return this.escapeHtml(code); }\n  }\n\n  /**\n   * \u683C\u5F0F\u5316\u9AD8\u4EAE\u4EE3\u7801\uFF08\u53C2\u8003 wechat-tool formatHighlightedCode\uFF09\n   */\n  formatHighlightedCode(html, preserveNewlines = false) {\n    let formatted = html;\n    // \u5C06 span \u4E4B\u95F4\u7684\u7A7A\u683C\u79FB\u5230 span \u5185\u90E8\n    formatted = formatted.replace(/(<span[^>]*>[^<]*<\\/span>)(\\s+)(<span[^>]*>[^<]*<\\/span>)/g,\n      (_, span1, spaces, span2) => span1 + span2.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    formatted = formatted.replace(/(\\s+)(<span[^>]*>)/g,\n      (_, spaces, span) => span.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    // \u66FF\u6362\u5236\u8868\u7B26\u4E3A4\u4E2A\u7A7A\u683C\n    formatted = formatted.replace(/\\t/g, '    ');\n\n    // wechat-tool \u7684\u903B\u8F91\uFF1A\u5982\u679C\u662F lineNumbers \u6A21\u5F0F\uFF08preserveNewlines=false\uFF09\uFF0C\u5C06\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    // \u5982\u679C\u4E0D\u662F\uFF08preserveNewlines=true\uFF09\uFF0C\u5C06\u6362\u884C\u8F6C\u4E3A <br/> \u4E14\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    if (preserveNewlines) {\n      formatted = formatted\n        .replace(/\\r\\n/g, '<br/>')\n        .replace(/\\n/g, '<br/>')\n        .replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    } else {\n      formatted = formatted.replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    }\n    return formatted;\n  }\n\n  inlineHighlightStyles(html) {\n    const map = {\n      'hljs-keyword': 'color:#ff7b72 !important;', 'hljs-built_in': 'color:#ffa657 !important;',\n      'hljs-type': 'color:#ffa657 !important;', 'hljs-literal': 'color:#79c0ff !important;',\n      'hljs-number': 'color:#79c0ff !important;', 'hljs-string': 'color:#a5d6ff !important;',\n      'hljs-symbol': 'color:#a5d6ff !important;', 'hljs-comment': 'color:#8b949e !important;font-style:italic !important;',\n      'hljs-doctag': 'color:#8b949e !important;', 'hljs-meta': 'color:#ffa657 !important;',\n      'hljs-attr': 'color:#79c0ff !important;', 'hljs-attribute': 'color:#79c0ff !important;',\n      'hljs-name': 'color:#7ee787 !important;', 'hljs-tag': 'color:#7ee787 !important;',\n      'hljs-selector-tag': 'color:#7ee787 !important;', 'hljs-selector-class': 'color:#d2a8ff !important;',\n      'hljs-selector-id': 'color:#79c0ff !important;', 'hljs-variable': 'color:#ffa657 !important;',\n      'hljs-template-variable': 'color:#ffa657 !important;', 'hljs-params': 'color:#e6e6e6 !important;',\n      'hljs-function': 'color:#d2a8ff !important;', 'hljs-title': 'color:#d2a8ff !important;',\n      'hljs-punctuation': 'color:#e6e6e6 !important;', 'hljs-property': 'color:#79c0ff !important;',\n      'hljs-operator': 'color:#ff7b72 !important;', 'hljs-regexp': 'color:#a5d6ff !important;',\n      'hljs-subst': 'color:#e6e6e6 !important;',\n    };\n\n    // \u6539\u8FDB\uFF1A\u5904\u7406 class \u5C5E\u6027\u5305\u542B\u591A\u4E2A\u7C7B\u540D\u7684\u60C5\u51B5\n    return html.replace(/class=\"([^\"]*)\"/g, (match, classNames) => {\n      const classes = classNames.split(/\\s+/);\n      let styles = '';\n      for (const cls of classes) {\n        if (map[cls]) {\n          styles += map[cls];\n        }\n      }\n      return styles ? `style=\"${styles}\"` : match;\n    }).replace(/class=\"[^\"]*\"/g, ''); // \u518D\u6B21\u6E05\u7406\u672A\u5339\u914D\u7684 class\n  }\n\n  /**\n   * \u521B\u5EFA\u4EE3\u7801\u5757 - \u7167\u6284 wechat-tool \u7684\u5B9E\u73B0\n   * \u4F7F\u7528 wechat-tool \u7684\u989C\u8272\u548C\u7ED3\u6784\n   */\n  createCodeBlock(content, lang) {\n    const showMac = this.theme.macCodeBlock;\n    const showLineNum = this.theme.codeLineNumber;\n\n    // wechat-tool \u7684\u989C\u8272\u914D\u7F6E\uFF08GitHub Dark \u4E3B\u9898\uFF09\n    const background = '#0d1117';  // GitHub Dark \u80CC\u666F\n    const color = '#f0f6fc';       // GitHub Dark \u6587\u5B57\n    const barBackground = '#161b22'; // \u5DE5\u5177\u680F\u80CC\u666F\n    const borderColor = '#30363d';   // \u8FB9\u6846\u989C\u8272\n\n    let lines = content.replace(/\\r\\n/g, '\\n').split('\\n');\n    while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();\n\n    // Mac \u5934\u90E8\n    // \u5173\u952E\u4FEE\u6B63\uFF1A\u4F7F\u7528 section \u800C\u4E0D\u662F div\uFF0C\u589E\u5F3A\u5728\u516C\u4F17\u53F7\u4E2D\u7684\u517C\u5BB9\u6027\n    const macHeader = showMac ? `<section style=\"display:block !important;background:${barBackground} !important;padding:6px 10px 6px 10px !important;border:none !important;border-bottom:1px solid ${borderColor} !important;border-radius:8px 8px 0 0 !important;line-height:1 !important;\">\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#28c840 !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n    </section>` : '';\n\n    // \u7EDF\u4E00\u884C\u9AD8\u548C\u5B57\u4F53\u53D8\u91CF\n    const lineHeight = '1.75';\n    // const fontSize = '13px';\n\n    let codeHtml;\n\n    if (showLineNum) {\n      // \u5E26\u884C\u53F7\uFF1A\u9010\u884C\u5904\u7406\n      const highlightedLines = lines.map(lineRaw => {\n        const lineHtml = this.highlightCode(lineRaw, lang);\n        const styled = this.inlineHighlightStyles(lineHtml);\n        // \u6CE8\u610F\uFF1A\u8FD9\u91CC formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false\uFF0C\u4E0D\u5305\u542B <br>\uFF0C\u4E0D\u5305\u542B &nbsp; (\u9664\u975E\u5185\u90E8\u903B\u8F91\u5904\u7406)\n        // \u5B9E\u9645\u4E0A formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false \u65F6\uFF0C\u53EA\u505A\u7A7A\u683C\u5904\u7406\n        // wechat-tool \u4E2D\uFF1A return formatted === '' ? '&nbsp;' : formatted\n        const formatted = this.formatHighlightedCode(styled, false);\n        return formatted === '' ? '&nbsp;' : formatted;\n      });\n\n      // \u884C\u53F7\u5217\n      const lineNumbersHtml = highlightedLines.map((_, idx) =>\n        `<section style=\"height:1.75em !important;line-height:${lineHeight} !important;padding:0 12px 0 12px !important;font-size:13px !important;color:#95989C !important;text-align:right !important;white-space:nowrap !important;vertical-align:top !important;margin:0 !important;\">${idx + 1}</section>`\n      ).join('');\n\n      // \u4EE3\u7801\u5185\u5BB9\n      // \u5173\u952E\u6539\u52A8\uFF1A\u56DE\u5F52 wechat-tool \u539F\u59CB\u65B9\u6848 \u2014\u2014 \u4F7F\u7528 <br> \u62FC\u63A5\u4EE3\u7801\u884C\uFF0C\u800C\u4E0D\u662F div \u5206\u5272\n      // \u8FD9\u6837\u53F3\u4FA7\u5C31\u662F\u4E00\u4E2A\u5355\u4E00\u7684\u6587\u672C\u6D41\uFF0C\u9AD8\u5EA6\u4E25\u683C\u7531 line-height \u63A7\u5236\n      const codeInnerHtml = highlightedLines.join('<br/>');\n\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;line-height:${lineHeight} !important;font-size:13px !important;\">${codeInnerHtml}</section>`;\n\n      // \u884C\u53F7\u5217\u5BB9\u5668\u6837\u5F0F\n      const lineNumberColumnStyles = `text-align:right !important;padding:12px 0 12px 0 !important;border-right:1px solid rgba(255,255,255,0.1) !important;user-select:none !important;background:transparent !important;flex:0 0 auto !important;min-width:3.5em !important;margin:0 !important;`;\n\n      // \u6CE8\u610F flex \u5BB9\u5668\u7684 padding 0\uFF0C\u5185\u90E8 padding \u5206\u522B\u5728 lineNumberColumn \u548C code section\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"${lineNumberColumnStyles}\">${lineNumbersHtml}</section>\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px 12px 12px 16px !important;margin:0 !important;min-width:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    } else {\n      // \u65E0\u884C\u53F7\n      const highlighted = this.highlightCode(lines.join('\\n'), lang);\n      const styled = this.inlineHighlightStyles(highlighted);\n      // preserveNewlines=true -> \u5305\u542B <br>\n      const formatted = this.formatHighlightedCode(styled, true);\n      // \u6539\u52A8\uFF1Awhite-space: nowrap !important\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;word-break:keep-all !important;overflow-wrap:normal !important;line-height:${lineHeight} !important;font-size:13px !important;margin:0 !important;\">${formatted}</section>`;\n\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px !important;min-width:0 !important;margin:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    }\n\n    // \u5916\u5C42\u5BB9\u5668\n    return `<section class=\"code-snippet__fix\" style=\"width:100% !important;margin:12px 0 !important;background:${background} !important;border:1px solid ${borderColor} !important;border-radius:8px !important;overflow:hidden !important;box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;display:block !important;\">\n${macHeader}\n<section style=\"padding:0 !important;border:none !important;background:${background} !important;color:${color} !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:${lineHeight} !important;white-space:nowrap !important;overflow-x:auto !important;display:block !important;\">\n<pre style=\"margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:${color} !important;white-space:nowrap !important;overflow-x:visible !important;display:inline-block !important;min-width:100% !important;\">${codeHtml}</pre>\n</section>\n</section>`;\n  }\n\n  getInlineStyle(tagName) { return this.theme.getStyle(tagName); }\n  stripFrontmatter(md) { return md.replace(/^---\\n[\\s\\S]*?\\n---\\n?/, ''); }\n\n\n  async convert(markdown) {\n    if (!this.md) await this.initMarkdownIt();\n\n    // \u4FEE\u590D\uFF1A\u79FB\u9664\u5757\u7EA7\u516C\u5F0F $$ \u524D\u9762\u7684\u7F29\u8FDB\uFF0C\u907F\u514D\u88AB\u8BEF\u8BC6\u522B\u4E3A\u4EE3\u7801\u5757\n    // \u4EC5\u5339\u914D\u884C\u9996\u7684\u7A7A\u767D + $$\uFF0C\u4E0D\u5F71\u54CD\u5176\u4ED6\u7F29\u8FDB\n    markdown = markdown.replace(/^[\\t ]+(\\$\\$)/gm, '$1');\n\n    // Pre-process: Convert Wiki-links ![[...]] to standard images ![](...)\n    // Regex: ![[path|alt]] or ![[path]]\n    // Fix: Use more robust regex preventing greedy capture and encoding URI for paths with spaces\n    markdown = markdown.replace(/!\\[\\[([^\\[\\]|]+)(?:\\|([^\\[\\]]+))?\\]\\]/g, (match, path, alt) => {\n      // Must encodeURI to handle spaces in filenames which are valid in WikiLinks but break standard Markdown images\n      // trimmed path to avoid leading/trailing spaces breaking the link\n      return `![${alt || ''}](${encodeURI(path.trim())})`;\n    });\n\n\n\n    let html = this.md.render(this.stripFrontmatter(markdown));\n    html = this.fixListParagraphs(html);\n    html = this.unwrapFigures(html); // Fix: Remove <p> wrappers from <figure> to prevent empty lines\n    html = this.removeBlockquoteParagraphMargins(html); // Fix: Remove margins from <p> inside <blockquote> for vertical centering\n    html = this.fixMathJaxTags(html); // Fix: Replace <mjx-container> with WeChat-compatible tags\n    html = this.sanitizeHtml(html); // Final security pass: Neutralize XSS and dangerous tags\n    return `<section style=\"${this.getInlineStyle('section')}\">${html}</section>`;\n  }\n\n  fixMathJaxTags(html) {\n    if (!html.includes('mjx-container')) return html;\n\n    // Fix: Remove assistive MathML (hidden text that shows up in WeChat)\n    html = html.replace(/<mjx-assistive-mml[^>]*>[\\s\\S]*?<\\/mjx-assistive-mml>/gi, '');\n\n    const normalizeMathPositionStyles = (markup) => String(markup || '').replace(\n      /style=\"([^\"]*)\"/gi,\n      (_match, styleText) => {\n        let style = String(styleText || '');\n        let topValue = null;\n        style = style.replace(/(^|;)\\s*top\\s*:\\s*([^;\"]+)\\s*;?/i, (_m, prefix, value) => {\n          topValue = String(value || '').trim();\n          return prefix || '';\n        });\n        if (!topValue) return `style=\"${style}\"`;\n\n        if (/transform\\s*:/i.test(style)) {\n          style = style.replace(\n            /transform\\s*:\\s*([^;\"]+)/i,\n            (_m, value) => `transform:${String(value || '').trim()} translateY(${topValue})`\n          );\n        } else {\n          style = `${style}${style.trim().endsWith(';') || !style.trim() ? '' : ';'}transform: translateY(${topValue});`;\n        }\n        return `style=\"${style}\"`;\n      }\n    );\n\n    const appendSvgStyle = (markup, extraStyle) => String(markup || '').replace(/<svg([^>]*)>/i, (_m, svgAttrs) => {\n      if (svgAttrs.includes('style=\"')) {\n        return `<svg${svgAttrs.replace('style=\"', `style=\"${extraStyle}`)}>`;\n      }\n      return `<svg${svgAttrs} style=\"${extraStyle}\">`;\n    });\n\n    // Replace <mjx-container> with <section> (block) or <span> (inline)\n    // WeChat strips custom tags like mjx-container but keeps SVG content\n    return html.replace(/<mjx-container([^>]*)>(.*?)<\\/mjx-container>/gs, (match, attrs, content) => {\n      // Check for block display mode\n      // MathJax 3 usually adds display=\"true\" or class=\"MathJax CtxtMenu_Attached_0\" with separate style\n      const isBlock = attrs.includes('display=\"true\"') || attrs.includes('display: true');\n\n      const tag = isBlock ? 'section' : 'span';\n\n      // Inline math needs vertical alignment adjustment\n      // Block math needs centering and scaling (not scrolling) as per WeChat behavior\n      const style = isBlock\n        ? 'display:block; width:100%; margin:1em auto; text-align:center; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;'\n        : 'display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px; line-height:1;';\n\n      content = normalizeMathPositionStyles(content);\n\n      // \u5173\u952E\u4FEE\u590D\uFF1A\u7ED9\u5757\u7EA7\u516C\u5F0F\u7684 SVG \u6DFB\u52A0 max-width: 100% \u548C height: auto\n      // \u8FD9\u6837\u5728\u624B\u673A\u4E0A\u9884\u89C8\u65F6\uFF0C\u516C\u5F0F\u4F1A\u6309\u6BD4\u4F8B\u7F29\u5C0F\u4EE5\u9002\u5E94\u5C4F\u5E55\uFF0C\u800C\u4E0D\u662F\u88AB\u906E\u6321\u6216\u9700\u8981\u6EDA\u52A8\n      // \u8FD9\u7B26\u5408\u5FAE\u4FE1\u516C\u4F17\u53F7\u7684\u9ED8\u8BA4\u6E32\u67D3\u884C\u4E3A\n      if (isBlock) {\n        content = appendSvgStyle(content, 'display:block; margin:0 auto; max-width:100%; height:auto; ');\n      } else {\n        content = content.replace(/vertical-align\\s*:\\s*[^;\"]+;?/gi, '');\n        content = appendSvgStyle(content, 'display:inline-block; max-width:300vw !important; height:auto; vertical-align:middle; ');\n      }\n\n      return `<${tag} data-owc-math=\"${isBlock ? 'block' : 'inline'}\" style=\"${style}\">${content}</${tag}>`;\n    });\n  }\n\n  fixListParagraphs(html) {\n    const style = this.getInlineStyle('li p');\n    return html.replace(/<li[^>]*>[\\s\\S]*?<\\/li>/g, m => m.replace(/<p style=\"[^\"]*\">/g, `<p style=\"${style}\">`));\n  }\n\n  replaceStyleDeclaration(styleText, property, value) {\n    const style = String(styleText || '');\n    const declaration = `${property}: ${value}`;\n    const propertyPattern = new RegExp(`(^|;)\\\\s*${property}\\\\s*:\\\\s*[^;\"]*`, 'i');\n\n    if (propertyPattern.test(style)) {\n      return style.replace(propertyPattern, (_match, prefix) => `${prefix ? `${prefix} ` : ''}${declaration}`);\n    }\n\n    const normalizedStyle = style.trim().replace(/;?\\s*$/, '');\n    return normalizedStyle ? `${normalizedStyle}; ${declaration}` : declaration;\n  }\n\n  /**\n   * Keep blockquote padding in control while preserving intentional blank lines.\n   * A blank line inside Markdown blockquotes renders as multiple paragraphs.\n   */\n  removeBlockquoteParagraphMargins(html) {\n    const containerTags = new Set([\n      'blockquote', 'section', 'div', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tfoot',\n      'tr', 'th', 'td', 'ul', 'ol', 'li', 'pre', 'article', 'aside',\n    ]);\n    const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);\n    const blockquoteStack = [];\n    const replacements = [];\n    const tagPattern = /<\\/?([a-zA-Z][\\w:-]*)(?:\\s[^<>]*)?>/g;\n\n    let match;\n    while ((match = tagPattern.exec(html)) !== null) {\n      const rawTag = match[0];\n      const tagName = String(match[1] || '').toLowerCase();\n      const isClosing = /^<\\//.test(rawTag);\n      const isSelfClosing = /\\/\\s*>$/.test(rawTag) || voidTags.has(tagName);\n\n      if (tagName === 'blockquote') {\n        if (isClosing) {\n          const frame = blockquoteStack.pop();\n          if (frame) {\n            const paragraphCount = frame.paragraphs.length;\n            frame.paragraphs.forEach((paragraph, index) => {\n              const isLastParagraph = index === paragraphCount - 1;\n              const marginValue = paragraphCount > 1 && !isLastParagraph ? '0 0 0.8em 0' : '0';\n              const updatedStyle = this.replaceStyleDeclaration(paragraph.styleText, 'margin', marginValue);\n              replacements.push({\n                start: paragraph.start,\n                end: paragraph.end,\n                value: paragraph.rawTag.replace(/style=\"([^\"]*)\"/, `style=\"${updatedStyle}\"`),\n              });\n            });\n          }\n          if (blockquoteStack.length > 0) {\n            const parentFrame = blockquoteStack[blockquoteStack.length - 1];\n            parentFrame.containerDepth = Math.max(0, parentFrame.containerDepth - 1);\n          }\n        } else {\n          if (blockquoteStack.length > 0) {\n            blockquoteStack[blockquoteStack.length - 1].containerDepth += 1;\n          }\n          blockquoteStack.push({ containerDepth: 0, paragraphs: [] });\n        }\n        continue;\n      }\n\n      if (blockquoteStack.length === 0) continue;\n\n      const frame = blockquoteStack[blockquoteStack.length - 1];\n      if (!isClosing && tagName === 'p') {\n        const styleMatch = rawTag.match(/\\bstyle=\"([^\"]*)\"/);\n        if (styleMatch && frame.containerDepth === 0) {\n          frame.paragraphs.push({\n            start: match.index,\n            end: match.index + rawTag.length,\n            rawTag,\n            styleText: styleMatch[1],\n          });\n        } else if (styleMatch) {\n          const updatedStyle = this.replaceStyleDeclaration(styleMatch[1], 'margin', '0');\n          replacements.push({\n            start: match.index,\n            end: match.index + rawTag.length,\n            value: rawTag.replace(/style=\"([^\"]*)\"/, `style=\"${updatedStyle}\"`),\n          });\n        }\n        continue;\n      }\n\n      if (!containerTags.has(tagName) || tagName === 'p') continue;\n      if (isClosing) {\n        frame.containerDepth = Math.max(0, frame.containerDepth - 1);\n      } else if (!isSelfClosing) {\n        frame.containerDepth += 1;\n      }\n    }\n\n    return replacements\n      .sort((a, b) => b.start - a.start)\n      .reduce((output, replacement) => (\n        output.slice(0, replacement.start) + replacement.value + output.slice(replacement.end)\n      ), html);\n  }\n\n  /**\n   * Fix: Unwrap <figure> from <p> tags\n   * Markdown-it wraps images in <p> by default, but <figure> inside <p> is invalid.\n   * Browsers (and WeChat) handle this by splitting the <p> into two empty <p>s above and below,\n   * causing unwanted empty lines. This regex removes the wrapping <p>.\n   */\n  unwrapFigures(html) {\n    // Logic: Match <p ...> <figure>...</figure> </p> and replace with <figure>...</figure>\n    return html.replace(/<p[^>]*>\\s*(<figure[\\s\\S]*?<\\/figure>)\\s*<\\/p>/gi, '$1');\n  }\n\n  validateLink(url, isImage = false) {\n    if (!url) return '#';\n    const value = String(url).trim();\n    if (!value) return '#';\n\n    // Keep legacy parity: allow raw data:image src in image context.\n    // Non-image data: remains blocked.\n    if (/^data:/i.test(value)) {\n      if (!isImage) return '#unsafe';\n      return /^data:image\\//i.test(value) ? value : '#';\n    }\n\n    // Allow safe protocols\n    const safeProtocols = ['http:', 'https:', 'obsidian:', 'mailto:', 'tel:', 'app:', 'capacitor:'];\n\n    try {\n      // URL constructor might fail for some internal links or malformed data URIs\n      const parsed = new URL(value);\n      if (safeProtocols.includes(parsed.protocol)) {\n        return value;\n      }\n    } catch (e) {\n      // Handle relative paths or Obsidian internal links that URL() can't parse\n      if (value.startsWith('#') || value.startsWith('/') || !value.includes(':')) return value;\n    }\n    return '#'; // Block javascript: and other dangerous protocols\n  }\n\n  sanitizeHtml(html) {\n    // 1. Remove dangerous tags and their content\n    let sanitized = html.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*>[\\s\\S]*?<\\/\\1>/gi, '');\n    // 2. Remove self-closing dangerous tags\n    sanitized = sanitized.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*\\/?>/gi, '');\n    // 3. Remove document wrapper tags/comments that may appear when users paste browser fragments.\n    sanitized = sanitized.replace(/<!--[\\s\\S]*?-->/g, '');\n    sanitized = sanitized.replace(/<\\/?(?:html|body|head|meta|title|link)[^>]*>/gi, '');\n    // 4. Remove all on* event handlers (e.g., onerror, onclick)\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*\"[^\"]*\"/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*'[^']*'/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*[^\\s>]+/gi, '');\n\n    // 5. Sanitize href and src in remaining HTML tags to prevent protocol bypass (e.g. <a href=\"javascript:...\")\n    sanitized = sanitized.replace(/<(a|img|source|video|audio|area)\\b([^>]*)>/gi, (match, tag, attrs) => {\n      const isImageTag = /^(img|source)$/i.test(tag);\n      let newAttrs = attrs.replace(/\\b(href|src)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))/gi, (attrMatch, attrName, qVal, sqVal, uVal) => {\n        const val = qVal || sqVal || uVal || '';\n        const safeVal = this.validateLink(val, isImageTag);\n        const quote = qVal !== undefined ? '\"' : (sqVal !== undefined ? \"'\" : '\"');\n        return `${attrName}=${quote}${safeVal}${quote}`;\n      });\n      return `<${tag}${newAttrs}>`;\n    });\n\n    return sanitized;\n  }\n\n  escapeHtml(text) {\n    return text.replace(/[&<>\"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#039;' }[m]));\n  }\n\n  extractFileName(src) {\n    if (!src) return '\u56FE\u7247';\n    return src.split('/').pop().split('\\\\').pop().replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '') || '\u56FE\u7247';\n  }\n}\n\nwindow.AppleStyleConverter = AppleStyleConverter;\n"
+        "converter": "/**\n * \u{1F34E} Apple Style Markdown \u8F6C\u6362\u5668\n * \u76F4\u63A5\u7167\u6284 wechat-tool \u7684\u4EE3\u7801\u5757\u5B9E\u73B0\n * \u9488\u5BF9\u5FAE\u4FE1\u516C\u4F17\u53F7\u4F18\u5316\uFF1A\u4F7F\u7528 section \u7ED3\u6784\uFF0C\u589E\u5F3A\u517C\u5BB9\u6027\n */\n\n// Callout \u56FE\u6807\u914D\u7F6E\uFF08\u989C\u8272\u8DDF\u968F\u4E3B\u9898\u8272\uFF09\nconst CALLOUT_ICONS = {\n  // \u4FE1\u606F\u7C7B\n  note: { icon: '\u2139\uFE0F', label: '\u5907\u6CE8' },\n  info: { icon: '\u2139\uFE0F', label: '\u4FE1\u606F' },\n  todo: { icon: '\u2611\uFE0F', label: '\u5F85\u529E' },\n  // \u6458\u8981\u7C7B\n  abstract: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  summary: { icon: '\u{1F4C4}', label: '\u6458\u8981' },\n  tldr: { icon: '\u{1F4C4}', label: 'TL;DR' },\n  // \u63D0\u793A\u7C7B\n  tip: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  hint: { icon: '\u{1F4A1}', label: '\u63D0\u793A' },\n  important: { icon: '\u{1F4A1}', label: '\u91CD\u8981' },\n  // \u6210\u529F\u7C7B\n  success: { icon: '\u2705', label: '\u6210\u529F' },\n  check: { icon: '\u2705', label: '\u5B8C\u6210' },\n  done: { icon: '\u2705', label: '\u5B8C\u6210' },\n  // \u95EE\u9898\u7C7B\n  question: { icon: '\u2753', label: '\u95EE\u9898' },\n  help: { icon: '\u2753', label: '\u5E2E\u52A9' },\n  faq: { icon: '\u2753', label: 'FAQ' },\n  // \u8B66\u544A\u7C7B\n  warning: { icon: '\u26A0\uFE0F', label: '\u8B66\u544A' },\n  caution: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  attention: { icon: '\u26A0\uFE0F', label: '\u6CE8\u610F' },\n  // \u5931\u8D25/\u5371\u9669\u7C7B\n  failure: { icon: '\u274C', label: '\u5931\u8D25' },\n  fail: { icon: '\u274C', label: '\u5931\u8D25' },\n  missing: { icon: '\u274C', label: '\u7F3A\u5931' },\n  danger: { icon: '\u{1F6A8}', label: '\u5371\u9669' },\n  error: { icon: '\u274C', label: '\u9519\u8BEF' },\n  bug: { icon: '\u{1F41B}', label: 'Bug' },\n  // \u5F15\u7528\u7C7B\n  quote: { icon: '\u{1F4AC}', label: '\u5F15\u7528' },\n  cite: { icon: '\u{1F4DD}', label: '\u5F15\u7528' },\n  // \u793A\u4F8B\u7C7B\n  example: { icon: '\u{1F4CB}', label: '\u793A\u4F8B' },\n};\n\nconst CALLOUT_SEMANTIC_GROUPS = {\n  note: 'info',\n  info: 'info',\n  todo: 'info',\n  abstract: 'info',\n  summary: 'info',\n  tldr: 'info',\n  tip: 'tip',\n  hint: 'tip',\n  important: 'tip',\n  success: 'success',\n  check: 'success',\n  done: 'success',\n  question: 'question',\n  help: 'question',\n  faq: 'question',\n  warning: 'warning',\n  caution: 'warning',\n  attention: 'warning',\n  failure: 'danger',\n  fail: 'danger',\n  missing: 'danger',\n  danger: 'danger',\n  error: 'danger',\n  bug: 'danger',\n  quote: 'quote',\n  cite: 'quote',\n  example: 'quote',\n};\n\nconst CALLOUT_SEMANTIC_COLORS = {\n  info: '#2f6fdd',\n  tip: '#1f8c7a',\n  success: '#2d8a4a',\n  question: '#7251b5',\n  warning: '#b26a00',\n  danger: '#c44747',\n  quote: '#5f6b7a',\n};\n\nfunction resolveCalloutSemanticColor(type, fallbackColor) {\n  const key = String(type || '').trim().toLowerCase();\n  const group = CALLOUT_SEMANTIC_GROUPS[key] || 'info';\n  return CALLOUT_SEMANTIC_COLORS[group] || fallbackColor;\n}\n\nwindow.AppleStyleConverter = class AppleStyleConverter {\n  constructor(theme, avatarUrl = '', showImageCaption = true, app = null, sourcePath = '') {\n    this.theme = theme;\n    this.avatarUrl = avatarUrl;\n    this.showImageCaption = showImageCaption;\n    this.app = app; // Obsidian App instance\n    this.sourcePath = sourcePath; // Current file path for relative resolution\n    this.md = null;\n    this.hljs = null;\n  }\n\n  async initMarkdownIt() {\n    if (this.md) return;\n    if (typeof markdownit === 'undefined') throw new Error('markdown-it \u672A\u52A0\u8F7D');\n    this.hljs = typeof hljs !== 'undefined' ? hljs : null;\n    this.md = markdownit({ html: true, breaks: true, linkify: true, typographer: true });\n\n    // Enable MathJax if available\n    if (window.ObsidianWechatMath) {\n      window.ObsidianWechatMath(this.md);\n    }\n\n    this.setupRenderRules();\n  }\n\n  reinit() { this.md = null; }\n\n  updateConfig(config) {\n    if (config.showImageCaption !== undefined) {\n      this.showImageCaption = config.showImageCaption;\n    }\n    if (config.avatarUrl !== undefined) {\n      this.avatarUrl = config.avatarUrl;\n    }\n  }\n\n  updateSourcePath(path) {\n    this.sourcePath = path;\n  }\n\n  resolveImagePath(src) {\n    if (!this.app) return src;\n    // IF remote url, bypass\n    if (/^(https?:\\/\\/|data:)/i.test(src)) return src;\n\n    try {\n      // Markdown-it might encode the URL (e.g. %20 for space), but Obsidian expects decoded paths\n      const linkPath = decodeURI(src);\n      const sourcePath = this.sourcePath;\n      // Resolve using Obsidian's standard API\n      const tFile = this.app.metadataCache.getFirstLinkpathDest(linkPath, sourcePath);\n      if (tFile) {\n        return this.app.vault.getResourcePath(tFile);\n      }\n    } catch (e) {\n      console.error('Image resolution failed:', src, e);\n    }\n    return src;\n  }\n\n  setupRenderRules() {\n    // Callout & Blockquote \u667A\u80FD\u68C0\u6D4B\u6E32\u67D3\n    this.md.renderer.rules.blockquote_open = (tokens, idx, options, env, self) => {\n      // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A\u6587\u672C\u5185\u5BB9\uFF0C\u68C0\u6D4B\u662F\u5426\u4E3A callout \u8BED\u6CD5\n      const calloutInfo = this.detectCallout(tokens, idx);\n\n      // \u4F7F\u7528\u6808\u7BA1\u7406 callout \u72B6\u6001\uFF0C\u652F\u6301\u5D4C\u5957\n      if (!env._calloutStack) env._calloutStack = [];\n      env._calloutStack.push(calloutInfo);\n\n      if (calloutInfo) {\n        return this.renderCalloutOpen(calloutInfo);\n      }\n      // \u666E\u901A blockquote\n      return `<blockquote style=\"${this.getInlineStyle('blockquote')}\">`;\n    };\n\n    this.md.renderer.rules.blockquote_close = (tokens, idx, options, env, self) => {\n      const calloutInfo = env._calloutStack ? env._calloutStack.pop() : null;\n      if (calloutInfo) {\n        return `</section></section>`; // \u5173\u95ED\u5185\u5BB9\u533A\u548C\u5916\u5C42\u5BB9\u5668\n      }\n      return `</blockquote>`;\n    };\n\n    this.md.renderer.rules.paragraph_open = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `<p style=\"${this.getInlineStyle('p')}\">`;\n    };\n\n    this.md.renderer.rules.paragraph_close = (tokens, idx) => {\n      if (tokens[idx].hidden) return '';\n      return `</p>`;\n    };\n    this.md.renderer.rules.heading_open = (tokens, idx) => `<${tokens[idx].tag} style=\"${this.getInlineStyle(tokens[idx].tag)}\">`;\n    this.md.renderer.rules.bullet_list_open = () => `<ul style=\"${this.getInlineStyle('ul')}\">`;\n    this.md.renderer.rules.ordered_list_open = () => `<ol style=\"${this.getInlineStyle('ol')}\">`;\n    this.md.renderer.rules.list_item_open = () => `<li style=\"${this.getInlineStyle('li')}\">`;\n\n    this.md.renderer.rules.code_inline = (tokens, idx) =>\n      `<code style=\"${this.getInlineStyle('code')}\">${this.escapeHtml(tokens[idx].content)}</code>`;\n\n    this.md.renderer.rules.fence = (tokens, idx) => {\n      const content = tokens[idx].content;\n      const lang = tokens[idx].info || 'text';\n      return this.createCodeBlock(content, lang);\n    };\n\n    this.md.renderer.rules.link_open = (tokens, idx) => {\n      const href = tokens[idx].attrGet('href');\n      const safeHref = this.validateLink(href);\n      return `<a href=\"${safeHref}\" style=\"${this.getInlineStyle('a')}\">`;\n    };\n    this.md.renderer.rules.strong_open = () => `<strong style=\"${this.getInlineStyle('strong')}\">`;\n    this.md.renderer.rules.em_open = () => `<em style=\"${this.getInlineStyle('em')}\">`;\n    this.md.renderer.rules.s_open = () => `<del style=\"${this.getInlineStyle('del')}\">`;\n\n    this.md.renderer.rules.image = (tokens, idx) => {\n      let src = tokens[idx].attrGet('src');\n      const alt = tokens[idx].content;\n\n      // Resolve Local Path for Preview\n      src = this.resolveImagePath(src);\n\n\n      let caption = '';\n\n      if (alt) {\n        caption = alt;\n        const stripped = caption.replace(/\\|\\s*\\d+(x\\d+)?\\s*$/, '');\n        caption = stripped || caption;\n        caption = caption.replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');\n      }\n\n\n      if (this.avatarUrl) {\n        // \u6C34\u5370\u6A21\u5F0F\uFF1A\u663E\u793A\u5934\u50CF + \u56FE\u7247\u540D\u79F0\uFF0C\u4F7F\u7528\u5E26\u8FB9\u6846\u7684\u6837\u5F0F\n        const avatarHeaderStyle = this.getInlineStyle('avatar-header');\n        const spacerStyle = 'display:block;height:8px;line-height:8px;font-size:0;';\n        // Fix: Force text-align: left for the figure container in watermark mode to prevent centering\n        // We strip the default text-align: center from the figure style and add text-align: left\n        let figureStyle = this.getInlineStyle('figure');\n        figureStyle = figureStyle.replace('text-align: center;', 'text-align: left;');\n\n        return `<figure style=\"${figureStyle}\"><div style=\"${avatarHeaderStyle}\"><img src=\"${this.avatarUrl}\" alt=\"logo\" style=\"${this.getInlineStyle('avatar')}\"><span style=\"${this.getInlineStyle('avatar-caption')}\">${caption}</span></div><section style=\"${spacerStyle}\">&nbsp;</section><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n\n      // \u975E\u6C34\u5370\u6A21\u5F0F\uFF1A\u65E0\u8FB9\u6846\u6837\u5F0F\n      const simpleFigureStyle = 'display:block;margin:16px 0;text-align:center;';\n      if (this.showImageCaption && caption) {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"><figcaption style=\"${this.getInlineStyle('figcaption')}\">${caption}</figcaption></figure>`;\n      } else {\n        return `<figure style=\"${simpleFigureStyle}\"><img src=\"${src}\" alt=\"${alt}\" style=\"${this.getInlineStyle('img')}\"></figure>`;\n      }\n    };\n\n    this.md.renderer.rules.hr = () => `<hr style=\"${this.getInlineStyle('hr')}\">`;\n    this.md.renderer.rules.table_open = (tokens, idx) => `<section style=\"${this.getInlineStyle('table-wrapper')}\"><table style=\"${this.getTableStyle(tokens, idx)}\">`;\n    this.md.renderer.rules.table_close = () => `</table></section>`;\n    this.md.renderer.rules.thead_open = () => `<thead style=\"${this.getInlineStyle('thead')}\">`;\n    this.md.renderer.rules.th_open = () => `<th style=\"${this.getInlineStyle('th')}\">`;\n    this.md.renderer.rules.td_open = () => `<td style=\"${this.getInlineStyle('td')}\">`;\n  }\n\n  getTableColumnCount(tokens, tableIdx) {\n    if (!Array.isArray(tokens)) return 0;\n\n    let rowOpen = false;\n    let count = 0;\n    for (let i = tableIdx + 1; i < tokens.length; i += 1) {\n      const token = tokens[i];\n      if (!token) continue;\n      if (token.type === 'table_close') break;\n      if (token.type === 'tr_open') {\n        rowOpen = true;\n        count = 0;\n        continue;\n      }\n      if (token.type === 'tr_close' && rowOpen) {\n        if (count > 0) return count;\n        rowOpen = false;\n        continue;\n      }\n      if (!rowOpen || (token.type !== 'th_open' && token.type !== 'td_open')) continue;\n\n      const colspanAttr = typeof token.attrGet === 'function' ? token.attrGet('colspan') : null;\n      const colspan = Number.parseInt(colspanAttr || '1', 10);\n      count += Number.isFinite(colspan) && colspan > 0 ? colspan : 1;\n    }\n\n    return count;\n  }\n\n  getTableMinWidth(tokens, tableIdx) {\n    const columns = this.getTableColumnCount(tokens, tableIdx);\n    if (!columns) return 720;\n    const width = columns <= 2 ? (columns * 180 + 80) : (columns * 230 + 80);\n    return Math.max(360, Math.min(1200, width));\n  }\n\n  getTableStyle(tokens, tableIdx) {\n    const baseStyle = this.getInlineStyle('table');\n    const minWidth = this.getTableMinWidth(tokens, tableIdx);\n    const withoutWidth = baseStyle\n      .replace(/(?:^|;)\\s*width\\s*:\\s*[^;]+;?/gi, ';')\n      .replace(/(?:^|;)\\s*min-width\\s*:\\s*[^;]+;?/gi, ';')\n      .replace(/(?:^|;)\\s*max-width\\s*:\\s*[^;]+;?/gi, ';')\n      .replace(/;{2,}/g, ';')\n      .replace(/^\\s*;\\s*/, '')\n      .trim();\n    const normalized = withoutWidth && !withoutWidth.endsWith(';') ? `${withoutWidth};` : withoutWidth;\n    return `width: ${minWidth}px; min-width: 100%; max-width: none; ${normalized}`;\n  }\n\n  /**\n   * \u68C0\u6D4B blockquote \u662F\u5426\u4E3A Callout \u8BED\u6CD5\n   * \u5E76\u6E05\u7406 marker \u6807\u8BC6\u7B26\n   * @param {Array} tokens - markdown-it tokens\n   * @param {number} idx - blockquote_open \u7684\u7D22\u5F15\n   * @returns {Object|null} - callout \u4FE1\u606F { type, title, icon, label } \u6216 null\n   */\n  detectCallout(tokens, idx) {\n    // \u67E5\u627E blockquote \u5185\u7684\u7B2C\u4E00\u4E2A inline token\n    for (let i = idx + 1; i < tokens.length; i++) {\n      if (tokens[i].type === 'blockquote_close') break;\n      if (tokens[i].type === 'inline' && tokens[i].content) {\n        // \u53EA\u53D6\u7B2C\u4E00\u884C\u5185\u5BB9\u8FDB\u884C\u5339\u914D\n        const firstLine = tokens[i].content.split('\\n')[0];\n        // \u652F\u6301\u81EA\u5B9A\u4E49 callout \u7C7B\u578B\uFF08\u5305\u542B\u4E2D\u6587\u3001\u8FDE\u5B57\u7B26\u7B49\uFF09\uFF0C\u4F8B\u5982 [!\u5B66\u4E60\u7814\u7A76] / [!custom-type]\n        const match = firstLine.match(/^\\[!\\s*([^\\]\\r\\n]+?)\\s*\\](?:\\s+(.*))?/);\n        if (match) {\n          const rawType = match[1].trim();\n          if (!rawType || !/\\S/u.test(rawType)) return null;\n          const type = rawType.toLowerCase();\n          const customTitle = match[2] ? match[2].trim() : null;\n          const mappedConfig = CALLOUT_ICONS[type];\n          const config = mappedConfig || { icon: CALLOUT_ICONS.note.icon, label: type };\n          const defaultTitle = type.charAt(0).toUpperCase() + type.slice(1);\n\n          // --- \u5728 Token \u9636\u6BB5\u6E05\u7406 Marker ---\n          // 1. \u66F4\u65B0 content\uFF1A\u79FB\u9664\u5305\u542B marker \u7684\u7B2C\u4E00\u884C\n          const lines = tokens[i].content.split('\\n');\n          lines.shift();\n          tokens[i].content = lines.join('\\n');\n\n          // 2. \u66F4\u65B0 children\uFF1A\u540C\u6B65\u79FB\u9664\u7B2C\u4E00\u884C\u5BF9\u5E94\u7684 tokens\n          if (tokens[i].children) {\n            const breakIdx = tokens[i].children.findIndex(c => c.type === 'softbreak' || c.type === 'hardbreak');\n            if (breakIdx !== -1) {\n              // \u79FB\u9664\u7B2C\u4E00\u4E2A\u6362\u884C\u7B26\u53CA\u5176\u4E4B\u524D\u7684\u6240\u6709\u5185\u5BB9\n              tokens[i].children = tokens[i].children.slice(breakIdx + 1);\n            } else {\n              // \u53EA\u6709\u4E00\u884C\uFF0C\u76F4\u63A5\u6E05\u7A7A\n              tokens[i].children = [];\n            }\n          }\n\n          // 3. \u5982\u679C\u8BE5\u6BB5\u843D\u53D8\u4E3A\u7A7A\uFF08\u8BF4\u660E marker \u72EC\u5360\u4E00\u884C\uFF09\uFF0C\u9690\u85CF\u8BE5\u6BB5\u843D\u5BB9\u5668\n          if (tokens[i].content.trim() === '') {\n            if (i > 0 && tokens[i-1].type === 'paragraph_open') tokens[i-1].hidden = true;\n            tokens[i].hidden = true; // \u9690\u85CF inline token \u672C\u8EAB\n            if (i < tokens.length - 1 && tokens[i+1].type === 'paragraph_close') tokens[i+1].hidden = true;\n          }\n\n          return {\n            type,\n            title: customTitle || defaultTitle,\n            icon: config.icon,\n            label: config.label,\n          };\n        }\n        break; // \u53EA\u68C0\u67E5\u7B2C\u4E00\u4E2A inline\n      }\n    }\n    return null;\n  }\n\n  /**\n   * \u6E32\u67D3 Callout \u5F00\u59CB\u6807\u7B7E\n   * @param {Object} calloutInfo - { type, title, icon }\n   * @returns {string} - HTML \u5B57\u7B26\u4E32\n   */\n  renderCalloutOpen(calloutInfo) {\n    const color = this.theme.getThemeColorValue();\n    const sizes = this.theme.getSizes();\n    const font = this.theme.getFontFamily();\n    const quoteCalloutStyleMode = typeof this.theme.getQuoteCalloutStyleMode === 'function'\n      ? this.theme.getQuoteCalloutStyleMode()\n      : 'theme';\n\n    if (quoteCalloutStyleMode === 'neutral') {\n      return this.renderCalloutOpenNeutral(calloutInfo, color, sizes, font);\n    }\n\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, color);\n\n    const containerStyle = `\n      margin: 16px 0 16px 8px;\n      background: ${accentColor}0D;\n      border: 1px solid ${accentColor}24;\n      border-radius: 4px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 8px 12px;\n      background: ${accentColor}14;\n      border-bottom: 1px solid ${accentColor}24;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: ${accentColor};\n    `.replace(/\\s+/g, ' ').trim();\n\n    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;\n    const titleStyle = `flex: 1; color: ${accentColor};`;\n\n    const contentStyle = `\n      padding: 12px 16px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #595959;\n      background: ${accentColor}0D;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"${iconStyle}\">${calloutInfo.icon}</span>\n        <span style=\"${titleStyle}\">${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  renderCalloutOpenNeutral(calloutInfo, themeColor, sizes, font) {\n    const safeTitle = this.escapeHtml(String(calloutInfo.title ?? ''));\n    const accentColor = resolveCalloutSemanticColor(calloutInfo?.type, themeColor);\n\n    const containerStyle = `\n      margin: 16px 0 16px 8px;\n      background: #f9f9f9;\n      border: 1px solid ${accentColor}24;\n      border-radius: 4px;\n      overflow: hidden;\n    `.replace(/\\s+/g, ' ').trim();\n\n    const headerStyle = `\n      display: flex;\n      align-items: center;\n      padding: 8px 12px;\n      background: ${accentColor}14;\n      border-bottom: 1px solid ${accentColor}24;\n      font-weight: bold;\n      font-size: ${sizes.base}px;\n      font-family: ${font};\n      color: ${accentColor};\n    `.replace(/\\s+/g, ' ').trim();\n\n    const iconStyle = `margin-right: 8px; font-size: ${sizes.base + 2}px; color: ${accentColor};`;\n    const titleStyle = `flex: 1; color: ${accentColor};`;\n    const contentStyle = `\n      padding: 12px 16px;\n      font-size: ${sizes.base}px;\n      line-height: 1.8;\n      color: #595959;\n      background: #f9f9f9;\n    `.replace(/\\s+/g, ' ').trim();\n\n    return `<section style=\"${containerStyle}\">\n      <section style=\"${headerStyle}\">\n        <span style=\"${iconStyle}\">${calloutInfo.icon}</span>\n        <span style=\"${titleStyle}\">${safeTitle}</span>\n      </section>\n      <section style=\"${contentStyle}\">`;\n  }\n\n  highlightCode(code, lang) {\n    if (!this.hljs) return this.escapeHtml(code);\n    try {\n      if (lang && this.hljs.getLanguage(lang)) return this.hljs.highlight(code, { language: lang }).value;\n      return this.hljs.highlightAuto(code).value;\n    } catch (e) { return this.escapeHtml(code); }\n  }\n\n  /**\n   * \u683C\u5F0F\u5316\u9AD8\u4EAE\u4EE3\u7801\uFF08\u53C2\u8003 wechat-tool formatHighlightedCode\uFF09\n   */\n  formatHighlightedCode(html, preserveNewlines = false) {\n    let formatted = html;\n    // \u5C06 span \u4E4B\u95F4\u7684\u7A7A\u683C\u79FB\u5230 span \u5185\u90E8\n    formatted = formatted.replace(/(<span[^>]*>[^<]*<\\/span>)(\\s+)(<span[^>]*>[^<]*<\\/span>)/g,\n      (_, span1, spaces, span2) => span1 + span2.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    formatted = formatted.replace(/(\\s+)(<span[^>]*>)/g,\n      (_, spaces, span) => span.replace(/^(<span[^>]*>)/, `$1${spaces}`));\n    // \u66FF\u6362\u5236\u8868\u7B26\u4E3A4\u4E2A\u7A7A\u683C\n    formatted = formatted.replace(/\\t/g, '    ');\n\n    // wechat-tool \u7684\u903B\u8F91\uFF1A\u5982\u679C\u662F lineNumbers \u6A21\u5F0F\uFF08preserveNewlines=false\uFF09\uFF0C\u5C06\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    // \u5982\u679C\u4E0D\u662F\uFF08preserveNewlines=true\uFF09\uFF0C\u5C06\u6362\u884C\u8F6C\u4E3A <br/> \u4E14\u7A7A\u683C\u8F6C\u4E3A &nbsp;\n    if (preserveNewlines) {\n      formatted = formatted\n        .replace(/\\r\\n/g, '<br/>')\n        .replace(/\\n/g, '<br/>')\n        .replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    } else {\n      formatted = formatted.replace(/(>[^<]+)|(^[^<]+)/g, str => str.replace(/\\s/g, '&nbsp;'));\n    }\n    return formatted;\n  }\n\n  inlineHighlightStyles(html) {\n    const map = {\n      'hljs-keyword': 'color:#ff7b72 !important;', 'hljs-built_in': 'color:#ffa657 !important;',\n      'hljs-type': 'color:#ffa657 !important;', 'hljs-literal': 'color:#79c0ff !important;',\n      'hljs-number': 'color:#79c0ff !important;', 'hljs-string': 'color:#a5d6ff !important;',\n      'hljs-symbol': 'color:#a5d6ff !important;', 'hljs-comment': 'color:#8b949e !important;font-style:italic !important;',\n      'hljs-doctag': 'color:#8b949e !important;', 'hljs-meta': 'color:#ffa657 !important;',\n      'hljs-attr': 'color:#79c0ff !important;', 'hljs-attribute': 'color:#79c0ff !important;',\n      'hljs-name': 'color:#7ee787 !important;', 'hljs-tag': 'color:#7ee787 !important;',\n      'hljs-selector-tag': 'color:#7ee787 !important;', 'hljs-selector-class': 'color:#d2a8ff !important;',\n      'hljs-selector-id': 'color:#79c0ff !important;', 'hljs-variable': 'color:#ffa657 !important;',\n      'hljs-template-variable': 'color:#ffa657 !important;', 'hljs-params': 'color:#e6e6e6 !important;',\n      'hljs-function': 'color:#d2a8ff !important;', 'hljs-title': 'color:#d2a8ff !important;',\n      'hljs-punctuation': 'color:#e6e6e6 !important;', 'hljs-property': 'color:#79c0ff !important;',\n      'hljs-operator': 'color:#ff7b72 !important;', 'hljs-regexp': 'color:#a5d6ff !important;',\n      'hljs-subst': 'color:#e6e6e6 !important;',\n    };\n\n    // \u6539\u8FDB\uFF1A\u5904\u7406 class \u5C5E\u6027\u5305\u542B\u591A\u4E2A\u7C7B\u540D\u7684\u60C5\u51B5\n    return html.replace(/class=\"([^\"]*)\"/g, (match, classNames) => {\n      const classes = classNames.split(/\\s+/);\n      let styles = '';\n      for (const cls of classes) {\n        if (map[cls]) {\n          styles += map[cls];\n        }\n      }\n      return styles ? `style=\"${styles}\"` : match;\n    }).replace(/class=\"[^\"]*\"/g, ''); // \u518D\u6B21\u6E05\u7406\u672A\u5339\u914D\u7684 class\n  }\n\n  /**\n   * \u521B\u5EFA\u4EE3\u7801\u5757 - \u7167\u6284 wechat-tool \u7684\u5B9E\u73B0\n   * \u4F7F\u7528 wechat-tool \u7684\u989C\u8272\u548C\u7ED3\u6784\n   */\n  createCodeBlock(content, lang) {\n    const showMac = this.theme.macCodeBlock;\n    const showLineNum = this.theme.codeLineNumber;\n\n    // wechat-tool \u7684\u989C\u8272\u914D\u7F6E\uFF08GitHub Dark \u4E3B\u9898\uFF09\n    const background = '#0d1117';  // GitHub Dark \u80CC\u666F\n    const color = '#f0f6fc';       // GitHub Dark \u6587\u5B57\n    const barBackground = '#161b22'; // \u5DE5\u5177\u680F\u80CC\u666F\n    const borderColor = '#30363d';   // \u8FB9\u6846\u989C\u8272\n\n    let lines = content.replace(/\\r\\n/g, '\\n').split('\\n');\n    while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();\n\n    // Mac \u5934\u90E8\n    // \u5173\u952E\u4FEE\u6B63\uFF1A\u4F7F\u7528 section \u800C\u4E0D\u662F div\uFF0C\u589E\u5F3A\u5728\u516C\u4F17\u53F7\u4E2D\u7684\u517C\u5BB9\u6027\n    const macHeader = showMac ? `<section style=\"display:block !important;background:${barBackground} !important;padding:6px 10px 6px 10px !important;border:none !important;border-bottom:1px solid ${borderColor} !important;border-radius:8px 8px 0 0 !important;line-height:1 !important;\">\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ff5f57 !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#ffbd2e !important;margin-right:7px !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n      <span style=\"display:inline-block !important;width:9px !important;height:9px !important;border-radius:50% !important;background:#28c840 !important;font-size:0 !important;line-height:0 !important;vertical-align:top !important;\"></span>\n    </section>` : '';\n\n    // \u7EDF\u4E00\u884C\u9AD8\u548C\u5B57\u4F53\u53D8\u91CF\n    const lineHeight = '1.75';\n    // const fontSize = '13px';\n\n    let codeHtml;\n\n    if (showLineNum) {\n      // \u5E26\u884C\u53F7\uFF1A\u9010\u884C\u5904\u7406\n      const highlightedLines = lines.map(lineRaw => {\n        const lineHtml = this.highlightCode(lineRaw, lang);\n        const styled = this.inlineHighlightStyles(lineHtml);\n        // \u6CE8\u610F\uFF1A\u8FD9\u91CC formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false\uFF0C\u4E0D\u5305\u542B <br>\uFF0C\u4E0D\u5305\u542B &nbsp; (\u9664\u975E\u5185\u90E8\u903B\u8F91\u5904\u7406)\n        // \u5B9E\u9645\u4E0A formatHighlightedCode \u7B2C\u4E8C\u4E2A\u53C2\u6570\u4E3A false \u65F6\uFF0C\u53EA\u505A\u7A7A\u683C\u5904\u7406\n        // wechat-tool \u4E2D\uFF1A return formatted === '' ? '&nbsp;' : formatted\n        const formatted = this.formatHighlightedCode(styled, false);\n        return formatted === '' ? '&nbsp;' : formatted;\n      });\n\n      // \u884C\u53F7\u5217\n      const lineNumbersHtml = highlightedLines.map((_, idx) =>\n        `<section style=\"height:1.75em !important;line-height:${lineHeight} !important;padding:0 12px 0 12px !important;font-size:13px !important;color:#95989C !important;text-align:right !important;white-space:nowrap !important;vertical-align:top !important;margin:0 !important;\">${idx + 1}</section>`\n      ).join('');\n\n      // \u4EE3\u7801\u5185\u5BB9\n      // \u5173\u952E\u6539\u52A8\uFF1A\u56DE\u5F52 wechat-tool \u539F\u59CB\u65B9\u6848 \u2014\u2014 \u4F7F\u7528 <br> \u62FC\u63A5\u4EE3\u7801\u884C\uFF0C\u800C\u4E0D\u662F div \u5206\u5272\n      // \u8FD9\u6837\u53F3\u4FA7\u5C31\u662F\u4E00\u4E2A\u5355\u4E00\u7684\u6587\u672C\u6D41\uFF0C\u9AD8\u5EA6\u4E25\u683C\u7531 line-height \u63A7\u5236\n      const codeInnerHtml = highlightedLines.join('<br/>');\n\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;line-height:${lineHeight} !important;font-size:13px !important;\">${codeInnerHtml}</section>`;\n\n      // \u884C\u53F7\u5217\u5BB9\u5668\u6837\u5F0F\n      const lineNumberColumnStyles = `text-align:right !important;padding:12px 0 12px 0 !important;border-right:1px solid rgba(255,255,255,0.1) !important;user-select:none !important;background:transparent !important;flex:0 0 auto !important;min-width:3.5em !important;margin:0 !important;`;\n\n      // \u6CE8\u610F flex \u5BB9\u5668\u7684 padding 0\uFF0C\u5185\u90E8 padding \u5206\u522B\u5728 lineNumberColumn \u548C code section\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"${lineNumberColumnStyles}\">${lineNumbersHtml}</section>\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px 12px 12px 16px !important;margin:0 !important;min-width:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    } else {\n      // \u65E0\u884C\u53F7\n      const highlighted = this.highlightCode(lines.join('\\n'), lang);\n      const styled = this.inlineHighlightStyles(highlighted);\n      // preserveNewlines=true -> \u5305\u542B <br>\n      const formatted = this.formatHighlightedCode(styled, true);\n      // \u6539\u52A8\uFF1Awhite-space: nowrap !important\n      const codeLinesHtml = `<section style=\"white-space:nowrap !important;display:inline-block !important;min-width:100% !important;word-break:keep-all !important;overflow-wrap:normal !important;line-height:${lineHeight} !important;font-size:13px !important;margin:0 !important;\">${formatted}</section>`;\n\n      codeHtml = `<section style=\"display:flex !important;align-items:flex-start !important;overflow-x:hidden !important;overflow-y:visible !important;width:100% !important;padding:0 !important;margin:0 !important;\">\n        <section style=\"flex:1 1 auto !important;overflow-x:auto !important;overflow-y:visible !important;padding:12px !important;min-width:0 !important;margin:0 !important;\">${codeLinesHtml}</section>\n      </section>`;\n    }\n\n    // \u5916\u5C42\u5BB9\u5668\n    return `<section class=\"code-snippet__fix\" style=\"width:100% !important;margin:12px 0 !important;background:${background} !important;border:1px solid ${borderColor} !important;border-radius:8px !important;overflow:hidden !important;box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;display:block !important;\">\n${macHeader}\n<section style=\"padding:0 !important;border:none !important;background:${background} !important;color:${color} !important;font-family:'SF Mono',Consolas,Monaco,monospace !important;font-size:13px !important;line-height:${lineHeight} !important;white-space:nowrap !important;overflow-x:auto !important;display:block !important;\">\n<pre style=\"margin:0 !important;padding:0 !important;background:${background} !important;font-family:inherit !important;font-size:13px !important;line-height:inherit !important;color:${color} !important;white-space:nowrap !important;overflow-x:visible !important;display:inline-block !important;min-width:100% !important;\">${codeHtml}</pre>\n</section>\n</section>`;\n  }\n\n  getInlineStyle(tagName) { return this.theme.getStyle(tagName); }\n  stripFrontmatter(md) { return md.replace(/^---\\n[\\s\\S]*?\\n---\\n?/, ''); }\n\n\n  async convert(markdown) {\n    if (!this.md) await this.initMarkdownIt();\n\n    // \u4FEE\u590D\uFF1A\u79FB\u9664\u5757\u7EA7\u516C\u5F0F $$ \u524D\u9762\u7684\u7F29\u8FDB\uFF0C\u907F\u514D\u88AB\u8BEF\u8BC6\u522B\u4E3A\u4EE3\u7801\u5757\n    // \u4EC5\u5339\u914D\u884C\u9996\u7684\u7A7A\u767D + $$\uFF0C\u4E0D\u5F71\u54CD\u5176\u4ED6\u7F29\u8FDB\n    markdown = markdown.replace(/^[\\t ]+(\\$\\$)/gm, '$1');\n\n    // Pre-process: Convert Wiki-links ![[...]] to standard images ![](...)\n    // Regex: ![[path|alt]] or ![[path]]\n    // Fix: Use more robust regex preventing greedy capture and encoding URI for paths with spaces\n    markdown = markdown.replace(/!\\[\\[([^\\[\\]|]+)(?:\\|([^\\[\\]]+))?\\]\\]/g, (match, path, alt) => {\n      // Must encodeURI to handle spaces in filenames which are valid in WikiLinks but break standard Markdown images\n      // trimmed path to avoid leading/trailing spaces breaking the link\n      if (!alt) {\n        const filename = path.trim().split('/').pop().replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '') || path.trim();\n        return `![${filename}](${encodeURI(path.trim())})`;\n      }\n      return `![${alt}](${encodeURI(path.trim())})`;\n    });\n\n\n\n    let html = this.md.render(this.stripFrontmatter(markdown));\n    html = this.fixListParagraphs(html);\n    html = this.unwrapFigures(html); // Fix: Remove <p> wrappers from <figure> to prevent empty lines\n    html = this.removeBlockquoteParagraphMargins(html); // Fix: Remove margins from <p> inside <blockquote> for vertical centering\n    html = this.fixMathJaxTags(html); // Fix: Replace <mjx-container> with WeChat-compatible tags\n    html = this.sanitizeHtml(html); // Final security pass: Neutralize XSS and dangerous tags\n    return `<section style=\"${this.getInlineStyle('section')}\">${html}</section>`;\n  }\n\n  fixMathJaxTags(html) {\n    if (!html.includes('mjx-container')) return html;\n\n    // Fix: Remove assistive MathML (hidden text that shows up in WeChat)\n    html = html.replace(/<mjx-assistive-mml[^>]*>[\\s\\S]*?<\\/mjx-assistive-mml>/gi, '');\n\n    const normalizeMathPositionStyles = (markup) => String(markup || '').replace(\n      /style=\"([^\"]*)\"/gi,\n      (_match, styleText) => {\n        let style = String(styleText || '');\n        let topValue = null;\n        style = style.replace(/(^|;)\\s*top\\s*:\\s*([^;\"]+)\\s*;?/i, (_m, prefix, value) => {\n          topValue = String(value || '').trim();\n          return prefix || '';\n        });\n        if (!topValue) return `style=\"${style}\"`;\n\n        if (/transform\\s*:/i.test(style)) {\n          style = style.replace(\n            /transform\\s*:\\s*([^;\"]+)/i,\n            (_m, value) => `transform:${String(value || '').trim()} translateY(${topValue})`\n          );\n        } else {\n          style = `${style}${style.trim().endsWith(';') || !style.trim() ? '' : ';'}transform: translateY(${topValue});`;\n        }\n        return `style=\"${style}\"`;\n      }\n    );\n\n    const appendSvgStyle = (markup, extraStyle) => String(markup || '').replace(/<svg([^>]*)>/i, (_m, svgAttrs) => {\n      if (svgAttrs.includes('style=\"')) {\n        return `<svg${svgAttrs.replace('style=\"', `style=\"${extraStyle}`)}>`;\n      }\n      return `<svg${svgAttrs} style=\"${extraStyle}\">`;\n    });\n\n    // Replace <mjx-container> with <section> (block) or <span> (inline)\n    // WeChat strips custom tags like mjx-container but keeps SVG content\n    return html.replace(/<mjx-container([^>]*)>(.*?)<\\/mjx-container>/gs, (match, attrs, content) => {\n      // Check for block display mode\n      // MathJax 3 usually adds display=\"true\" or class=\"MathJax CtxtMenu_Attached_0\" with separate style\n      const isBlock = attrs.includes('display=\"true\"') || attrs.includes('display: true');\n\n      const tag = isBlock ? 'section' : 'span';\n\n      // Inline math needs vertical alignment adjustment\n      // Block math needs centering and scaling (not scrolling) as per WeChat behavior\n      const style = isBlock\n        ? 'display:block; width:100%; margin:1em auto; text-align:center; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;'\n        : 'display:inline-block; vertical-align:middle; transform:translateY(-0.12em); margin:0 1px; line-height:1;';\n\n      content = normalizeMathPositionStyles(content);\n\n      // \u5173\u952E\u4FEE\u590D\uFF1A\u7ED9\u5757\u7EA7\u516C\u5F0F\u7684 SVG \u6DFB\u52A0 max-width: 100% \u548C height: auto\n      // \u8FD9\u6837\u5728\u624B\u673A\u4E0A\u9884\u89C8\u65F6\uFF0C\u516C\u5F0F\u4F1A\u6309\u6BD4\u4F8B\u7F29\u5C0F\u4EE5\u9002\u5E94\u5C4F\u5E55\uFF0C\u800C\u4E0D\u662F\u88AB\u906E\u6321\u6216\u9700\u8981\u6EDA\u52A8\n      // \u8FD9\u7B26\u5408\u5FAE\u4FE1\u516C\u4F17\u53F7\u7684\u9ED8\u8BA4\u6E32\u67D3\u884C\u4E3A\n      if (isBlock) {\n        content = appendSvgStyle(content, 'display:block; margin:0 auto; max-width:100%; height:auto; ');\n      } else {\n        content = content.replace(/vertical-align\\s*:\\s*[^;\"]+;?/gi, '');\n        content = appendSvgStyle(content, 'display:inline-block; max-width:300vw !important; height:auto; vertical-align:middle; ');\n      }\n\n      return `<${tag} data-owc-math=\"${isBlock ? 'block' : 'inline'}\" style=\"${style}\">${content}</${tag}>`;\n    });\n  }\n\n  fixListParagraphs(html) {\n    const style = this.getInlineStyle('li p');\n    return html.replace(/<li[^>]*>[\\s\\S]*?<\\/li>/g, m => m.replace(/<p style=\"[^\"]*\">/g, `<p style=\"${style}\">`));\n  }\n\n  replaceStyleDeclaration(styleText, property, value) {\n    const style = String(styleText || '');\n    const declaration = `${property}: ${value}`;\n    const propertyPattern = new RegExp(`(^|;)\\\\s*${property}\\\\s*:\\\\s*[^;\"]*`, 'i');\n\n    if (propertyPattern.test(style)) {\n      return style.replace(propertyPattern, (_match, prefix) => `${prefix ? `${prefix} ` : ''}${declaration}`);\n    }\n\n    const normalizedStyle = style.trim().replace(/;?\\s*$/, '');\n    return normalizedStyle ? `${normalizedStyle}; ${declaration}` : declaration;\n  }\n\n  /**\n   * Keep blockquote padding in control while preserving intentional blank lines.\n   * A blank line inside Markdown blockquotes renders as multiple paragraphs.\n   */\n  removeBlockquoteParagraphMargins(html) {\n    const containerTags = new Set([\n      'blockquote', 'section', 'div', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tfoot',\n      'tr', 'th', 'td', 'ul', 'ol', 'li', 'pre', 'article', 'aside',\n    ]);\n    const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);\n    const blockquoteStack = [];\n    const replacements = [];\n    const tagPattern = /<\\/?([a-zA-Z][\\w:-]*)(?:\\s[^<>]*)?>/g;\n\n    let match;\n    while ((match = tagPattern.exec(html)) !== null) {\n      const rawTag = match[0];\n      const tagName = String(match[1] || '').toLowerCase();\n      const isClosing = /^<\\//.test(rawTag);\n      const isSelfClosing = /\\/\\s*>$/.test(rawTag) || voidTags.has(tagName);\n\n      if (tagName === 'blockquote') {\n        if (isClosing) {\n          const frame = blockquoteStack.pop();\n          if (frame) {\n            const paragraphCount = frame.paragraphs.length;\n            frame.paragraphs.forEach((paragraph, index) => {\n              const isLastParagraph = index === paragraphCount - 1;\n              const marginValue = paragraphCount > 1 && !isLastParagraph ? '0 0 0.8em 0' : '0';\n              const updatedStyle = this.replaceStyleDeclaration(paragraph.styleText, 'margin', marginValue);\n              replacements.push({\n                start: paragraph.start,\n                end: paragraph.end,\n                value: paragraph.rawTag.replace(/style=\"([^\"]*)\"/, `style=\"${updatedStyle}\"`),\n              });\n            });\n          }\n          if (blockquoteStack.length > 0) {\n            const parentFrame = blockquoteStack[blockquoteStack.length - 1];\n            parentFrame.containerDepth = Math.max(0, parentFrame.containerDepth - 1);\n          }\n        } else {\n          if (blockquoteStack.length > 0) {\n            blockquoteStack[blockquoteStack.length - 1].containerDepth += 1;\n          }\n          blockquoteStack.push({ containerDepth: 0, paragraphs: [] });\n        }\n        continue;\n      }\n\n      if (blockquoteStack.length === 0) continue;\n\n      const frame = blockquoteStack[blockquoteStack.length - 1];\n      if (!isClosing && tagName === 'p') {\n        const styleMatch = rawTag.match(/\\bstyle=\"([^\"]*)\"/);\n        if (styleMatch && frame.containerDepth === 0) {\n          frame.paragraphs.push({\n            start: match.index,\n            end: match.index + rawTag.length,\n            rawTag,\n            styleText: styleMatch[1],\n          });\n        } else if (styleMatch) {\n          const updatedStyle = this.replaceStyleDeclaration(styleMatch[1], 'margin', '0');\n          replacements.push({\n            start: match.index,\n            end: match.index + rawTag.length,\n            value: rawTag.replace(/style=\"([^\"]*)\"/, `style=\"${updatedStyle}\"`),\n          });\n        }\n        continue;\n      }\n\n      if (!containerTags.has(tagName) || tagName === 'p') continue;\n      if (isClosing) {\n        frame.containerDepth = Math.max(0, frame.containerDepth - 1);\n      } else if (!isSelfClosing) {\n        frame.containerDepth += 1;\n      }\n    }\n\n    return replacements\n      .sort((a, b) => b.start - a.start)\n      .reduce((output, replacement) => (\n        output.slice(0, replacement.start) + replacement.value + output.slice(replacement.end)\n      ), html);\n  }\n\n  /**\n   * Fix: Unwrap <figure> from <p> tags\n   * Markdown-it wraps images in <p> by default, but <figure> inside <p> is invalid.\n   * Browsers (and WeChat) handle this by splitting the <p> into two empty <p>s above and below,\n   * causing unwanted empty lines. This regex removes the wrapping <p>.\n   */\n  unwrapFigures(html) {\n    // Logic: Match <p ...> <figure>...</figure> </p> and replace with <figure>...</figure>\n    return html.replace(/<p[^>]*>\\s*(<figure[\\s\\S]*?<\\/figure>)\\s*<\\/p>/gi, '$1');\n  }\n\n  validateLink(url, isImage = false) {\n    if (!url) return '#';\n    const value = String(url).trim();\n    if (!value) return '#';\n\n    // Keep legacy parity: allow raw data:image src in image context.\n    // Non-image data: remains blocked.\n    if (/^data:/i.test(value)) {\n      if (!isImage) return '#unsafe';\n      return /^data:image\\//i.test(value) ? value : '#';\n    }\n\n    // Allow safe protocols\n    const safeProtocols = ['http:', 'https:', 'obsidian:', 'mailto:', 'tel:', 'app:', 'capacitor:'];\n\n    try {\n      // URL constructor might fail for some internal links or malformed data URIs\n      const parsed = new URL(value);\n      if (safeProtocols.includes(parsed.protocol)) {\n        return value;\n      }\n    } catch (e) {\n      // Handle relative paths or Obsidian internal links that URL() can't parse\n      if (value.startsWith('#') || value.startsWith('/') || !value.includes(':')) return value;\n    }\n    return '#'; // Block javascript: and other dangerous protocols\n  }\n\n  sanitizeHtml(html) {\n    // 1. Remove dangerous tags and their content\n    let sanitized = html.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*>[\\s\\S]*?<\\/\\1>/gi, '');\n    // 2. Remove self-closing dangerous tags\n    sanitized = sanitized.replace(/<(script|iframe|object|embed|form|input|button|style)[^>]*\\/?>/gi, '');\n    // 3. Remove document wrapper tags/comments that may appear when users paste browser fragments.\n    sanitized = sanitized.replace(/<!--[\\s\\S]*?-->/g, '');\n    sanitized = sanitized.replace(/<\\/?(?:html|body|head|meta|title|link)[^>]*>/gi, '');\n    // 4. Remove all on* event handlers (e.g., onerror, onclick)\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*\"[^\"]*\"/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*'[^']*'/gi, '');\n    sanitized = sanitized.replace(/\\s+on\\w+\\s*=\\s*[^\\s>]+/gi, '');\n\n    // 5. Sanitize href and src in remaining HTML tags to prevent protocol bypass (e.g. <a href=\"javascript:...\")\n    sanitized = sanitized.replace(/<(a|img|source|video|audio|area)\\b([^>]*)>/gi, (match, tag, attrs) => {\n      const isImageTag = /^(img|source)$/i.test(tag);\n      let newAttrs = attrs.replace(/\\b(href|src)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))/gi, (attrMatch, attrName, qVal, sqVal, uVal) => {\n        const val = qVal || sqVal || uVal || '';\n        const safeVal = this.validateLink(val, isImageTag);\n        const quote = qVal !== undefined ? '\"' : (sqVal !== undefined ? \"'\" : '\"');\n        return `${attrName}=${quote}${safeVal}${quote}`;\n      });\n      return `<${tag}${newAttrs}>`;\n    });\n\n    return sanitized;\n  }\n\n  escapeHtml(text) {\n    return text.replace(/[&<>\"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#039;' }[m]));\n  }\n\n  extractFileName(src) {\n    if (!src) return '\u56FE\u7247';\n    return src.split('/').pop().split('\\\\').pop().replace(/\\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '') || '\u56FE\u7247';\n  }\n}\n\nwindow.AppleStyleConverter = AppleStyleConverter;\n"
       }
     };
   }
@@ -1800,6 +1800,9 @@ var require_obsidian_triplet_serializer = __commonJS({
           return /* @__PURE__ */ new Set(["href", "style"]);
         if (tagName === "img")
           return /* @__PURE__ */ new Set(["src", "alt", "style", "width", "height", "class"]);
+        if (tagName === "section" && !finalStage) {
+          return /* @__PURE__ */ new Set(["style", "class", "data-owc-image-swipe", "data-owc-image-swipe-type", "data-owc-image-swipe-warning", "data-owc-image-swipe-hint"]);
+        }
         if (tagName === "section")
           return /* @__PURE__ */ new Set(["style", "class"]);
         if (!finalStage && (tagName === "pre" || tagName === "code"))
@@ -1814,7 +1817,7 @@ var require_obsidian_triplet_serializer = __commonJS({
         const attrs = Array.from(el.attributes);
         for (const attr of attrs) {
           const name = attr.name.toLowerCase();
-          if (name.startsWith("data-") || name === "id" || name === "dir") {
+          if (name.startsWith("data-") && !allowed.has(name) || name === "id" || name === "dir") {
             el.removeAttribute(attr.name);
             continue;
           }
@@ -1910,18 +1913,14 @@ var require_obsidian_triplet_serializer = __commonJS({
     }
     function deriveImageCaption(converter, src = "", alt = "") {
       let caption = alt || "";
-      if (!caption) {
-        if (converter && typeof converter.extractFileName === "function") {
-          caption = converter.extractFileName(src);
-        } else {
-          caption = src.split("/").pop() || "\u56FE\u7247";
-        }
+      if (caption) {
+        caption = safeDecodeCaption(caption);
+        caption = caption.replace(/[?#].*$/, "");
+        const stripped = caption.replace(/\|\s*\d+(x\d+)?\s*$/, "");
+        caption = stripped || caption;
+        caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, "");
       }
-      caption = safeDecodeCaption(caption);
-      caption = caption.replace(/[?#].*$/, "");
-      caption = caption.replace(/\|\s*\d+(x\d+)?\s*$/, "");
-      caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, "");
-      return caption || "\u56FE\u7247";
+      return caption;
     }
     function extractWidthHintFromText(text) {
       const value = String(text || "");
@@ -2003,6 +2002,9 @@ var require_obsidian_triplet_serializer = __commonJS({
       const styleMatch = style.match(/(?:^|;)\s*width\s*:\s*(\d+)px\b/i);
       if (styleMatch && styleMatch[1]) {
         return `${alt}|${styleMatch[1]}`;
+      }
+      if (/^\s*\d{2,4}\s*$/.test(alt)) {
+        return alt;
       }
       const ancestorWidth = findImageWidthHintFromAncestors(imgEl);
       if (ancestorWidth) {
@@ -2157,12 +2159,127 @@ var require_obsidian_triplet_serializer = __commonJS({
         }
       }
     }
+    var IMAGE_SWIPE_DEFAULT_WARNING = "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
+    var IMAGE_SWIPE_DEFAULT_HINT = "\u5DE6\u53F3\u6ED1\u52A8\u67E5\u770B\u56FE\u7247";
+    function decodeImageSwipeValue(value) {
+      try {
+        return decodeURIComponent(String(value || ""));
+      } catch (error) {
+        return String(value || "");
+      }
+    }
+    function setImageSwipeSectionStyle(el, styleText) {
+      if (!el || !styleText)
+        return;
+      el.setAttribute("style", styleText);
+    }
+    function normalizeImageSwipeImage(img, converter) {
+      let src = img.getAttribute("src") || "";
+      src = normalizeObsidianImageSrcForLegacyParity(src);
+      const safeSrc = converter && typeof converter.validateLink === "function" ? converter.validateLink(src, true) : src;
+      src = safeSrc;
+      if (looksLikeImageSrc(src) && converter && typeof converter.resolveImagePath === "function") {
+        src = converter.resolveImagePath(src);
+      }
+      const rawAlt = img.getAttribute("alt") || "";
+      const alt = buildLegacyParityImageAlt(img, rawAlt);
+      img.setAttribute("src", src);
+      img.setAttribute("alt", alt);
+      return {
+        src,
+        alt,
+        caption: deriveImageCaption(converter, src, alt)
+      };
+    }
+    function createImageSwipePanel({ img, caption, converter }) {
+      const panel = document.createElement("section");
+      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:top;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;text-align:center;");
+      img.setAttribute("data-owc-skip-standalone-image", "1");
+      appendInlineStyle(img, getTagStyle(converter, "img"));
+      panel.appendChild(img);
+      const showCaption = !converter || converter.showImageCaption !== false;
+      if (showCaption && caption) {
+        const captionEl = document.createElement("figcaption");
+        appendInlineStyle(captionEl, getTagStyle(converter, "figcaption"));
+        captionEl.textContent = caption;
+        panel.appendChild(captionEl);
+      }
+      return panel;
+    }
+    function createImageSwipeWarningPanel(warning) {
+      const panel = document.createElement("section");
+      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:8px 10px;margin:0;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;");
+      const content = document.createElement("section");
+      setImageSwipeSectionStyle(content, "display:block;box-sizing:border-box;padding:0;margin:0 auto;");
+      const label = document.createElement("section");
+      setImageSwipeSectionStyle(label, "display:inline-block;margin:0 auto 8px;padding:2px 8px;border-radius:999px;background:#ffffff;color:#8a6d3b;border:1px solid #efe2c7;font-size:12px;line-height:1.4;");
+      label.textContent = "\u654F\u611F\u56FE\u7247";
+      const text = document.createElement("section");
+      setImageSwipeSectionStyle(text, "display:block;margin:0;color:#4a4f5a;font-size:14px;line-height:1.55;font-weight:500;");
+      text.textContent = warning || IMAGE_SWIPE_DEFAULT_WARNING;
+      const hint = document.createElement("section");
+      setImageSwipeSectionStyle(hint, "display:block;margin-top:6px;padding:0;color:#6b7280;font-size:12px;line-height:1.4;");
+      hint.textContent = "\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
+      content.appendChild(label);
+      content.appendChild(text);
+      content.appendChild(hint);
+      panel.appendChild(content);
+      return panel;
+    }
+    function createImageSwipeHint(hint, converter) {
+      const hintEl = document.createElement("section");
+      const fallbackStyle = "display:block;margin:8px 0 0;color:#8a8f98;font-size:13px;line-height:1.6;text-align:center;";
+      setImageSwipeSectionStyle(hintEl, getTagStyle(converter, "figcaption") || fallbackStyle);
+      appendInlineStyle(hintEl, "margin-top:8px;");
+      hintEl.textContent = hint || IMAGE_SWIPE_DEFAULT_HINT;
+      return hintEl;
+    }
+    function convertImageSwipeBlocks(container, converter) {
+      if (!container)
+        return;
+      const blocks = Array.from(container.querySelectorAll('section[data-owc-image-swipe="1"]'));
+      for (const block of blocks) {
+        const imgs = Array.from(block.querySelectorAll("img"));
+        if (!imgs.length) {
+          block.removeAttribute("data-owc-image-swipe");
+          block.removeAttribute("data-owc-image-swipe-type");
+          block.removeAttribute("data-owc-image-swipe-warning");
+          block.removeAttribute("data-owc-image-swipe-hint");
+          continue;
+        }
+        const type = block.getAttribute("data-owc-image-swipe-type") || "image-swipe";
+        const wrapper = document.createElement("section");
+        setImageSwipeSectionStyle(wrapper, "display:block;margin:18px 0;text-align:left;");
+        const scroll = document.createElement("section");
+        setImageSwipeSectionStyle(scroll, "display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;margin:0;padding:0;white-space:nowrap;");
+        const row = document.createElement("section");
+        const panelCount = imgs.length + (type === "image-sensitive" ? 1 : 0);
+        setImageSwipeSectionStyle(row, `display:table;table-layout:fixed;width:${panelCount * 100}%;min-width:${panelCount * 100}%;border-spacing:0;font-size:0;line-height:0;margin:0;padding:0;`);
+        if (type === "image-sensitive") {
+          const warning = decodeImageSwipeValue(block.getAttribute("data-owc-image-swipe-warning") || "") || IMAGE_SWIPE_DEFAULT_WARNING;
+          row.appendChild(createImageSwipeWarningPanel(warning));
+        }
+        for (const img of imgs) {
+          const { caption } = normalizeImageSwipeImage(img, converter);
+          row.appendChild(createImageSwipePanel({ img, caption, converter }));
+        }
+        scroll.appendChild(row);
+        wrapper.appendChild(scroll);
+        if (type === "image-swipe") {
+          const hint = decodeImageSwipeValue(block.getAttribute("data-owc-image-swipe-hint") || "") || IMAGE_SWIPE_DEFAULT_HINT;
+          wrapper.appendChild(createImageSwipeHint(hint, converter));
+        }
+        block.replaceWith(wrapper);
+      }
+    }
     function convertStandaloneImages(container, converter) {
       if (!container)
         return;
       const imgs = Array.from(container.querySelectorAll("img"));
       for (const img of imgs) {
         if (img.closest("figure"))
+          continue;
+        if (img.getAttribute("data-owc-skip-standalone-image") === "1")
           continue;
         if (img.getAttribute("alt") === "logo")
           continue;
@@ -2227,7 +2344,7 @@ var require_obsidian_triplet_serializer = __commonJS({
         bodyImg.setAttribute("alt", alt);
         appendInlineStyle(bodyImg, getTagStyle(converter, "img"));
         figure.appendChild(bodyImg);
-        const showCaption = !converter || converter.showImageCaption !== false;
+        const showCaption = (!converter || converter.showImageCaption !== false) && caption;
         if (showCaption) {
           const figcaption = document.createElement("figcaption");
           appendInlineStyle(figcaption, getTagStyle(converter, "figcaption"));
@@ -2728,6 +2845,7 @@ var require_obsidian_triplet_serializer = __commonJS({
       sanitizeAnchorAndImageLinks(container, converter);
       normalizeMathPresentation(container);
       convertPreBlocks(container, converter);
+      convertImageSwipeBlocks(container, converter);
       convertStandaloneImages(container, converter);
       applyThemeInlineStyles(container, converter);
       wrapTablesForHorizontalScroll(container, converter);
@@ -4280,12 +4398,533 @@ var require_obsidian_triplet_renderer = __commonJS({
       });
       return { markdown: output, formulas };
     }
+    var IMAGE_SWIPE_DEFAULT_WARNING = "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
+    var IMAGE_SWIPE_DEFAULT_HINT = "\u5DE6\u53F3\u6ED1\u52A8\u67E5\u770B\u56FE\u7247";
+    var IMAGE_SWIPE_TYPES = /* @__PURE__ */ new Set(["image-swipe", "image-sensitive"]);
+    function encodeImageSwipeValue(value) {
+      return encodeURIComponent(String(value || ""));
+    }
+    function escapeImageSwipeHtmlAttr(value) {
+      return String(value || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    function getImageCaptionFromPath(imagePath) {
+      const value = String(imagePath || "").trim();
+      if (!value)
+        return "";
+      const filename = value.split("/").pop().split("\\").pop() || value;
+      return filename.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp|avif)$/i, "");
+    }
+    function hasExplicitUrlProtocol(value) {
+      return /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(String(value || "").trim());
+    }
+    function shouldMaterializeLocalMarkdownImage(src) {
+      const value = String(src || "").trim();
+      if (!value)
+        return false;
+      if (/^(?:https?:)?\/\//i.test(value))
+        return false;
+      if (/^data:image\//i.test(value))
+        return false;
+      return !hasExplicitUrlProtocol(value);
+    }
+    function encodeMarkdownImageSrc(src) {
+      const value = String(src || "").trim();
+      try {
+        return encodeURI(decodeURI(value));
+      } catch (error) {
+        return encodeURI(value);
+      }
+    }
+    function findInlineCodeRanges(line) {
+      const value = String(line || "");
+      const ranges = [];
+      let index = 0;
+      while (index < value.length) {
+        if (value[index] !== "`") {
+          index += 1;
+          continue;
+        }
+        let markerLength = 1;
+        while (value[index + markerLength] === "`") {
+          markerLength += 1;
+        }
+        const marker = "`".repeat(markerLength);
+        const closeIndex = value.indexOf(marker, index + markerLength);
+        if (closeIndex === -1) {
+          index += markerLength;
+          continue;
+        }
+        ranges.push([index, closeIndex + markerLength]);
+        index = closeIndex + markerLength;
+      }
+      return ranges;
+    }
+    function findHtmlTagRanges(line) {
+      const value = String(line || "");
+      const ranges = [];
+      let index = 0;
+      while (index < value.length) {
+        const start = value.indexOf("<", index);
+        if (start === -1)
+          break;
+        if (!/[A-Za-z/!?]/.test(value[start + 1] || "")) {
+          index = start + 1;
+          continue;
+        }
+        const end = value.indexOf(">", start + 1);
+        if (end === -1)
+          break;
+        ranges.push([start, end + 1]);
+        index = end + 1;
+      }
+      return ranges;
+    }
+    function findHtmlElementContentRanges(line) {
+      const value = String(line || "");
+      const ranges = [];
+      const openTagPattern = /<([A-Za-z][\w:-]*)(?:\s[^<>]*)?>/g;
+      let match;
+      while ((match = openTagPattern.exec(value)) !== null) {
+        const rawTag = match[0] || "";
+        if (/\/\s*>$/.test(rawTag))
+          continue;
+        const tagName = String(match[1] || "").toLowerCase();
+        const closePattern = new RegExp(`</${tagName}\\s*>`, "i");
+        const rest = value.slice(openTagPattern.lastIndex);
+        const closeMatch = closePattern.exec(rest);
+        if (!closeMatch)
+          continue;
+        ranges.push([match.index, openTagPattern.lastIndex + closeMatch.index + closeMatch[0].length]);
+      }
+      return ranges;
+    }
+    function findMarkdownLinkLabelRanges(line) {
+      const value = String(line || "");
+      const ranges = [];
+      for (let i = 0; i < value.length; i += 1) {
+        if (value[i] !== "[" || value[i - 1] === "!" || value[i - 1] === "\\")
+          continue;
+        let depth = 1;
+        let cursor = i + 1;
+        while (cursor < value.length) {
+          const char = value[cursor];
+          if (char === "\\") {
+            cursor += 2;
+            continue;
+          }
+          if (char === "[") {
+            depth += 1;
+          } else if (char === "]") {
+            depth -= 1;
+            if (depth === 0) {
+              if (value[cursor + 1] === "(") {
+                ranges.push([i, cursor + 1]);
+              }
+              break;
+            }
+          }
+          cursor += 1;
+        }
+      }
+      return ranges;
+    }
+    function isOffsetInRanges(offset, ranges) {
+      return ranges.some(([start, end]) => offset >= start && offset < end);
+    }
+    var HTML_VOID_TAGS = /* @__PURE__ */ new Set([
+      "area",
+      "base",
+      "br",
+      "col",
+      "embed",
+      "hr",
+      "img",
+      "input",
+      "link",
+      "meta",
+      "param",
+      "source",
+      "track",
+      "wbr"
+    ]);
+    function isHtmlVoidTag(tagName) {
+      return HTML_VOID_TAGS.has(String(tagName || "").toLowerCase());
+    }
+    function findClosingMarkdownBracket(value, startIndex) {
+      let index = startIndex;
+      while (index < value.length) {
+        const char = value[index];
+        if (char === "\\") {
+          index += 2;
+          continue;
+        }
+        if (char === "]")
+          return index;
+        index += 1;
+      }
+      return -1;
+    }
+    function parseQuotedMarkdownTitle(value, startIndex) {
+      const quote = value[startIndex];
+      if (quote !== '"' && quote !== "'")
+        return null;
+      let index = startIndex + 1;
+      while (index < value.length) {
+        const char = value[index];
+        if (char === "\\") {
+          index += 2;
+          continue;
+        }
+        if (char === quote)
+          return index + 1;
+        index += 1;
+      }
+      return null;
+    }
+    function parseParenthesizedMarkdownTitle(value, startIndex) {
+      if (value[startIndex] !== "(")
+        return null;
+      let depth = 1;
+      let index = startIndex + 1;
+      while (index < value.length) {
+        const char = value[index];
+        if (char === "\\") {
+          index += 2;
+          continue;
+        }
+        if (char === "(") {
+          depth += 1;
+        } else if (char === ")") {
+          depth -= 1;
+          if (depth === 0)
+            return index + 1;
+        }
+        index += 1;
+      }
+      return null;
+    }
+    function parseMarkdownImageTitleAndClose(value, startIndex) {
+      let index = startIndex;
+      while (/\s/.test(value[index] || ""))
+        index += 1;
+      if (value[index] === ")")
+        return index + 1;
+      const titleEnd = value[index] === "(" ? parseParenthesizedMarkdownTitle(value, index) : parseQuotedMarkdownTitle(value, index);
+      if (!titleEnd)
+        return null;
+      index = titleEnd;
+      while (/\s/.test(value[index] || ""))
+        index += 1;
+      return value[index] === ")" ? index + 1 : null;
+    }
+    function parseMarkdownImageTargetAt(value, openParenIndex) {
+      let index = openParenIndex + 1;
+      while (/\s/.test(value[index] || ""))
+        index += 1;
+      if (value[index] === "<") {
+        const targetStart2 = index + 1;
+        index += 1;
+        while (index < value.length) {
+          if (value[index] === "\\") {
+            index += 2;
+            continue;
+          }
+          if (value[index] === ">") {
+            const target = value.slice(targetStart2, index);
+            index += 1;
+            const endIndex = parseMarkdownImageTitleAndClose(value, index);
+            if (!endIndex)
+              return null;
+            return { rawTarget: target, endIndex };
+          }
+          index += 1;
+        }
+        return null;
+      }
+      const targetStart = index;
+      let depth = 0;
+      while (index < value.length) {
+        const char = value[index];
+        if (char === "\\") {
+          index += 2;
+          continue;
+        }
+        if (/\s/.test(char) && depth === 0) {
+          const target = value.slice(targetStart, index);
+          const endIndex = parseMarkdownImageTitleAndClose(value, index);
+          if (!endIndex)
+            return null;
+          return { rawTarget: target, endIndex };
+        }
+        if (char === "(") {
+          depth += 1;
+        } else if (char === ")") {
+          if (depth > 0) {
+            depth -= 1;
+          } else {
+            return {
+              rawTarget: value.slice(targetStart, index),
+              endIndex: index + 1
+            };
+          }
+        }
+        index += 1;
+      }
+      return null;
+    }
+    function replaceLocalMarkdownImagesInLine(line, protectedRanges) {
+      const value = String(line || "");
+      let output = "";
+      let cursor = 0;
+      while (cursor < value.length) {
+        const start = value.indexOf("![", cursor);
+        if (start === -1) {
+          output += value.slice(cursor);
+          break;
+        }
+        output += value.slice(cursor, start);
+        const closeBracketIndex = findClosingMarkdownBracket(value, start + 2);
+        const openParenIndex = closeBracketIndex >= 0 ? closeBracketIndex + 1 : -1;
+        const parsedTarget = openParenIndex >= 0 && value[openParenIndex] === "(" ? parseMarkdownImageTargetAt(value, openParenIndex) : null;
+        if (!parsedTarget) {
+          output += value[start];
+          cursor = start + 1;
+          continue;
+        }
+        const rawAlt = value.slice(start + 2, closeBracketIndex);
+        const match = value.slice(start, parsedTarget.endIndex);
+        if (isOffsetInRanges(start, protectedRanges) || value[start - 1] === "[" || value[start - 1] === "\\") {
+          output += match;
+          cursor = parsedTarget.endIndex;
+          continue;
+        }
+        const src = parseImageSwipeMarkdownTarget(parsedTarget.rawTarget);
+        if (!shouldMaterializeLocalMarkdownImage(src)) {
+          output += match;
+          cursor = parsedTarget.endIndex;
+          continue;
+        }
+        output += `<img src="${escapeImageSwipeHtmlAttr(encodeMarkdownImageSrc(src))}" alt="${escapeImageSwipeHtmlAttr(String(rawAlt || "").trim())}">`;
+        cursor = parsedTarget.endIndex;
+      }
+      return output;
+    }
+    function parseImageSwipeMarkdownTarget(rawTarget) {
+      const value = String(rawTarget || "").trim();
+      if (!value)
+        return "";
+      if (value.startsWith("<")) {
+        const endIndex = value.indexOf(">");
+        if (endIndex > 1)
+          return value.slice(1, endIndex).trim();
+      }
+      const titledMatch = value.match(/^(.+?)\s+(['"]).*\2\s*$/);
+      return (titledMatch ? titledMatch[1] : value).trim();
+    }
+    function parseImageSwipeMarkdownLine(line) {
+      const value = String(line || "").trim();
+      const wikiMatch = value.match(/^!\[\[([^\]|]+)(?:\|([^\]]+))?]]$/);
+      if (wikiMatch) {
+        return {
+          src: encodeURI(String(wikiMatch[1] || "").trim()),
+          alt: String(wikiMatch[2] || "").trim()
+        };
+      }
+      const markdownMatch = value.match(/^!\[([^\]]*)]\(([\s\S]+)\)$/);
+      if (!markdownMatch)
+        return null;
+      const src = parseImageSwipeMarkdownTarget(markdownMatch[2]);
+      if (!src)
+        return null;
+      return {
+        src: encodeURI(src),
+        alt: String(markdownMatch[1] || "").trim()
+      };
+    }
+    function materializeLocalMarkdownImages(markdown) {
+      const lines = String(markdown || "").split("\n");
+      const output = [];
+      let fenceState = null;
+      let inMathFence = false;
+      let rawHtmlBlockTag = "";
+      let inHtmlComment = false;
+      for (const line of lines) {
+        const fenceDelimiter = parseFencedBlockDelimiter(line);
+        if (!inMathFence && fenceDelimiter) {
+          if (!fenceState) {
+            fenceState = fenceDelimiter;
+          } else if (fenceDelimiter.marker === fenceState.marker && fenceDelimiter.length >= fenceState.length) {
+            fenceState = null;
+          }
+          output.push(line);
+          continue;
+        }
+        if (!fenceState && isMathFenceDelimiter(line)) {
+          inMathFence = !inMathFence;
+          output.push(line);
+          continue;
+        }
+        if (fenceState || inMathFence) {
+          output.push(line);
+          continue;
+        }
+        if (inHtmlComment) {
+          output.push(line);
+          if (String(line || "").includes("-->")) {
+            inHtmlComment = false;
+          }
+          continue;
+        }
+        if (rawHtmlBlockTag) {
+          output.push(line);
+          if (new RegExp(`</${rawHtmlBlockTag}\\s*>`, "i").test(String(line || ""))) {
+            rawHtmlBlockTag = "";
+          }
+          continue;
+        }
+        if (/^(?: {4}|\t)/.test(String(line || ""))) {
+          output.push(line);
+          continue;
+        }
+        if (/^\s{0,3}<!--/.test(String(line || "")) && !String(line || "").includes("-->")) {
+          inHtmlComment = true;
+          output.push(line);
+          continue;
+        }
+        const rawBlockMatch = String(line || "").match(/^\s{0,3}<([A-Za-z][\w:-]*)(?:\s[^<>]*)?>\s*$/);
+        const rawBlockTag = String((rawBlockMatch == null ? void 0 : rawBlockMatch[1]) || "").toLowerCase();
+        const isSelfClosingRawBlock = /\/\s*>\s*$/.test(String(line || ""));
+        if (rawBlockMatch && !isHtmlVoidTag(rawBlockTag) && !isSelfClosingRawBlock && !new RegExp(`</${rawBlockTag}\\s*>`, "i").test(String(line || ""))) {
+          rawHtmlBlockTag = rawBlockTag;
+          output.push(line);
+          continue;
+        }
+        const protectedRanges = [
+          ...findInlineCodeRanges(line),
+          ...findHtmlTagRanges(line),
+          ...findHtmlElementContentRanges(line),
+          ...findMarkdownLinkLabelRanges(line)
+        ];
+        output.push(replaceLocalMarkdownImagesInLine(line, protectedRanges));
+      }
+      return output.join("\n");
+    }
+    function extractImageSwipeItalicCaption(lines, imageIndex) {
+      for (let i = imageIndex + 1; i < lines.length; i += 1) {
+        const line = String(lines[i] || "").trim();
+        if (!line)
+          continue;
+        if (parseImageSwipeMarkdownLine(line))
+          return "";
+        const match = line.match(/^(?:\*|_)(.+?)(?:\*|_)$/);
+        return match ? String(match[1] || "").trim() : "";
+      }
+      return "";
+    }
+    function collectImageSwipeImages(blockLines) {
+      const images = [];
+      for (let i = 0; i < blockLines.length; i += 1) {
+        const image = parseImageSwipeMarkdownLine(blockLines[i]);
+        if (!image)
+          continue;
+        const caption = image.alt || extractImageSwipeItalicCaption(blockLines, i);
+        images.push({ ...image, alt: caption });
+      }
+      return images;
+    }
+    function renderImageSwipeHtmlBlock(type, blockLines, optionText) {
+      const images = collectImageSwipeImages(blockLines);
+      if (!images.length)
+        return null;
+      const attrs = [
+        'data-owc-image-swipe="1"',
+        `data-owc-image-swipe-type="${type}"`
+      ];
+      if (type === "image-sensitive") {
+        attrs.push(`data-owc-image-swipe-warning="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_WARNING))}"`);
+      } else {
+        attrs.push(`data-owc-image-swipe-hint="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_HINT))}"`);
+      }
+      return [
+        `<section ${attrs.join(" ")}>`,
+        ...images.map((image) => `<img src="${escapeImageSwipeHtmlAttr(image.src)}" alt="${escapeImageSwipeHtmlAttr(image.alt)}">`),
+        "</section>"
+      ];
+    }
+    function parseImageSwipeCalloutOpen(line) {
+      const match = String(line || "").match(/^\s{0,3}>\s?\[!\s*([a-z-]+)\s*](?:[+-])?\s*(.*)$/i);
+      if (!match)
+        return null;
+      const type = String(match[1] || "").toLowerCase();
+      if (!IMAGE_SWIPE_TYPES.has(type))
+        return null;
+      return {
+        type,
+        optionText: String(match[2] || "").trim()
+      };
+    }
+    function stripSingleQuotePrefix(line) {
+      return String(line || "").replace(/^\s{0,3}>\s?/, "");
+    }
+    function preprocessImageSwipeCallouts(markdown) {
+      const lines = String(markdown || "").split("\n");
+      const output = [];
+      let fenceState = null;
+      let inMathFence = false;
+      for (let i = 0; i < lines.length; ) {
+        const fenceDelimiter = parseFencedBlockDelimiter(lines[i]);
+        if (fenceDelimiter) {
+          if (!fenceState) {
+            fenceState = fenceDelimiter;
+          } else if (fenceDelimiter.marker === fenceState.marker && fenceDelimiter.length >= fenceState.length) {
+            fenceState = null;
+          }
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        if (!fenceState && isMathFenceDelimiter(lines[i])) {
+          inMathFence = !inMathFence;
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        if (fenceState || inMathFence) {
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        const callout = parseImageSwipeCalloutOpen(lines[i]);
+        if (!callout) {
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        const originalLines = [lines[i]];
+        const blockLines = [];
+        i += 1;
+        while (i < lines.length && isQuoteLine(lines[i])) {
+          originalLines.push(lines[i]);
+          blockLines.push(stripSingleQuotePrefix(lines[i]));
+          i += 1;
+        }
+        const rendered = renderImageSwipeHtmlBlock(callout.type, blockLines, callout.optionText);
+        if (rendered) {
+          output.push(...rendered);
+        } else {
+          output.push(...originalLines);
+        }
+      }
+      return output.join("\n");
+    }
     function preprocessMarkdownForTriplet(markdown, converter) {
-      let output = String(markdown || "");
+      let output = preprocessImageSwipeCallouts(markdown);
       output = output.replace(/^[\t ]+(\$\$)/gm, "$1");
       output = output.replace(/!\[\[([^\[\]|]+)(?:\|([^\[\]]+))?\]\]/g, (match, imagePath, alt) => {
-        return `![${alt || ""}](${encodeURI(String(imagePath || "").trim())})`;
+        const normalizedPath = String(imagePath || "").trim();
+        return `![${alt || getImageCaptionFromPath(normalizedPath)}](${encodeURI(normalizedPath)})`;
       });
+      output = materializeLocalMarkdownImages(output);
       if (converter && typeof converter.stripFrontmatter === "function") {
         output = converter.stripFrontmatter(output);
       }
@@ -4533,7 +5172,7 @@ var require_obsidian_triplet_renderer = __commonJS({
       }
       const container = document.createElement("div");
       const { markdown: preparedMarkdown, mathFormulas } = preprocessMarkdownForTriplet(markdown, converter);
-      const shouldObserveWindow = shouldObserveAsyncEmbedWindow(preparedMarkdown);
+      const shouldObserveWindow = shouldObserveAsyncEmbedWindow(markdown) || shouldObserveAsyncEmbedWindow(preparedMarkdown);
       const shouldObserveMermaid = shouldObserveMermaidRenderWindow(preparedMarkdown);
       await renderByObsidianMarkdownRenderer({
         app,
@@ -4647,6 +5286,8 @@ var require_native_renderer = __commonJS({
     function canUseNativePreviewFastPath2(markdown) {
       const source = String(markdown || "");
       if (!source.trim())
+        return false;
+      if (/^\s{0,3}>\s?\[!\s*(?:image-swipe|image-sensitive)\s*](?:[+-])?/im.test(source))
         return false;
       if (source.includes("![["))
         return false;
@@ -10430,8 +11071,88 @@ var require_wechat_html_cleaner = __commonJS({
   }
 });
 
+// services/obsidian-fetch-adapter.js
+var require_obsidian_fetch_adapter = __commonJS({
+  "services/obsidian-fetch-adapter.js"(exports2, module2) {
+    function createAbortError() {
+      if (typeof DOMException === "function") {
+        return new DOMException("The operation was aborted.", "AbortError");
+      }
+      const error = new Error("The operation was aborted.");
+      error.name = "AbortError";
+      return error;
+    }
+    function normalizeHeaders(headers) {
+      if (!headers)
+        return void 0;
+      if (typeof Headers !== "undefined" && headers instanceof Headers) {
+        return Object.fromEntries(headers.entries());
+      }
+      if (Array.isArray(headers)) {
+        return Object.fromEntries(headers);
+      }
+      return { ...headers };
+    }
+    function getHeaderValue(headers, name) {
+      const normalized = normalizeHeaders(headers);
+      if (!normalized)
+        return void 0;
+      const target = String(name || "").toLowerCase();
+      const match = Object.keys(normalized).find((key) => key.toLowerCase() === target);
+      return match ? normalized[match] : void 0;
+    }
+    function createObsidianFetchAdapter2(requestUrlImpl) {
+      if (typeof requestUrlImpl !== "function") {
+        throw new Error("Obsidian requestUrl is not available");
+      }
+      return async function obsidianFetchAdapter(url, options = {}) {
+        const signal = options.signal;
+        if (signal == null ? void 0 : signal.aborted) {
+          throw createAbortError();
+        }
+        let abortHandler = null;
+        const abortPromise = signal ? new Promise((_, reject) => {
+          abortHandler = () => reject(createAbortError());
+          signal.addEventListener("abort", abortHandler, { once: true });
+        }) : null;
+        try {
+          const headers = normalizeHeaders(options.headers);
+          const requestPromise = requestUrlImpl({
+            url,
+            method: options.method || "GET",
+            headers,
+            body: options.body,
+            contentType: getHeaderValue(headers, "content-type")
+          });
+          const response = await (abortPromise ? Promise.race([requestPromise, abortPromise]) : requestPromise);
+          const responseText = (response == null ? void 0 : response.text) !== void 0 ? String(response.text) : (response == null ? void 0 : response.json) !== void 0 ? JSON.stringify(response.json) : "";
+          return {
+            ok: response.status >= 200 && response.status < 300,
+            status: response.status,
+            statusText: String(response.status || ""),
+            headers: response.headers || {},
+            text: async () => responseText,
+            json: async () => {
+              if ((response == null ? void 0 : response.json) !== void 0)
+                return response.json;
+              return responseText ? JSON.parse(responseText) : null;
+            }
+          };
+        } finally {
+          if (signal && abortHandler) {
+            signal.removeEventListener("abort", abortHandler);
+          }
+        }
+      };
+    }
+    module2.exports = {
+      createObsidianFetchAdapter: createObsidianFetchAdapter2
+    };
+  }
+});
+
 // input.js
-var { Plugin, MarkdownView, ItemView, Notice, Platform } = require("obsidian");
+var { Plugin, MarkdownView, ItemView, Notice, Platform, requestUrl } = require("obsidian");
 var { PluginSettingTab, Setting } = require("obsidian");
 var { createRenderPipelines } = require_render_pipeline();
 var { buildRenderRuntime } = require_dependency_loader();
@@ -10473,8 +11194,66 @@ var { resolveSyncAccount, toSyncFriendlyMessage } = require_sync_context();
 var { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require_wechat_media();
 var { cleanHtmlForDraft: cleanHtmlForDraftService } = require_wechat_html_cleaner();
 var { rasterizeSvgToPngBlob } = require_svg_rasterizer();
+var { createObsidianFetchAdapter } = require_obsidian_fetch_adapter();
 var APPLE_STYLE_VIEW = "apple-style-converter";
 var APPLE_STYLE_VIEW_TITLE = "\u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668";
+var IMAGE_SWIPE_COMMAND_COPY = {
+  "image-swipe": {
+    zhName: "\u63D2\u5165\u56FE\u7247\u5757",
+    enName: "Insert image block",
+    zhTitle: "\u5DE6\u53F3\u6ED1\u52A8\u67E5\u770B\u56FE\u7247",
+    enTitle: "Swipe to view images",
+    zhPlaceholder: ["![[\u56FE\u72471.png]]", "![[\u56FE\u72472.png]]"],
+    enPlaceholder: ["![[image-1.png]]", "![[image-2.png]]"],
+    zhNotice: "\u5DF2\u63D2\u5165\u56FE\u7247\u5757",
+    enNotice: "Image block inserted"
+  },
+  "image-sensitive": {
+    zhName: "\u63D2\u5165\u654F\u611F\u56FE\u7247\u5757",
+    enName: "Insert sensitive image block",
+    zhTitle: "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B",
+    enTitle: "Sensitive images. Swipe to view.",
+    zhPlaceholder: ["![[\u56FE\u72471.png]]", "![[\u56FE\u72472.png]]"],
+    enPlaceholder: ["![[image-1.png]]", "![[image-2.png]]"],
+    zhNotice: "\u5DF2\u63D2\u5165\u654F\u611F\u56FE\u7247\u5757",
+    enNotice: "Sensitive image block inserted"
+  }
+};
+function getObsidianLocale(app = null) {
+  var _a, _b, _c, _d, _e, _f, _g, _h;
+  const candidates = [
+    (_b = (_a = app == null ? void 0 : app.vault) == null ? void 0 : _a.getConfig) == null ? void 0 : _b.call(_a, "language"),
+    (_d = (_c = app == null ? void 0 : app.vault) == null ? void 0 : _c.getConfig) == null ? void 0 : _d.call(_c, "locale"),
+    typeof window !== "undefined" ? (_f = (_e = window.localStorage) == null ? void 0 : _e.getItem) == null ? void 0 : _f.call(_e, "language") : "",
+    typeof window !== "undefined" ? (_h = (_g = window.localStorage) == null ? void 0 : _g.getItem) == null ? void 0 : _h.call(_g, "obsidian-language") : "",
+    typeof navigator !== "undefined" ? navigator.language : ""
+  ];
+  return String(candidates.find((value) => typeof value === "string" && value.trim()) || "").trim().toLowerCase();
+}
+function isChineseObsidianLocale(app = null) {
+  const locale = getObsidianLocale(app);
+  return !locale || /^zh(?:-|_|$)/i.test(locale);
+}
+function getImageSwipeCommandCopy(app = null, type = "image-swipe") {
+  const copy = IMAGE_SWIPE_COMMAND_COPY[type] || IMAGE_SWIPE_COMMAND_COPY["image-swipe"];
+  const useChinese = isChineseObsidianLocale(app);
+  return {
+    name: useChinese ? copy.zhName : copy.enName,
+    title: useChinese ? copy.zhTitle : copy.enTitle,
+    placeholder: useChinese ? copy.zhPlaceholder : copy.enPlaceholder,
+    notice: useChinese ? copy.zhNotice : copy.enNotice
+  };
+}
+function quoteLinesForImageSwipeCallout(text) {
+  const lines = String(text || "").split("\n");
+  return lines.map((line) => line ? `> ${line}` : ">").join("\n");
+}
+function createImageSwipeCalloutMarkdown(type = "image-swipe", selectedText = "", app = null) {
+  const copy = getImageSwipeCommandCopy(app, type);
+  const content = String(selectedText || "").trim() ? String(selectedText || "").replace(/\s+$/g, "") : copy.placeholder.join("\n");
+  return `> [!${type}] ${copy.title}
+${quoteLinesForImageSwipeCallout(content)}`;
+}
 var DEFAULT_SETTINGS = {
   theme: "github",
   themeColor: "blue",
@@ -10664,10 +11443,10 @@ var WechatAPI = class {
    * 纯粹的 HTTP 请求封装，不包含重试逻辑
    */
   async sendRequest(url, options = {}) {
-    const { requestUrl } = require("obsidian");
+    const { requestUrl: requestUrl2 } = require("obsidian");
     if (this.proxyUrl) {
       this.validateProxyUrl(this.proxyUrl);
-      const proxyResponse = await requestUrl({
+      const proxyResponse = await requestUrl2({
         url: this.proxyUrl,
         method: "POST",
         body: JSON.stringify({
@@ -10679,7 +11458,7 @@ var WechatAPI = class {
       });
       return proxyResponse.json;
     } else {
-      const response = await requestUrl({ url, ...options });
+      const response = await requestUrl2({ url, ...options });
       return response.json;
     }
   }
@@ -10724,7 +11503,7 @@ var WechatAPI = class {
   }
   async uploadMultipart(url, blob, fieldName) {
     return this.requestWithRetry(async () => {
-      const { requestUrl } = require("obsidian");
+      const { requestUrl: requestUrl2 } = require("obsidian");
       const mimeType = blob.type || "image/jpeg";
       const ext = mimeType.includes("gif") ? "gif" : mimeType.includes("png") ? "png" : "jpg";
       if (this.proxyUrl) {
@@ -10735,7 +11514,7 @@ var WechatAPI = class {
           reader.onload = () => resolve(reader.result.split(",")[1]);
           reader.onerror = reject;
         });
-        const proxyResponse = await requestUrl({
+        const proxyResponse = await requestUrl2({
           url: this.proxyUrl,
           method: "POST",
           body: JSON.stringify({
@@ -10776,7 +11555,7 @@ var WechatAPI = class {
         bodyBytes.set(bytes, headerBytes.length);
         bodyBytes.set(footerBytes, headerBytes.length + bytes.length);
         try {
-          const response = await requestUrl({
+          const response = await requestUrl2({
             url,
             method: "POST",
             body: bodyBytes.buffer,
@@ -11152,7 +11931,7 @@ var AppleStyleView = class extends ItemView {
       return btn;
     };
     this.settingsBtn = createIconBtn("sliders-horizontal", "\u6837\u5F0F\u8BBE\u7F6E", () => {
-      this.togglePanel(this.settingsOverlay, this.settingsBtn);
+      this.togglePanel(this.settingsOverlay, this.settingsBtn, () => this.resetSettingsPanelViewState());
     });
     this.aiLayoutBtn = createIconBtn("sparkles", "AI \u7F16\u6392", () => this.onAiLayoutButtonClick());
     if (!isMobileClient(this.app)) {
@@ -11163,6 +11942,7 @@ var AppleStyleView = class extends ItemView {
     createIconBtn("send", "\u4E00\u952E\u540C\u6B65\u5230\u8349\u7A3F\u7BB1", () => this.showSyncModal());
     this.settingsOverlay = container.createEl("div", { cls: "apple-settings-overlay" });
     const settingsArea = this.settingsOverlay.createEl("div", { cls: "apple-settings-area" });
+    this.settingsArea = settingsArea;
     this.createSection(settingsArea, "\u4E3B\u9898", (section) => {
       const grid = section.createEl("div", { cls: "apple-btn-grid" });
       const themes = AppleTheme.getThemeList();
@@ -11290,11 +12070,13 @@ var AppleStyleView = class extends ItemView {
       });
     });
     const advancedOptions = settingsArea.createEl("details", { cls: "apple-settings-details" });
+    this.settingsAdvancedOptions = advancedOptions;
     advancedOptions.createEl("summary", {
       cls: "apple-settings-summary",
       text: "\u9AD8\u7EA7\u9009\u9879"
     });
     const advancedArea = advancedOptions.createDiv({ cls: "apple-settings-area apple-settings-advanced-area" });
+    this.settingsAdvancedArea = advancedArea;
     const quoteStyleSection = this.createSection(advancedArea, "\u5F15\u7528\u6837\u5F0F", (section) => {
       const select = section.createEl("select", { cls: "apple-select" });
       [
@@ -11394,6 +12176,16 @@ var AppleStyleView = class extends ItemView {
       section._captionToggle = { checkbox, toggle };
     });
     captionSection.classList.add("apple-settings-inline-toggle");
+    this.createSection(advancedArea, "\u6A2A\u6ED1\u56FE\u7247\u5757", (section) => {
+      const imageBlockCommand = getImageSwipeCommandCopy(this.app, "image-swipe").name;
+      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, "image-sensitive").name;
+      section.createEl("span", {
+        text: `\u9009\u4E2D\u591A\u5F20\u56FE\u7247\uFF0C\u6253\u5F00\u547D\u4EE4\u9762\u677F\uFF0C\u8FD0\u884C\u300C${imageBlockCommand}\u300D\u6216\u300C${sensitiveImageBlockCommand}\u300D\u3002`,
+        attr: {
+          style: "font-size: 11px; color: var(--apple-secondary); opacity: 0.78; font-weight: 500; line-height: 1.6; display: block;"
+        }
+      });
+    });
     if (this.plugin.settings.enableWatermark) {
       const captionDesc = captionSection.querySelector(".apple-setting-content > span");
       if (captionDesc) {
@@ -11700,6 +12492,46 @@ var AppleStyleView = class extends ItemView {
     builder(content);
     return section;
   }
+  resetSettingsPanelViewState() {
+    var _a;
+    const advancedOptions = this.settingsAdvancedOptions || ((_a = this.settingsOverlay) == null ? void 0 : _a.querySelector(".apple-settings-details"));
+    if (advancedOptions)
+      advancedOptions.open = false;
+    const scrollTargets = [
+      this.settingsOverlay,
+      this.settingsArea,
+      this.settingsAdvancedArea
+    ].filter(Boolean);
+    const resetScroll = () => {
+      scrollTargets.forEach((target) => {
+        target.scrollTop = 0;
+      });
+    };
+    resetScroll();
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(resetScroll);
+    }
+  }
+  resetAiLayoutPanelViewState() {
+    this.aiAdvancedOpen = false;
+    this.aiLayoutDebugMode = "";
+    this.aiLayoutPendingAnchor = null;
+    const scrollTargets = [
+      this.aiLayoutOverlay,
+      this.aiLayoutArea,
+      this.aiAdvancedBody,
+      this.aiDebugPanelBody
+    ].filter(Boolean);
+    const resetScroll = () => {
+      scrollTargets.forEach((target) => {
+        target.scrollTop = 0;
+      });
+    };
+    resetScroll();
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(resetScroll);
+    }
+  }
   togglePanel(overlay, button, onOpen) {
     if (!overlay || !button)
       return;
@@ -11807,12 +12639,16 @@ var AppleStyleView = class extends ItemView {
       new Notice("AI \u7F16\u6392\u5F53\u524D\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528");
       return;
     }
-    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
+    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => {
+      this.resetAiLayoutPanelViewState();
+      this.refreshAiLayoutPanel();
+    });
   }
   createAiLayoutPanel(parent) {
     var _a, _b;
     this.attachOverlayScrollGuard(parent, [".apple-ai-layout-debug-body"]);
     const area = parent.createDiv({ cls: "apple-ai-layout-area" });
+    this.aiLayoutArea = area;
     const header = area.createDiv({ cls: "apple-ai-layout-header" });
     header.createEl("div", { cls: "apple-ai-layout-title", text: "AI \u7F16\u6392" });
     header.createEl("div", {
@@ -12316,7 +13152,8 @@ var AppleStyleView = class extends ItemView {
         markdown: sourceContext.markdown,
         selection: requestedSelection,
         imageRefs,
-        timeoutMs: aiSettings.requestTimeoutMs
+        timeoutMs: aiSettings.requestTimeoutMs,
+        fetchImpl: createObsidianFetchAdapter(requestUrl)
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length)
@@ -13305,7 +14142,8 @@ var AppleStyleView = class extends ItemView {
         markdown: context.markdown,
         selection,
         imageRefs,
-        timeoutMs: aiSettings.requestTimeoutMs
+        timeoutMs: aiSettings.requestTimeoutMs,
+        fetchImpl: createObsidianFetchAdapter(requestUrl)
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length) {
@@ -13818,8 +14656,8 @@ var AppleStyleView = class extends ItemView {
       return await resp.blob();
     }
     if (src.startsWith("http")) {
-      const { requestUrl } = require("obsidian");
-      const response = await requestUrl({ url: src });
+      const { requestUrl: requestUrl2 } = require("obsidian");
+      const response = await requestUrl2({ url: src });
       const contentType = response.headers["content-type"] || response.headers["Content-Type"] || "image/jpeg";
       return new Blob([response.arrayBuffer], { type: contentType });
     }
@@ -14862,7 +15700,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
           testBtn.disabled = true;
           testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
           try {
-            await testAiProviderConnection(provider);
+            await testAiProviderConnection(provider, createObsidianFetchAdapter(requestUrl));
             new Notice(`\u2705 ${provider.name} \u8FDE\u63A5\u6210\u529F\uFF01`);
           } catch (error) {
             new Notice(`\u274C ${provider.name} \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
@@ -15050,7 +15888,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       testBtn.disabled = true;
       testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
       try {
-        await testAiProviderConnection(candidate);
+        await testAiProviderConnection(candidate, createObsidianFetchAdapter(requestUrl));
         new Notice("\u2705 AI Provider \u8FDE\u63A5\u6210\u529F\uFF01");
       } catch (error) {
         new Notice(`\u274C \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
@@ -15252,6 +16090,20 @@ var AppleStylePlugin = class extends Plugin {
         await this.openConverter();
       }
     });
+    this.addCommand({
+      id: "insert-image-swipe-block",
+      name: getImageSwipeCommandCopy(this.app, "image-swipe").name,
+      editorCallback: (editor) => {
+        this.insertImageSwipeCallout(editor, "image-swipe");
+      }
+    });
+    this.addCommand({
+      id: "insert-image-sensitive-block",
+      name: getImageSwipeCommandCopy(this.app, "image-sensitive").name,
+      editorCallback: (editor) => {
+        this.insertImageSwipeCallout(editor, "image-sensitive");
+      }
+    });
     this.addSettingTab(new AppleStyleSettingTab(this.app, this));
     this.app.workspace.onLayoutReady(() => {
       this.migrateLegacyConverterLeafTitles().catch((error) => {
@@ -15259,6 +16111,16 @@ var AppleStylePlugin = class extends Plugin {
       });
     });
     console.log("\u2705 \u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668\u52A0\u8F7D\u5B8C\u6210");
+  }
+  insertImageSwipeCallout(editor, type = "image-swipe") {
+    if (!editor || typeof editor.replaceSelection !== "function") {
+      new Notice("\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7 Markdown \u6587\u6863");
+      return;
+    }
+    const selectedText = typeof editor.getSelection === "function" ? editor.getSelection() : "";
+    const markdown = createImageSwipeCalloutMarkdown(type, selectedText, this.app);
+    editor.replaceSelection(markdown);
+    new Notice(getImageSwipeCommandCopy(this.app, type).notice);
   }
   toConverterViewState(baseState = {}, options = {}) {
     const safeState = baseState && typeof baseState === "object" ? baseState : {};
@@ -15507,3 +16369,5 @@ module.exports = AppleStylePlugin;
 module.exports.AppleStyleView = AppleStyleView;
 module.exports.WechatAPI = WechatAPI;
 module.exports.AppleStyleSettingTab = AppleStyleSettingTab;
+module.exports.createImageSwipeCalloutMarkdown = createImageSwipeCalloutMarkdown;
+module.exports.getImageSwipeCommandCopy = getImageSwipeCommandCopy;

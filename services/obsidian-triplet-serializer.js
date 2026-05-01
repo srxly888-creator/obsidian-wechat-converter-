@@ -179,6 +179,9 @@ function pruneObsidianOnlyAttributes(container, { finalStage = false } = {}) {
   const getAllowedAttrs = (tagName) => {
     if (tagName === 'a') return new Set(['href', 'style']);
     if (tagName === 'img') return new Set(['src', 'alt', 'style', 'width', 'height', 'class']);
+    if (tagName === 'section' && !finalStage) {
+      return new Set(['style', 'class', 'data-owc-image-swipe', 'data-owc-image-swipe-type', 'data-owc-image-swipe-warning', 'data-owc-image-swipe-hint']);
+    }
     if (tagName === 'section') return new Set(['style', 'class']);
     if (!finalStage && (tagName === 'pre' || tagName === 'code')) return new Set(['style', 'class']);
     if (SVG_TAGS.has(tagName)) return SVG_ALLOWED_ATTRS;
@@ -191,7 +194,7 @@ function pruneObsidianOnlyAttributes(container, { finalStage = false } = {}) {
     const attrs = Array.from(el.attributes);
     for (const attr of attrs) {
       const name = attr.name.toLowerCase();
-      if (name.startsWith('data-') || name === 'id' || name === 'dir') {
+      if ((name.startsWith('data-') && !allowed.has(name)) || name === 'id' || name === 'dir') {
         el.removeAttribute(attr.name);
         continue;
       }
@@ -289,20 +292,14 @@ function safeDecodeCaption(text) {
 
 function deriveImageCaption(converter, src = '', alt = '') {
   let caption = alt || '';
-  if (!caption) {
-    if (converter && typeof converter.extractFileName === 'function') {
-      caption = converter.extractFileName(src);
-    } else {
-      caption = src.split('/').pop() || '图片';
-    }
+  if (caption) {
+    caption = safeDecodeCaption(caption);
+    caption = caption.replace(/[?#].*$/, '');
+    const stripped = caption.replace(/\|\s*\d+(x\d+)?\s*$/, '');
+    caption = stripped || caption;
+    caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');
   }
-  caption = safeDecodeCaption(caption);
-  // Keep parity with legacy converter image caption extraction:
-  // remove cache/query fragments before stripping extension.
-  caption = caption.replace(/[?#].*$/, '');
-  caption = caption.replace(/\|\s*\d+(x\d+)?\s*$/, '');
-  caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');
-  return caption || '图片';
+  return caption;
 }
 
 function extractWidthHintFromText(text) {
@@ -384,6 +381,10 @@ function buildLegacyParityImageAlt(imgEl, rawAlt = '') {
   const styleMatch = style.match(/(?:^|;)\s*width\s*:\s*(\d+)px\b/i);
   if (styleMatch && styleMatch[1]) {
     return `${alt}|${styleMatch[1]}`;
+  }
+
+  if (/^\s*\d{2,4}\s*$/.test(alt)) {
+    return alt;
   }
 
   const ancestorWidth = findImageWidthHintFromAncestors(imgEl);
@@ -553,12 +554,145 @@ function convertPreBlocks(container, converter) {
   }
 }
 
+const IMAGE_SWIPE_DEFAULT_WARNING = '此类图片可能引发不适，向左滑动查看';
+const IMAGE_SWIPE_DEFAULT_HINT = '左右滑动查看图片';
+
+function decodeImageSwipeValue(value) {
+  try {
+    return decodeURIComponent(String(value || ''));
+  } catch (error) {
+    return String(value || '');
+  }
+}
+
+function setImageSwipeSectionStyle(el, styleText) {
+  if (!el || !styleText) return;
+  el.setAttribute('style', styleText);
+}
+
+function normalizeImageSwipeImage(img, converter) {
+  let src = img.getAttribute('src') || '';
+  src = normalizeObsidianImageSrcForLegacyParity(src);
+  const safeSrc = converter && typeof converter.validateLink === 'function'
+    ? converter.validateLink(src, true)
+    : src;
+  src = safeSrc;
+  if (looksLikeImageSrc(src) && converter && typeof converter.resolveImagePath === 'function') {
+    src = converter.resolveImagePath(src);
+  }
+
+  const rawAlt = img.getAttribute('alt') || '';
+  const alt = buildLegacyParityImageAlt(img, rawAlt);
+  img.setAttribute('src', src);
+  img.setAttribute('alt', alt);
+  return {
+    src,
+    alt,
+    caption: deriveImageCaption(converter, src, alt),
+  };
+}
+
+function createImageSwipePanel({ img, caption, converter }) {
+  const panel = document.createElement('section');
+  setImageSwipeSectionStyle(panel, 'display:table-cell;vertical-align:top;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;text-align:center;');
+
+  img.setAttribute('data-owc-skip-standalone-image', '1');
+  appendInlineStyle(img, getTagStyle(converter, 'img'));
+  panel.appendChild(img);
+
+  const showCaption = !converter || converter.showImageCaption !== false;
+  if (showCaption && caption) {
+    const captionEl = document.createElement('figcaption');
+    appendInlineStyle(captionEl, getTagStyle(converter, 'figcaption'));
+    captionEl.textContent = caption;
+    panel.appendChild(captionEl);
+  }
+
+  return panel;
+}
+
+function createImageSwipeWarningPanel(warning) {
+  const panel = document.createElement('section');
+  setImageSwipeSectionStyle(panel, 'display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:8px 10px;margin:0;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;');
+
+  const content = document.createElement('section');
+  setImageSwipeSectionStyle(content, 'display:block;box-sizing:border-box;padding:0;margin:0 auto;');
+  const label = document.createElement('section');
+  setImageSwipeSectionStyle(label, 'display:inline-block;margin:0 auto 8px;padding:2px 8px;border-radius:999px;background:#ffffff;color:#8a6d3b;border:1px solid #efe2c7;font-size:12px;line-height:1.4;');
+  label.textContent = '敏感图片';
+  const text = document.createElement('section');
+  setImageSwipeSectionStyle(text, 'display:block;margin:0;color:#4a4f5a;font-size:14px;line-height:1.55;font-weight:500;');
+  text.textContent = warning || IMAGE_SWIPE_DEFAULT_WARNING;
+  const hint = document.createElement('section');
+  setImageSwipeSectionStyle(hint, 'display:block;margin-top:6px;padding:0;color:#6b7280;font-size:12px;line-height:1.4;');
+  hint.textContent = '向左滑动查看';
+
+  content.appendChild(label);
+  content.appendChild(text);
+  content.appendChild(hint);
+  panel.appendChild(content);
+  return panel;
+}
+
+function createImageSwipeHint(hint, converter) {
+  const hintEl = document.createElement('section');
+  const fallbackStyle = 'display:block;margin:8px 0 0;color:#8a8f98;font-size:13px;line-height:1.6;text-align:center;';
+  setImageSwipeSectionStyle(hintEl, getTagStyle(converter, 'figcaption') || fallbackStyle);
+  appendInlineStyle(hintEl, 'margin-top:8px;');
+  hintEl.textContent = hint || IMAGE_SWIPE_DEFAULT_HINT;
+  return hintEl;
+}
+
+function convertImageSwipeBlocks(container, converter) {
+  if (!container) return;
+
+  const blocks = Array.from(container.querySelectorAll('section[data-owc-image-swipe="1"]'));
+  for (const block of blocks) {
+    const imgs = Array.from(block.querySelectorAll('img'));
+    if (!imgs.length) {
+      block.removeAttribute('data-owc-image-swipe');
+      block.removeAttribute('data-owc-image-swipe-type');
+      block.removeAttribute('data-owc-image-swipe-warning');
+      block.removeAttribute('data-owc-image-swipe-hint');
+      continue;
+    }
+
+    const type = block.getAttribute('data-owc-image-swipe-type') || 'image-swipe';
+    const wrapper = document.createElement('section');
+    setImageSwipeSectionStyle(wrapper, 'display:block;margin:18px 0;text-align:left;');
+    const scroll = document.createElement('section');
+    setImageSwipeSectionStyle(scroll, 'display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;margin:0;padding:0;white-space:nowrap;');
+    const row = document.createElement('section');
+    const panelCount = imgs.length + (type === 'image-sensitive' ? 1 : 0);
+    setImageSwipeSectionStyle(row, `display:table;table-layout:fixed;width:${panelCount * 100}%;min-width:${panelCount * 100}%;border-spacing:0;font-size:0;line-height:0;margin:0;padding:0;`);
+
+    if (type === 'image-sensitive') {
+      const warning = decodeImageSwipeValue(block.getAttribute('data-owc-image-swipe-warning') || '') || IMAGE_SWIPE_DEFAULT_WARNING;
+      row.appendChild(createImageSwipeWarningPanel(warning));
+    }
+
+    for (const img of imgs) {
+      const { caption } = normalizeImageSwipeImage(img, converter);
+      row.appendChild(createImageSwipePanel({ img, caption, converter }));
+    }
+
+    scroll.appendChild(row);
+    wrapper.appendChild(scroll);
+    if (type === 'image-swipe') {
+      const hint = decodeImageSwipeValue(block.getAttribute('data-owc-image-swipe-hint') || '') || IMAGE_SWIPE_DEFAULT_HINT;
+      wrapper.appendChild(createImageSwipeHint(hint, converter));
+    }
+    block.replaceWith(wrapper);
+  }
+}
+
 function convertStandaloneImages(container, converter) {
   if (!container) return;
 
   const imgs = Array.from(container.querySelectorAll('img'));
   for (const img of imgs) {
     if (img.closest('figure')) continue;
+    if (img.getAttribute('data-owc-skip-standalone-image') === '1') continue;
     if (img.getAttribute('alt') === 'logo') continue;
     if (img.classList.contains('math-formula-image')) continue;
     if (img.classList.contains('mermaid-diagram-image')) {
@@ -641,7 +775,7 @@ function convertStandaloneImages(container, converter) {
     appendInlineStyle(bodyImg, getTagStyle(converter, 'img'));
     figure.appendChild(bodyImg);
 
-    const showCaption = !converter || converter.showImageCaption !== false;
+    const showCaption = (!converter || converter.showImageCaption !== false) && caption;
     if (showCaption) {
       const figcaption = document.createElement('figcaption');
       appendInlineStyle(figcaption, getTagStyle(converter, 'figcaption'));
@@ -1182,6 +1316,7 @@ function serializeObsidianRenderedHtml({
   sanitizeAnchorAndImageLinks(container, converter);
   normalizeMathPresentation(container);
   convertPreBlocks(container, converter);
+  convertImageSwipeBlocks(container, converter);
   convertStandaloneImages(container, converter);
   applyThemeInlineStyles(container, converter);
   wrapTablesForHorizontalScroll(container, converter);

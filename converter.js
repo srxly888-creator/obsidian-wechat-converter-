@@ -217,15 +217,10 @@ window.AppleStyleConverter = class AppleStyleConverter {
 
       let caption = '';
 
-      if (!alt) {
-        // Logic 1: ![]() -> Extract filename, clean query/ext
-        caption = decodeURIComponent(this.extractFileName(src));
-        caption = caption.replace(/\?.*$/, '');
-        caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');
-      } else {
-        // Logic 2: ![alt]() -> Use alt, clean resize/ext
+      if (alt) {
         caption = alt;
-        caption = caption.replace(/\|\s*\d+(x\d+)?\s*$/, '');
+        const stripped = caption.replace(/\|\s*\d+(x\d+)?\s*$/, '');
+        caption = stripped || caption;
         caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');
       }
 
@@ -244,7 +239,7 @@ window.AppleStyleConverter = class AppleStyleConverter {
 
       // 非水印模式：无边框样式
       const simpleFigureStyle = 'display:block;margin:16px 0;text-align:center;';
-      if (this.showImageCaption) {
+      if (this.showImageCaption && caption) {
         return `<figure style="${simpleFigureStyle}"><img src="${src}" alt="${alt}" style="${this.getInlineStyle('img')}"><figcaption style="${this.getInlineStyle('figcaption')}">${caption}</figcaption></figure>`;
       } else {
         return `<figure style="${simpleFigureStyle}"><img src="${src}" alt="${alt}" style="${this.getInlineStyle('img')}"></figure>`;
@@ -641,7 +636,11 @@ ${macHeader}
     markdown = markdown.replace(/!\[\[([^\[\]|]+)(?:\|([^\[\]]+))?\]\]/g, (match, path, alt) => {
       // Must encodeURI to handle spaces in filenames which are valid in WikiLinks but break standard Markdown images
       // trimmed path to avoid leading/trailing spaces breaking the link
-      return `![${alt || ''}](${encodeURI(path.trim())})`;
+      if (!alt) {
+        const filename = path.trim().split('/').pop().replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '') || path.trim();
+        return `![${filename}](${encodeURI(path.trim())})`;
+      }
+      return `![${alt}](${encodeURI(path.trim())})`;
     });
 
 
