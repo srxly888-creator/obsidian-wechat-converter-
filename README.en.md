@@ -4,7 +4,7 @@
 
 Convert Obsidian Markdown into polished WeChat articles with live preview, copy-to-editor, and optional draft sync.
 
-![Version](https://img.shields.io/badge/version-2.7.0-blue)
+![Version](https://img.shields.io/badge/version-2.7.5-blue)
 ![Obsidian](https://img.shields.io/badge/Obsidian-1.0.0+-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
