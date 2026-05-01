@@ -292,20 +292,14 @@ function safeDecodeCaption(text) {
 
 function deriveImageCaption(converter, src = '', alt = '') {
   let caption = alt || '';
-  if (!caption) {
-    if (converter && typeof converter.extractFileName === 'function') {
-      caption = converter.extractFileName(src);
-    } else {
-      caption = src.split('/').pop() || '图片';
-    }
+  if (caption) {
+    caption = safeDecodeCaption(caption);
+    caption = caption.replace(/[?#].*$/, '');
+    const stripped = caption.replace(/\|\s*\d+(x\d+)?\s*$/, '');
+    caption = stripped || caption;
+    caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');
   }
-  caption = safeDecodeCaption(caption);
-  // Keep parity with legacy converter image caption extraction:
-  // remove cache/query fragments before stripping extension.
-  caption = caption.replace(/[?#].*$/, '');
-  caption = caption.replace(/\|\s*\d+(x\d+)?\s*$/, '');
-  caption = caption.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i, '');
-  return caption || '图片';
+  return caption;
 }
 
 function extractWidthHintFromText(text) {
@@ -387,6 +381,10 @@ function buildLegacyParityImageAlt(imgEl, rawAlt = '') {
   const styleMatch = style.match(/(?:^|;)\s*width\s*:\s*(\d+)px\b/i);
   if (styleMatch && styleMatch[1]) {
     return `${alt}|${styleMatch[1]}`;
+  }
+
+  if (/^\s*\d{2,4}\s*$/.test(alt)) {
+    return alt;
   }
 
   const ancestorWidth = findImageWidthHintFromAncestors(imgEl);
@@ -777,7 +775,7 @@ function convertStandaloneImages(container, converter) {
     appendInlineStyle(bodyImg, getTagStyle(converter, 'img'));
     figure.appendChild(bodyImg);
 
-    const showCaption = !converter || converter.showImageCaption !== false;
+    const showCaption = (!converter || converter.showImageCaption !== false) && caption;
     if (showCaption) {
       const figcaption = document.createElement('figcaption');
       appendInlineStyle(figcaption, getTagStyle(converter, 'figcaption'));

@@ -31,7 +31,7 @@ describe('Obsidian Triplet Renderer', () => {
 
     const { markdown: output } = preprocessMarkdownForTriplet(input, converter);
     expect(output).not.toContain('title: test');
-    expect(output).toContain('![封面](folder/a%20b.png)');
+    expect(output).toContain('<img src="folder/a%20b.png" alt="封面">');
     expect(output).toContain('$$');
     expect(output).not.toContain('   $$');
   });
@@ -60,8 +60,74 @@ describe('Obsidian Triplet Renderer', () => {
 
     const { markdown: output } = preprocessMarkdownForTriplet(input, {});
     expect(output).toContain('正文 \\[[目标文档|别名]]');
-    expect(output).toContain('![图注](assets/pic%20a.png)');
+    expect(output).toContain('<img src="assets/pic%20a.png" alt="图注">');
     expect(output).toContain('[[code-link]]');
+  });
+
+  it('should materialize local markdown images before Obsidian can replace alt text', () => {
+    const input = [
+      '![300](attachments/做视频.png)',
+      '![](attachments/空图注.png)',
+      '![paren](attachments/foo(1).png)',
+      '![angle](<attachments/foo(2).png>)',
+      '![title](attachments/title(3).png "标题")',
+      '![title-paren](attachments/title.png "Title with ) paren")',
+      '![remote](https://example.com/remote.png)',
+      '```',
+      '![code](attachments/code.png)',
+      '```',
+    ].join('\n');
+
+    const { markdown: output } = preprocessMarkdownForTriplet(input, {});
+    expect(output).toContain('<img src="attachments/%E5%81%9A%E8%A7%86%E9%A2%91.png" alt="300">');
+    expect(output).toContain('<img src="attachments/%E7%A9%BA%E5%9B%BE%E6%B3%A8.png" alt="">');
+    expect(output).toContain('<img src="attachments/foo(1).png" alt="paren">');
+    expect(output).toContain('<img src="attachments/foo(2).png" alt="angle">');
+    expect(output).toContain('<img src="attachments/title(3).png" alt="title">');
+    expect(output).toContain('<img src="attachments/title.png" alt="title-paren">');
+    expect(output).toContain('![remote](https://example.com/remote.png)');
+    expect(output).toContain('![code](attachments/code.png)');
+  });
+
+  it('should not materialize local markdown images inside non-image syntax contexts', () => {
+    const input = [
+      '示例 `![alt](attachments/a.png)` 不应变图片',
+      '    ![indented](attachments/indented.png)',
+      '<div data-example="![html](attachments/html.png)"></div>',
+      '<code>![html-code](attachments/html-code.png)</code>',
+      '<pre>',
+      '![html-block](attachments/html-block.png)',
+      '</pre>',
+      '<!--',
+      '![html-comment](attachments/html-comment.png)',
+      '-->',
+      '<img src="cover.png">',
+      '![after-void-img](attachments/after-void-img.png)',
+      '<br>',
+      '![after-br](attachments/after-br.png)',
+      '<hr>',
+      '![after-hr](attachments/after-hr.png)',
+      '[![linked](attachments/linked.png)](https://example.com)',
+      '[文字 ![linked-mid](attachments/linked-mid.png)](https://example.com)',
+      String.raw`\![escaped](attachments/escaped.png)`,
+      '正文 ![real](attachments/real.png)',
+    ].join('\n');
+
+    const { markdown: output } = preprocessMarkdownForTriplet(input, {});
+    expect(output).toContain('`![alt](attachments/a.png)`');
+    expect(output).toContain('    ![indented](attachments/indented.png)');
+    expect(output).toContain('<div data-example="![html](attachments/html.png)"></div>');
+    expect(output).toContain('<code>![html-code](attachments/html-code.png)</code>');
+    expect(output).toContain('<pre>\n![html-block](attachments/html-block.png)\n</pre>');
+    expect(output).toContain('![html-comment](attachments/html-comment.png)');
+    expect(output).not.toContain('<img src="attachments/html-comment.png"');
+    expect(output).toContain('<img src="attachments/after-void-img.png" alt="after-void-img">');
+    expect(output).toContain('<img src="attachments/after-br.png" alt="after-br">');
+    expect(output).toContain('<img src="attachments/after-hr.png" alt="after-hr">');
+    expect(output).toContain('[![linked](attachments/linked.png)](https://example.com)');
+    expect(output).toContain('[文字 ![linked-mid](attachments/linked-mid.png)](https://example.com)');
+    expect(output).toContain(String.raw`\![escaped](attachments/escaped.png)`);
+    expect(output).toContain('<img src="attachments/real.png" alt="real">');
   });
 
   it('should preprocess image-swipe callouts into marked raw html', () => {
@@ -321,6 +387,29 @@ describe('Obsidian Triplet Renderer', () => {
     expect(renderMarkdown.mock.calls[0][0]).toBe('# title');
     expect(serializer).toHaveBeenCalled();
     expect(html).toBe('<section>ok</section>');
+  });
+
+  it('should preserve standard local image alt as caption through triplet rendering', async () => {
+    const converter = await createLegacyConverter();
+    converter.resolveImagePath = (src) => src;
+    converter.showImageCaption = true;
+    const renderMarkdown = vi.fn(async (markdown, el) => {
+      el.innerHTML = markdown;
+    });
+
+    const html = await renderObsidianTripletMarkdown({
+      app: {},
+      converter,
+      markdown: '![300](attachments/做视频.png)',
+      sourcePath: 'note.md',
+      markdownRenderer: { renderMarkdown },
+    });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    expect(container.querySelector('figure img')?.getAttribute('alt')).toBe('300');
+    expect(container.querySelector('figure figcaption')?.textContent).toBe('300');
+    expect(container.textContent).not.toContain('attachments/做视频');
   });
 
   it('should pass component into markdown renderer APIs', async () => {

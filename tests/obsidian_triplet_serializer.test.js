@@ -426,13 +426,17 @@ describe('Obsidian Triplet Serializer', () => {
     expect(safeDecodeCaption('hello%20world')).toBe('hello world');
     expect(safeDecodeCaption('broken%2Gvalue')).toBe('broken%2Gvalue');
 
-    expect(deriveImageCaption(converter, 'https://example.com/hello%20world.png', '')).toBe('hello world');
-    expect(deriveImageCaption(converter, 'https://example.com/broken%2Gvalue.png', '')).toBe('broken%2Gvalue');
+    // Empty alt returns empty (no fallback to filename)
+    expect(deriveImageCaption(converter, 'https://example.com/hello%20world.png', '')).toBe('');
+    // Non-empty alt is decoded
+    expect(deriveImageCaption(converter, 'https://example.com/b.png', 'hello%20world')).toBe('hello world');
+    // Malformed encoding in alt is kept as-is
+    expect(deriveImageCaption(converter, 'https://example.com/broken%2Gvalue.png', 'broken%2Gvalue')).toBe('broken%2Gvalue');
   });
 
-  it('should drop query/hash when deriving caption from src', () => {
+  it('should drop query/hash when deriving caption from alt', () => {
     expect(
-      deriveImageCaption(converter, 'https://example.com/%E6%B5%8B%E8%AF%95.png?ts=123#v1', '')
+      deriveImageCaption(converter, 'https://example.com/%E6%B5%8B%E8%AF%95.png?ts=123#v1', '测试?ts=123#v1')
     ).toBe('测试');
   });
 

@@ -456,6 +456,343 @@ function escapeImageSwipeHtmlAttr(value) {
     .replace(/>/g, '&gt;');
 }
 
+function getImageCaptionFromPath(imagePath) {
+  const value = String(imagePath || '').trim();
+  if (!value) return '';
+  const filename = value.split('/').pop().split('\\').pop() || value;
+  return filename.replace(/\.(jpg|jpeg|png|gif|webp|svg|bmp|avif)$/i, '');
+}
+
+function hasExplicitUrlProtocol(value) {
+  return /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(String(value || '').trim());
+}
+
+function shouldMaterializeLocalMarkdownImage(src) {
+  const value = String(src || '').trim();
+  if (!value) return false;
+  if (/^(?:https?:)?\/\//i.test(value)) return false;
+  if (/^data:image\//i.test(value)) return false;
+  return !hasExplicitUrlProtocol(value);
+}
+
+function encodeMarkdownImageSrc(src) {
+  const value = String(src || '').trim();
+  try {
+    return encodeURI(decodeURI(value));
+  } catch (error) {
+    return encodeURI(value);
+  }
+}
+
+function findInlineCodeRanges(line) {
+  const value = String(line || '');
+  const ranges = [];
+  let index = 0;
+
+  while (index < value.length) {
+    if (value[index] !== '`') {
+      index += 1;
+      continue;
+    }
+
+    let markerLength = 1;
+    while (value[index + markerLength] === '`') {
+      markerLength += 1;
+    }
+
+    const marker = '`'.repeat(markerLength);
+    const closeIndex = value.indexOf(marker, index + markerLength);
+    if (closeIndex === -1) {
+      index += markerLength;
+      continue;
+    }
+
+    ranges.push([index, closeIndex + markerLength]);
+    index = closeIndex + markerLength;
+  }
+
+  return ranges;
+}
+
+function findHtmlTagRanges(line) {
+  const value = String(line || '');
+  const ranges = [];
+  let index = 0;
+
+  while (index < value.length) {
+    const start = value.indexOf('<', index);
+    if (start === -1) break;
+    if (!/[A-Za-z/!?]/.test(value[start + 1] || '')) {
+      index = start + 1;
+      continue;
+    }
+
+    const end = value.indexOf('>', start + 1);
+    if (end === -1) break;
+    ranges.push([start, end + 1]);
+    index = end + 1;
+  }
+
+  return ranges;
+}
+
+function findHtmlElementContentRanges(line) {
+  const value = String(line || '');
+  const ranges = [];
+  const openTagPattern = /<([A-Za-z][\w:-]*)(?:\s[^<>]*)?>/g;
+  let match;
+
+  while ((match = openTagPattern.exec(value)) !== null) {
+    const rawTag = match[0] || '';
+    if (/\/\s*>$/.test(rawTag)) continue;
+
+    const tagName = String(match[1] || '').toLowerCase();
+    const closePattern = new RegExp(`</${tagName}\\s*>`, 'i');
+    const rest = value.slice(openTagPattern.lastIndex);
+    const closeMatch = closePattern.exec(rest);
+    if (!closeMatch) continue;
+
+    ranges.push([match.index, openTagPattern.lastIndex + closeMatch.index + closeMatch[0].length]);
+  }
+
+  return ranges;
+}
+
+function findMarkdownLinkLabelRanges(line) {
+  const value = String(line || '');
+  const ranges = [];
+
+  for (let i = 0; i < value.length; i += 1) {
+    if (value[i] !== '[' || value[i - 1] === '!' || value[i - 1] === '\\') continue;
+
+    let depth = 1;
+    let cursor = i + 1;
+    while (cursor < value.length) {
+      const char = value[cursor];
+      if (char === '\\') {
+        cursor += 2;
+        continue;
+      }
+      if (char === '[') {
+        depth += 1;
+      } else if (char === ']') {
+        depth -= 1;
+        if (depth === 0) {
+          if (value[cursor + 1] === '(') {
+            ranges.push([i, cursor + 1]);
+          }
+          break;
+        }
+      }
+      cursor += 1;
+    }
+  }
+
+  return ranges;
+}
+
+function isOffsetInRanges(offset, ranges) {
+  return ranges.some(([start, end]) => offset >= start && offset < end);
+}
+
+const HTML_VOID_TAGS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
+
+function isHtmlVoidTag(tagName) {
+  return HTML_VOID_TAGS.has(String(tagName || '').toLowerCase());
+}
+
+function findClosingMarkdownBracket(value, startIndex) {
+  let index = startIndex;
+  while (index < value.length) {
+    const char = value[index];
+    if (char === '\\') {
+      index += 2;
+      continue;
+    }
+    if (char === ']') return index;
+    index += 1;
+  }
+  return -1;
+}
+
+function parseQuotedMarkdownTitle(value, startIndex) {
+  const quote = value[startIndex];
+  if (quote !== '"' && quote !== "'") return null;
+
+  let index = startIndex + 1;
+  while (index < value.length) {
+    const char = value[index];
+    if (char === '\\') {
+      index += 2;
+      continue;
+    }
+    if (char === quote) return index + 1;
+    index += 1;
+  }
+
+  return null;
+}
+
+function parseParenthesizedMarkdownTitle(value, startIndex) {
+  if (value[startIndex] !== '(') return null;
+
+  let depth = 1;
+  let index = startIndex + 1;
+  while (index < value.length) {
+    const char = value[index];
+    if (char === '\\') {
+      index += 2;
+      continue;
+    }
+    if (char === '(') {
+      depth += 1;
+    } else if (char === ')') {
+      depth -= 1;
+      if (depth === 0) return index + 1;
+    }
+    index += 1;
+  }
+
+  return null;
+}
+
+function parseMarkdownImageTitleAndClose(value, startIndex) {
+  let index = startIndex;
+  while (/\s/.test(value[index] || '')) index += 1;
+  if (value[index] === ')') return index + 1;
+
+  const titleEnd = value[index] === '('
+    ? parseParenthesizedMarkdownTitle(value, index)
+    : parseQuotedMarkdownTitle(value, index);
+  if (!titleEnd) return null;
+
+  index = titleEnd;
+  while (/\s/.test(value[index] || '')) index += 1;
+  return value[index] === ')' ? index + 1 : null;
+}
+
+function parseMarkdownImageTargetAt(value, openParenIndex) {
+  let index = openParenIndex + 1;
+  while (/\s/.test(value[index] || '')) index += 1;
+
+  if (value[index] === '<') {
+    const targetStart = index + 1;
+    index += 1;
+    while (index < value.length) {
+      if (value[index] === '\\') {
+        index += 2;
+        continue;
+      }
+      if (value[index] === '>') {
+        const target = value.slice(targetStart, index);
+        index += 1;
+        const endIndex = parseMarkdownImageTitleAndClose(value, index);
+        if (!endIndex) return null;
+        return { rawTarget: target, endIndex };
+      }
+      index += 1;
+    }
+    return null;
+  }
+
+  const targetStart = index;
+  let depth = 0;
+  while (index < value.length) {
+    const char = value[index];
+    if (char === '\\') {
+      index += 2;
+      continue;
+    }
+    if (/\s/.test(char) && depth === 0) {
+      const target = value.slice(targetStart, index);
+      const endIndex = parseMarkdownImageTitleAndClose(value, index);
+      if (!endIndex) return null;
+      return { rawTarget: target, endIndex };
+    }
+    if (char === '(') {
+      depth += 1;
+    } else if (char === ')') {
+      if (depth > 0) {
+        depth -= 1;
+      } else {
+        return {
+          rawTarget: value.slice(targetStart, index),
+          endIndex: index + 1,
+        };
+      }
+    }
+    index += 1;
+  }
+
+  return null;
+}
+
+function replaceLocalMarkdownImagesInLine(line, protectedRanges) {
+  const value = String(line || '');
+  let output = '';
+  let cursor = 0;
+
+  while (cursor < value.length) {
+    const start = value.indexOf('![', cursor);
+    if (start === -1) {
+      output += value.slice(cursor);
+      break;
+    }
+
+    output += value.slice(cursor, start);
+
+    const closeBracketIndex = findClosingMarkdownBracket(value, start + 2);
+    const openParenIndex = closeBracketIndex >= 0 ? closeBracketIndex + 1 : -1;
+    const parsedTarget = openParenIndex >= 0 && value[openParenIndex] === '('
+      ? parseMarkdownImageTargetAt(value, openParenIndex)
+      : null;
+    if (!parsedTarget) {
+      output += value[start];
+      cursor = start + 1;
+      continue;
+    }
+
+    const rawAlt = value.slice(start + 2, closeBracketIndex);
+    const match = value.slice(start, parsedTarget.endIndex);
+    if (
+      isOffsetInRanges(start, protectedRanges)
+      || value[start - 1] === '['
+      || value[start - 1] === '\\'
+    ) {
+      output += match;
+      cursor = parsedTarget.endIndex;
+      continue;
+    }
+
+    const src = parseImageSwipeMarkdownTarget(parsedTarget.rawTarget);
+    if (!shouldMaterializeLocalMarkdownImage(src)) {
+      output += match;
+      cursor = parsedTarget.endIndex;
+      continue;
+    }
+
+    output += `<img src="${escapeImageSwipeHtmlAttr(encodeMarkdownImageSrc(src))}" alt="${escapeImageSwipeHtmlAttr(String(rawAlt || '').trim())}">`;
+    cursor = parsedTarget.endIndex;
+  }
+
+  return output;
+}
+
 function parseImageSwipeMarkdownTarget(rawTarget) {
   const value = String(rawTarget || '').trim();
   if (!value) return '';
@@ -488,6 +825,94 @@ function parseImageSwipeMarkdownLine(line) {
     src: encodeURI(src),
     alt: String(markdownMatch[1] || '').trim(),
   };
+}
+
+function materializeLocalMarkdownImages(markdown) {
+  const lines = String(markdown || '').split('\n');
+  const output = [];
+  let fenceState = null;
+  let inMathFence = false;
+  let rawHtmlBlockTag = '';
+  let inHtmlComment = false;
+
+  for (const line of lines) {
+    const fenceDelimiter = parseFencedBlockDelimiter(line);
+    if (!inMathFence && fenceDelimiter) {
+      if (!fenceState) {
+        fenceState = fenceDelimiter;
+      } else if (
+        fenceDelimiter.marker === fenceState.marker &&
+        fenceDelimiter.length >= fenceState.length
+      ) {
+        fenceState = null;
+      }
+      output.push(line);
+      continue;
+    }
+
+    if (!fenceState && isMathFenceDelimiter(line)) {
+      inMathFence = !inMathFence;
+      output.push(line);
+      continue;
+    }
+
+    if (fenceState || inMathFence) {
+      output.push(line);
+      continue;
+    }
+
+    if (inHtmlComment) {
+      output.push(line);
+      if (String(line || '').includes('-->')) {
+        inHtmlComment = false;
+      }
+      continue;
+    }
+
+    if (rawHtmlBlockTag) {
+      output.push(line);
+      if (new RegExp(`</${rawHtmlBlockTag}\\s*>`, 'i').test(String(line || ''))) {
+        rawHtmlBlockTag = '';
+      }
+      continue;
+    }
+
+    if (/^(?: {4}|\t)/.test(String(line || ''))) {
+      output.push(line);
+      continue;
+    }
+
+    if (/^\s{0,3}<!--/.test(String(line || '')) && !String(line || '').includes('-->')) {
+      inHtmlComment = true;
+      output.push(line);
+      continue;
+    }
+
+    const rawBlockMatch = String(line || '').match(/^\s{0,3}<([A-Za-z][\w:-]*)(?:\s[^<>]*)?>\s*$/);
+    const rawBlockTag = String(rawBlockMatch?.[1] || '').toLowerCase();
+    const isSelfClosingRawBlock = /\/\s*>\s*$/.test(String(line || ''));
+    if (
+      rawBlockMatch
+      && !isHtmlVoidTag(rawBlockTag)
+      && !isSelfClosingRawBlock
+      && !new RegExp(`</${rawBlockTag}\\s*>`, 'i').test(String(line || ''))
+    ) {
+      rawHtmlBlockTag = rawBlockTag;
+      output.push(line);
+      continue;
+    }
+
+    const protectedRanges = [
+      ...findInlineCodeRanges(line),
+      ...findHtmlTagRanges(line),
+      ...findHtmlElementContentRanges(line),
+      ...findMarkdownLinkLabelRanges(line),
+    ];
+
+    output.push(replaceLocalMarkdownImagesInLine(line, protectedRanges));
+  }
+
+  return output.join('\n');
 }
 
 function extractImageSwipeItalicCaption(lines, imageIndex) {
@@ -622,8 +1047,10 @@ function preprocessMarkdownForTriplet(markdown, converter) {
   // Align with converter.convert preprocessing to reduce non-semantic parity noise.
   output = output.replace(/^[\t ]+(\$\$)/gm, '$1');
   output = output.replace(/!\[\[([^\[\]|]+)(?:\|([^\[\]]+))?\]\]/g, (match, imagePath, alt) => {
-    return `![${alt || ''}](${encodeURI(String(imagePath || '').trim())})`;
+    const normalizedPath = String(imagePath || '').trim();
+    return `![${alt || getImageCaptionFromPath(normalizedPath)}](${encodeURI(normalizedPath)})`;
   });
+  output = materializeLocalMarkdownImages(output);
 
   if (converter && typeof converter.stripFrontmatter === 'function') {
     output = converter.stripFrontmatter(output);
@@ -922,7 +1349,7 @@ async function renderObsidianTripletMarkdown({
   const container = document.createElement('div');
   const { markdown: preparedMarkdown, mathFormulas } = preprocessMarkdownForTriplet(markdown, converter);
 
-  const shouldObserveWindow = shouldObserveAsyncEmbedWindow(preparedMarkdown);
+  const shouldObserveWindow = shouldObserveAsyncEmbedWindow(markdown) || shouldObserveAsyncEmbedWindow(preparedMarkdown);
   const shouldObserveMermaid = shouldObserveMermaidRenderWindow(preparedMarkdown);
   await renderByObsidianMarkdownRenderer({
     app,
