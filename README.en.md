@@ -23,6 +23,8 @@ If this plugin saves you time when formatting, copying, or syncing WeChat articl
 - Math rendering with SVG output for better WeChat compatibility.
 - Mermaid diagrams rendered by Obsidian preview, then rasterized to PNG on export for WeChat-safe copy and sync.
 - Local image handling for wiki links, relative paths, absolute paths, and GIFs.
+- Swipeable image blocks for step screenshots, comparisons, split long images, and sensitive-image gates.
+- Wide tables stay horizontally scrollable instead of being squeezed or clipped on mobile.
 - Visual settings panel with theme, typography, preview, code block controls, and quote style options.
 - Experimental AI layout planning with provider profiles, built-in layout families, schema checks, and debug snapshots.
 - Chinese punctuation normalization for rendered output, with protection for code and technical tokens.
@@ -46,6 +48,39 @@ If this plugin saves you time when formatting, copying, or syncing WeChat articl
 2. Edit your Markdown note as usual. The right panel updates the article preview in real time.
 3. Click `Copy to WeChat` to paste rich HTML into the WeChat editor.
 4. Optionally click `Sync to Draft` after configuring your WeChat AppID and AppSecret in plugin settings.
+
+### Horizontally scrollable content
+
+#### Wide tables
+
+Write normal Markdown tables. When a table has many columns or long cell content, the converter automatically wraps it in a horizontal scroll container for preview, copy, and draft sync:
+
+```markdown
+| Metric | Q1 | Q2 | Q3 | Q4 | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Conversion rate | 12.4% | 15.8% | 18.1% | 21.6% | Keep the full table width |
+```
+
+#### Swipeable image blocks
+
+Use Obsidian callout syntax to group multiple images into a swipeable horizontal block:
+
+```markdown
+> [!image-swipe] Swipe to view images
+> ![[step-1.png]]
+> ![[step-2.png]]
+> ![Step 3](attachments/step-3.png)
+```
+
+For sensitive images, use `image-sensitive`. The first panel shows the warning, then readers can swipe to view the images:
+
+```markdown
+> [!image-sensitive] Sensitive images. Swipe to view.
+> ![[image-1.png]]
+> ![[image-2.png]]
+```
+
+You can also select multiple image lines, open the command palette (`Cmd/Ctrl + P`), and run `Insert image block` or `Insert sensitive image block`.
 
 ### Experimental AI layout planning
 
