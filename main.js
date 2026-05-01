@@ -12141,6 +12141,26 @@ var AppleStyleView = class extends ItemView {
       requestAnimationFrame(resetScroll);
     }
   }
+  resetAiLayoutPanelViewState() {
+    this.aiAdvancedOpen = false;
+    this.aiLayoutDebugMode = "";
+    this.aiLayoutPendingAnchor = null;
+    const scrollTargets = [
+      this.aiLayoutOverlay,
+      this.aiLayoutArea,
+      this.aiAdvancedBody,
+      this.aiDebugPanelBody
+    ].filter(Boolean);
+    const resetScroll = () => {
+      scrollTargets.forEach((target) => {
+        target.scrollTop = 0;
+      });
+    };
+    resetScroll();
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(resetScroll);
+    }
+  }
   togglePanel(overlay, button, onOpen) {
     if (!overlay || !button)
       return;
@@ -12248,12 +12268,16 @@ var AppleStyleView = class extends ItemView {
       new Notice("AI \u7F16\u6392\u5F53\u524D\u5DF2\u5173\u95ED\uFF0C\u8BF7\u5148\u5728\u63D2\u4EF6\u8BBE\u7F6E\u4E2D\u542F\u7528");
       return;
     }
-    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
+    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => {
+      this.resetAiLayoutPanelViewState();
+      this.refreshAiLayoutPanel();
+    });
   }
   createAiLayoutPanel(parent) {
     var _a, _b;
     this.attachOverlayScrollGuard(parent, [".apple-ai-layout-debug-body"]);
     const area = parent.createDiv({ cls: "apple-ai-layout-area" });
+    this.aiLayoutArea = area;
     const header = area.createDiv({ cls: "apple-ai-layout-header" });
     header.createEl("div", { cls: "apple-ai-layout-title", text: "AI \u7F16\u6392" });
     header.createEl("div", {

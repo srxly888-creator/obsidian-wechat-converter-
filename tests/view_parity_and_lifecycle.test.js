@@ -524,6 +524,84 @@ describe('AppleStyleView native render + lifecycle', () => {
     expect(view.plugin.settings).toEqual({ theme: 'wechat', fontSize: 4 });
   });
 
+  it('resetAiLayoutPanelViewState should collapse debug options and scroll to top without changing settings', () => {
+    const aiSettings = {
+      enabled: true,
+      defaultLayoutFamily: 'magazine',
+      defaultColorPalette: 'tech-green',
+    };
+    const view = new AppleStyleView(null, { settings: { ai: aiSettings } });
+
+    const overlay = createObsidianLikeElement();
+    const area = createObsidianLikeElement();
+    const advancedBody = createObsidianLikeElement();
+    const debugBody = createObsidianLikeElement('pre');
+
+    view.aiLayoutOverlay = overlay;
+    view.aiLayoutArea = area;
+    view.aiAdvancedBody = advancedBody;
+    view.aiDebugPanelBody = debugBody;
+    view.aiAdvancedOpen = true;
+    view.aiLayoutDebugMode = 'json';
+    view.aiLayoutPendingAnchor = { blockKey: 'block-1', fallbackScrollTop: 160 };
+
+    overlay.scrollTop = 160;
+    area.scrollTop = 70;
+    advancedBody.scrollTop = 40;
+    debugBody.scrollTop = 25;
+
+    view.resetAiLayoutPanelViewState();
+
+    expect(view.aiAdvancedOpen).toBe(false);
+    expect(view.aiLayoutDebugMode).toBe('');
+    expect(view.aiLayoutPendingAnchor).toBeNull();
+    expect(overlay.scrollTop).toBe(0);
+    expect(area.scrollTop).toBe(0);
+    expect(advancedBody.scrollTop).toBe(0);
+    expect(debugBody.scrollTop).toBe(0);
+    expect(view.plugin.settings.ai).toBe(aiSettings);
+    expect(view.plugin.settings.ai).toEqual({
+      enabled: true,
+      defaultLayoutFamily: 'magazine',
+      defaultColorPalette: 'tech-green',
+    });
+  });
+
+  it('onAiLayoutButtonClick should reset AI panel view state before refreshing on open', () => {
+    const view = new AppleStyleView(null, {
+      settings: {
+        ai: {
+          enabled: true,
+          defaultStylePack: 'tech-green',
+          includeImagesInLayout: true,
+          requestTimeoutMs: 45000,
+        },
+      },
+    });
+    view.aiLayoutOverlay = createObsidianLikeElement();
+    view.aiLayoutBtn = createObsidianLikeElement();
+    view.aiLayoutArea = createObsidianLikeElement();
+    view.aiAdvancedOpen = true;
+    view.aiLayoutDebugMode = 'error';
+    view.aiLayoutPendingAnchor = { blockKey: 'block-1', fallbackScrollTop: 120 };
+    view.aiLayoutOverlay.scrollTop = 120;
+    view.aiLayoutArea.scrollTop = 60;
+
+    const refreshSpy = vi.spyOn(view, 'refreshAiLayoutPanel').mockImplementation(() => {
+      expect(view.aiAdvancedOpen).toBe(false);
+      expect(view.aiLayoutDebugMode).toBe('');
+      expect(view.aiLayoutPendingAnchor).toBeNull();
+      expect(view.aiLayoutOverlay.scrollTop).toBe(0);
+      expect(view.aiLayoutArea.scrollTop).toBe(0);
+    });
+
+    view.onAiLayoutButtonClick();
+
+    expect(view.aiLayoutOverlay.classList.contains('visible')).toBe(true);
+    expect(view.aiLayoutBtn.classList.contains('active')).toBe(true);
+    expect(refreshSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('createSettingsPanel should hide AI entry when feature toggle is off', () => {
     const view = new AppleStyleView(null, {
       settings: {

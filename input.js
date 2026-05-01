@@ -1648,6 +1648,30 @@ class AppleStyleView extends ItemView {
     }
   }
 
+  resetAiLayoutPanelViewState() {
+    this.aiAdvancedOpen = false;
+    this.aiLayoutDebugMode = '';
+    this.aiLayoutPendingAnchor = null;
+
+    const scrollTargets = [
+      this.aiLayoutOverlay,
+      this.aiLayoutArea,
+      this.aiAdvancedBody,
+      this.aiDebugPanelBody,
+    ].filter(Boolean);
+
+    const resetScroll = () => {
+      scrollTargets.forEach((target) => {
+        target.scrollTop = 0;
+      });
+    };
+
+    resetScroll();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(resetScroll);
+    }
+  }
+
   togglePanel(overlay, button, onOpen) {
     if (!overlay || !button) return;
     const willOpen = !overlay.classList.contains('visible');
@@ -1756,13 +1780,17 @@ class AppleStyleView extends ItemView {
       new Notice('AI 编排当前已关闭，请先在插件设置中启用');
       return;
     }
-    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => this.refreshAiLayoutPanel());
+    this.togglePanel(this.aiLayoutOverlay, this.aiLayoutBtn, () => {
+      this.resetAiLayoutPanelViewState();
+      this.refreshAiLayoutPanel();
+    });
   }
 
   createAiLayoutPanel(parent) {
     this.attachOverlayScrollGuard(parent, ['.apple-ai-layout-debug-body']);
 
     const area = parent.createDiv({ cls: 'apple-ai-layout-area' });
+    this.aiLayoutArea = area;
 
     const header = area.createDiv({ cls: 'apple-ai-layout-header' });
     header.createEl('div', { cls: 'apple-ai-layout-title', text: 'AI 编排' });
