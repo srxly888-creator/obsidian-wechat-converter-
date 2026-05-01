@@ -1262,14 +1262,6 @@ class AppleStyleView extends ItemView {
           style: 'font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;'
         }
       });
-      const imageBlockCommand = getImageSwipeCommandCopy(this.app, 'image-swipe').name;
-      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, 'image-sensitive').name;
-      section.createEl('span', {
-        text: `横滑多图：选中图片后运行「${imageBlockCommand}」或「${sensitiveImageBlockCommand}」。`,
-        attr: {
-          style: 'margin-top: 4px; font-size: 11px; color: var(--apple-secondary); opacity: 0.72; font-weight: 500; display: block;'
-        }
-      });
 
       checkbox.addEventListener('change', async () => {
         this.plugin.settings.showImageCaption = checkbox.checked;
@@ -1284,6 +1276,18 @@ class AppleStyleView extends ItemView {
       section._captionToggle = { checkbox, toggle };
     });
     captionSection.classList.add('apple-settings-inline-toggle');
+
+    // === 横滑图片块提示 ===
+    this.createSection(advancedArea, '横滑图片块', (section) => {
+      const imageBlockCommand = getImageSwipeCommandCopy(this.app, 'image-swipe').name;
+      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, 'image-sensitive').name;
+      section.createEl('span', {
+        text: `选中多张图片，打开命令面板，运行「${imageBlockCommand}」或「${sensitiveImageBlockCommand}」。`,
+        attr: {
+          style: 'font-size: 11px; color: var(--apple-secondary); opacity: 0.78; font-weight: 500; line-height: 1.6; display: block;'
+        }
+      });
+    });
 
     // 根据全局水印设置更新状态
     if (this.plugin.settings.enableWatermark) {

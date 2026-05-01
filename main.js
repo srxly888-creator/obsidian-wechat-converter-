@@ -11791,14 +11791,6 @@ var AppleStyleView = class extends ItemView {
           style: "font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;"
         }
       });
-      const imageBlockCommand = getImageSwipeCommandCopy(this.app, "image-swipe").name;
-      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, "image-sensitive").name;
-      section.createEl("span", {
-        text: `\u6A2A\u6ED1\u591A\u56FE\uFF1A\u9009\u4E2D\u56FE\u7247\u540E\u8FD0\u884C\u300C${imageBlockCommand}\u300D\u6216\u300C${sensitiveImageBlockCommand}\u300D\u3002`,
-        attr: {
-          style: "margin-top: 4px; font-size: 11px; color: var(--apple-secondary); opacity: 0.72; font-weight: 500; display: block;"
-        }
-      });
       checkbox.addEventListener("change", async () => {
         this.plugin.settings.showImageCaption = checkbox.checked;
         await this.plugin.saveSettings();
@@ -11810,6 +11802,16 @@ var AppleStyleView = class extends ItemView {
       section._captionToggle = { checkbox, toggle };
     });
     captionSection.classList.add("apple-settings-inline-toggle");
+    this.createSection(advancedArea, "\u6A2A\u6ED1\u56FE\u7247\u5757", (section) => {
+      const imageBlockCommand = getImageSwipeCommandCopy(this.app, "image-swipe").name;
+      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, "image-sensitive").name;
+      section.createEl("span", {
+        text: `\u9009\u4E2D\u591A\u5F20\u56FE\u7247\uFF0C\u6253\u5F00\u547D\u4EE4\u9762\u677F\uFF0C\u8FD0\u884C\u300C${imageBlockCommand}\u300D\u6216\u300C${sensitiveImageBlockCommand}\u300D\u3002`,
+        attr: {
+          style: "font-size: 11px; color: var(--apple-secondary); opacity: 0.78; font-weight: 500; line-height: 1.6; display: block;"
+        }
+      });
+    });
     if (this.plugin.settings.enableWatermark) {
       const captionDesc = captionSection.querySelector(".apple-setting-content > span");
       if (captionDesc) {
