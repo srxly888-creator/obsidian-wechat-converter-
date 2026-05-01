@@ -64,6 +64,74 @@ describe('Obsidian Triplet Renderer', () => {
     expect(output).toContain('[[code-link]]');
   });
 
+  it('should preprocess image-swipe callouts into marked raw html', () => {
+    const input = [
+      'before',
+      '> [!image-swipe] 左右滑动查看步骤图',
+      '> ![[assets/first image.png|第一张]]',
+      '> ![第二张](<assets/second image.png>)',
+      'after',
+    ].join('\n');
+
+    const { markdown: output } = preprocessMarkdownForTriplet(input, {});
+
+    expect(output).toContain('data-owc-image-swipe="1"');
+    expect(output).toContain('data-owc-image-swipe-type="image-swipe"');
+    expect(output).toContain('data-owc-image-swipe-hint="%E5%B7%A6%E5%8F%B3');
+    expect(output).toContain('<img src="assets/first%20image.png" alt="第一张">');
+    expect(output).toContain('<img src="assets/second%20image.png" alt="第二张">');
+    expect(output).not.toContain('[!image-swipe]');
+  });
+
+  it('should preprocess sensitive-image callouts with a warning panel and multiple images', () => {
+    const input = [
+      '> [!sensitive-image] 此类图片可能引发不适，向左滑动查看',
+      '> ![图一](images/a.png)',
+      '> ![[images/b.png|图二]]',
+    ].join('\n');
+
+    const { markdown: output } = preprocessMarkdownForTriplet(input, {});
+
+    expect(output).toContain('data-owc-image-swipe="1"');
+    expect(output).toContain('data-owc-image-swipe-type="sensitive-image"');
+    expect(output).toContain('data-owc-image-swipe-warning="%E6%AD%A4%E7%B1%BB');
+    expect(output).toContain('<img src="images/a.png" alt="图一">');
+    expect(output).toContain('<img src="images/b.png" alt="图二">');
+  });
+
+  it('should leave fenced sensitive-image syntax untouched', () => {
+    const input = [
+      ':::sensitive-image 此类图片可能引发不适，向左滑动查看',
+      '![图一](images/a.png)',
+      ':::',
+    ].join('\n');
+
+    const { markdown: output } = preprocessMarkdownForTriplet(input, {});
+
+    expect(output).toContain(':::sensitive-image 此类图片可能引发不适，向左滑动查看');
+    expect(output).not.toContain('data-owc-image-swipe="1"');
+  });
+
+  it('should not preprocess image-swipe examples inside fenced code blocks', () => {
+    const input = [
+      '```markdown',
+      '> [!image-swipe] 左右滑动查看图片',
+      '> ![A](a.png)',
+      '```',
+      '',
+      '> [!sensitive-image] 此类图片可能引发不适',
+      '> ![B](b.png)',
+    ].join('\n');
+
+    const { markdown: output } = preprocessMarkdownForTriplet(input, {});
+
+    expect(output).toContain('```markdown');
+    expect(output).toContain('> [!image-swipe] 左右滑动查看图片');
+    expect(output).toContain('> ![A](a.png)');
+    expect(output).toContain('data-owc-image-swipe-type="sensitive-image"');
+    expect(output).not.toContain('<img src="a.png" alt="A">');
+  });
+
   it('should keep inline-code wikilinks unescaped while neutralizing plain wikilinks', () => {
     const input = '正文 [[目标文档]] 与 `[[标题]]`';
 

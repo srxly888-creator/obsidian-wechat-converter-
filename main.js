@@ -1800,6 +1800,9 @@ var require_obsidian_triplet_serializer = __commonJS({
           return /* @__PURE__ */ new Set(["href", "style"]);
         if (tagName === "img")
           return /* @__PURE__ */ new Set(["src", "alt", "style", "width", "height", "class"]);
+        if (tagName === "section" && !finalStage) {
+          return /* @__PURE__ */ new Set(["style", "class", "data-owc-image-swipe", "data-owc-image-swipe-type", "data-owc-image-swipe-warning", "data-owc-image-swipe-hint"]);
+        }
         if (tagName === "section")
           return /* @__PURE__ */ new Set(["style", "class"]);
         if (!finalStage && (tagName === "pre" || tagName === "code"))
@@ -1814,7 +1817,7 @@ var require_obsidian_triplet_serializer = __commonJS({
         const attrs = Array.from(el.attributes);
         for (const attr of attrs) {
           const name = attr.name.toLowerCase();
-          if (name.startsWith("data-") || name === "id" || name === "dir") {
+          if (name.startsWith("data-") && !allowed.has(name) || name === "id" || name === "dir") {
             el.removeAttribute(attr.name);
             continue;
           }
@@ -2157,12 +2160,127 @@ var require_obsidian_triplet_serializer = __commonJS({
         }
       }
     }
+    var IMAGE_SWIPE_DEFAULT_WARNING = "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
+    var IMAGE_SWIPE_DEFAULT_HINT = "\u5DE6\u53F3\u6ED1\u52A8\u67E5\u770B\u56FE\u7247";
+    function decodeImageSwipeValue(value) {
+      try {
+        return decodeURIComponent(String(value || ""));
+      } catch (error) {
+        return String(value || "");
+      }
+    }
+    function setImageSwipeSectionStyle(el, styleText) {
+      if (!el || !styleText)
+        return;
+      el.setAttribute("style", styleText);
+    }
+    function normalizeImageSwipeImage(img, converter) {
+      let src = img.getAttribute("src") || "";
+      src = normalizeObsidianImageSrcForLegacyParity(src);
+      const safeSrc = converter && typeof converter.validateLink === "function" ? converter.validateLink(src, true) : src;
+      src = safeSrc;
+      if (looksLikeImageSrc(src) && converter && typeof converter.resolveImagePath === "function") {
+        src = converter.resolveImagePath(src);
+      }
+      const rawAlt = img.getAttribute("alt") || "";
+      const alt = buildLegacyParityImageAlt(img, rawAlt);
+      img.setAttribute("src", src);
+      img.setAttribute("alt", alt);
+      return {
+        src,
+        alt,
+        caption: deriveImageCaption(converter, src, alt)
+      };
+    }
+    function createImageSwipePanel({ img, caption, converter }) {
+      const panel = document.createElement("section");
+      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:top;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;text-align:center;");
+      img.setAttribute("data-owc-skip-standalone-image", "1");
+      appendInlineStyle(img, getTagStyle(converter, "img"));
+      panel.appendChild(img);
+      const showCaption = !converter || converter.showImageCaption !== false;
+      if (showCaption && caption) {
+        const captionEl = document.createElement("figcaption");
+        appendInlineStyle(captionEl, getTagStyle(converter, "figcaption"));
+        captionEl.textContent = caption;
+        panel.appendChild(captionEl);
+      }
+      return panel;
+    }
+    function createImageSwipeWarningPanel(warning) {
+      const panel = document.createElement("section");
+      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;");
+      const card = document.createElement("section");
+      setImageSwipeSectionStyle(card, "display:block;box-sizing:border-box;min-height:220px;padding:34px 22px;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;");
+      const label = document.createElement("section");
+      setImageSwipeSectionStyle(label, "display:inline-block;margin:0 auto 14px;padding:4px 12px;border-radius:999px;background:#ffffff;color:#8a6d3b;border:1px solid #efe2c7;font-size:13px;line-height:1.5;");
+      label.textContent = "\u654F\u611F\u56FE\u7247";
+      const text = document.createElement("section");
+      setImageSwipeSectionStyle(text, "display:block;margin:0;color:#4a4f5a;font-size:16px;line-height:1.8;font-weight:500;");
+      text.textContent = warning || IMAGE_SWIPE_DEFAULT_WARNING;
+      const hint = document.createElement("section");
+      setImageSwipeSectionStyle(hint, "display:inline-block;margin-top:18px;padding:8px 18px;border-radius:999px;background:#ffffff;color:#5d6472;border:1px solid #dde1ea;font-size:14px;line-height:1.4;");
+      hint.textContent = "\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
+      card.appendChild(label);
+      card.appendChild(text);
+      card.appendChild(hint);
+      panel.appendChild(card);
+      return panel;
+    }
+    function createImageSwipeHint(hint, converter) {
+      const hintEl = document.createElement("section");
+      const fallbackStyle = "display:block;margin:8px 0 0;color:#8a8f98;font-size:13px;line-height:1.6;text-align:center;";
+      setImageSwipeSectionStyle(hintEl, getTagStyle(converter, "figcaption") || fallbackStyle);
+      appendInlineStyle(hintEl, "margin-top:8px;");
+      hintEl.textContent = hint || IMAGE_SWIPE_DEFAULT_HINT;
+      return hintEl;
+    }
+    function convertImageSwipeBlocks(container, converter) {
+      if (!container)
+        return;
+      const blocks = Array.from(container.querySelectorAll('section[data-owc-image-swipe="1"]'));
+      for (const block of blocks) {
+        const imgs = Array.from(block.querySelectorAll("img"));
+        if (!imgs.length) {
+          block.removeAttribute("data-owc-image-swipe");
+          block.removeAttribute("data-owc-image-swipe-type");
+          block.removeAttribute("data-owc-image-swipe-warning");
+          block.removeAttribute("data-owc-image-swipe-hint");
+          continue;
+        }
+        const type = block.getAttribute("data-owc-image-swipe-type") || "image-swipe";
+        const wrapper = document.createElement("section");
+        setImageSwipeSectionStyle(wrapper, "display:block;margin:18px 0;text-align:left;");
+        const scroll = document.createElement("section");
+        setImageSwipeSectionStyle(scroll, "display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;margin:0;padding:0;white-space:nowrap;");
+        const row = document.createElement("section");
+        const panelCount = imgs.length + (type === "sensitive-image" ? 1 : 0);
+        setImageSwipeSectionStyle(row, `display:table;table-layout:fixed;width:${panelCount * 100}%;min-width:${panelCount * 100}%;border-spacing:0;font-size:0;line-height:0;margin:0;padding:0;`);
+        if (type === "sensitive-image") {
+          const warning = decodeImageSwipeValue(block.getAttribute("data-owc-image-swipe-warning") || "") || IMAGE_SWIPE_DEFAULT_WARNING;
+          row.appendChild(createImageSwipeWarningPanel(warning));
+        }
+        for (const img of imgs) {
+          const { caption } = normalizeImageSwipeImage(img, converter);
+          row.appendChild(createImageSwipePanel({ img, caption, converter }));
+        }
+        scroll.appendChild(row);
+        wrapper.appendChild(scroll);
+        if (type === "image-swipe") {
+          const hint = decodeImageSwipeValue(block.getAttribute("data-owc-image-swipe-hint") || "") || IMAGE_SWIPE_DEFAULT_HINT;
+          wrapper.appendChild(createImageSwipeHint(hint, converter));
+        }
+        block.replaceWith(wrapper);
+      }
+    }
     function convertStandaloneImages(container, converter) {
       if (!container)
         return;
       const imgs = Array.from(container.querySelectorAll("img"));
       for (const img of imgs) {
         if (img.closest("figure"))
+          continue;
+        if (img.getAttribute("data-owc-skip-standalone-image") === "1")
           continue;
         if (img.getAttribute("alt") === "logo")
           continue;
@@ -2728,6 +2846,7 @@ var require_obsidian_triplet_serializer = __commonJS({
       sanitizeAnchorAndImageLinks(container, converter);
       normalizeMathPresentation(container);
       convertPreBlocks(container, converter);
+      convertImageSwipeBlocks(container, converter);
       convertStandaloneImages(container, converter);
       applyThemeInlineStyles(container, converter);
       wrapTablesForHorizontalScroll(container, converter);
@@ -4280,8 +4399,157 @@ var require_obsidian_triplet_renderer = __commonJS({
       });
       return { markdown: output, formulas };
     }
+    var IMAGE_SWIPE_DEFAULT_WARNING = "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
+    var IMAGE_SWIPE_DEFAULT_HINT = "\u5DE6\u53F3\u6ED1\u52A8\u67E5\u770B\u56FE\u7247";
+    var IMAGE_SWIPE_TYPES = /* @__PURE__ */ new Set(["image-swipe", "sensitive-image"]);
+    function encodeImageSwipeValue(value) {
+      return encodeURIComponent(String(value || ""));
+    }
+    function escapeImageSwipeHtmlAttr(value) {
+      return String(value || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    function parseImageSwipeMarkdownTarget(rawTarget) {
+      const value = String(rawTarget || "").trim();
+      if (!value)
+        return "";
+      if (value.startsWith("<")) {
+        const endIndex = value.indexOf(">");
+        if (endIndex > 1)
+          return value.slice(1, endIndex).trim();
+      }
+      const titledMatch = value.match(/^(.+?)\s+(['"]).*\2\s*$/);
+      return (titledMatch ? titledMatch[1] : value).trim();
+    }
+    function parseImageSwipeMarkdownLine(line) {
+      const value = String(line || "").trim();
+      const wikiMatch = value.match(/^!\[\[([^\]|]+)(?:\|([^\]]+))?]]$/);
+      if (wikiMatch) {
+        return {
+          src: encodeURI(String(wikiMatch[1] || "").trim()),
+          alt: String(wikiMatch[2] || "").trim()
+        };
+      }
+      const markdownMatch = value.match(/^!\[([^\]]*)]\(([\s\S]+)\)$/);
+      if (!markdownMatch)
+        return null;
+      const src = parseImageSwipeMarkdownTarget(markdownMatch[2]);
+      if (!src)
+        return null;
+      return {
+        src: encodeURI(src),
+        alt: String(markdownMatch[1] || "").trim()
+      };
+    }
+    function extractImageSwipeItalicCaption(lines, imageIndex) {
+      for (let i = imageIndex + 1; i < lines.length; i += 1) {
+        const line = String(lines[i] || "").trim();
+        if (!line)
+          continue;
+        if (parseImageSwipeMarkdownLine(line))
+          return "";
+        const match = line.match(/^(?:\*|_)(.+?)(?:\*|_)$/);
+        return match ? String(match[1] || "").trim() : "";
+      }
+      return "";
+    }
+    function collectImageSwipeImages(blockLines) {
+      const images = [];
+      for (let i = 0; i < blockLines.length; i += 1) {
+        const image = parseImageSwipeMarkdownLine(blockLines[i]);
+        if (!image)
+          continue;
+        const caption = image.alt || extractImageSwipeItalicCaption(blockLines, i);
+        images.push({ ...image, alt: caption });
+      }
+      return images;
+    }
+    function renderImageSwipeHtmlBlock(type, blockLines, optionText) {
+      const images = collectImageSwipeImages(blockLines);
+      if (!images.length)
+        return null;
+      const attrs = [
+        'data-owc-image-swipe="1"',
+        `data-owc-image-swipe-type="${type}"`
+      ];
+      if (type === "sensitive-image") {
+        attrs.push(`data-owc-image-swipe-warning="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_WARNING))}"`);
+      } else {
+        attrs.push(`data-owc-image-swipe-hint="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_HINT))}"`);
+      }
+      return [
+        `<section ${attrs.join(" ")}>`,
+        ...images.map((image) => `<img src="${escapeImageSwipeHtmlAttr(image.src)}" alt="${escapeImageSwipeHtmlAttr(image.alt)}">`),
+        "</section>"
+      ];
+    }
+    function parseImageSwipeCalloutOpen(line) {
+      const match = String(line || "").match(/^\s{0,3}>\s?\[!\s*([a-z-]+)\s*](?:[+-])?\s*(.*)$/i);
+      if (!match)
+        return null;
+      const type = String(match[1] || "").toLowerCase();
+      if (!IMAGE_SWIPE_TYPES.has(type))
+        return null;
+      return {
+        type,
+        optionText: String(match[2] || "").trim()
+      };
+    }
+    function stripSingleQuotePrefix(line) {
+      return String(line || "").replace(/^\s{0,3}>\s?/, "");
+    }
+    function preprocessImageSwipeCallouts(markdown) {
+      const lines = String(markdown || "").split("\n");
+      const output = [];
+      let fenceState = null;
+      let inMathFence = false;
+      for (let i = 0; i < lines.length; ) {
+        const fenceDelimiter = parseFencedBlockDelimiter(lines[i]);
+        if (fenceDelimiter) {
+          if (!fenceState) {
+            fenceState = fenceDelimiter;
+          } else if (fenceDelimiter.marker === fenceState.marker && fenceDelimiter.length >= fenceState.length) {
+            fenceState = null;
+          }
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        if (!fenceState && isMathFenceDelimiter(lines[i])) {
+          inMathFence = !inMathFence;
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        if (fenceState || inMathFence) {
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        const callout = parseImageSwipeCalloutOpen(lines[i]);
+        if (!callout) {
+          output.push(lines[i]);
+          i += 1;
+          continue;
+        }
+        const originalLines = [lines[i]];
+        const blockLines = [];
+        i += 1;
+        while (i < lines.length && isQuoteLine(lines[i])) {
+          originalLines.push(lines[i]);
+          blockLines.push(stripSingleQuotePrefix(lines[i]));
+          i += 1;
+        }
+        const rendered = renderImageSwipeHtmlBlock(callout.type, blockLines, callout.optionText);
+        if (rendered) {
+          output.push(...rendered);
+        } else {
+          output.push(...originalLines);
+        }
+      }
+      return output.join("\n");
+    }
     function preprocessMarkdownForTriplet(markdown, converter) {
-      let output = String(markdown || "");
+      let output = preprocessImageSwipeCallouts(markdown);
       output = output.replace(/^[\t ]+(\$\$)/gm, "$1");
       output = output.replace(/!\[\[([^\[\]|]+)(?:\|([^\[\]]+))?\]\]/g, (match, imagePath, alt) => {
         return `![${alt || ""}](${encodeURI(String(imagePath || "").trim())})`;
@@ -4647,6 +4915,8 @@ var require_native_renderer = __commonJS({
     function canUseNativePreviewFastPath2(markdown) {
       const source = String(markdown || "");
       if (!source.trim())
+        return false;
+      if (/^\s{0,3}>\s?\[!\s*(?:image-swipe|sensitive-image)\s*](?:[+-])?/im.test(source))
         return false;
       if (source.includes("![["))
         return false;
@@ -10430,8 +10700,88 @@ var require_wechat_html_cleaner = __commonJS({
   }
 });
 
+// services/obsidian-fetch-adapter.js
+var require_obsidian_fetch_adapter = __commonJS({
+  "services/obsidian-fetch-adapter.js"(exports2, module2) {
+    function createAbortError() {
+      if (typeof DOMException === "function") {
+        return new DOMException("The operation was aborted.", "AbortError");
+      }
+      const error = new Error("The operation was aborted.");
+      error.name = "AbortError";
+      return error;
+    }
+    function normalizeHeaders(headers) {
+      if (!headers)
+        return void 0;
+      if (typeof Headers !== "undefined" && headers instanceof Headers) {
+        return Object.fromEntries(headers.entries());
+      }
+      if (Array.isArray(headers)) {
+        return Object.fromEntries(headers);
+      }
+      return { ...headers };
+    }
+    function getHeaderValue(headers, name) {
+      const normalized = normalizeHeaders(headers);
+      if (!normalized)
+        return void 0;
+      const target = String(name || "").toLowerCase();
+      const match = Object.keys(normalized).find((key) => key.toLowerCase() === target);
+      return match ? normalized[match] : void 0;
+    }
+    function createObsidianFetchAdapter2(requestUrlImpl) {
+      if (typeof requestUrlImpl !== "function") {
+        throw new Error("Obsidian requestUrl is not available");
+      }
+      return async function obsidianFetchAdapter(url, options = {}) {
+        const signal = options.signal;
+        if (signal == null ? void 0 : signal.aborted) {
+          throw createAbortError();
+        }
+        let abortHandler = null;
+        const abortPromise = signal ? new Promise((_, reject) => {
+          abortHandler = () => reject(createAbortError());
+          signal.addEventListener("abort", abortHandler, { once: true });
+        }) : null;
+        try {
+          const headers = normalizeHeaders(options.headers);
+          const requestPromise = requestUrlImpl({
+            url,
+            method: options.method || "GET",
+            headers,
+            body: options.body,
+            contentType: getHeaderValue(headers, "content-type")
+          });
+          const response = await (abortPromise ? Promise.race([requestPromise, abortPromise]) : requestPromise);
+          const responseText = (response == null ? void 0 : response.text) !== void 0 ? String(response.text) : (response == null ? void 0 : response.json) !== void 0 ? JSON.stringify(response.json) : "";
+          return {
+            ok: response.status >= 200 && response.status < 300,
+            status: response.status,
+            statusText: String(response.status || ""),
+            headers: response.headers || {},
+            text: async () => responseText,
+            json: async () => {
+              if ((response == null ? void 0 : response.json) !== void 0)
+                return response.json;
+              return responseText ? JSON.parse(responseText) : null;
+            }
+          };
+        } finally {
+          if (signal && abortHandler) {
+            signal.removeEventListener("abort", abortHandler);
+          }
+        }
+      };
+    }
+    module2.exports = {
+      createObsidianFetchAdapter: createObsidianFetchAdapter2
+    };
+  }
+});
+
 // input.js
-var { Plugin, MarkdownView, ItemView, Notice, Platform } = require("obsidian");
+var { Plugin, MarkdownView, ItemView, Notice, Platform, requestUrl } = require("obsidian");
 var { PluginSettingTab, Setting } = require("obsidian");
 var { createRenderPipelines } = require_render_pipeline();
 var { buildRenderRuntime } = require_dependency_loader();
@@ -10473,8 +10823,66 @@ var { resolveSyncAccount, toSyncFriendlyMessage } = require_sync_context();
 var { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require_wechat_media();
 var { cleanHtmlForDraft: cleanHtmlForDraftService } = require_wechat_html_cleaner();
 var { rasterizeSvgToPngBlob } = require_svg_rasterizer();
+var { createObsidianFetchAdapter } = require_obsidian_fetch_adapter();
 var APPLE_STYLE_VIEW = "apple-style-converter";
 var APPLE_STYLE_VIEW_TITLE = "\u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668";
+var IMAGE_SWIPE_COMMAND_COPY = {
+  "image-swipe": {
+    zhName: "\u63D2\u5165\u56FE\u7247\u5757",
+    enName: "Insert image block",
+    zhTitle: "\u5DE6\u53F3\u6ED1\u52A8\u67E5\u770B\u56FE\u7247",
+    enTitle: "Swipe to view images",
+    zhPlaceholder: ["![[\u56FE\u72471.png]]", "![[\u56FE\u72472.png]]"],
+    enPlaceholder: ["![[image-1.png]]", "![[image-2.png]]"],
+    zhNotice: "\u5DF2\u63D2\u5165\u56FE\u7247\u5757",
+    enNotice: "Image block inserted"
+  },
+  "sensitive-image": {
+    zhName: "\u63D2\u5165\u654F\u611F\u56FE\u7247\u5757",
+    enName: "Insert sensitive image block",
+    zhTitle: "\u6B64\u7C7B\u56FE\u7247\u53EF\u80FD\u5F15\u53D1\u4E0D\u9002\uFF0C\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B",
+    enTitle: "Sensitive images. Swipe to view.",
+    zhPlaceholder: ["![[\u56FE\u72471.png]]", "![[\u56FE\u72472.png]]"],
+    enPlaceholder: ["![[image-1.png]]", "![[image-2.png]]"],
+    zhNotice: "\u5DF2\u63D2\u5165\u654F\u611F\u56FE\u7247\u5757",
+    enNotice: "Sensitive image block inserted"
+  }
+};
+function getObsidianLocale(app = null) {
+  var _a, _b, _c, _d, _e, _f, _g, _h;
+  const candidates = [
+    (_b = (_a = app == null ? void 0 : app.vault) == null ? void 0 : _a.getConfig) == null ? void 0 : _b.call(_a, "language"),
+    (_d = (_c = app == null ? void 0 : app.vault) == null ? void 0 : _c.getConfig) == null ? void 0 : _d.call(_c, "locale"),
+    typeof window !== "undefined" ? (_f = (_e = window.localStorage) == null ? void 0 : _e.getItem) == null ? void 0 : _f.call(_e, "language") : "",
+    typeof window !== "undefined" ? (_h = (_g = window.localStorage) == null ? void 0 : _g.getItem) == null ? void 0 : _h.call(_g, "obsidian-language") : "",
+    typeof navigator !== "undefined" ? navigator.language : ""
+  ];
+  return String(candidates.find((value) => typeof value === "string" && value.trim()) || "").trim().toLowerCase();
+}
+function isChineseObsidianLocale(app = null) {
+  const locale = getObsidianLocale(app);
+  return !locale || /^zh(?:-|_|$)/i.test(locale);
+}
+function getImageSwipeCommandCopy(app = null, type = "image-swipe") {
+  const copy = IMAGE_SWIPE_COMMAND_COPY[type] || IMAGE_SWIPE_COMMAND_COPY["image-swipe"];
+  const useChinese = isChineseObsidianLocale(app);
+  return {
+    name: useChinese ? copy.zhName : copy.enName,
+    title: useChinese ? copy.zhTitle : copy.enTitle,
+    placeholder: useChinese ? copy.zhPlaceholder : copy.enPlaceholder,
+    notice: useChinese ? copy.zhNotice : copy.enNotice
+  };
+}
+function quoteLinesForImageSwipeCallout(text) {
+  const lines = String(text || "").split("\n");
+  return lines.map((line) => line ? `> ${line}` : ">").join("\n");
+}
+function createImageSwipeCalloutMarkdown(type = "image-swipe", selectedText = "", app = null) {
+  const copy = getImageSwipeCommandCopy(app, type);
+  const content = String(selectedText || "").trim() ? String(selectedText || "").replace(/\s+$/g, "") : copy.placeholder.join("\n");
+  return `> [!${type}] ${copy.title}
+${quoteLinesForImageSwipeCallout(content)}`;
+}
 var DEFAULT_SETTINGS = {
   theme: "github",
   themeColor: "blue",
@@ -10664,10 +11072,10 @@ var WechatAPI = class {
    * 纯粹的 HTTP 请求封装，不包含重试逻辑
    */
   async sendRequest(url, options = {}) {
-    const { requestUrl } = require("obsidian");
+    const { requestUrl: requestUrl2 } = require("obsidian");
     if (this.proxyUrl) {
       this.validateProxyUrl(this.proxyUrl);
-      const proxyResponse = await requestUrl({
+      const proxyResponse = await requestUrl2({
         url: this.proxyUrl,
         method: "POST",
         body: JSON.stringify({
@@ -10679,7 +11087,7 @@ var WechatAPI = class {
       });
       return proxyResponse.json;
     } else {
-      const response = await requestUrl({ url, ...options });
+      const response = await requestUrl2({ url, ...options });
       return response.json;
     }
   }
@@ -10724,7 +11132,7 @@ var WechatAPI = class {
   }
   async uploadMultipart(url, blob, fieldName) {
     return this.requestWithRetry(async () => {
-      const { requestUrl } = require("obsidian");
+      const { requestUrl: requestUrl2 } = require("obsidian");
       const mimeType = blob.type || "image/jpeg";
       const ext = mimeType.includes("gif") ? "gif" : mimeType.includes("png") ? "png" : "jpg";
       if (this.proxyUrl) {
@@ -10735,7 +11143,7 @@ var WechatAPI = class {
           reader.onload = () => resolve(reader.result.split(",")[1]);
           reader.onerror = reject;
         });
-        const proxyResponse = await requestUrl({
+        const proxyResponse = await requestUrl2({
           url: this.proxyUrl,
           method: "POST",
           body: JSON.stringify({
@@ -10776,7 +11184,7 @@ var WechatAPI = class {
         bodyBytes.set(bytes, headerBytes.length);
         bodyBytes.set(footerBytes, headerBytes.length + bytes.length);
         try {
-          const response = await requestUrl({
+          const response = await requestUrl2({
             url,
             method: "POST",
             body: bodyBytes.buffer,
@@ -11381,6 +11789,14 @@ var AppleStyleView = class extends ItemView {
         text: "\u5173\u95ED\u6C34\u5370\u65F6\uFF0C\u5728\u56FE\u7247\u4E0B\u65B9\u663E\u793A\u8BF4\u660E\u6587\u5B57",
         attr: {
           style: "font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;"
+        }
+      });
+      const imageBlockCommand = getImageSwipeCommandCopy(this.app, "image-swipe").name;
+      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, "sensitive-image").name;
+      section.createEl("span", {
+        text: `\u6A2A\u6ED1\u591A\u56FE\uFF1A\u9009\u4E2D\u56FE\u7247\u540E\u8FD0\u884C\u300C${imageBlockCommand}\u300D\u6216\u300C${sensitiveImageBlockCommand}\u300D\u3002`,
+        attr: {
+          style: "margin-top: 4px; font-size: 11px; color: var(--apple-secondary); opacity: 0.72; font-weight: 500; display: block;"
         }
       });
       checkbox.addEventListener("change", async () => {
@@ -12316,7 +12732,8 @@ var AppleStyleView = class extends ItemView {
         markdown: sourceContext.markdown,
         selection: requestedSelection,
         imageRefs,
-        timeoutMs: aiSettings.requestTimeoutMs
+        timeoutMs: aiSettings.requestTimeoutMs,
+        fetchImpl: createObsidianFetchAdapter(requestUrl)
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length)
@@ -13305,7 +13722,8 @@ var AppleStyleView = class extends ItemView {
         markdown: context.markdown,
         selection,
         imageRefs,
-        timeoutMs: aiSettings.requestTimeoutMs
+        timeoutMs: aiSettings.requestTimeoutMs,
+        fetchImpl: createObsidianFetchAdapter(requestUrl)
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length) {
@@ -13818,8 +14236,8 @@ var AppleStyleView = class extends ItemView {
       return await resp.blob();
     }
     if (src.startsWith("http")) {
-      const { requestUrl } = require("obsidian");
-      const response = await requestUrl({ url: src });
+      const { requestUrl: requestUrl2 } = require("obsidian");
+      const response = await requestUrl2({ url: src });
       const contentType = response.headers["content-type"] || response.headers["Content-Type"] || "image/jpeg";
       return new Blob([response.arrayBuffer], { type: contentType });
     }
@@ -14862,7 +15280,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
           testBtn.disabled = true;
           testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
           try {
-            await testAiProviderConnection(provider);
+            await testAiProviderConnection(provider, createObsidianFetchAdapter(requestUrl));
             new Notice(`\u2705 ${provider.name} \u8FDE\u63A5\u6210\u529F\uFF01`);
           } catch (error) {
             new Notice(`\u274C ${provider.name} \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
@@ -15050,7 +15468,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       testBtn.disabled = true;
       testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
       try {
-        await testAiProviderConnection(candidate);
+        await testAiProviderConnection(candidate, createObsidianFetchAdapter(requestUrl));
         new Notice("\u2705 AI Provider \u8FDE\u63A5\u6210\u529F\uFF01");
       } catch (error) {
         new Notice(`\u274C \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
@@ -15252,6 +15670,20 @@ var AppleStylePlugin = class extends Plugin {
         await this.openConverter();
       }
     });
+    this.addCommand({
+      id: "insert-image-swipe-block",
+      name: getImageSwipeCommandCopy(this.app, "image-swipe").name,
+      editorCallback: (editor) => {
+        this.insertImageSwipeCallout(editor, "image-swipe");
+      }
+    });
+    this.addCommand({
+      id: "insert-sensitive-image-block",
+      name: getImageSwipeCommandCopy(this.app, "sensitive-image").name,
+      editorCallback: (editor) => {
+        this.insertImageSwipeCallout(editor, "sensitive-image");
+      }
+    });
     this.addSettingTab(new AppleStyleSettingTab(this.app, this));
     this.app.workspace.onLayoutReady(() => {
       this.migrateLegacyConverterLeafTitles().catch((error) => {
@@ -15259,6 +15691,16 @@ var AppleStylePlugin = class extends Plugin {
       });
     });
     console.log("\u2705 \u5FAE\u4FE1\u516C\u4F17\u53F7\u8F6C\u6362\u5668\u52A0\u8F7D\u5B8C\u6210");
+  }
+  insertImageSwipeCallout(editor, type = "image-swipe") {
+    if (!editor || typeof editor.replaceSelection !== "function") {
+      new Notice("\u8BF7\u5148\u6253\u5F00\u4E00\u7BC7 Markdown \u6587\u6863");
+      return;
+    }
+    const selectedText = typeof editor.getSelection === "function" ? editor.getSelection() : "";
+    const markdown = createImageSwipeCalloutMarkdown(type, selectedText, this.app);
+    editor.replaceSelection(markdown);
+    new Notice(getImageSwipeCommandCopy(this.app, type).notice);
   }
   toConverterViewState(baseState = {}, options = {}) {
     const safeState = baseState && typeof baseState === "object" ? baseState : {};
@@ -15507,3 +15949,5 @@ module.exports = AppleStylePlugin;
 module.exports.AppleStyleView = AppleStyleView;
 module.exports.WechatAPI = WechatAPI;
 module.exports.AppleStyleSettingTab = AppleStyleSettingTab;
+module.exports.createImageSwipeCalloutMarkdown = createImageSwipeCalloutMarkdown;
+module.exports.getImageSwipeCommandCopy = getImageSwipeCommandCopy;

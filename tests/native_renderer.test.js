@@ -72,6 +72,19 @@ describe('Native Renderer', () => {
     expect(isSafeRawImageSrc('#')).toBe(false);
   });
 
+  it('should route custom image swipe blocks away from native fast path', () => {
+    expect(canUseNativePreviewFastPath([
+      '> [!image-swipe] 左右滑动查看图片',
+      '> ![A](https://example.com/a.png)',
+      '> ![B](https://example.com/b.png)',
+    ].join('\n'))).toBe(false);
+
+    expect(canUseNativePreviewFastPath([
+      '> [!sensitive-image] 向左滑动查看',
+      '> ![A](https://example.com/a.png)',
+    ].join('\n'))).toBe(false);
+  });
+
   it('preprocess should preserve safe raw image protocols and remove unsafe ones', () => {
     const input = [
       '<img src="https://example.com/ok.png">',

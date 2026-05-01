@@ -440,6 +440,176 @@ function preRenderMathFormulas(markdown, converter) {
   return { markdown: output, formulas };
 }
 
+const IMAGE_SWIPE_DEFAULT_WARNING = '此类图片可能引发不适，向左滑动查看';
+const IMAGE_SWIPE_DEFAULT_HINT = '左右滑动查看图片';
+const IMAGE_SWIPE_TYPES = new Set(['image-swipe', 'sensitive-image']);
+
+function encodeImageSwipeValue(value) {
+  return encodeURIComponent(String(value || ''));
+}
+
+function escapeImageSwipeHtmlAttr(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function parseImageSwipeMarkdownTarget(rawTarget) {
+  const value = String(rawTarget || '').trim();
+  if (!value) return '';
+
+  if (value.startsWith('<')) {
+    const endIndex = value.indexOf('>');
+    if (endIndex > 1) return value.slice(1, endIndex).trim();
+  }
+
+  const titledMatch = value.match(/^(.+?)\s+(['"]).*\2\s*$/);
+  return (titledMatch ? titledMatch[1] : value).trim();
+}
+
+function parseImageSwipeMarkdownLine(line) {
+  const value = String(line || '').trim();
+  const wikiMatch = value.match(/^!\[\[([^\]|]+)(?:\|([^\]]+))?]]$/);
+  if (wikiMatch) {
+    return {
+      src: encodeURI(String(wikiMatch[1] || '').trim()),
+      alt: String(wikiMatch[2] || '').trim(),
+    };
+  }
+
+  const markdownMatch = value.match(/^!\[([^\]]*)]\(([\s\S]+)\)$/);
+  if (!markdownMatch) return null;
+  const src = parseImageSwipeMarkdownTarget(markdownMatch[2]);
+  if (!src) return null;
+
+  return {
+    src: encodeURI(src),
+    alt: String(markdownMatch[1] || '').trim(),
+  };
+}
+
+function extractImageSwipeItalicCaption(lines, imageIndex) {
+  for (let i = imageIndex + 1; i < lines.length; i += 1) {
+    const line = String(lines[i] || '').trim();
+    if (!line) continue;
+    if (parseImageSwipeMarkdownLine(line)) return '';
+    const match = line.match(/^(?:\*|_)(.+?)(?:\*|_)$/);
+    return match ? String(match[1] || '').trim() : '';
+  }
+  return '';
+}
+
+function collectImageSwipeImages(blockLines) {
+  const images = [];
+  for (let i = 0; i < blockLines.length; i += 1) {
+    const image = parseImageSwipeMarkdownLine(blockLines[i]);
+    if (!image) continue;
+    const caption = image.alt || extractImageSwipeItalicCaption(blockLines, i);
+    images.push({ ...image, alt: caption });
+  }
+  return images;
+}
+
+function renderImageSwipeHtmlBlock(type, blockLines, optionText) {
+  const images = collectImageSwipeImages(blockLines);
+  if (!images.length) return null;
+
+  const attrs = [
+    'data-owc-image-swipe="1"',
+    `data-owc-image-swipe-type="${type}"`,
+  ];
+  if (type === 'sensitive-image') {
+    attrs.push(`data-owc-image-swipe-warning="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_WARNING))}"`);
+  } else {
+    attrs.push(`data-owc-image-swipe-hint="${escapeImageSwipeHtmlAttr(encodeImageSwipeValue(optionText || IMAGE_SWIPE_DEFAULT_HINT))}"`);
+  }
+
+  return [
+    `<section ${attrs.join(' ')}>`,
+    ...images.map((image) => `<img src="${escapeImageSwipeHtmlAttr(image.src)}" alt="${escapeImageSwipeHtmlAttr(image.alt)}">`),
+    '</section>',
+  ];
+}
+
+function parseImageSwipeCalloutOpen(line) {
+  const match = String(line || '').match(/^\s{0,3}>\s?\[!\s*([a-z-]+)\s*](?:[+-])?\s*(.*)$/i);
+  if (!match) return null;
+  const type = String(match[1] || '').toLowerCase();
+  if (!IMAGE_SWIPE_TYPES.has(type)) return null;
+  return {
+    type,
+    optionText: String(match[2] || '').trim(),
+  };
+}
+
+function stripSingleQuotePrefix(line) {
+  return String(line || '').replace(/^\s{0,3}>\s?/, '');
+}
+
+function preprocessImageSwipeCallouts(markdown) {
+  const lines = String(markdown || '').split('\n');
+  const output = [];
+  let fenceState = null;
+  let inMathFence = false;
+
+  for (let i = 0; i < lines.length;) {
+    const fenceDelimiter = parseFencedBlockDelimiter(lines[i]);
+    if (fenceDelimiter) {
+      if (!fenceState) {
+        fenceState = fenceDelimiter;
+      } else if (
+        fenceDelimiter.marker === fenceState.marker &&
+        fenceDelimiter.length >= fenceState.length
+      ) {
+        fenceState = null;
+      }
+      output.push(lines[i]);
+      i += 1;
+      continue;
+    }
+
+    if (!fenceState && isMathFenceDelimiter(lines[i])) {
+      inMathFence = !inMathFence;
+      output.push(lines[i]);
+      i += 1;
+      continue;
+    }
+
+    if (fenceState || inMathFence) {
+      output.push(lines[i]);
+      i += 1;
+      continue;
+    }
+
+    const callout = parseImageSwipeCalloutOpen(lines[i]);
+    if (!callout) {
+      output.push(lines[i]);
+      i += 1;
+      continue;
+    }
+
+    const originalLines = [lines[i]];
+    const blockLines = [];
+    i += 1;
+    while (i < lines.length && isQuoteLine(lines[i])) {
+      originalLines.push(lines[i]);
+      blockLines.push(stripSingleQuotePrefix(lines[i]));
+      i += 1;
+    }
+
+    const rendered = renderImageSwipeHtmlBlock(callout.type, blockLines, callout.optionText);
+    if (rendered) {
+      output.push(...rendered);
+    } else {
+      output.push(...originalLines);
+    }
+  }
+
+  return output.join('\n');
+}
+
 /**
  * Preprocess markdown for triplet rendering.
  * Returns an object with processed markdown and pre-rendered math formulas.
@@ -447,7 +617,7 @@ function preRenderMathFormulas(markdown, converter) {
  * @returns {{ markdown: string, mathFormulas: Array }}
  */
 function preprocessMarkdownForTriplet(markdown, converter) {
-  let output = String(markdown || '');
+  let output = preprocessImageSwipeCallouts(markdown);
 
   // Align with converter.convert preprocessing to reduce non-semantic parity noise.
   output = output.replace(/^[\t ]+(\$\$)/gm, '$1');

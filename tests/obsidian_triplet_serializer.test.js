@@ -38,6 +38,75 @@ describe('Obsidian Triplet Serializer', () => {
     expect(figure.getAttribute('style')).toBe('display:block;margin:16px 0;text-align:center;');
   });
 
+  it('should convert marked image-swipe sections into a horizontal gallery', () => {
+    const root = document.createElement('div');
+    root.innerHTML = [
+      '<section data-owc-image-swipe="1" data-owc-image-swipe-type="image-swipe" data-owc-image-swipe-hint="%E5%B7%A6%E5%8F%B3%E6%BB%91%E5%8A%A8%E6%9F%A5%E7%9C%8B%E5%9B%BE%E7%89%87">',
+      '<img src="images/a.png" alt="第一张">',
+      '<img src="images/b.png" alt="第二张">',
+      '</section>',
+    ].join('');
+
+    const html = serializeObsidianRenderedHtml({ root, converter });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    expect(html).toContain('overflow-x:auto');
+    expect(html).toContain('width:200%');
+    expect(container.querySelectorAll('figure')).toHaveLength(0);
+    expect(container.querySelectorAll('img')).toHaveLength(2);
+    expect(container.querySelectorAll('figcaption')).toHaveLength(2);
+    expect(container.textContent).toContain('第一张');
+    expect(container.textContent).toContain('第二张');
+    expect(container.textContent).toContain('左右滑动查看图片');
+    expect(html).not.toContain('data-owc-image-swipe');
+
+    const cleanedHtml = cleanHtmlForDraft(html);
+    expect(cleanedHtml).toContain('overflow-x:auto');
+    expect(cleanedHtml).toContain('width:200%');
+  });
+
+  it('should add a default hint for marked image-swipe sections', () => {
+    const root = document.createElement('div');
+    root.innerHTML = [
+      '<section data-owc-image-swipe="1" data-owc-image-swipe-type="image-swipe">',
+      '<img src="images/a.png" alt="第一张">',
+      '</section>',
+    ].join('');
+
+    const html = serializeObsidianRenderedHtml({ root, converter });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    expect(container.textContent).toContain('左右滑动查看图片');
+    expect(html).toContain('width:100%');
+  });
+
+  it('should convert sensitive-image sections into warning-first horizontal panels', () => {
+    const root = document.createElement('div');
+    root.innerHTML = [
+      '<section data-owc-image-swipe="1" data-owc-image-swipe-type="sensitive-image" data-owc-image-swipe-warning="%E6%AD%A4%E7%B1%BB%E5%9B%BE%E7%89%87%E5%8F%AF%E8%83%BD%E5%BC%95%E5%8F%91%E4%B8%8D%E9%80%82">',
+      '<img src="images/a.png" alt="图一">',
+      '<img src="images/b.png" alt="图二">',
+      '</section>',
+    ].join('');
+
+    const html = serializeObsidianRenderedHtml({ root, converter });
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    expect(html).toContain('overflow-x:auto');
+    expect(html).toContain('width:300%');
+    expect(container.textContent).toContain('敏感图片');
+    expect(container.textContent).toContain('此类图片可能引发不适');
+    expect(container.querySelectorAll('img')).toHaveLength(2);
+    expect(container.querySelectorAll('figure')).toHaveLength(0);
+
+    const cleanedHtml = cleanHtmlForDraft(html);
+    expect(cleanedHtml).toContain('overflow-x:auto');
+    expect(cleanedHtml).toContain('width:300%');
+  });
+
   it('should convert pre blocks to themed code snippets', () => {
     const root = document.createElement('div');
     root.innerHTML = '<pre><code class="language-js">const x = 1;</code></pre>';

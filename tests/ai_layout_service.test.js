@@ -880,6 +880,67 @@ title: 示例
     expect(html).not.toContain('降级子正文');
   });
 
+  it('should preserve horizontal image swipe and wide table scroll containers inside ai sections', () => {
+    const renderedSectionFragments = extractRenderedSectionFragments(`
+      <section>
+        <h2>第一部分</h2>
+        <p>普通正文。</p>
+        <section style="display:block;margin:18px 0;text-align:left;">
+          <section style="display:block;width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;margin:0;padding:0;white-space:nowrap;">
+            <section style="display:table;table-layout:fixed;width:200%;min-width:200%;border-spacing:0;font-size:0;line-height:0;margin:0;padding:0;">
+              <section style="display:table-cell;vertical-align:top;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;text-align:center;">
+                <img src="https://example.com/a.png" alt="第一张" style="display:block;width:100%;height:auto;">
+              </section>
+              <section style="display:table-cell;vertical-align:top;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;text-align:center;">
+                <img src="https://example.com/b.png" alt="第二张" style="display:block;width:100%;height:auto;">
+              </section>
+            </section>
+          </section>
+          <section style="display:block;margin:8px 0 0;color:#888;text-align:center;">左右滑动查看图片</section>
+        </section>
+        <section style="display:block;box-sizing:border-box;width:100%;max-width:100%;overflow-x: scroll;overflow-y:hidden;-webkit-overflow-scrolling: touch;margin:16px 0;padding-bottom:10px;">
+          <table style="width:770px;min-width:100%;"><tr><td style="white-space: nowrap;">很宽的表格内容</td></tr></table>
+        </section>
+      </section>
+    `);
+
+    const html = renderArticleLayoutHtml({
+      resolved: {
+        layoutFamily: 'tutorial-cards',
+        colorPalette: 'ocean-blue',
+      },
+      stylePack: 'ocean-blue',
+      blocks: [
+        {
+          type: 'section-block',
+          sectionIndex: 0,
+          title: '第一部分',
+          paragraphs: ['降级正文'],
+          imageIds: ['image-1', 'image-2'],
+        },
+      ],
+    }, {
+      imageRefs: [
+        { id: 'image-1', src: 'https://example.com/a.png', alt: '第一张', caption: '第一张' },
+        { id: 'image-2', src: 'https://example.com/b.png', alt: '第二张', caption: '第二张' },
+      ],
+      mode: 'draft',
+      renderedSectionFragments,
+    });
+    const cleaned = cleanHtmlForDraft(html);
+
+    expect(html).toContain('overflow-x:auto');
+    expect(html).toContain('width:200%');
+    expect(html).toContain('左右滑动查看图片');
+    expect(html).toContain('overflow-x: scroll');
+    expect(html).toContain('width:770px');
+    expect(html.match(/https:\/\/example\.com\/a\.png/g) || []).toHaveLength(1);
+    expect(html.match(/https:\/\/example\.com\/b\.png/g) || []).toHaveLength(1);
+    expect(html).not.toContain('降级正文');
+    expect(cleaned).toContain('overflow-x:auto');
+    expect(cleaned).toContain('overflow-x: scroll');
+  });
+
   it('should preserve rendered nested lists from the base preview and keep wechat draft cleanup compatibility', () => {
     const renderedSectionFragments = extractRenderedSectionFragments(`
       <section>

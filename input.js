@@ -1,4 +1,4 @@
-const { Plugin, MarkdownView, ItemView, Notice, Platform } = require('obsidian');
+const { Plugin, MarkdownView, ItemView, Notice, Platform, requestUrl } = require('obsidian');
 const { PluginSettingTab, Setting } = require('obsidian');
 const { createRenderPipelines } = require('./services/render-pipeline');
 const { buildRenderRuntime } = require('./services/dependency-loader');
@@ -40,10 +40,75 @@ const { resolveSyncAccount, toSyncFriendlyMessage } = require('./services/sync-c
 const { processAllImages: processAllImagesService, processMathFormulas: processMathFormulasService } = require('./services/wechat-media');
 const { cleanHtmlForDraft: cleanHtmlForDraftService } = require('./services/wechat-html-cleaner');
 const { rasterizeSvgToPngBlob } = require('./services/svg-rasterizer');
+const { createObsidianFetchAdapter } = require('./services/obsidian-fetch-adapter');
 
 // 视图类型标识
 const APPLE_STYLE_VIEW = 'apple-style-converter';
 const APPLE_STYLE_VIEW_TITLE = '微信公众号转换器';
+
+const IMAGE_SWIPE_COMMAND_COPY = {
+  'image-swipe': {
+    zhName: '插入图片块',
+    enName: 'Insert image block',
+    zhTitle: '左右滑动查看图片',
+    enTitle: 'Swipe to view images',
+    zhPlaceholder: ['![[图片1.png]]', '![[图片2.png]]'],
+    enPlaceholder: ['![[image-1.png]]', '![[image-2.png]]'],
+    zhNotice: '已插入图片块',
+    enNotice: 'Image block inserted',
+  },
+  'sensitive-image': {
+    zhName: '插入敏感图片块',
+    enName: 'Insert sensitive image block',
+    zhTitle: '此类图片可能引发不适，向左滑动查看',
+    enTitle: 'Sensitive images. Swipe to view.',
+    zhPlaceholder: ['![[图片1.png]]', '![[图片2.png]]'],
+    enPlaceholder: ['![[image-1.png]]', '![[image-2.png]]'],
+    zhNotice: '已插入敏感图片块',
+    enNotice: 'Sensitive image block inserted',
+  },
+};
+
+function getObsidianLocale(app = null) {
+  const candidates = [
+    app?.vault?.getConfig?.('language'),
+    app?.vault?.getConfig?.('locale'),
+    typeof window !== 'undefined' ? window.localStorage?.getItem?.('language') : '',
+    typeof window !== 'undefined' ? window.localStorage?.getItem?.('obsidian-language') : '',
+    typeof navigator !== 'undefined' ? navigator.language : '',
+  ];
+
+  return String(candidates.find((value) => typeof value === 'string' && value.trim()) || '').trim().toLowerCase();
+}
+
+function isChineseObsidianLocale(app = null) {
+  const locale = getObsidianLocale(app);
+  return !locale || /^zh(?:-|_|$)/i.test(locale);
+}
+
+function getImageSwipeCommandCopy(app = null, type = 'image-swipe') {
+  const copy = IMAGE_SWIPE_COMMAND_COPY[type] || IMAGE_SWIPE_COMMAND_COPY['image-swipe'];
+  const useChinese = isChineseObsidianLocale(app);
+  return {
+    name: useChinese ? copy.zhName : copy.enName,
+    title: useChinese ? copy.zhTitle : copy.enTitle,
+    placeholder: useChinese ? copy.zhPlaceholder : copy.enPlaceholder,
+    notice: useChinese ? copy.zhNotice : copy.enNotice,
+  };
+}
+
+function quoteLinesForImageSwipeCallout(text) {
+  const lines = String(text || '').split('\n');
+  return lines.map((line) => (line ? `> ${line}` : '>')).join('\n');
+}
+
+function createImageSwipeCalloutMarkdown(type = 'image-swipe', selectedText = '', app = null) {
+  const copy = getImageSwipeCommandCopy(app, type);
+  const content = String(selectedText || '').trim()
+    ? String(selectedText || '').replace(/\s+$/g, '')
+    : copy.placeholder.join('\n');
+  return `> [!${type}] ${copy.title}\n${quoteLinesForImageSwipeCallout(content)}`;
+}
 
 // 默认设置
 const DEFAULT_SETTINGS = {
@@ -1197,6 +1262,14 @@ class AppleStyleView extends ItemView {
           style: 'font-size: 11px; color: var(--apple-secondary); opacity: 0.8; font-weight: 500; display: block;'
         }
       });
+      const imageBlockCommand = getImageSwipeCommandCopy(this.app, 'image-swipe').name;
+      const sensitiveImageBlockCommand = getImageSwipeCommandCopy(this.app, 'sensitive-image').name;
+      section.createEl('span', {
+        text: `横滑多图：选中图片后运行「${imageBlockCommand}」或「${sensitiveImageBlockCommand}」。`,
+        attr: {
+          style: 'margin-top: 4px; font-size: 11px; color: var(--apple-secondary); opacity: 0.72; font-weight: 500; display: block;'
+        }
+      });
 
       checkbox.addEventListener('change', async () => {
         this.plugin.settings.showImageCaption = checkbox.checked;
@@ -2200,6 +2273,7 @@ class AppleStyleView extends ItemView {
         selection: requestedSelection,
         imageRefs,
         timeoutMs: aiSettings.requestTimeoutMs,
+        fetchImpl: createObsidianFetchAdapter(requestUrl),
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson?.blocks) || !layoutJson.blocks.length) return null;
@@ -3260,6 +3334,7 @@ class AppleStyleView extends ItemView {
         selection,
         imageRefs,
         timeoutMs: aiSettings.requestTimeoutMs,
+        fetchImpl: createObsidianFetchAdapter(requestUrl),
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson?.blocks) || !layoutJson.blocks.length) {
@@ -5168,7 +5243,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
           testBtn.disabled = true;
           testBtn.textContent = '测试中...';
           try {
-            await testAiProviderConnection(provider);
+            await testAiProviderConnection(provider, createObsidianFetchAdapter(requestUrl));
             new Notice(`✅ ${provider.name} 连接成功！`);
           } catch (error) {
             new Notice(`❌ ${provider.name} 连接失败: ${error.message}`);
@@ -5384,7 +5459,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
       testBtn.disabled = true;
       testBtn.textContent = '测试中...';
       try {
-        await testAiProviderConnection(candidate);
+        await testAiProviderConnection(candidate, createObsidianFetchAdapter(requestUrl));
         new Notice('✅ AI Provider 连接成功！');
       } catch (error) {
         new Notice(`❌ 连接失败: ${error.message}`);
@@ -5628,6 +5703,22 @@ class AppleStylePlugin extends Plugin {
       },
     });
 
+    this.addCommand({
+      id: 'insert-image-swipe-block',
+      name: getImageSwipeCommandCopy(this.app, 'image-swipe').name,
+      editorCallback: (editor) => {
+        this.insertImageSwipeCallout(editor, 'image-swipe');
+      },
+    });
+
+    this.addCommand({
+      id: 'insert-sensitive-image-block',
+      name: getImageSwipeCommandCopy(this.app, 'sensitive-image').name,
+      editorCallback: (editor) => {
+        this.insertImageSwipeCallout(editor, 'sensitive-image');
+      },
+    });
+
 
     // Command 'convert-to-apple-style' removed as per user request
 
@@ -5640,6 +5731,18 @@ class AppleStylePlugin extends Plugin {
     });
 
     console.log('✅ 微信公众号转换器加载完成');
+  }
+
+  insertImageSwipeCallout(editor, type = 'image-swipe') {
+    if (!editor || typeof editor.replaceSelection !== 'function') {
+      new Notice('请先打开一篇 Markdown 文档');
+      return;
+    }
+
+    const selectedText = typeof editor.getSelection === 'function' ? editor.getSelection() : '';
+    const markdown = createImageSwipeCalloutMarkdown(type, selectedText, this.app);
+    editor.replaceSelection(markdown);
+    new Notice(getImageSwipeCommandCopy(this.app, type).notice);
   }
 
   toConverterViewState(baseState = {}, options = {}) {
@@ -5923,3 +6026,5 @@ module.exports = AppleStylePlugin;
 module.exports.AppleStyleView = AppleStyleView;
 module.exports.WechatAPI = WechatAPI;
 module.exports.AppleStyleSettingTab = AppleStyleSettingTab;
+module.exports.createImageSwipeCalloutMarkdown = createImageSwipeCalloutMarkdown;
+module.exports.getImageSwipeCommandCopy = getImageSwipeCommandCopy;
