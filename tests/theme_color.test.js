@@ -156,8 +156,8 @@ describe('AppleTheme Color Logic', () => {
       const colorful = new AppleTheme({ theme: 'colorful', themeColor: 'purple' });
 
       expect(paper.getStyle('h1')).toContain('border-top: 2px solid #e83e8c;');
-      expect(grid.getStyle('h2')).toContain('border-left: 3px solid #20c997;');
-      expect(media.getStyle('h2')).toContain('background-size: 60% 2px;');
+      expect(grid.getStyle('h2')).toContain('border: 1px solid #20c99755;');
+      expect(media.getStyle('h2')).toContain('background-size: 100% 2px;');
       expect(colorful.getStyle('h1')).toContain('background: #6f42c1;');
     });
 
@@ -168,13 +168,22 @@ describe('AppleTheme Color Logic', () => {
       const media = new AppleTheme({ theme: 'media', themeColor: 'orange' });
       const colorful = new AppleTheme({ theme: 'colorful', themeColor: 'purple' });
 
-      expect(paper.getStyle('h2')).toContain('border-bottom: 2px solid #e83e8c;');
-      expect(paper.getStyle('h3')).toContain('border-top: 1px solid #e83e8c55;');
-      expect(grid.getStyle('h2')).toContain('border-left: 3px solid #20c997;');
-      expect(grid.getStyle('h3')).toContain('background-image: linear-gradient(#20c997, #20c997);');
-      expect(typo.getStyle('h2')).toContain('background-image: linear-gradient(#d8d8d8, #d8d8d8);');
-      expect(media.getStyle('h2')).toContain('background-size: 60% 2px;');
-      expect(colorful.getStyle('h2')).toContain('border-left: 4px solid #6f42c1;');
+      expect(paper.getStyle('h2')).toContain('border-top: 2px solid #e83e8c;');
+      expect(paper.getStyle('h2')).toContain('font-size: 22px;');
+      expect(paper.getStyle('h3')).toContain('border-bottom: 2px solid #e83e8c;');
+      expect(paper.getStyle('h4')).toContain('border-top: 1px solid #e83e8c55;');
+      expect(grid.getStyle('h2')).toContain('border: 1px solid #20c99755;');
+      expect(grid.getStyle('h3')).toContain('border-left: 3px solid #20c997;');
+      expect(grid.getStyle('h4')).toContain('background-image: linear-gradient(#20c997, #20c997);');
+      expect(typo.getStyle('h2')).toContain('border-bottom: 1px solid #d8d8d8;');
+      expect(typo.getStyle('h3')).toContain('background-image: linear-gradient(#d8d8d8, #d8d8d8);');
+      expect(typo.getStyle('h4')).toContain('border-left: 2px solid #d8d8d8;');
+      expect(media.getStyle('h2')).toContain('background-size: 100% 2px;');
+      expect(media.getStyle('h3')).toContain('background-size: 60% 2px;');
+      expect(media.getStyle('h4')).toContain('border: 1px solid #fd7e1433;');
+      expect(colorful.getStyle('h2')).toContain('background: #6f42c1;');
+      expect(colorful.getStyle('h3')).toContain('border-left: 4px solid #6f42c1;');
+      expect(colorful.getStyle('h4')).toContain('border-bottom: 2px solid #6f42c1;');
     });
 
     it('should keep new theme surfaces and regular quotes distinct from callout cards', () => {

@@ -119,6 +119,7 @@ window.AppleTheme = class AppleTheme {
       name: '纸张长文',
       lineHeight: 1.9,
       paragraphGap: 22,
+      shiftHeadingDecorationsDown: true,
       h1Decoration: 'paper-title',
       h2Decoration: 'paper-chapter',
       h3Decoration: 'paper-section',
@@ -143,6 +144,7 @@ window.AppleTheme = class AppleTheme {
       name: '网格文档',
       lineHeight: 1.82,
       paragraphGap: 20,
+      shiftHeadingDecorationsDown: true,
       h1Decoration: 'grid-title',
       h2Decoration: 'grid-chapter',
       h3Decoration: 'grid-section',
@@ -167,6 +169,7 @@ window.AppleTheme = class AppleTheme {
       name: 'Typo',
       lineHeight: 1.92,
       paragraphGap: 22,
+      shiftHeadingDecorationsDown: true,
       h1Decoration: 'typo-title',
       h2Decoration: 'typo-title',
       h3Decoration: 'typo-section',
@@ -190,6 +193,7 @@ window.AppleTheme = class AppleTheme {
       name: '清爽媒体',
       lineHeight: 1.86,
       paragraphGap: 18,
+      shiftHeadingDecorationsDown: true,
       h1Decoration: 'media-title',
       h2Decoration: 'media-chapter',
       h3Decoration: 'media-section',
@@ -213,6 +217,7 @@ window.AppleTheme = class AppleTheme {
       name: '彩色强调',
       lineHeight: 1.82,
       paragraphGap: 20,
+      shiftHeadingDecorationsDown: true,
       h1Decoration: 'colorful-title',
       h2Decoration: 'colorful-chapter',
       h3Decoration: 'colorful-section',
@@ -386,9 +391,18 @@ window.AppleTheme = class AppleTheme {
         );
 
       case 'h1': return this.getH1Style(config.h1Decoration, color, sizes.h1, font, headingColor, config);
-      case 'h2': return this.getH2Style(config.h2Decoration, color, sizes.h2, font, headingColor, config);
-      case 'h3': return this.getH3Style(config.h3Decoration, color, sizes.h3, font, headingColor, config);
-      case 'h4': return this.getH4Style(config.h4Decoration, color, sizes.h4, font, headingColor);
+      case 'h2':
+        return config.shiftHeadingDecorationsDown
+          ? this.getH1Style(config.h1Decoration, color, sizes.h2, font, headingColor, config)
+          : this.getH2Style(config.h2Decoration, color, sizes.h2, font, headingColor, config);
+      case 'h3':
+        return config.shiftHeadingDecorationsDown
+          ? this.getH2Style(config.h2Decoration, color, sizes.h3, font, headingColor, config)
+          : this.getH3Style(config.h3Decoration, color, sizes.h3, font, headingColor, config);
+      case 'h4':
+        return config.shiftHeadingDecorationsDown
+          ? this.getH3Style(config.h3Decoration, color, sizes.h4, font, headingColor, config)
+          : this.getH4Style(config.h4Decoration, color, sizes.h4, font, headingColor);
 
       case 'h5':
         return this.getH5Style(config.h5Decoration, color, sizes.h5, font, headingColor);
