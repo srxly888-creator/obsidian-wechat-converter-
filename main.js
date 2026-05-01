@@ -2209,17 +2209,17 @@ var require_obsidian_triplet_serializer = __commonJS({
     }
     function createImageSwipeWarningPanel(warning) {
       const panel = document.createElement("section");
-      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;");
+      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:8px 10px;margin:0;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;");
       const content = document.createElement("section");
-      setImageSwipeSectionStyle(content, "display:block;box-sizing:border-box;padding:22px 14px;margin:0 auto;");
+      setImageSwipeSectionStyle(content, "display:block;box-sizing:border-box;padding:0;margin:0 auto;");
       const label = document.createElement("section");
-      setImageSwipeSectionStyle(label, "display:inline-block;margin:0 auto 14px;padding:4px 12px;border-radius:999px;background:#ffffff;color:#8a6d3b;border:1px solid #efe2c7;font-size:13px;line-height:1.5;");
+      setImageSwipeSectionStyle(label, "display:inline-block;margin:0 auto 8px;padding:2px 8px;border-radius:999px;background:#ffffff;color:#8a6d3b;border:1px solid #efe2c7;font-size:12px;line-height:1.4;");
       label.textContent = "\u654F\u611F\u56FE\u7247";
       const text = document.createElement("section");
-      setImageSwipeSectionStyle(text, "display:block;margin:0;color:#4a4f5a;font-size:16px;line-height:1.8;font-weight:500;");
+      setImageSwipeSectionStyle(text, "display:block;margin:0;color:#4a4f5a;font-size:14px;line-height:1.55;font-weight:500;");
       text.textContent = warning || IMAGE_SWIPE_DEFAULT_WARNING;
       const hint = document.createElement("section");
-      setImageSwipeSectionStyle(hint, "display:inline-block;margin-top:18px;padding:8px 18px;border-radius:999px;background:#ffffff;color:#5d6472;border:1px solid #dde1ea;font-size:14px;line-height:1.4;");
+      setImageSwipeSectionStyle(hint, "display:block;margin-top:6px;padding:0;color:#6b7280;font-size:12px;line-height:1.4;");
       hint.textContent = "\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
       content.appendChild(label);
       content.appendChild(text);

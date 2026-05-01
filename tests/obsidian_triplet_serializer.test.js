@@ -102,6 +102,8 @@ describe('Obsidian Triplet Serializer', () => {
     expect(container.querySelectorAll('img')).toHaveLength(2);
     expect(container.querySelectorAll('figure')).toHaveLength(0);
     expect(html).not.toContain('min-height:220px');
+    expect(html).not.toContain('padding:22px');
+    expect(html).toContain('font-size:14px;line-height:1.55');
 
     const cleanedHtml = cleanHtmlForDraft(html);
     expect(cleanedHtml).toContain('overflow-x:auto');
