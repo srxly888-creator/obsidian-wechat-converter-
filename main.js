@@ -2209,9 +2209,9 @@ var require_obsidian_triplet_serializer = __commonJS({
     }
     function createImageSwipeWarningPanel(warning) {
       const panel = document.createElement("section");
-      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;");
-      const card = document.createElement("section");
-      setImageSwipeSectionStyle(card, "display:block;box-sizing:border-box;min-height:220px;padding:34px 22px;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;");
+      setImageSwipeSectionStyle(panel, "display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;");
+      const content = document.createElement("section");
+      setImageSwipeSectionStyle(content, "display:block;box-sizing:border-box;padding:22px 14px;margin:0 auto;");
       const label = document.createElement("section");
       setImageSwipeSectionStyle(label, "display:inline-block;margin:0 auto 14px;padding:4px 12px;border-radius:999px;background:#ffffff;color:#8a6d3b;border:1px solid #efe2c7;font-size:13px;line-height:1.5;");
       label.textContent = "\u654F\u611F\u56FE\u7247";
@@ -2221,10 +2221,10 @@ var require_obsidian_triplet_serializer = __commonJS({
       const hint = document.createElement("section");
       setImageSwipeSectionStyle(hint, "display:inline-block;margin-top:18px;padding:8px 18px;border-radius:999px;background:#ffffff;color:#5d6472;border:1px solid #dde1ea;font-size:14px;line-height:1.4;");
       hint.textContent = "\u5411\u5DE6\u6ED1\u52A8\u67E5\u770B";
-      card.appendChild(label);
-      card.appendChild(text);
-      card.appendChild(hint);
-      panel.appendChild(card);
+      content.appendChild(label);
+      content.appendChild(text);
+      content.appendChild(hint);
+      panel.appendChild(content);
       return panel;
     }
     function createImageSwipeHint(hint, converter) {

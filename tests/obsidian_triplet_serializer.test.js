@@ -101,10 +101,12 @@ describe('Obsidian Triplet Serializer', () => {
     expect(container.textContent).toContain('此类图片可能引发不适');
     expect(container.querySelectorAll('img')).toHaveLength(2);
     expect(container.querySelectorAll('figure')).toHaveLength(0);
+    expect(html).not.toContain('min-height:220px');
 
     const cleanedHtml = cleanHtmlForDraft(html);
     expect(cleanedHtml).toContain('overflow-x:auto');
     expect(cleanedHtml).toContain('width:300%');
+    expect(cleanedHtml).not.toContain('min-height:220px');
   });
 
   it('should convert pre blocks to themed code snippets', () => {

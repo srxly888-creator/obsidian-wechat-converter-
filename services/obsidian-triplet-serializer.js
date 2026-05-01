@@ -615,10 +615,10 @@ function createImageSwipePanel({ img, caption, converter }) {
 
 function createImageSwipeWarningPanel(warning) {
   const panel = document.createElement('section');
-  setImageSwipeSectionStyle(panel, 'display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;');
+  setImageSwipeSectionStyle(panel, 'display:table-cell;vertical-align:middle;width:1%;box-sizing:border-box;white-space:normal;padding:0 8px;margin:0;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;');
 
-  const card = document.createElement('section');
-  setImageSwipeSectionStyle(card, 'display:block;box-sizing:border-box;min-height:220px;padding:34px 22px;border:1px solid #e6e8ef;border-radius:12px;background:#f8f9fc;color:#4a4f5a;text-align:center;');
+  const content = document.createElement('section');
+  setImageSwipeSectionStyle(content, 'display:block;box-sizing:border-box;padding:22px 14px;margin:0 auto;');
   const label = document.createElement('section');
   setImageSwipeSectionStyle(label, 'display:inline-block;margin:0 auto 14px;padding:4px 12px;border-radius:999px;background:#ffffff;color:#8a6d3b;border:1px solid #efe2c7;font-size:13px;line-height:1.5;');
   label.textContent = '敏感图片';
@@ -629,10 +629,10 @@ function createImageSwipeWarningPanel(warning) {
   setImageSwipeSectionStyle(hint, 'display:inline-block;margin-top:18px;padding:8px 18px;border-radius:999px;background:#ffffff;color:#5d6472;border:1px solid #dde1ea;font-size:14px;line-height:1.4;');
   hint.textContent = '向左滑动查看';
 
-  card.appendChild(label);
-  card.appendChild(text);
-  card.appendChild(hint);
-  panel.appendChild(card);
+  content.appendChild(label);
+  content.appendChild(text);
+  content.appendChild(hint);
+  panel.appendChild(content);
   return panel;
 }
 
