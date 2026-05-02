@@ -7077,6 +7077,7 @@ var require_ai_layout = __commonJS({
     var MAX_PART_NAV_ITEMS = 6;
     var MAX_CASE_BLOCK_BULLETS = 6;
     var MAX_CASE_BLOCK_IMAGE_IDS = 4;
+    var ANTHROPIC_LAYOUT_MAX_TOKENS = 8192;
     var AI_LAYOUT_DEFAULT_FAMILY = "source-first";
     var AI_LAYOUT_DEFAULT_COLOR_PALETTE = "tech-green";
     var AI_LAYOUT_IMPLEMENTED_FAMILIES = new Set(AI_LAYOUT_FAMILIES);
@@ -9254,6 +9255,9 @@ var require_ai_layout = __commonJS({
       throw new Error("Gemini \u54CD\u5E94\u7F3A\u5C11\u53EF\u89E3\u6790\u6587\u672C");
     }
     function readAnthropicContent(data) {
+      if ((data == null ? void 0 : data.stop_reason) === "max_tokens") {
+        throw new Error("Anthropic \u54CD\u5E94\u8FBE\u5230 max_tokens \u8F93\u51FA\u4E0A\u9650\uFF0C\u6392\u7248 JSON \u53EF\u80FD\u88AB\u622A\u65AD\u3002\u8BF7\u7F29\u77ED\u6587\u7AE0\u6216\u51CF\u5C11\u56FE\u7247\u540E\u91CD\u8BD5\u3002");
+      }
       const content = Array.isArray(data == null ? void 0 : data.content) ? data.content : [];
       const text = content.map((item) => (item == null ? void 0 : item.type) === "text" && typeof (item == null ? void 0 : item.text) === "string" ? item.text : "").join("").trim();
       if (text)
@@ -9414,7 +9418,7 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
           },
           body: JSON.stringify({
             model: provider.model,
-            max_tokens: 4096,
+            max_tokens: ANTHROPIC_LAYOUT_MAX_TOKENS,
             temperature: 0.2,
             system: systemInstruction,
             messages: [
@@ -11101,7 +11105,97 @@ var require_obsidian_fetch_adapter = __commonJS({
       const match = Object.keys(normalized).find((key) => key.toLowerCase() === target);
       return match ? normalized[match] : void 0;
     }
-    function createObsidianFetchAdapter2(requestUrlImpl) {
+    function findFirstJsonContainer(text) {
+      const source = String(text || "");
+      const objectStart = source.indexOf("{");
+      const arrayStart = source.indexOf("[");
+      if (objectStart === -1)
+        return arrayStart;
+      if (arrayStart === -1)
+        return objectStart;
+      return Math.min(objectStart, arrayStart);
+    }
+    function findJsonContainerEnd(text, startIndex) {
+      const source = String(text || "");
+      const firstChar = source[startIndex];
+      const stack = firstChar === "{" ? ["}"] : firstChar === "[" ? ["]"] : [];
+      if (!stack.length)
+        return -1;
+      let inString = false;
+      let escaped = false;
+      for (let index = startIndex + 1; index < source.length; index += 1) {
+        const char = source[index];
+        if (inString) {
+          if (escaped) {
+            escaped = false;
+          } else if (char === "\\") {
+            escaped = true;
+          } else if (char === '"') {
+            inString = false;
+          }
+          continue;
+        }
+        if (char === '"') {
+          inString = true;
+          continue;
+        }
+        if (char === "{") {
+          stack.push("}");
+          continue;
+        }
+        if (char === "[") {
+          stack.push("]");
+          continue;
+        }
+        const expectedClose = stack[stack.length - 1];
+        if (char === expectedClose) {
+          stack.pop();
+          if (!stack.length)
+            return index + 1;
+        }
+      }
+      return -1;
+    }
+    function parseJsonResponseText(text) {
+      const source = String(text || "");
+      if (!source.trim())
+        return null;
+      try {
+        return JSON.parse(source);
+      } catch (error) {
+        const startIndex = findFirstJsonContainer(source);
+        if (startIndex === -1)
+          throw error;
+        const endIndex = findJsonContainerEnd(source, startIndex);
+        if (endIndex === -1)
+          throw error;
+        try {
+          return JSON.parse(source.slice(startIndex, endIndex));
+        } catch (_) {
+          throw error;
+        }
+      }
+    }
+    function resolveRequestImplementations(requestSource) {
+      if (typeof requestSource === "function") {
+        return {
+          requestUrlImpl: requestSource,
+          requestTextImpl: null
+        };
+      }
+      return {
+        requestUrlImpl: requestSource == null ? void 0 : requestSource.requestUrl,
+        requestTextImpl: requestSource == null ? void 0 : requestSource.request
+      };
+    }
+    function isJsonParseFailure(error) {
+      if (error instanceof SyntaxError)
+        return true;
+      const message = String((error == null ? void 0 : error.message) || error || "");
+      return /json|unexpected non-whitespace|unexpected token|parse/i.test(message);
+    }
+    function createObsidianFetchAdapter2(requestSource) {
+      const { requestUrlImpl, requestTextImpl } = resolveRequestImplementations(requestSource);
       if (typeof requestUrlImpl !== "function") {
         throw new Error("Obsidian requestUrl is not available");
       }
@@ -11117,14 +11211,29 @@ var require_obsidian_fetch_adapter = __commonJS({
         }) : null;
         try {
           const headers = normalizeHeaders(options.headers);
-          const requestPromise = requestUrlImpl({
+          const requestOptions = {
             url,
             method: options.method || "GET",
             headers,
             body: options.body,
-            contentType: getHeaderValue(headers, "content-type")
-          });
-          const response = await (abortPromise ? Promise.race([requestPromise, abortPromise]) : requestPromise);
+            contentType: getHeaderValue(headers, "content-type"),
+            throw: false
+          };
+          const withAbort = (promise) => abortPromise ? Promise.race([promise, abortPromise]) : promise;
+          let response;
+          try {
+            response = await withAbort(requestUrlImpl(requestOptions));
+          } catch (error) {
+            if (typeof requestTextImpl !== "function" || !isJsonParseFailure(error)) {
+              throw error;
+            }
+            const text = await withAbort(Promise.resolve(requestTextImpl(requestOptions)));
+            response = {
+              status: 200,
+              text,
+              headers: {}
+            };
+          }
           const responseText = (response == null ? void 0 : response.text) !== void 0 ? String(response.text) : (response == null ? void 0 : response.json) !== void 0 ? JSON.stringify(response.json) : "";
           return {
             ok: response.status >= 200 && response.status < 300,
@@ -11135,7 +11244,7 @@ var require_obsidian_fetch_adapter = __commonJS({
             json: async () => {
               if ((response == null ? void 0 : response.json) !== void 0)
                 return response.json;
-              return responseText ? JSON.parse(responseText) : null;
+              return parseJsonResponseText(responseText);
             }
           };
         } finally {
@@ -11146,13 +11255,15 @@ var require_obsidian_fetch_adapter = __commonJS({
       };
     }
     module2.exports = {
-      createObsidianFetchAdapter: createObsidianFetchAdapter2
+      createObsidianFetchAdapter: createObsidianFetchAdapter2,
+      isJsonParseFailure,
+      parseJsonResponseText
     };
   }
 });
 
 // input.js
-var { Plugin, MarkdownView, ItemView, Notice, Platform, requestUrl } = require("obsidian");
+var { Plugin, MarkdownView, ItemView, Notice, Platform, requestUrl, request } = require("obsidian");
 var { PluginSettingTab, Setting } = require("obsidian");
 var { createRenderPipelines } = require_render_pipeline();
 var { buildRenderRuntime } = require_dependency_loader();
@@ -13153,7 +13264,7 @@ var AppleStyleView = class extends ItemView {
         selection: requestedSelection,
         imageRefs,
         timeoutMs: aiSettings.requestTimeoutMs,
-        fetchImpl: createObsidianFetchAdapter(requestUrl)
+        fetchImpl: createObsidianFetchAdapter({ requestUrl, request })
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length)
@@ -14143,7 +14254,7 @@ var AppleStyleView = class extends ItemView {
         selection,
         imageRefs,
         timeoutMs: aiSettings.requestTimeoutMs,
-        fetchImpl: createObsidianFetchAdapter(requestUrl)
+        fetchImpl: createObsidianFetchAdapter({ requestUrl, request })
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson == null ? void 0 : layoutJson.blocks) || !layoutJson.blocks.length) {
@@ -15700,7 +15811,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
           testBtn.disabled = true;
           testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
           try {
-            await testAiProviderConnection(provider, createObsidianFetchAdapter(requestUrl));
+            await testAiProviderConnection(provider, createObsidianFetchAdapter({ requestUrl, request }));
             new Notice(`\u2705 ${provider.name} \u8FDE\u63A5\u6210\u529F\uFF01`);
           } catch (error) {
             new Notice(`\u274C ${provider.name} \u8FDE\u63A5\u5931\u8D25: ${error.message}`);
@@ -15888,7 +15999,7 @@ var AppleStyleSettingTab = class extends PluginSettingTab {
       testBtn.disabled = true;
       testBtn.textContent = "\u6D4B\u8BD5\u4E2D...";
       try {
-        await testAiProviderConnection(candidate, createObsidianFetchAdapter(requestUrl));
+        await testAiProviderConnection(candidate, createObsidianFetchAdapter({ requestUrl, request }));
         new Notice("\u2705 AI Provider \u8FDE\u63A5\u6210\u529F\uFF01");
       } catch (error) {
         new Notice(`\u274C \u8FDE\u63A5\u5931\u8D25: ${error.message}`);

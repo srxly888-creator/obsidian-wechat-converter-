@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 const {
   createObsidianFetchAdapter,
+  isJsonParseFailure,
+  parseJsonResponseText,
 } = require('../services/obsidian-fetch-adapter');
 
 describe('Obsidian fetch adapter', () => {
@@ -32,6 +34,7 @@ describe('Obsidian fetch adapter', () => {
       },
       body: '{"hello":"world"}',
       contentType: 'application/json',
+      throw: false,
     });
     expect(response.ok).toBe(true);
     expect(response.status).toBe(200);
@@ -52,6 +55,60 @@ describe('Obsidian fetch adapter', () => {
     expect(response.ok).toBe(false);
     expect(response.status).toBe(401);
     await expect(response.text()).resolves.toBe('unauthorized');
+  });
+
+  it('should parse the first complete JSON payload when requestUrl text has trailing data', async () => {
+    const requestUrl = vi.fn(async () => ({
+      status: 200,
+      text: '{"choices":[{"message":{"content":"{\\"blocks\\":[{\\"type\\":\\"paragraph\\",\\"text\\":\\"ok\\"}]}"}}]}{"ignored":true}',
+      headers: { 'content-type': 'application/json' },
+    }));
+    const fetchImpl = createObsidianFetchAdapter(requestUrl);
+
+    const response = await fetchImpl('https://api.example.com/v1/chat/completions');
+
+    await expect(response.json()).resolves.toEqual({
+      choices: [
+        {
+          message: {
+            content: '{"blocks":[{"type":"paragraph","text":"ok"}]}',
+          },
+        },
+      ],
+    });
+  });
+
+  it('should fall back to Obsidian request text when requestUrl rejects while parsing JSON', async () => {
+    const requestUrl = vi.fn(async () => {
+      throw new SyntaxError('Unexpected non-whitespace character after JSON at position 655');
+    });
+    const request = vi.fn(async () => '{"ok":true}{"ignored":true}');
+    const fetchImpl = createObsidianFetchAdapter({ requestUrl, request });
+
+    const response = await fetchImpl('https://api.example.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"hello":"world"}',
+    });
+
+    expect(request).toHaveBeenCalledWith({
+      url: 'https://api.example.com/v1/chat/completions',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"hello":"world"}',
+      contentType: 'application/json',
+      throw: false,
+    });
+    expect(response.ok).toBe(true);
+    await expect(response.text()).resolves.toBe('{"ok":true}{"ignored":true}');
+    await expect(response.json()).resolves.toEqual({ ok: true });
+  });
+
+  it('should preserve the original JSON parse error when no complete payload can be recovered', async () => {
+    expect(() => parseJsonResponseText('{"ok":true}')).not.toThrow();
+    expect(() => parseJsonResponseText('not json')).toThrow(SyntaxError);
+    expect(isJsonParseFailure(new SyntaxError('broken'))).toBe(true);
+    expect(isJsonParseFailure(new Error('Failed to fetch'))).toBe(false);
   });
 
   it('should reject immediately when the signal is already aborted', async () => {

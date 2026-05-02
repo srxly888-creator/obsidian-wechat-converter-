@@ -1,4 +1,4 @@
-const { Plugin, MarkdownView, ItemView, Notice, Platform, requestUrl } = require('obsidian');
+const { Plugin, MarkdownView, ItemView, Notice, Platform, requestUrl, request } = require('obsidian');
 const { PluginSettingTab, Setting } = require('obsidian');
 const { createRenderPipelines } = require('./services/render-pipeline');
 const { buildRenderRuntime } = require('./services/dependency-loader');
@@ -2330,7 +2330,7 @@ class AppleStyleView extends ItemView {
         selection: requestedSelection,
         imageRefs,
         timeoutMs: aiSettings.requestTimeoutMs,
-        fetchImpl: createObsidianFetchAdapter(requestUrl),
+        fetchImpl: createObsidianFetchAdapter({ requestUrl, request }),
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson?.blocks) || !layoutJson.blocks.length) return null;
@@ -3391,7 +3391,7 @@ class AppleStyleView extends ItemView {
         selection,
         imageRefs,
         timeoutMs: aiSettings.requestTimeoutMs,
-        fetchImpl: createObsidianFetchAdapter(requestUrl),
+        fetchImpl: createObsidianFetchAdapter({ requestUrl, request }),
       });
       const layoutJson = result.layoutJson;
       if (!Array.isArray(layoutJson?.blocks) || !layoutJson.blocks.length) {
@@ -5300,7 +5300,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
           testBtn.disabled = true;
           testBtn.textContent = '测试中...';
           try {
-            await testAiProviderConnection(provider, createObsidianFetchAdapter(requestUrl));
+            await testAiProviderConnection(provider, createObsidianFetchAdapter({ requestUrl, request }));
             new Notice(`✅ ${provider.name} 连接成功！`);
           } catch (error) {
             new Notice(`❌ ${provider.name} 连接失败: ${error.message}`);
@@ -5516,7 +5516,7 @@ class AppleStyleSettingTab extends PluginSettingTab {
       testBtn.disabled = true;
       testBtn.textContent = '测试中...';
       try {
-        await testAiProviderConnection(candidate, createObsidianFetchAdapter(requestUrl));
+        await testAiProviderConnection(candidate, createObsidianFetchAdapter({ requestUrl, request }));
         new Notice('✅ AI Provider 连接成功！');
       } catch (error) {
         new Notice(`❌ 连接失败: ${error.message}`);
