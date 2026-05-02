@@ -25,6 +25,7 @@ const MAX_LAYOUT_BLOCKS = 24;
 const MAX_PART_NAV_ITEMS = 6;
 const MAX_CASE_BLOCK_BULLETS = 6;
 const MAX_CASE_BLOCK_IMAGE_IDS = 4;
+const ANTHROPIC_LAYOUT_MAX_TOKENS = 8192;
 const AI_LAYOUT_DEFAULT_FAMILY = 'source-first';
 const AI_LAYOUT_DEFAULT_COLOR_PALETTE = 'tech-green';
 const AI_LAYOUT_IMPLEMENTED_FAMILIES = new Set(AI_LAYOUT_FAMILIES);
@@ -2411,6 +2412,9 @@ function readGeminiContent(data) {
 }
 
 function readAnthropicContent(data) {
+  if (data?.stop_reason === 'max_tokens') {
+    throw new Error('Anthropic 响应达到 max_tokens 输出上限，排版 JSON 可能被截断。请缩短文章或减少图片后重试。');
+  }
   const content = Array.isArray(data?.content) ? data.content : [];
   const text = content
     .map((item) => (item?.type === 'text' && typeof item?.text === 'string' ? item.text : ''))
@@ -2587,7 +2591,7 @@ async function requestAnthropicLayout({
       },
       body: JSON.stringify({
         model: provider.model,
-        max_tokens: 4096,
+        max_tokens: ANTHROPIC_LAYOUT_MAX_TOKENS,
         temperature: 0.2,
         system: systemInstruction,
         messages: [

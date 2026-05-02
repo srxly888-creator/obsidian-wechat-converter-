@@ -2007,7 +2007,41 @@ title: 示例
     expect(request.url).toBe('https://api.anthropic.com/v1/messages');
     expect(request.options.headers['x-api-key']).toBe('secret');
     expect(request.options.headers['anthropic-version']).toBe('2023-06-01');
+    expect(JSON.parse(request.options.body).max_tokens).toBe(8192);
     expect(result.layoutJson.blocks[0].type).toBe('lead-quote');
+  });
+
+  it('should report a clear error when anthropic truncates output at max_tokens', async () => {
+    const provider = {
+      id: 'a1',
+      name: 'Anthropic',
+      kind: 'anthropic',
+      baseUrl: 'https://api.anthropic.com/v1',
+      apiKey: 'secret',
+      model: 'claude-3-5-haiku-latest',
+      enabled: true,
+    };
+    const fetchImpl = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        stop_reason: 'max_tokens',
+        content: [
+          {
+            type: 'text',
+            text: '{"articleType":"tutorial","blocks":[',
+          },
+        ],
+      }),
+    }));
+
+    await expect(generateArticleLayout({
+      provider,
+      title: 'Claude 测试',
+      markdown: '## 第一部分\n正文',
+      imageRefs: [],
+      timeoutMs: 2000,
+      fetchImpl,
+    })).rejects.toThrow('max_tokens 输出上限');
   });
 
   it('should convert aborted provider requests into timeout errors', async () => {
