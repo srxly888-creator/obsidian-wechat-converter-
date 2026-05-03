@@ -199,6 +199,27 @@ title: 示例
     expect(html).toContain('重点高亮');
   });
 
+  it('should render cached task markers as WeChat-safe checkbox glyphs', () => {
+    const html = renderArticleLayoutHtml({
+      stylePack: 'tech-green',
+      title: '清单文章',
+      blocks: [
+        {
+          type: 'section-block',
+          title: '展位物料',
+          bulletGroups: [
+            ['[ ] 展位设计稿', '[x] 产品陈列台'],
+          ],
+        },
+      ],
+    }, { imageRefs: [] });
+
+    expect(html).toContain('□ 展位设计稿');
+    expect(html).toContain('☑ 产品陈列台');
+    expect(html).not.toContain('[ ] 展位设计稿');
+    expect(html).not.toContain('[x] 产品陈列台');
+  });
+
   it('should render custom ai colors from independent ai color settings', () => {
     const palette = resolveColorPaletteForRender('custom', { customColor: '#ff3366' });
     const html = renderArticleLayoutHtml({

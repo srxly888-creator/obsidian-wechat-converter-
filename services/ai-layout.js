@@ -2768,8 +2768,16 @@ async function testAiProviderConnection(provider, fetchImpl = globalThis.fetch) 
   return !!result?.layoutJson?.blocks?.length;
 }
 
+function normalizeWechatTaskMarkerText(text) {
+  return String(text || '').replace(
+    /(^|\n)(\s*)\[([ xX])\]\s+/g,
+    (_match, lineStart, indent, state) =>
+      `${lineStart}${indent}${String(state || '').trim().toLowerCase() === 'x' ? '☑' : '□'} `,
+  );
+}
+
 function escapeHtml(text) {
-  return String(text || '').replace(/[&<>"']/g, (char) => ({
+  return normalizeWechatTaskMarkerText(text).replace(/[&<>"']/g, (char) => ({
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',

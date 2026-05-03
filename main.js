@@ -9668,8 +9668,14 @@ ${String((message == null ? void 0 : message.content) || "").trim()}`;
       });
       return !!((_b = (_a2 = result == null ? void 0 : result.layoutJson) == null ? void 0 : _a2.blocks) == null ? void 0 : _b.length);
     }
+    function normalizeWechatTaskMarkerText(text) {
+      return String(text || "").replace(
+        /(^|\n)(\s*)\[([ xX])\]\s+/g,
+        (_match, lineStart, indent, state) => `${lineStart}${indent}${String(state || "").trim().toLowerCase() === "x" ? "\u2611" : "\u25A1"} `
+      );
+    }
     function escapeHtml(text) {
-      return String(text || "").replace(/[&<>"']/g, (char) => ({
+      return normalizeWechatTaskMarkerText(text).replace(/[&<>"']/g, (char) => ({
         "&": "&amp;",
         "<": "&lt;",
         ">": "&gt;",
