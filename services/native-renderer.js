@@ -15,10 +15,52 @@ function isSafeRawImageSrc(src) {
   }
 }
 
+function normalizeWechatUnsafeTaskListMarkersForNative(markdown) {
+  const source = String(markdown || '');
+  if (!source) return source;
+
+  const lines = source.split('\n');
+  let fence = null;
+  let inMathFence = false;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    const trimmed = String(line || '').trim();
+    const fenceMatch = trimmed.match(/^(`{3,}|~{3,})/);
+
+    if (fenceMatch) {
+      const marker = fenceMatch[1][0];
+      const length = fenceMatch[1].length;
+      if (!fence) {
+        fence = { marker, length };
+      } else if (marker === fence.marker && length >= fence.length) {
+        fence = null;
+      }
+      continue;
+    }
+
+    if (!fence && /^\$\$\s*$/.test(trimmed)) {
+      inMathFence = !inMathFence;
+      continue;
+    }
+
+    if (fence || inMathFence) continue;
+
+    lines[i] = line.replace(
+      /^(\s*)([-*+])\s+\[([ xX])\]\s+/,
+      (_match, indent, marker, state) =>
+        `${indent}${marker} ${String(state || '').trim().toLowerCase() === 'x' ? '☑' : '□'} `,
+    );
+  }
+
+  return lines.join('\n');
+}
+
 function preprocessMarkdownForNative(markdown) {
   if (typeof markdown !== 'string' || markdown.length === 0) return '';
 
   let output = markdown;
+  output = normalizeWechatUnsafeTaskListMarkersForNative(output);
 
   // Remove dangerous raw HTML blocks before markdown-it parsing so they do not
   // poison following markdown lines as raw HTML context.
@@ -115,6 +157,7 @@ async function renderNativeMarkdown({
 module.exports = {
   canUseNativePreviewFastPath,
   isSafeRawImageSrc,
+  normalizeWechatUnsafeTaskListMarkersForNative,
   preprocessMarkdownForNative,
   cleanupNativeRenderedHtml,
   renderNativeMarkdown,

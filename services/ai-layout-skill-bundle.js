@@ -40,6 +40,9 @@ const AI_LAYOUT_SKILL_SYSTEM_LINES = [
   '如果 selection 为 auto，请根据内容推荐 recommendedLayoutFamily 和 recommendedColorPalette，并写入 resolved。',
   '如果 selection 已指定具体布局或颜色，resolved 必须尊重该选择。',
   'AI 编排最终会被渲染为微信安全 HTML，不能依赖额外 style 标签或 class 选择器。',
+  '公众号可见文本里不要输出裸 Markdown 源码，例如 - [ ]、- [x]、## 标题、|---|、代码围栏。',
+  '原文任务清单必须转换成公众号安全文本：未完成项用 □ 事项，完成项用 ☑ 事项；不要保留 [ ] 或 [x]。',
+  '长清单项要拆成主项和说明，或放入 bulletGroups / paragraphs，避免手机端出现圆点 + [ ] + 长括号导致缩进错位。',
 ];
 
 function getAiLayoutBlockConstraintLines() {

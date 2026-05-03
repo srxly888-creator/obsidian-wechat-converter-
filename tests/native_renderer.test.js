@@ -4,6 +4,7 @@ import path from 'path';
 const {
   canUseNativePreviewFastPath,
   isSafeRawImageSrc,
+  normalizeWechatUnsafeTaskListMarkersForNative,
   preprocessMarkdownForNative,
   renderNativeMarkdown,
 } = require('../services/native-renderer');
@@ -54,6 +55,22 @@ describe('Native Renderer', () => {
     expect(output).not.toContain('<iframe');
     expect(output).not.toContain('<img src="x"');
     expect(output).toContain('正常文本 **保留**');
+  });
+
+  it('should normalize task list markers for WeChat without touching fenced code', () => {
+    const input = [
+      '- [ ] 展位设计稿',
+      '  - [x] 已确认物料',
+      '',
+      '```md',
+      '- [ ] 代码块不改',
+      '```',
+    ].join('\n');
+
+    const output = normalizeWechatUnsafeTaskListMarkersForNative(input);
+    expect(output).toContain('- □ 展位设计稿');
+    expect(output).toContain('  - ☑ 已确认物料');
+    expect(output).toContain('```md\n- [ ] 代码块不改\n```');
   });
 
   it('should accept only approved raw image protocols', () => {

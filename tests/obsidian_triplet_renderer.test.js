@@ -1,8 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
+vi.mock('obsidian', () => ({
+  MarkdownRenderer: {
+    async renderMarkdown(markdown, el) {
+      const safe = String(markdown || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      el.innerHTML = `<p>${safe}</p>`;
+    },
+  },
+}));
+
 const { createLegacyConverter } = require('./helpers/render-runtime');
 const {
   neutralizeUnsafeMarkdownLinks,
   neutralizePlainWikilinks,
+  normalizeWechatUnsafeTaskListMarkers,
   preprocessMarkdownForTriplet,
   injectHardBreaksForLegacyParity,
   shouldObserveAsyncEmbedWindow,
@@ -62,6 +75,22 @@ describe('Obsidian Triplet Renderer', () => {
     expect(output).toContain('正文 \\[[目标文档|别名]]');
     expect(output).toContain('<img src="assets/pic%20a.png" alt="图注">');
     expect(output).toContain('[[code-link]]');
+  });
+
+  it('should normalize task list markers before Obsidian rendering', () => {
+    const input = [
+      '- [ ] 展位设计稿',
+      '  - [X] 已确认物料',
+      '',
+      '```md',
+      '- [ ] 代码块不改',
+      '```',
+    ].join('\n');
+
+    const output = normalizeWechatUnsafeTaskListMarkers(input);
+    expect(output).toContain('- □ 展位设计稿');
+    expect(output).toContain('  - ☑ 已确认物料');
+    expect(output).toContain('```md\n- [ ] 代码块不改\n```');
   });
 
   it('should materialize local markdown images before Obsidian can replace alt text', () => {

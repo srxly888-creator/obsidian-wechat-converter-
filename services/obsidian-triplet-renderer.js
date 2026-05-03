@@ -1,4 +1,9 @@
-const { MarkdownRenderer } = require('obsidian');
+let MarkdownRenderer = null;
+try {
+  ({ MarkdownRenderer } = require('obsidian'));
+} catch (error) {
+  MarkdownRenderer = null;
+}
 const { serializeObsidianRenderedHtml } = require('./obsidian-triplet-serializer');
 const { normalizeRenderedDomPunctuation } = require('./chinese-punctuation');
 const {
@@ -198,6 +203,47 @@ function neutralizePlainWikilinks(markdown) {
     if (fenceState || inMathFence) continue;
 
     lines[i] = neutralizeLineOutsideInlineCode(line);
+  }
+
+  return lines.join('\n');
+}
+
+function normalizeWechatUnsafeTaskListMarkers(markdown) {
+  const source = String(markdown || '');
+  if (!source) return source;
+
+  const lines = source.split('\n');
+  let fenceState = null;
+  let inMathFence = false;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+
+    const fenceDelimiter = parseFencedBlockDelimiter(line);
+    if (fenceDelimiter) {
+      if (!fenceState) {
+        fenceState = fenceDelimiter;
+      } else if (
+        fenceDelimiter.marker === fenceState.marker &&
+        fenceDelimiter.length >= fenceState.length
+      ) {
+        fenceState = null;
+      }
+      continue;
+    }
+
+    if (!fenceState && isMathFenceDelimiter(line)) {
+      inMathFence = !inMathFence;
+      continue;
+    }
+
+    if (fenceState || inMathFence) continue;
+
+    lines[i] = line.replace(
+      /^(\s*)([-*+])\s+\[([ xX])\]\s+/,
+      (_match, indent, marker, state) =>
+        `${indent}${marker} ${String(state || '').trim().toLowerCase() === 'x' ? '☑' : '□'} `,
+    );
   }
 
   return lines.join('\n');
@@ -1060,6 +1106,7 @@ function preprocessMarkdownForTriplet(markdown, converter) {
   // This is needed because Obsidian's MarkdownRenderer.renderMarkdown doesn't render LaTeX
   const { markdown: mathProcessed, formulas: mathFormulas } = preRenderMathFormulas(output, converter);
   output = mathProcessed;
+  output = normalizeWechatUnsafeTaskListMarkers(output);
 
   // Escape pseudo-HTML tags that look like HTML but are actually text
   // For example: <Title>_xxx_MS.pdf should render as text, not as an HTML tag
@@ -1390,6 +1437,7 @@ async function renderObsidianTripletMarkdown({
 module.exports = {
   neutralizeUnsafeMarkdownLinks,
   neutralizePlainWikilinks,
+  normalizeWechatUnsafeTaskListMarkers,
   preprocessMarkdownForTriplet,
   injectHardBreaksForLegacyParity,
   normalizeRenderedDomPunctuation,
